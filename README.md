@@ -6,8 +6,8 @@
 
 <p align="center">
   <b>Paste a YouTube link, get a file.</b><br>
-  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/69inoi69/tyaga?color=ff6b2c&label=download" alt="Latest release"></a>
-  <a href="../../actions/workflows/ci.yml"><img src="https://github.com/69inoi69/tyaga/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/nadludyna/tyaga?color=ff6b2c&label=download" alt="Latest release"></a>
+  <a href="../../actions/workflows/ci.yml"><img src="https://github.com/nadludyna/tyaga/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-161616" alt="Windows, macOS, Linux">
 </p>
 
