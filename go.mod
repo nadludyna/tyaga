@@ -1,3 +1,3 @@
-module github.com/69inoi69/tyaga
+module github.com/nadludyna/tyaga
 
 go 1.22
