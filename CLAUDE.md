@@ -11,6 +11,22 @@ through a page in the browser. One Go program: a tiny local server + one embedde
 - Everything in the repo (code, comments, README, commits, PRs) is in **English**.
 - The name is **ТЯГА** everywhere people see it. Latin `tyaga` only where it's a file name.
 
+## Talking it through
+
+- **When the owner proposes something:** first say back what you understood. Then say
+  honestly whether it's a good idea. Good → do it, maybe with a small improvement (say which
+  and why). Bad → say plainly that it's a bad idea, why, and what would work better. Never
+  agree just because he asked.
+- **He tends to say "go" to a confident answer** ("it's an AI, it probably knows better").
+  So don't sound surer than you are, give the reason behind every choice, and say what you
+  don't know or didn't check.
+- **Check that he understood, don't ask "clear?"**: for anything that matters, ask him to
+  explain it back in his own words or on a concrete example ("what happens if you paste a
+  playlist link now?"). If his answer is off, explain again, differently. When he really
+  understands what we're doing, the work goes much better.
+- **After showing something**, say what was checked and how, and what wasn't (e.g. "tested
+  on the stand, not with real YouTube").
+
 ## How we work
 
 1. **Talk first.** Collect what's wrong or wanted into a list, agree on it, then do it as one
