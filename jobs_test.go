@@ -91,11 +91,11 @@ func TestOnLine(t *testing.T) {
 	if j.Title != "[3/12] A | title with bars" {
 		t.Errorf("title: %q", j.Title)
 	}
-	onLine(j, "PROG|512|1024|1048576|65")
+	onLine(j, "PROG|512|1024|NA|1048576|65|NA|NA")
 	if j.Progress != 50 || j.Speed != "1.0 MB/s" || j.ETA != "1:05" {
 		t.Errorf("progress: %v %q %q", j.Progress, j.Speed, j.ETA)
 	}
-	onLine(j, "PROG|NA|NA|NA|NA") // unknown values must not break anything
+	onLine(j, "PROG|NA|NA|NA|NA|NA|NA|NA") // unknown values must not break anything
 	onLine(j, "FILE|/out/My list/003 - Song.m4a")
 	if len(j.Files) != 1 || j.Files[0] != "003 - Song.m4a" {
 		t.Errorf("files: %v", j.Files)
@@ -216,24 +216,53 @@ func TestThumbURL(t *testing.T) {
 func TestLog(t *testing.T) {
 	j := &Job{}
 	for _, l := range []string{
-		"[youtube] abc: Downloading webpage",
+		"[youtube] Extracting URL: https://www.youtube.com/watch?v=abc",
+		"[youtube] dQw4w9WgXcQ: Downloading webpage",
+		"[youtube] dQw4w9WgXcQ: Downloading tv client config",
+		"[youtube] dQw4w9WgXcQ: Downloading player 4fcd6e4a",
+		"[info] Downloading video thumbnail 44 ...",
+		`[info] Writing video thumbnail 44 to: C:\Users\Me\Downloads\YouTube\My list\01 - Song.webp`,
 		"[debug] noise",
-		"[download] Destination: /home/me/Downloads/TYAGA/Song.mp3",
-		"[download] Destination: /home/me/Downloads/TYAGA/Song.mp3",
+		"[download] Sleeping 5.00 seconds as required by the site...",
+		`[download] Destination: C:\Users\Me\Downloads\YouTube\My list\01 - Song.webm`,
+		"[download] 100% of 4.00MiB in 00:00:08 at 4.61MiB/s",
 		"WARNING: something odd",
-		`[Merger] Merging formats into "/x/y/Video.mp4"`,
-		"[ExtractAudio] Destination: /x/Song.mp3",
+		`[ThumbnailsConvertor] Converting thumbnail "C:\Users\Me\Song.webp" to jpg`,
+		"[ExtractAudio] Destination: /home/me/Downloads/YouTube/Song.mp3",
+		"Deleting original file /home/me/Song.webm (pass -k to keep)",
+		`[EmbedThumbnail] ffmpeg: Adding thumbnail to "/home/me/Song.mp3"`,
 	} {
 		onLine(j, l)
 	}
 	want := []string{
-		"download · Destination: Song.mp3",
-		"WARNING: something odd",
-		`Merger · Merging formats into "Video.mp4"`,
-		"ExtractAudio · Destination: Song.mp3",
+		"⚠ something odd",
+		"Converting to Song.mp3",
+		"Adding the cover",
 	}
-	if !slices.Equal(j.Log, want) {
-		t.Errorf("log = %q\nwant %q", j.Log, want)
+	if !slices.Equal(j.Log[1:], want) || j.Log[0] != "Downloading 01 - Song.webm" {
+		t.Errorf("log = %q", j.Log)
+	}
+	for _, l := range j.Log {
+		if strings.ContainsAny(l, `\/`) {
+			t.Errorf("a path got into the log: %q", l)
+		}
+	}
+	if logLine("[youtube] dQw4w9WgXcQ: Downloading webpage") != "Reading the video page" ||
+		logLine("[download] Sleeping 5.00 seconds as required by the site...") != "" ||
+		logLine(`[Merger] Merging formats into "/x/Video.mp4"`) != "Joining the picture and the sound" {
+		t.Error("friendly lines changed")
+	}
+}
+
+func TestWaiting(t *testing.T) {
+	j := &Job{Speed: "1.0 MB/s"}
+	onLine(j, "[download] Sleeping 5.00 seconds as required by the site...")
+	if j.Wait != 5 || j.Speed != "" || j.Now != "Waiting: YouTube asks for a 5 s pause" {
+		t.Errorf("during the pause: wait %d speed %q", j.Wait, j.Speed)
+	}
+	onLine(j, "PROG|1|10|NA|1|1|NA|NA")
+	if j.Wait != 0 {
+		t.Errorf("still waiting after a progress line")
 	}
 }
 
@@ -244,7 +273,7 @@ func TestProgressWholePlaylist(t *testing.T) {
 	if j.Progress != 50 {
 		t.Errorf("start of the 7th of 12: %v, want 50", j.Progress)
 	}
-	onLine(j, "PROG|50|100|1000|5")
+	onLine(j, "PROG|50|100|NA|1000|5|NA|NA")
 	if j.Progress != 54.166666666666664 || j.ETA != "" {
 		t.Errorf("7th half done: %v (eta %q), want ~54.2 and no eta", j.Progress, j.ETA)
 	}
@@ -253,17 +282,82 @@ func TestProgressWholePlaylist(t *testing.T) {
 func TestProgressVideoTwoFiles(t *testing.T) {
 	j := &Job{Options: Options{Mode: "video"}}
 	onLine(j, "ITEM|||Video")
-	onLine(j, "PROG|500|1000|1|1")
-	onLine(j, "PROG|1000|1000|1|1")
+	onLine(j, "PROG|500|1000|NA|1|1|NA|NA")
+	onLine(j, "PROG|1000|1000|NA|1|1|NA|NA")
 	if j.Progress != 90 {
 		t.Errorf("picture done: %v, want 90", j.Progress)
 	}
-	onLine(j, "PROG|10|100|1|1") // the sound starts: must not jump back
+	onLine(j, "PROG|10|100|NA|1|1|NA|NA") // the sound starts: must not jump back
 	if j.Progress < 90 || j.Progress > 91 {
 		t.Errorf("sound started: %v, want ~90.1", j.Progress)
 	}
-	onLine(j, "PROG|100|100|1|1")
+	onLine(j, "PROG|100|100|NA|1|1|NA|NA")
 	if j.Progress != 100 {
 		t.Errorf("all done: %v, want 100", j.Progress)
+	}
+}
+
+func TestNextItem(t *testing.T) {
+	j := &Job{Options: Options{Mode: "audio"}, Speed: "0.2 MB/s"}
+	onLine(j, "[download] Downloading item 2 of 3")
+	if j.Pos != 2 || j.Of != 3 || j.Speed != "" || j.Progress < 33.3 || j.Progress > 33.4 {
+		t.Errorf("item 2 of 3: pos %d/%d speed %q progress %v", j.Pos, j.Of, j.Speed, j.Progress)
+	}
+}
+
+func TestExplain(t *testing.T) {
+	if got := explain("ERROR: [youtube] FAILabcdefg: unable to download video data: HTTP Error 403: Forbidden"); !strings.HasPrefix(got, "YouTube refused") {
+		t.Errorf("403: %q", got)
+	}
+	if got := explain("ERROR: [youtube] dQw4w9WgXcQ: Video unavailable"); got != "Video unavailable" {
+		t.Errorf("other error: %q", got)
+	}
+}
+
+func TestSpeedText(t *testing.T) {
+	if speedText(52428) != "51 KB/s" || speedText(4404019) != "4.2 MB/s" {
+		t.Errorf("%q %q", speedText(52428), speedText(4404019))
+	}
+}
+
+// A long video in pieces: the size guess starts far too low; the pieces count is what's true.
+func TestProgressFragments(t *testing.T) {
+	j := &Job{Options: Options{Mode: "video"}}
+	onLine(j, "ITEM|||Long video")
+	onLine(j, "PROG|3000000|NA|3100000|3000000|730|10|2041") // guess says 97%, pieces say 0.5%
+	if j.Progress > 1 {
+		t.Errorf("piece 10 of 2041: %v%%, want ~0.4", j.Progress)
+	}
+	onLine(j, "PROG|900000000|NA|950000000|3000000|300|1020|2041")
+	if j.Progress < 44 || j.Progress > 46 {
+		t.Errorf("piece 1020 of 2041: %v%%, want ~45 (half of the picture's 90)", j.Progress)
+	}
+	if logLine("[hlsnative] Total fragments: 2041") != "" || logLine("[info] dQw4w9WgXcQ: Downloading m3u8 manifest") != "" {
+		t.Error("piece details got into the log")
+	}
+}
+
+func TestFormatNumberHidden(t *testing.T) {
+	if got := logLine(`[download] Destination: C:\\x\\Song.f299.mp4`); got != "Downloading Song.mp4" {
+		t.Errorf("%q", got)
+	}
+}
+
+func TestLiveLine(t *testing.T) {
+	j := &Job{Options: Options{Mode: "video"}}
+	onLine(j, "CHAN|Pilotredsky - Topic")
+	onLine(j, "PROG|327155712|NA|9000000000|3000000|300|1020|2041")
+	if j.Channel != "Pilotredsky" || j.Now != "Downloading the picture · piece 1 020 of 2 041 · 312 MB" {
+		t.Errorf("channel %q, now %q", j.Channel, j.Now)
+	}
+	onLine(j, "[Merger] Merging formats into \"/x/V.mp4\"")
+	if j.Now != "" {
+		t.Errorf("live line stays after the step ended: %q", j.Now)
+	}
+}
+
+func TestJSChallenge(t *testing.T) {
+	if got := logLine("[youtube] [jsc:deno] Solving JS challenges using deno"); got != "Passing YouTube's check" {
+		t.Errorf("%q", got)
 	}
 }

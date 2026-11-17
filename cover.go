@@ -94,6 +94,27 @@ func abs(x int) int {
 	return x
 }
 
+// coverOf reads the cover picture out of a finished file (audio or video). nil if it has none.
+func coverOf(path string) []byte {
+	if path == "" || tools.ffmpeg == "" {
+		return nil
+	}
+	pic := filepath.Join(filepath.Dir(path), "~show-"+filepath.Base(path)+".img")
+	defer os.Remove(pic)
+	// "-map 0:v -map -0:V": video streams minus real video = only the attached picture.
+	cmd := exec.Command(tools.ffmpeg, "-y", "-hide_banner", "-loglevel", "error", "-i", path,
+		"-map", "0:v", "-map", "-0:V", "-frames:v", "1", "-c", "copy", "-f", "image2", pic)
+	hideWindow(cmd)
+	if cmd.Run() != nil {
+		return nil
+	}
+	b, err := os.ReadFile(pic)
+	if err != nil || len(b) == 0 {
+		return nil
+	}
+	return b
+}
+
 // squareCover takes the cover out of an audio file and, if it's album art between bars,
 // puts back just the art. The audio is not re-encoded. Any failure leaves the file as it was.
 func squareCover(path string) {

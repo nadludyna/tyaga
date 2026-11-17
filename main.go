@@ -22,6 +22,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -136,7 +137,7 @@ func handler(token string) http.Handler {
 		// Everything else only for the page that knows the token. Normal requests send it in a
 		// header (another website can't do that); sendBeacon can't, so /api/bye has it in the URL.
 		got := r.Header.Get("X-Token")
-		if r.URL.Path == "/api/bye" {
+		if r.URL.Path == "/api/bye" || r.URL.Path == "/api/cover" { // sendBeacon and <img> can't send headers
 			got = r.URL.Query().Get("t")
 		}
 		if subtle.ConstantTimeCompare([]byte(got), []byte(token)) != 1 {
@@ -155,6 +156,16 @@ func handler(token string) http.Handler {
 					"version": version, "ready": ready, "setup": status, "problem": problem,
 					"out": outDir, "jobs": jobs,
 				})
+			case "/api/cover":
+				id, _ := strconv.Atoi(r.URL.Query().Get("id"))
+				pic := jobCover(id)
+				if pic == nil {
+					http.NotFound(w, r)
+					return
+				}
+				w.Header().Set("Content-Type", http.DetectContentType(pic))
+				w.Header().Set("Cache-Control", "max-age=86400") // the page adds ?v= when it changes
+				w.Write(pic)
 			default:
 				http.NotFound(w, r)
 			}
