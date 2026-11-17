@@ -6,8 +6,7 @@
 // On Windows there's no console window: TYAGA quits by the Quit button on the page,
 // or by itself once the page is closed and the downloads are finished (see app.go).
 //
-// By default only this computer can reach the server. The "Phone" button on the page opens
-// access from the home network with a short code, so you can download from your phone.
+// Only this computer can reach the server, and only the page that knows the token.
 package main
 
 import (
@@ -16,7 +15,6 @@ import (
 	_ "embed"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -24,9 +22,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -42,9 +38,6 @@ var (
 	cookiesFile string // optional youtube-cookies.txt next to the program
 	outDir      string // where downloads are saved
 )
-
-// lanPort is a fixed port for the phone, so the address stays the same between runs.
-const lanPort = 8765
 
 func main() {
 	consoleUTF8()
@@ -83,7 +76,7 @@ func main() {
 		openURL(address)
 		go quitWhenAbandoned() // with -no-browser nobody promised to keep a page open
 	}
-	fail(http.Serve(ln, handler(false, func() string { return localToken })).Error())
+	fail(http.Serve(ln, handler(localToken)).Error())
 }
 
 // programDir is the folder with the exe. Under "go run" the exe sits in a temp folder,
@@ -116,105 +109,11 @@ func randomToken() string {
 }
 
 // ---------------------------------------------------------------------------
-//  Phone access
-// ---------------------------------------------------------------------------
-
-var lan struct {
-	sync.Mutex
-	srv      *http.Server
-	code     string // a short code instead of the long token: easy to type on a phone
-	url      string
-	failures int // wrong codes: after 20 the access turns itself off
-}
-
-// shortCode is 6 characters without look-alikes (no 0/o, 1/l/i).
-func shortCode() string {
-	const alphabet = "abcdefghjkmnpqrstuvwxyz23456789"
-	b := make([]byte, 6)
-	rand.Read(b)
-	for i := range b {
-		b[i] = alphabet[int(b[i])%len(alphabet)]
-	}
-	return string(b)
-}
-
-// lanIP is this computer's address in the home network. The UDP "connection" sends nothing,
-// it just asks the OS which address it would use to go out.
-func lanIP() string {
-	if c, err := net.Dial("udp", "192.168.0.1:9"); err == nil {
-		defer c.Close()
-		if a, ok := c.LocalAddr().(*net.UDPAddr); ok && !a.IP.IsLoopback() {
-			return a.IP.String()
-		}
-	}
-	addrs, _ := net.InterfaceAddrs()
-	for _, a := range addrs {
-		if n, ok := a.(*net.IPNet); ok && n.IP.IsPrivate() && n.IP.To4() != nil {
-			return n.IP.String()
-		}
-	}
-	return ""
-}
-
-func setLAN(on bool) error {
-	lan.Lock()
-	defer lan.Unlock()
-	if !on {
-		if lan.srv != nil {
-			lan.srv.Close()
-			lan.srv, lan.code, lan.url = nil, "", ""
-			logf("Phone access is off.")
-		}
-		return nil
-	}
-	if lan.srv != nil {
-		return nil
-	}
-	ip := lanIP()
-	if ip == "" {
-		return errors.New("this computer is not connected to a network")
-	}
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", lanPort))
-	if err != nil {
-		ln, err = net.Listen("tcp", ":0") // the fixed port is busy, take any
-		if err != nil {
-			return err
-		}
-	}
-	port := ln.Addr().(*net.TCPAddr).Port
-	lan.code, lan.failures = shortCode(), 0
-	lan.url = fmt.Sprintf("http://%s:%d/?t=%s", ip, port, lan.code)
-	code := lan.code
-	lan.srv = &http.Server{Handler: handler(true, func() string { return code })}
-	go lan.srv.Serve(ln)
-	logf("Phone access is on: %s", lan.url)
-	return nil
-}
-
-func lanState() (on bool, link string) {
-	lan.Lock()
-	defer lan.Unlock()
-	return lan.srv != nil, lan.url
-}
-
-// lanFailure counts wrong codes, so nobody can guess the code forever.
-func lanFailure() {
-	lan.Lock()
-	lan.failures++
-	tooMany := lan.failures >= 20
-	lan.Unlock()
-	if tooMany {
-		logf("Too many wrong codes from other devices.")
-		go setLAN(false)
-	}
-}
-
-// ---------------------------------------------------------------------------
 //  Server
 // ---------------------------------------------------------------------------
 
-// handler serves one entrance: local (this computer) or network (the phone).
-func handler(remote bool, token func() string) http.Handler {
+// handler serves the page and its API.
+func handler(token string) http.Handler {
 	writeJSON := func(w http.ResponseWriter, v any) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(v)
@@ -235,15 +134,12 @@ func handler(remote bool, token func() string) http.Handler {
 		}
 
 		// Everything else only for the page that knows the token. Normal requests send it in a
-		// header (another website can't do that), file download links send it in the URL.
+		// header (another website can't do that); sendBeacon can't, so /api/bye has it in the URL.
 		got := r.Header.Get("X-Token")
-		if r.URL.Path == "/api/file" || r.URL.Path == "/api/bye" { // links and sendBeacon can't send headers
+		if r.URL.Path == "/api/bye" {
 			got = r.URL.Query().Get("t")
 		}
-		if subtle.ConstantTimeCompare([]byte(got), []byte(token())) != 1 {
-			if remote {
-				lanFailure()
-			}
+		if subtle.ConstantTimeCompare([]byte(got), []byte(token)) != 1 {
 			http.Error(w, "forbidden", http.StatusForbidden)
 			return
 		}
@@ -253,28 +149,12 @@ func handler(remote bool, token func() string) http.Handler {
 			case "/api/state":
 				pageSeen()
 				status, problem, ready := tools.state()
-				on, link := lanState()
 				mu.Lock()
 				defer mu.Unlock()
-				state := map[string]any{
+				writeJSON(w, map[string]any{
 					"version": version, "ready": ready, "setup": status, "problem": problem,
-					"out": outDir, "remote": remote, "jobs": jobs,
-				}
-				if !remote { // the link with the code is shown only on the computer itself
-					state["lan"] = map[string]any{"on": on, "url": link}
-				}
-				writeJSON(w, state)
-			case "/api/file":
-				id, _ := strconv.Atoi(r.URL.Query().Get("id"))
-				n, _ := strconv.Atoi(r.URL.Query().Get("n"))
-				path, ok := jobFile(id, n)
-				if !ok || !fileExists(path) {
-					http.NotFound(w, r)
-					return
-				}
-				name := filepath.Base(path)
-				w.Header().Set("Content-Disposition", "attachment; filename*=UTF-8''"+url.PathEscape(name))
-				http.ServeFile(w, r, path)
+					"out": outDir, "jobs": jobs,
+				})
 			default:
 				http.NotFound(w, r)
 			}
@@ -290,7 +170,6 @@ func handler(remote bool, token func() string) http.Handler {
 			Options
 			ID int
 			N  int // file number within a download
-			On bool
 		}
 		json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&body)
 
@@ -332,30 +211,15 @@ func handler(remote bool, token func() string) http.Handler {
 		case "/api/bye":
 			pageClosed()
 		case "/api/quit":
-			if remote { // a phone can't switch off the computer's TYAGA
-				http.Error(w, "forbidden", http.StatusForbidden)
-				return
-			}
 			writeJSON(w, map[string]bool{"ok": true})
 			go func() { time.Sleep(200 * time.Millisecond); quit() }() // let the answer reach the page first
 			return
 		case "/api/open":
-			if !remote { // opening the folder from a phone makes no sense: it would open on the computer
-				os.MkdirAll(outDir, 0o755)
-				openFolder(outDir)
-			}
+			os.MkdirAll(outDir, 0o755)
+			openFolder(outDir)
 		case "/api/reveal":
-			if path, ok := jobFile(body.ID, body.N); ok && !remote && fileExists(path) {
+			if path, ok := jobFile(body.ID, body.N); ok && fileExists(path) {
 				revealFile(path)
-			}
-		case "/api/lan":
-			if remote {
-				http.Error(w, "forbidden", http.StatusForbidden)
-				return
-			}
-			if err := setLAN(body.On); err != nil {
-				writeJSON(w, map[string]string{"error": "Could not turn on phone access: " + err.Error()})
-				return
 			}
 		default:
 			http.NotFound(w, r)

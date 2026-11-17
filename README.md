@@ -37,11 +37,9 @@ One small program, nothing to install, and the interface is just a page in your 
 
 **Try again.** YouTube sometimes throws a random 403. A failed or cancelled download has a Retry button: it goes back into the queue, and whatever already downloaded is skipped.
 
-**From your phone.** Paste a link on the phone and the computer downloads it. Then grab the finished file right onto the phone.
-
 **Watch it go.** The progress is a wave that runs faster the faster the download goes and slows down when it stalls. Under it, a short log of what yt-dlp is doing right now. The progress is in the tab title too, and when a download finishes while you're in another window, you get a notification.
 
-Plus the little things: a queue (paste ten links at once, or drag a link onto the page), a thumbnail next to every download, "Show in folder" for finished ones, a hint on every switch when you hover it, the switches remember how you left them, and endless YouTube Mixes are stopped after the first 25 videos. And it's alive: notes fall in the background and dodge the cursor, and when a download is done the fish on the hook jumps.
+Plus the little things: a queue (paste ten links at once, or drag a link onto the page), a thumbnail next to every download, "Show in folder" for finished ones, which also say exactly what came out (Audio · MP3, Video · MP4 · 1080p), a hint on every switch when you hover it, the switches remember how you left them, and endless YouTube Mixes are stopped after the first 25 videos. And it's alive: notes fall in the background and dodge the cursor, and when a download is done the fish on the hook jumps.
 
 Everything lands in `Downloads/YouTube`. If you'd rather it didn't move, turn on "reduce motion" in your system: ТЯГА keeps still then.
 
@@ -63,12 +61,6 @@ The folder is portable, so carry it on a USB stick if you like.
 
 **Linux:** `sudo apt install ffmpeg` (or your distro's version of it).
 
-## From your phone
-
-Click "Phone: off" at the bottom of the page. An address with a short code appears, something like `http://192.168.1.5:8765/?t=k7m2pq`. Open it on a phone on the same Wi-Fi.
-
-The code is new every time, nobody on the network gets in without it, and after 20 wrong guesses the door closes by itself. The first time, Windows asks about the firewall: allow private networks. And the computer has to stay on, since it's the one doing the downloading.
-
 ## When YouTube wants you to sign in
 
 Some videos are for signed-in users only, and sometimes YouTube decides you're a bot. Export your YouTube cookies in Netscape format (the "Get cookies.txt LOCALLY" extension does it) and save the file as `youtube-cookies.txt` next to the program.
@@ -80,7 +72,7 @@ Cookies are the keys to your account. Don't send them to anyone and don't commit
 ТЯГА starts a tiny web server that only this computer can reach, with a one-time token in the address, and opens the page. The page hands links to the server, the server runs yt-dlp one link at a time and reports how it's going.
 
 ```
-main.go      the server and phone access
+main.go      the server
 app.go       life without a console: log, single instance, quitting
 jobs.go      the queue and the yt-dlp command
 merge.go     gluing a playlist into one file

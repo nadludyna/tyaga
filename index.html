@@ -98,10 +98,10 @@ input[type=checkbox]:active{transform:scale(.8)}
 .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .st{font-size:13px;color:var(--dim);white-space:nowrap}
 .st.running{color:var(--acc)}
-.st.done{color:var(--ok);animation:pop .5s cubic-bezier(.3,1.6,.5,1)}.st.error{color:var(--err)}
+.st.done{color:var(--ok)}.st.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}.st.error{color:var(--err)}
 @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
 /* Progress: a sine wave that runs faster the faster the download goes (drawn in the script). */
-.wave{display:block;width:100%;height:22px;margin-top:6px}
+.wave{display:block;width:100%;height:26px;margin-top:4px}
 .log{margin-top:4px;font:11.5px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--dim);opacity:.85}
 .log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.55}
 .log div:last-child{opacity:1;color:var(--fg)}
@@ -109,14 +109,19 @@ input[type=checkbox]:active{transform:scale(.8)}
 .sub{font-size:12px;color:var(--dim);margin-top:4px;word-break:break-word}
 .sub.err{color:var(--err)}
 .sub a{color:var(--acc);display:block;margin-top:2px}
-.x{border:0;background:none;color:var(--dim);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;transition:color .2s,transform .2s}
-.x:hover{color:var(--err);transform:rotate(90deg)}
-.foot{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
-.foot button{background:none;border:0;color:var(--dim);cursor:pointer;font:inherit;padding:0;transition:color .2s}
-.foot button:hover{color:var(--fg)}
-.foot .right{margin-left:auto}
-.phone{margin-top:12px;font-size:14px;color:var(--dim)}
-.phone code{display:block;margin:6px 0;font-size:17px;color:var(--fg);word-break:break-all;user-select:all}
+.foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.foot .btn{flex:1;justify-content:center;padding:9px 14px;font-size:14px}
+.foot .quit:hover{border-color:var(--err);color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
+/* Buttons: soft pills with an icon; the accent one is for the thing you most likely want. */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.07);color:var(--fg);font:inherit;font-size:13px;line-height:1.2;cursor:pointer;transition:border-color .2s,background .2s,color .2s,transform .15s}
+.btn svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+.btn:hover{border-color:rgba(127,127,127,.4);background:rgba(127,127,127,.14)}
+.btn:active{transform:scale(.96)}
+.btn.acc{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 45%,transparent);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.btn.acc:hover{background:color-mix(in srgb,var(--acc) 22%,transparent);border-color:var(--acc)}
+.btn.ghost{color:var(--dim)}
+.btn.ghost:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 .empty{color:var(--dim);text-align:center;padding:22px 0 10px;height:100%;display:flex;flex-direction:column;justify-content:center}
 .empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35;animation:bob 3.2s ease-in-out infinite}
 .times{color:var(--dim);display:inline-flex;gap:6px;align-items:center;animation:rise .3s both}
@@ -133,9 +138,6 @@ input[type=checkbox]:active{transform:scale(.8)}
 .seg{overflow:visible}.seg button:first-child{border-radius:9px 0 0 9px}.seg button:last-child{border-radius:0 9px 9px 0}
 [data-tip].tip-left::after{left:auto;right:0}
 .foot [data-tip]::after{top:auto;bottom:calc(100% + 8px)}
-.sub .link{background:none;border:0;padding:0;margin-top:3px;color:var(--acc);cursor:pointer;font:inherit;transition:opacity .2s}
-.sub .link:hover{opacity:.75}
-.sub .link.retry:hover{text-decoration:underline}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style></head><body><div class="bg"><canvas id="fall"></canvas></div><canvas id="fx"></canvas><main>
@@ -196,15 +198,9 @@ input[type=checkbox]:active{transform:scale(.8)}
 <div class="card" id="jobsCard">
   <div id="list"></div>
   <div class="foot">
-    <button id="open" data-local>Open folder</button>
-    <button id="clear">Clear finished</button>
-    <button id="quit" data-local title="Downloads stop; unfinished files resume next time">Quit</button>
-    <button id="lan" class="right" data-local>Phone: off</button>
-  </div>
-  <div class="phone" id="phone" hidden>
-    Open this on your phone (it has to be on the same Wi-Fi):
-    <code id="phoneUrl"></code>
-    Finished files can be downloaded right to the phone. If it doesn't open, allow ТЯГА (tyaga.exe) in Windows Firewall.
+    <button class="btn" id="open" title="The folder where everything is saved"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
+    <button class="btn" id="clear" title="Remove finished, failed and cancelled downloads from the list (the files stay)"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>Clear finished</button>
+    <button class="btn quit" id="quit" title="Downloads stop; unfinished files resume next time"><svg viewBox="0 0 24 24"><path d="M12 3v8M7 6a8 8 0 1 0 10 0"/></svg>Quit</button>
   </div>
 </div>
 
@@ -213,8 +209,7 @@ var TOKEN = new URLSearchParams(location.search).get('t');
 var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'error', cancelled: 'cancelled' };
 // stopped: Quit was clicked. (Not "closed": that's
 // window.closed, a built-in that silently ignores being set.)
-var seen = {}; // job ids already shown
-var state = {}, lastList = '', stopped = false, OFFLINE = 'ТЯГА is not responding. Start the program again.';
+var state = {}, stopped = false, OFFLINE = 'ТЯГА is not responding. Start the program again.';
 
 function $(id) { return document.getElementById(id); }
 
@@ -402,21 +397,20 @@ function showClosed() {
   document.querySelector('main').innerHTML =
     '<h1>ТЯГА</h1><div class="card">ТЯГА is closed. Run it again when you need it.</div>';
 }
-$('lan').onclick = function () {
-  api('/api/lan', { on: !(state.lan && state.lan.on) }).then(function (r) {
-    $('msg').textContent = r.error || '';
-    refresh();
-  });
-};
 
+// What the download is: "Audio · MP3", "Video · MP4 · 1080p", plus fragment / one file.
+function kindText(j) {
+  var k = j.mode === 'audio' ? 'Audio · ' + j.format.toUpperCase() : 'Video · MP4' + (j.quality ? ' · ' + j.quality + 'p' : '');
+  if (j.merge && j.list) k += ' · one file';
+  if (j.from || j.to) k += ' · ✂ ' + (j.from || '0:00') + '–' + (j.to || 'end');
+  return k;
+}
 function statusText(j) {
+  if (j.status === 'done') return '✓ ' + kindText(j);
   // The file is at 100%, but yt-dlp is still working: converting, merging or embedding the cover.
   var s = j.status === 'running' && j.progress >= 100 ? 'processing' : LABEL[j.status];
   if (j.status === 'queued' && !state.ready) s = 'waiting for setup';
-  if (j.merge && j.list) s = '1 file · ' + s;
-  if (j.mode === 'video' && j.quality) s = j.quality + 'p · ' + s;
-  if (j.from || j.to) s = '✂ ' + (j.from || '0:00') + '–' + (j.to || 'end') + ' · ' + s;
-  return j.mode === 'audio' ? '♪ ' + j.format.toUpperCase() + ' · ' + s : s;
+  return kindText(j) + ' · ' + s;
 }
 
 // A system notification when a download finishes or fails while you're in another tab or window.
@@ -441,6 +435,104 @@ function askNotify() {
   try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
 }
 
+var rows = {}; // job id → its row and the parts of it
+
+function button(cls, label, title, onclick) {
+  var b = el('button', 'btn ' + cls);
+  b.innerHTML = label;
+  if (title) b.title = title;
+  b.onclick = onclick;
+  return b;
+}
+
+function makeRow(j) {
+  var r = { row: el('div', 'job new'), body: el('div', 'body'), top: el('div', 'top') };
+  r.row.dataset.id = j.id;
+  r.name = el('span', 'name');
+  r.st = el('span', 'st');
+  r.top.append(r.name, r.st);
+  r.live = el('div', 'live');                // wave + numbers + log, only while downloading
+  r.wave = el('canvas', 'wave');
+  r.wave.dataset.id = j.id;
+  r.nums = el('div', 'sub');
+  r.log = el('div', 'log');
+  r.live.append(r.wave, r.nums, r.log);
+  r.msg = el('div', 'sub');
+  r.acts = el('div', 'acts');
+  r.body.append(r.top, r.live, r.msg, r.acts);
+  r.row.append(r.body);
+  return r;
+}
+
+var ICON = {
+  retry: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"/></svg>',
+  folder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+  cancel: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+};
+
+function updateRow(r, j) {
+  // Thumbnail: made once, swapped only when the picture changes (next video of a playlist).
+  if (j.thumb && (!r.img || r.img.dataset.src !== j.thumb)) {
+    var img = el('img', 'thumb');
+    img.alt = ''; img.referrerPolicy = 'no-referrer'; img.dataset.src = j.thumb;
+    img.onload = function () { img.classList.add('ok'); };
+    img.onerror = function () { img.remove(); };
+    img.src = j.thumb;
+    if (r.img) r.img.replaceWith(img); else r.row.prepend(img);
+    r.img = img;
+  }
+  if (r.status !== j.status) {
+    r.row.className = 'job ' + j.status + (r.status ? '' : ' new');
+    r.st.className = 'st ' + j.status + (r.status && j.status === 'done' ? ' pop' : '');
+  }
+  setText(r.name, j.title || j.url);
+  setText(r.st, statusText(j));
+
+  // While downloading: the wave, the numbers and the log.
+  var running = j.status === 'running';
+  r.live.hidden = !running;
+  if (running) {
+    waveTarget[j.id] = { p: j.progress, v: parseFloat(j.speed) || 0 };
+    setText(r.nums, j.progress >= 100 ? 'processing…' : [j.progress.toFixed(1) + '%', j.speed, j.eta && (j.eta + ' left')].filter(Boolean).join(' · '));
+    var lines = (j.log || []).join('\n');
+    if (r.logText !== lines) {
+      r.logText = lines;
+      r.log.innerHTML = '';
+      (j.log || []).forEach(function (l) { r.log.append(el('div', null, l)); });
+    }
+  }
+
+  // A note, an error, or skipped videos of a merged playlist.
+  var msg = j.status === 'error' ? j.error : j.status === 'done' ? j.error : j.note;
+  setText(r.msg, msg || '');
+  r.msg.className = 'sub' + (j.status === 'error' ? ' err' : '');
+  r.msg.hidden = !msg;
+
+  // Buttons: rebuilt only when the status changes.
+  var acts = j.status + '|' + j.files.length;
+  if (r.actsKey !== acts) {
+    r.actsKey = acts;
+    r.acts.innerHTML = '';
+    if (j.status === 'queued' || j.status === 'running') {
+      r.acts.append(button('ghost', ICON.cancel + 'Cancel', 'Stop it; the unfinished file resumes if you add the link again',
+        function () { api('/api/cancel', { id: j.id }).then(refresh); }));
+    }
+    // Failed or cancelled: back into the queue. What's already downloaded is skipped.
+    if (j.status === 'error' || j.status === 'cancelled') {
+      r.acts.append(button('acc', ICON.retry + 'Retry', 'Try again; whatever already downloaded is skipped',
+        function () { api('/api/retry', { id: j.id }).then(refresh); }));
+    }
+    if (j.status === 'done' && j.files.length) {
+      r.acts.append(button('', ICON.folder + 'Show in folder', null,
+        function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); }));
+    }
+    r.acts.hidden = !r.acts.children.length;
+  }
+  r.status = j.status;
+}
+
+function setText(e, t) { if (e.textContent !== t) e.textContent = t; }
+
 function render() {
   $('ver').textContent = state.version || '';
   $('ver').hidden = !state.version;
@@ -451,15 +543,6 @@ function render() {
   $('setup').textContent = note;
   $('setup').classList.toggle('err', !state.setup && !!state.problem);
 
-  // From a phone you can't open the folder on the computer or switch the access on/off.
-  document.querySelectorAll('[data-local]').forEach(function (e) { e.hidden = state.remote; });
-  var lan = state.lan || {};
-  $('lan').textContent = lan.on ? 'Phone: on' : 'Phone: off';
-  $('phone').hidden = !lan.on;
-  $('phoneUrl').textContent = lan.url || '';
-
-  // Redraw the list only if something in it changed: otherwise a link
-  // or the × button could vanish right under your finger.
   var list = $('list'), jobs = state.jobs || [];
   // While something downloads, the fish in the logo gets reeled in.
   var run = jobs.filter(function (j) { return j.status === 'running'; })[0];
@@ -467,88 +550,32 @@ function render() {
   // The tab shows the progress, so it's visible from another tab too.
   document.title = run ? Math.floor(run.progress) + '% · ТЯГА' : 'ТЯГА';
   ping(jobs);
-  var snapshot = JSON.stringify([jobs, state.ready, state.remote]);
-  if (snapshot === lastList) return;
-  lastList = snapshot;
-  list.innerHTML = '';
+
   if (!jobs.length) {
-    var empty = el('div', 'empty');
-    empty.innerHTML = '<svg viewBox="0 0 256 256"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="18"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg>';
-    empty.append('Nothing on the hook yet. Paste a link above.');
-    list.append(empty);
+    if (!list.querySelector('.empty')) {
+      list.innerHTML = '';
+      rows = {};
+      var empty = el('div', 'empty');
+      empty.innerHTML = '<svg viewBox="0 0 256 256"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="18"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg>';
+      empty.append('Nothing on the hook yet. Paste a link above.');
+      list.append(empty);
+    }
     return;
   }
+  var e = list.querySelector('.empty');
+  if (e) e.remove();
 
-  jobs.slice().reverse().forEach(function (j) { // newest first
-    // Only rows that weren't there before slide in, not the whole list on every update.
-    var row = el('div', (seen[j.id] ? 'job ' : 'job new ') + j.status), top = el('div', 'top');
-    row.dataset.id = j.id;
-    if (j.thumb) {
-      var img = el('img', 'thumb');
-      img.alt = ''; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
-      img.onload = function () { img.classList.add('ok'); };
-      img.onerror = function () { img.remove(); };
-      img.src = j.thumb;
-      row.append(img);
-    }
-    var body = el('div', 'body');
-    row.append(body);
-    seen[j.id] = true;
-    top.append(el('span', 'name', j.title || j.url), el('span', 'st ' + j.status, statusText(j)));
-    if (j.status === 'queued' || j.status === 'running') {
-      var x = el('button', 'x', '×');
-      x.title = 'Cancel';
-      x.onclick = function () { api('/api/cancel', { id: j.id }).then(refresh); };
-      top.append(x);
-    }
-    body.append(top);
-
-    if (j.status === 'running') {
-      var wave = el('canvas', 'wave');
-      wave.dataset.id = j.id;
-      waveTarget[j.id] = { p: j.progress, v: parseFloat(j.speed) || 0 };
-      var details = j.progress >= 100 ? ['processing…'] : [j.progress.toFixed(1) + '%', j.speed, j.eta && (j.eta + ' left')];
-      body.append(wave, el('div', 'sub', details.filter(Boolean).join(' · ')));
-      if (j.log && j.log.length) {
-        var log = el('div', 'log');
-        j.log.forEach(function (l) { log.append(el('div', null, l)); });
-        body.append(log);
-      }
-    }
-    if (j.note && j.status !== 'error') body.append(el('div', 'sub', j.note));
-    if (j.status === 'error' && j.error) body.append(el('div', 'sub err', j.error));
-    if (j.status === 'done' && j.error) body.append(el('div', 'sub', j.error)); // e.g. skipped videos in a merged playlist
-
-    // Failed or cancelled: one click puts it back in the queue. What's already downloaded is skipped.
-    if (j.status === 'error' || j.status === 'cancelled') {
-      var again = el('button', 'link retry', '↻ Retry');
-      again.onclick = function () { api('/api/retry', { id: j.id }).then(refresh); };
-      var rbox = el('div', 'sub');
-      rbox.append(again);
-      body.append(rbox);
-    }
-
-    // On the computer: show the file in its folder.
-    if (!state.remote && j.status === 'done' && j.files.length) {
-      var reveal = el('button', 'link', 'Show in folder');
-      reveal.onclick = function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); };
-      var box = el('div', 'sub');
-      box.append(reveal);
-      body.append(box);
-    }
-
-    // On a phone: links to take the finished files with you.
-    if (state.remote && j.status === 'done' && j.files.length) {
-      var files = el('div', 'sub');
-      j.files.forEach(function (name, n) {
-        var a = el('a', null, '↓ ' + name);
-        a.href = '/api/file?id=' + j.id + '&n=' + n + '&t=' + encodeURIComponent(TOKEN);
-        a.download = name;
-        files.append(a);
-      });
-      body.append(files);
-    }
-    list.append(row);
+  // Every download has its own row that stays on the page and is only updated, so nothing
+  // blinks or starts its animation over. A part is rebuilt only when it really changes.
+  var alive = {};
+  jobs.slice().reverse().forEach(function (j, i) { // newest first
+    alive[j.id] = true;
+    var r = rows[j.id] || (rows[j.id] = makeRow(j));
+    updateRow(r, j);
+    if (list.children[i] !== r.row) list.insertBefore(r.row, list.children[i] || null);
+  });
+  Object.keys(rows).forEach(function (id) {
+    if (!alive[id]) { rows[id].row.remove(); delete rows[id]; }
   });
 
   // Just finished: notes fly out of its row, the row flashes green, the fish jumps.
@@ -628,10 +655,14 @@ var waveTarget = {}, waveState = {};
       cx.lineCap = 'round';
       var g = cx.createLinearGradient(0, 0, head, 0);
       g.addColorStop(0, acc); g.addColorStop(1, acc2);
+      // Glow: the same line, wide and faint, underneath. (A canvas shadow got cut off
+      // at the top and bottom edges and showed up as flat lines.)
+      cx.globalAlpha = 0.18 + Math.min(energy, 5) * 0.03;
+      cx.strokeStyle = acc; cx.lineWidth = 7;
+      sine(cx, 4, head - 2, mid, amp, st.phase).stroke();
+      cx.globalAlpha = 1;
       cx.strokeStyle = g; cx.lineWidth = 3;
-      cx.shadowColor = acc; cx.shadowBlur = 8 + energy * 2;
-      sine(cx, 1, head, mid, amp, st.phase).stroke();
-      cx.shadowBlur = 0;
+      sine(cx, 2, head, mid, amp, st.phase).stroke();
     });
     fx.energy += (most - fx.energy) * Math.min(1, dt * 2);
     requestAnimationFrame(frame);

@@ -113,7 +113,7 @@ type Job struct {
 	Speed    string   `json:"speed"`
 	ETA      string   `json:"eta"`
 	Error    string   `json:"error"`
-	Files    []string `json:"files"` // names of finished files (to download them to a phone)
+	Files    []string `json:"files"` // names of finished files
 
 	mix    bool        // a YouTube Mix: only the first mixLimit videos
 	paths  []string    // full paths of finished files
