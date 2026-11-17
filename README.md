@@ -25,7 +25,7 @@ One small program, nothing to install, and the interface is just a page in your 
 
 **Music.** M4A (the original YouTube track, untouched) or MP3. The tags come out clean: real artist, title without "(Official Video)", year.
 
-**Covers.** The cover is the picture the author chose for the video, not a random frame. Album art sitting between bars becomes a clean square; a normal thumbnail stays whole, nothing cut off. Videos get their thumbnail as the cover too, so Explorer shows it.
+**Covers.** For music ТЯГА looks up the real album cover in the Apple Music catalogue by artist and title (1200×1200), and uses it only when both clearly match, so a wrong album never sneaks in. Only the artist and the song name are sent, nothing else. When the song isn't there, the cover is the picture the author chose for the video, not a random frame: album art sitting between bars becomes a clean square, a normal thumbnail stays whole. Videos get their thumbnail as the cover too, so Explorer shows it.
 
 **Albums.** A whole album uploaded as one video with chapters? It gets split into proper numbered tracks.
 
@@ -76,7 +76,7 @@ main.go      the server
 app.go       life without a console: log, single instance, quitting
 jobs.go      the queue and the yt-dlp command
 merge.go     gluing a playlist into one file
-cover.go     square album covers out of thumbnails with bars
+cover.go     covers: the real album art from Apple Music, or the thumbnail squared
 tools.go     finding and downloading yt-dlp, ffmpeg, Deno
 proc_*.go    the bits that differ between Windows and Linux/macOS
 index.html   the whole page

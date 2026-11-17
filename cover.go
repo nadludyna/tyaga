@@ -1,13 +1,23 @@
 package main
 
-// Track covers. yt-dlp embeds the author's thumbnail as it is (16:9). Then, for every
-// finished audio file, the cover is looked at: if it is an album cover sitting in the middle
-// of plain bars (how YouTube shows "Artist - Topic" tracks and most music uploads), the bars
-// are cut off and a square cover goes back in. A normal 16:9 thumbnail — a clip, a podcast —
-// is left whole, so nothing of the author's picture is cut away.
+// Track covers. yt-dlp embeds the video's thumbnail. Then, for every finished audio file:
+//
+//  1. The real album cover is looked up in the Apple Music catalogue (the iTunes Search API:
+//     public, no key) by artist and title. It's used only when both clearly match, so a
+//     wrong album never gets in. Square, 1200×1200.
+//  2. If there is none, the thumbnail is looked at: an album cover sitting between plain bars
+//     (how YouTube shows "Artist - Topic" tracks and many music uploads) gets the bars cut
+//     off. A normal 16:9 thumbnail — a clip, a podcast — is left whole.
 
 import (
 	"bytes"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/url"
+	"sync"
+	"time"
+	"unicode"
 	"image"
 	"image/color"
 	"image/jpeg"
@@ -15,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -130,15 +141,169 @@ func squareCover(path string) {
 		return
 	}
 
+	putCover(path, art)
+}
+
+// putCover replaces the cover of an audio file with the picture in the file pic.
+// The audio is not re-encoded; on any failure the file stays as it was.
+func putCover(path, pic string) bool {
+	dir, name := filepath.Dir(path), filepath.Base(path)
 	tmp := filepath.Join(dir, "~"+name) // same extension: ffmpeg picks the format by it
-	args := []string{"-i", path, "-i", art, "-map", "0:a", "-map", "1:0", "-c", "copy",
+	args := []string{"-y", "-hide_banner", "-loglevel", "error",
+		"-i", path, "-i", pic, "-map", "0:a", "-map", "1:0", "-c", "copy",
 		"-disposition:v:0", "attached_pic", "-metadata:s:v", "comment=Cover (front)"}
-	if ext == ".mp3" {
+	if strings.EqualFold(filepath.Ext(path), ".mp3") {
 		args = append(args, "-id3v2_version", "3")
 	}
-	if run(append(args, tmp)...) == nil {
-		os.Rename(tmp, path)
-	} else {
+	cmd := exec.Command(tools.ffmpeg, append(args, tmp)...)
+	hideWindow(cmd)
+	if cmd.Run() != nil {
 		os.Remove(tmp)
+		return false
 	}
+	return os.Rename(tmp, path) == nil
+}
+
+// ---------------------------------------------------------------------------
+//  Real album covers from the Apple Music catalogue
+// ---------------------------------------------------------------------------
+
+// song: what yt-dlp knows about a finished audio file (after the tag clean-up).
+type song struct {
+	Filepath string `json:"filepath"`
+	Artist   string `json:"artist"`
+	Title    string `json:"title"`
+	Album    string `json:"album"`
+}
+
+var (
+	itunesURL = "https://itunes.apple.com/search" // a variable so tests can point it elsewhere
+	web       = &http.Client{Timeout: 12 * time.Second}
+	artCache  sync.Map // search term → cover bytes (nil = not found), so a playlist asks once per album
+)
+
+var bracketRe = regexp.MustCompile(`\([^)]*\)|\[[^\]]*\]|【[^】]*】|「|」`)
+
+// norm makes names comparable: lower case, no brackets ("(feat. X)", "[Remastered]"),
+// no punctuation. Letters of any script stay, so Japanese titles compare too.
+func norm(s string) string {
+	s = strings.ToLower(bracketRe.ReplaceAllString(s, " "))
+	if i := strings.Index(s, " feat"); i > 0 {
+		s = s[:i]
+	}
+	return strings.Join(strings.FieldsFunc(s, func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
+	}), " ")
+}
+
+// same: the two names are the same thing, maybe with something extra on one side
+// ("Daft Punk" and "Daft Punk & Pharrell Williams").
+func same(a, b string) bool {
+	a, b = norm(a), norm(b)
+	if a == "" || b == "" {
+		return false
+	}
+	if a == b {
+		return true
+	}
+	// Whole words only: "one" is not inside "someone else".
+	short := min(len([]rune(a)), len([]rune(b)))
+	wa, wb := " "+a+" ", " "+b+" "
+	return short >= 3 && (strings.Contains(wa, wb) || strings.Contains(wb, wa))
+}
+
+// albumArt finds the real cover. With a title it looks for that song and takes its album's
+// cover; with only an album (a full album split by chapters) it looks for the album.
+// nil when nothing matches clearly enough, or there's no internet.
+func albumArt(artist, title, album string) []byte {
+	if norm(artist) == "" || (norm(title) == "" && norm(album) == "") {
+		return nil
+	}
+	entity, name := "song", title
+	if title == "" {
+		entity, name = "album", album
+	}
+	term := artist + " " + name
+	key := entity + "|" + norm(term)
+	if v, ok := artCache.Load(key); ok {
+		return v.([]byte)
+	}
+	var art []byte
+	defer func() { artCache.Store(key, art) }()
+
+	q := url.Values{"term": {term}, "media": {"music"}, "entity": {entity}, "limit": {"10"}}
+	body := get(itunesURL + "?" + q.Encode())
+	var res struct {
+		Results []struct {
+			ArtistName     string `json:"artistName"`
+			TrackName      string `json:"trackName"`
+			CollectionName string `json:"collectionName"`
+			ArtworkURL100  string `json:"artworkUrl100"`
+		} `json:"results"`
+	}
+	if body == nil || json.Unmarshal(body, &res) != nil {
+		return nil
+	}
+	for _, r := range res.Results {
+		got := r.TrackName
+		if entity == "album" {
+			got = r.CollectionName
+		}
+		if !same(r.ArtistName, artist) || !same(got, name) || r.ArtworkURL100 == "" {
+			continue
+		}
+		// The address says the size: ask for 1200×1200 instead of 100×100.
+		big := strings.Replace(r.ArtworkURL100, "100x100bb", "1200x1200bb", 1)
+		for _, u := range []string{big, r.ArtworkURL100} {
+			if pic := get(u); pic != nil {
+				if _, _, err := image.DecodeConfig(bytes.NewReader(pic)); err == nil {
+					art = pic
+					return art
+				}
+			}
+		}
+	}
+	return nil
+}
+
+// get downloads a small thing from the internet; nil on any problem.
+func get(u string) []byte {
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil
+	}
+	req.Header.Set("User-Agent", "TYAGA (github.com/nadludyna/tyaga)")
+	resp, err := web.Do(req)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil
+	}
+	b, err := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
+	if err != nil {
+		return nil
+	}
+	return b
+}
+
+// realCover puts the album's real cover into an audio file. False if there's none.
+func realCover(path string, art []byte) bool {
+	if art == nil {
+		return false
+	}
+	pic := filepath.Join(filepath.Dir(path), "~art-"+filepath.Base(path)+".jpg")
+	defer os.Remove(pic)
+	return os.WriteFile(pic, art, 0o644) == nil && putCover(path, pic)
+}
+
+// fixCover: the real album cover if there is one, otherwise the thumbnail, squared if it's art between bars.
+// Returns true when the real cover went in.
+func fixCover(path string, art []byte) bool {
+	if realCover(path, art) {
+		return true
+	}
+	squareCover(path)
+	return false
 }

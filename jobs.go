@@ -115,14 +115,15 @@ type Job struct {
 	Error    string   `json:"error"`
 	Files    []string `json:"files"` // names of finished files
 
-	mix    bool        // a YouTube Mix: only the first mixLimit videos
-	pos    int         // in a playlist: which video this is (1…of) and how many there are,
-	of     int         // so the progress goes once from 0 to 100% for the whole playlist
-	part   int         // video: 0 = the picture is downloading, 1 = the sound (a separate file)
-	lastB  float64     // bytes downloaded at the last progress line, to notice a new file starting
-	paths  []string    // full paths of finished files
-	splits []splitInfo // videos that were split by chapters
-	tracks []track     // playlist items to glue into one file (Merge)
+	mix    bool            // a YouTube Mix: only the first mixLimit videos
+	pos    int             // in a playlist: which video this is (1…of) and how many there are,
+	of     int             // so the progress goes once from 0 to 100% for the whole playlist
+	part   int             // video: 0 = the picture is downloading, 1 = the sound (a separate file)
+	lastB  float64         // bytes downloaded at the last progress line, to notice a new file starting
+	paths  []string        // full paths of finished files
+	songs  map[string]song // audio: artist / title / album of each finished file, by path
+	splits []splitInfo     // videos that were split by chapters
+	tracks []track         // playlist items to glue into one file (Merge)
 }
 
 // splitInfo is what yt-dlp reports about a video that was split by chapters.
@@ -130,6 +131,7 @@ type splitInfo struct {
 	Filepath string `json:"filepath"`
 	Album    string `json:"album"`
 	Title    string `json:"title"`
+	Artist   string `json:"artist"`
 	Chapters []struct {
 		Title string `json:"title"`
 	} `json:"chapters"`
@@ -325,6 +327,8 @@ func buildArgs(j *Job) []string {
 		args = append(args, "-x", "--audio-format", j.Format, "--audio-quality", "0")
 		args = append(args, "--embed-thumbnail", "--convert-thumbnails", "jpg")
 		args = append(args, audioTags...)
+		// Artist / song / album after the clean-up: to look up the real album cover (cover.go).
+		args = append(args, "--print", "after_move:SONG|%(.{filepath,artist,title,album})j")
 		if isList { // track number = position in the playlist
 			args = append(args, "--parse-metadata", "%(playlist_index)s:%(track_number)s")
 		}
@@ -332,7 +336,7 @@ func buildArgs(j *Job) []string {
 			// A whole album as one video with chapters → a folder with separate tracks appears next to it.
 			args = append(args, "--split-chapters",
 				"-o", "chapter:"+name+"/%(section_number)02d - %(section_title)s.%(ext)s",
-				"--print", "after_move:DONE|%(.{filepath,album,title,chapters})j")
+				"--print", "after_move:DONE|%(.{filepath,album,title,artist,chapters})j")
 		}
 	}
 
@@ -459,6 +463,14 @@ func onLine(j *Job, line string) {
 		path := line[5:]
 		j.paths = append(j.paths, path)
 		j.Files = append(j.Files, filepath.Base(path))
+	case strings.HasPrefix(line, "SONG|"):
+		var s song
+		if json.Unmarshal([]byte(line[5:]), &s) == nil && s.Filepath != "" {
+			if j.songs == nil {
+				j.songs = map[string]song{}
+			}
+			j.songs[s.Filepath] = s
+		}
 	case strings.HasPrefix(line, "TRACK|"):
 		var t track
 		if json.Unmarshal([]byte(line[6:]), &t) == nil && t.Filepath != "" {
@@ -588,8 +600,10 @@ func pump() {
 		}
 		mu.Unlock()
 
-		// Album art between bars → a square cover (the split tracks get it in tagChapters).
+		// Covers: the real album cover from Apple Music, or the thumbnail squared if it's
+		// art between bars (cover.go). The split tracks get theirs in tagChapters.
 		mu.Lock()
+		songs := j.songs
 		var covers []string
 		if j.Mode == "audio" {
 			covers = append(covers, j.paths...)
@@ -600,9 +614,15 @@ func pump() {
 		mu.Unlock()
 		done := map[string]bool{}
 		for _, p := range covers {
-			if !done[p] {
-				done[p] = true
-				squareCover(p)
+			if done[p] {
+				continue
+			}
+			done[p] = true
+			s := songs[p]
+			if fixCover(p, albumArt(s.Artist, s.Title, "")) {
+				mu.Lock()
+				j.addLog("[cover] The real album cover for " + s.Title)
+				mu.Unlock()
 			}
 		}
 
@@ -683,6 +703,7 @@ func retryJob(id int) {
 			j.Progress, j.Speed, j.ETA = 0, "", ""
 			j.Files, j.paths, j.tracks, j.splits = []string{}, nil, nil, nil
 			j.pos, j.of, j.part, j.lastB = 0, 0, 0, 0
+			j.songs = nil
 			j.Log = nil
 		}
 	}
@@ -734,6 +755,7 @@ func tagChapters(info splitInfo) {
 		album = info.Title
 	}
 	total := len(info.Chapters)
+	art := albumArt(info.Artist, "", album) // one cover for the whole album
 	for i, ch := range info.Chapters {
 		prefix := fmt.Sprintf("%02d - ", i+1)
 		file := ""
@@ -771,6 +793,6 @@ func tagChapters(info splitInfo) {
 		} else {
 			os.Remove(tmp)
 		}
-		squareCover(src)
+		fixCover(src, art)
 	}
 }
