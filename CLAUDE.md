@@ -20,8 +20,15 @@ through a page in the browser. One Go program: a tiny local server + one embedde
 3. **Give the owner a test build**, not a PR: cross-compile and send the exe
    (`GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H=windowsgui -X main.version=test-<sha>"`),
    zipped as `tyaga/tyaga.exe`. He runs it next to his normal copy, not instead of it.
-4. **PR only when he says so.** Work on a branch; open the PR when the batch is done and tested.
-5. Releases are made by the owner: Actions → Release, with a version like `v1.2.0`.
+4. **One branch = one working session.** A session starts when the owner sits down to work
+   on ТЯГА; everything done in it goes to one branch (commit and push as you go, no PR yet).
+   When he says the session is over ("заканчиваем сессию"), update the README, open the PR
+   for that branch, and he goes off to do other things. The next session starts a new branch
+   from `main`.
+5. **The README is updated at the end of a session**, not after every change. Its top stays
+   short and holds only what rarely changes: what ТЯГА is, how to start it, the screenshot.
+   Details and the things that change often go further down.
+6. Releases are made by the owner: Actions → Release, with a version like `v1.2.0`.
 
 ## Before you show anything
 
