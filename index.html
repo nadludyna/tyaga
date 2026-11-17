@@ -119,10 +119,26 @@ input[type=checkbox]:active{transform:scale(.8)}
 @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
 /* Progress: a sine wave that runs faster the faster the download goes (drawn in the script). */
 .wave{display:block;width:100%;height:18px;margin-top:6px}
-.log{margin-top:6px;font-size:12.5px;line-height:1.55;color:var(--dim)}
-.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.6}
-.log div:last-child{opacity:1;color:var(--fg)}
-.log div:last-child::before{content:"› ";color:var(--dim)}
+/* The steps, as a small vertical timeline on a quiet panel: done steps get a tick in a
+   circle, the current one an orange dot that breathes, joined by a thin line. The live
+   numbers of the current step (piece 17 of 80 · 8 MB) are little pills, like the counters
+   above. New steps slide in, old ones fold away at the top. */
+.log{margin-top:8px;padding:8px 12px 8px 10px;border-radius:12px;background:rgba(127,127,127,.06);box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.5;color:var(--dim)}
+.log:empty{display:none}
+.log div{position:relative;display:flex;align-items:center;gap:6px;min-height:24px;padding-left:24px;white-space:nowrap;overflow:hidden;max-height:24px;transition:opacity .35s,max-height .35s,min-height .35s}
+.log div > span:first-child{overflow:hidden;text-overflow:ellipsis}
+.log div::before{content:"";position:absolute;left:4px;top:7px;width:10px;height:10px;border-radius:50%;box-sizing:border-box}
+.log div:not(:last-child)::after{content:"";position:absolute;left:8.5px;top:19px;height:12px;width:1px;background:var(--line)}
+.log .done::before{background:color-mix(in srgb,var(--ok) 22%,transparent);border:1px solid color-mix(in srgb,var(--ok) 55%,transparent)}
+.log .done{opacity:.7}
+.log .done > span:first-child::after{content:" ✓";color:var(--ok);font-size:11px}
+.log .cur{color:var(--fg)}
+.log .cur::before{background:var(--acc);animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 45%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--acc) 0%,transparent)}}
+.log .tag{flex:none;padding:0 8px;border-radius:999px;font-size:11.5px;line-height:18px;font-variant-numeric:tabular-nums;color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent)}
+.log .in{animation:stepin .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes stepin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.log .out{opacity:0;max-height:0;min-height:0}
 .sub{font-size:12px;color:var(--dim);margin-top:4px;word-break:break-word}
 .sub.err{color:var(--err)}
 .sub a{color:var(--acc);display:block;margin-top:2px}
@@ -426,7 +442,8 @@ function showClosed() {
 
 // What the download is: "Audio · MP3", "Video · MP4 · 1080p", plus fragment / one file.
 function kindText(j) {
-  var k = j.mode === 'audio' ? 'Audio · ' + j.format.toUpperCase() : 'Video · MP4' + (j.quality ? ' · ' + j.quality + 'p' : '');
+  var k = (j.channel ? j.channel + ' · ' : '') +
+    (j.mode === 'audio' ? 'Audio · ' + j.format.toUpperCase() : 'Video · MP4' + (j.quality ? ' · ' + j.quality + 'p' : ''));
   if (j.merge && j.list) k += ' · one file';
   if (j.from || j.to) k += ' · ✂ ' + (j.from || '0:00') + '–' + (j.to || 'end');
   return k;
@@ -575,17 +592,12 @@ function updateRow(r, j) {
     waveTarget[j.id] = { p: j.progress, wait: waiting };
     // Track and percent are in the pills; here: speed and time left, or why it's waiting.
     var now = statusText(j);
-    var nums = waiting ? ['YouTube asks for a pause, ' + j.wait + ' s']
+    var nums = waiting ? ['Paused']
       : now === 'converting' ? ['Converting and adding the cover']
       : j.progress >= 100 ? ['Finishing up']
       : [j.speed || 'Starting…', j.eta && (j.eta + ' left')];
     setText(r.nums, nums.filter(Boolean).join(' · '));
-    var lines = (j.log || []).join('\n');
-    if (r.logText !== lines) {
-      r.logText = lines;
-      r.log.innerHTML = '';
-      (j.log || []).forEach(function (l) { r.log.append(el('div', null, l)); });
-    }
+    renderSteps(r, j);
   }
 
   // A note, an error, or skipped videos of a merged playlist.
@@ -628,6 +640,57 @@ function updateRow(r, j) {
     r.acts.hidden = !r.acts.children.length;
   }
   r.status = j.status;
+}
+
+// The step feed under the wave: done steps with a tick, the current one live. Updated
+// line by line, so a new step slides in and nothing that stayed the same is redrawn.
+function renderSteps(r, j) {
+  var steps = (j.log || []).slice();
+  var cur = j.now;
+  // The live line replaces the plain "Downloading Song.webm" of the same step.
+  if (cur && steps.length && /^Downloading /.test(steps[steps.length - 1])) steps.pop();
+  if (!cur) cur = steps.pop() || '';
+  var want = steps.map(function (t) { return { t: t, c: 'done' }; });
+  if (cur) want.push({ t: cur, c: 'cur' });
+  want = want.slice(-4);
+
+  var have = r.stepEls || (r.stepEls = []);
+  // Steps that left the top fold away; matching ones stay; the rest come in at the bottom.
+  var k = 0;
+  while (k < have.length && !startsWith(want, have.slice(k))) k++;
+  have.splice(0, k).forEach(function (e) {
+    e.classList.add('out');
+    setTimeout(function () { e.remove(); }, 360);
+  });
+  want.forEach(function (w, i) {
+    var e = have[i];
+    if (!e) {
+      e = el('div', 'in');
+      have.push(e);
+      r.log.append(e);
+    }
+    if (e.dataset.t !== w.t) {
+      e.dataset.t = w.t;
+      // "Downloading the picture · piece 17 of 80 · 8 MB" → the words, then the numbers as pills.
+      var parts = w.c === 'cur' ? w.t.split(' · ') : [w.t];
+      e.innerHTML = '';
+      e.append(el('span', null, parts[0]));
+      parts.slice(1).forEach(function (p) { e.append(el('span', 'tag', p)); });
+    }
+    e.classList.toggle('done', w.c === 'done');
+    e.classList.toggle('cur', w.c === 'cur');
+  });
+  have.splice(want.length).forEach(function (e) { e.remove(); });
+}
+// Do the steps on screen match the start of the new list? (The current one may have
+// become done, or its live numbers changed: only the text of a step counts if it's done.)
+function startsWith(want, have) {
+  if (have.length > want.length) return false;
+  for (var i = 0; i < have.length; i++) {
+    var same = have[i].dataset.t === want[i].t || (have[i].classList.contains('cur') && i === have.length - 1);
+    if (!same) return false;
+  }
+  return true;
 }
 
 function setText(e, t) { if (e.textContent !== t) e.textContent = t; }

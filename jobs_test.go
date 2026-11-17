@@ -257,7 +257,7 @@ func TestLog(t *testing.T) {
 func TestWaiting(t *testing.T) {
 	j := &Job{Speed: "1.0 MB/s"}
 	onLine(j, "[download] Sleeping 5.00 seconds as required by the site...")
-	if j.Wait != 5 || j.Speed != "" {
+	if j.Wait != 5 || j.Speed != "" || j.Now != "Waiting: YouTube asks for a 5 s pause" {
 		t.Errorf("during the pause: wait %d speed %q", j.Wait, j.Speed)
 	}
 	onLine(j, "PROG|1|10|NA|1|1|NA|NA")
@@ -340,5 +340,18 @@ func TestProgressFragments(t *testing.T) {
 func TestFormatNumberHidden(t *testing.T) {
 	if got := logLine(`[download] Destination: C:\\x\\Song.f299.mp4`); got != "Downloading Song.mp4" {
 		t.Errorf("%q", got)
+	}
+}
+
+func TestLiveLine(t *testing.T) {
+	j := &Job{Options: Options{Mode: "video"}}
+	onLine(j, "CHAN|Pilotredsky - Topic")
+	onLine(j, "PROG|327155712|NA|9000000000|3000000|300|1020|2041")
+	if j.Channel != "Pilotredsky" || j.Now != "Downloading the picture · piece 1 020 of 2 041 · 312 MB" {
+		t.Errorf("channel %q, now %q", j.Channel, j.Now)
+	}
+	onLine(j, "[Merger] Merging formats into \"/x/V.mp4\"")
+	if j.Now != "" {
+		t.Errorf("live line stays after the step ended: %q", j.Now)
 	}
 }

@@ -107,6 +107,8 @@ type Job struct {
 	Note     string   `json:"note"`     // something worth knowing about this link
 	Status   string   `json:"status"`   // queued, running, done, error, cancelled
 	Title    string   `json:"title"`    // title of the current video, numbered if it's a playlist
+	Channel  string   `json:"channel"`  // who uploaded the current video
+	Now      string   `json:"now"`      // what's happening this second, live: "Downloading the picture · piece 10 of 80 · 12 MB"
 	Thumb    string   `json:"thumb"`    // preview picture of the current video
 	Log      []string `json:"log"`      // the last few things yt-dlp said it's doing
 	Progress float64  `json:"progress"` // 0–100 for the whole download (a playlist counts as one)
@@ -237,6 +239,7 @@ func buildArgs(j *Job) []string {
 		"--print", "before_dl:POS|%(playlist_autonumber|)s|%(n_entries|)s",
 		"--print", "before_dl:ITEM|%(playlist_index|)s|%(n_entries|)s|%(title)s",
 		"--print", "before_dl:THUMB|%(extractor_key)s|%(id)s|%(thumbnail|)s",
+		"--print", "before_dl:CHAN|%(channel,uploader|)s",
 		"--print", "after_move:FILE|%(filepath)s",
 		"--progress-template",
 		// done | exact size | size estimate | speed | eta | fragment | of fragments
@@ -411,6 +414,26 @@ func thumbURL(s string) string {
 	return ""
 }
 
+// sizeText: "312 MB", "1.4 GB", "820 KB".
+func sizeText(b float64) string {
+	switch {
+	case b >= 1<<30:
+		return fmt.Sprintf("%.1f GB", b/(1<<30))
+	case b >= 1<<20:
+		return fmt.Sprintf("%.0f MB", b/(1<<20))
+	}
+	return fmt.Sprintf("%.0f KB", b/1024)
+}
+
+// thousands: 2041 → "2 041", easier to read at a glance.
+func thousands(f float64) string {
+	s := strconv.Itoa(int(f))
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + " " + s[i:]
+	}
+	return s
+}
+
 // speedText: "4.2 MB/s", or "350 KB/s" when it's slow (not "0.0 MB/s").
 func speedText(bytesPerSec float64) string {
 	if bytesPerSec < 1048576 {
@@ -448,6 +471,8 @@ func onLine(j *Job, line string) {
 		if len(p) == 2 {
 			j.Pos, j.Of = int(num(p[0])), int(num(p[1]))
 		}
+	case strings.HasPrefix(line, "CHAN|"):
+		j.Channel = strings.TrimSuffix(strings.TrimSpace(line[5:]), " - Topic")
 	case strings.HasPrefix(line, "THUMB|"):
 		j.Thumb = thumbURL(line[6:])
 	case strings.HasPrefix(line, "[ExtractAudio]") || strings.HasPrefix(line, "[Merger]"):
@@ -481,6 +506,22 @@ func onLine(j *Job, line string) {
 		case guess > 0:
 			f = done / guess
 		}
+		// The live line: which file, how many pieces, how much.
+		what := "Downloading the sound"
+		if j.Mode == "video" && j.part == 0 {
+			what = "Downloading the picture"
+		}
+		now := []string{what}
+		if frags > 0 && frag >= 0 {
+			now = append(now, fmt.Sprintf("piece %s of %s", thousands(frag), thousands(frags)))
+		}
+		switch {
+		case done > 0 && total > 0:
+			now = append(now, sizeText(done)+" of "+sizeText(total))
+		case done > 0:
+			now = append(now, sizeText(done))
+		}
+		j.Now = strings.Join(now, " · ")
 		if !math.IsNaN(f) {
 			f = math.Min(1, f)
 			if j.Mode == "video" {
@@ -532,6 +573,9 @@ func onLine(j *Job, line string) {
 	case strings.HasPrefix(line, "[") || strings.HasPrefix(line, "WARNING:"):
 		if m := sleepRe.FindStringSubmatch(line); m != nil && strings.HasPrefix(line, "[download]") {
 			j.Wait, j.Speed, j.ETA = int(num(m[1])+0.5), "", "" // nothing is downloading during the pause
+			j.addLog(line)
+			j.Now = fmt.Sprintf("Waiting: YouTube asks for a %d s pause", j.Wait)
+			return
 		}
 		j.addLog(line)
 	}
@@ -608,6 +652,7 @@ func (j *Job) addLog(line string) {
 	if line == "" {
 		return
 	}
+	j.Now = "" // a new step: the live line of the last one is over
 	if r := []rune(line); len(r) > 140 {
 		line = string(r[:139]) + "…"
 	}
@@ -823,7 +868,7 @@ func retryJob(id int) {
 	for _, j := range jobs {
 		// current == j: a cancelled download whose yt-dlp is still being stopped.
 		if j.ID == id && (j.Status == "error" || j.Status == "cancelled") && current != j {
-			j.Status, j.Error, j.ErrorRaw = "queued", "", ""
+			j.Status, j.Error, j.ErrorRaw, j.Now = "queued", "", "", ""
 			j.Progress, j.Speed, j.ETA = 0, "", ""
 			j.Files, j.paths, j.tracks, j.splits = []string{}, nil, nil, nil
 			j.Pos, j.Of, j.part, j.lastB = 0, 0, 0, 0

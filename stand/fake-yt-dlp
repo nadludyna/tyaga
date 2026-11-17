@@ -41,12 +41,13 @@ for i, (artist, title, vid) in enumerate(items, 1):
     say(f'POS|{i if playlist else "NA"}|{n if playlist else "NA"}')
     say(f'ITEM|{i if playlist else "NA"}|{n if playlist else "NA"}|{title}')
     say(f'THUMB|Youtube|{vid}|https://i.ytimg.com/vi_webp/{vid}/maxresdefault.webp')
+    say(f'CHAN|{artist} - Topic')
     say('[download] Sleeping 5.00 seconds as required by the site...'); time.sleep(5)
     parts = [('webm', 4_000_000)] if audio else [('f299.mp4', 40_000_000), ('f140.m4a', 3_000_000)]
-    for n, (ext, total) in enumerate(parts):
+    for part_no, (ext, total) in enumerate(parts):
         # A video's picture comes in pieces (HLS) with only a size guess that starts far too
         # low, like real YouTube; everything else has an exact size.
-        pieces = not audio and n == 0
+        pieces = not audio and part_no == 0
         if pieces:
             say('[hlsnative] Downloading m3u8 manifest')
             say('[hlsnative] Total fragments: 80')
