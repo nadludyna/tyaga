@@ -79,8 +79,10 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
   progress wave. Not frames, not glows around every item.
 - **Plain words for people.** No file paths, video ids, `[youtube]`-style tags or stack traces
   on the page. Errors say what happened and what to do.
-- **Motion is alive but calm.** The progress wave always moves at a steady pace and smoothly
-  speeds up while the bar moves forward; it never freezes or restarts. Respect "reduce motion".
+- **Motion is alive but calm.** The progress wave rolls at one steady pace, like Material 3's;
+  it never freezes or restarts. The bar grows smoothly at the average speed between progress
+  updates (they come in steps) — never lurching to each new value. Making the wave speed
+  follow the progress was tried and made it stutter. Respect "reduce motion".
 - **Light on weak laptops.** No `backdrop-filter` over the animated background; check with the
   CPU slowed down (Chrome devtools, 6×). The download list is updated in place, never rebuilt
   (rebuilding restarts animations and makes pictures blink).

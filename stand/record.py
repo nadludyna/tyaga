@@ -28,9 +28,9 @@ with sync_playwright() as p:
         link += '&list=PLxyz'; pg.check('#playlist')
         if mode.startswith('audio'): pg.check('#merge')
     pg.fill('#links', link); pg.click('#go')
-    pg.evaluate('window.__s=[];setInterval(()=>{for(const id in waveState){const s=waveState[id];'
+    pg.evaluate('window.__s=[];(function f(){for(const id in waveState){const s=waveState[id];'
                 'const c=document.querySelector(`canvas.wave[data-id="${id}"]`);if(c&&c.offsetParent)'
-                'window.__s.push([performance.now(),+id,s.phase,s.boost,s.shown])}},100)')
+                'window.__s.push([performance.now(),+id,s.phase,s.boost,s.shown])}requestAnimationFrame(f)})()')
     t0, k = time.time(), 0
     while time.time() - t0 < secs:
         pg.screenshot(path=f'{out}/s{k:03d}.png'); k += 1
@@ -43,6 +43,21 @@ with sync_playwright() as p:
 v = samples  # only while the wave is on screen
 rates = [(v[i+1][2]-v[i][2]) / ((v[i+1][0]-v[i][0]) / 1000) for i in range(len(v)-1) if v[i+1][0] > v[i][0]]
 print('page errors:', errs or 'none')
+# Smoothness: the bar's speed and the wave's speed, averaged over 0.1 s windows; how much
+# they jump from one window to the next (lower = smoother; a stutter shows up as spikes).
+def speeds(col):
+    out, i = [], 0
+    while i < len(v):
+        j = i
+        while j < len(v) and v[j][0] - v[i][0] < 100: j += 1
+        if j < len(v) and v[j][0] > v[i][0]:
+            out.append((v[j][col] - v[i][col]) / ((v[j][0] - v[i][0]) / 1000))
+        i = j
+    return out
+for name, col in [('bar', 4), ('wave', 2)]:
+    sp = speeds(col)
+    d = sorted(abs(sp[k+1] - sp[k]) for k in range(len(sp) - 1))
+    if d: print(f'{name} speed jumps: median {d[len(d)//2]:.2f}, worst 5% {d[int(len(d)*.95)]:.2f}')
 if rates:
     print(f'wave while downloading: speed {min(rates):.1f}…{max(rates):.1f} rad/s, '
           f'went back {sum(1 for i in range(len(v)-1) if v[i+1][2] < v[i][2])} times')
