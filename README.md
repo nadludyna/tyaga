@@ -29,7 +29,9 @@
 
 **No sponsors.** SponsorBlock cuts the "this video is sponsored by…" bits and the "don't forget to subscribe". For music it also trims the talking and the movie-scene intros from clips, leaving just the song.
 
-**Just a piece.** Need only the solo from 1:20 to 3:45? Tick "fragment", type the times, and only that bit is downloaded, cut exactly where you said.
+**Just a piece.** Need only the solo from 1:20 to 3:45? Tick "fragment", set the minutes and seconds (type them or spin them with the arrows, Shift jumps by 10), and only that bit is downloaded, cut exactly where you said.
+
+**Try again.** YouTube sometimes throws a random 403. A failed or cancelled download has a Retry button: it goes back into the queue, and whatever already downloaded is skipped.
 
 **From your phone.** Paste a link on the phone and the computer downloads it. Then grab the finished file right onto the phone.
 
