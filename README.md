@@ -21,7 +21,7 @@
 
 **Video.** MP4 at the best quality, or capped at 1080p / 720p / 480p if you'd rather not download a 4K monster. Tick "for editing" and you get H.264 + AAC, which opens in DaVinci Resolve and any player.
 
-**Music.** M4A (the original YouTube track, untouched) or MP3. The tags come out clean: real artist, title without "(Official Video)", year, and a square album cover instead of a 16:9 thumbnail.
+**Music.** M4A (the original YouTube track, untouched) or MP3. The tags come out clean: real artist, title without "(Official Video)", year, and the cover is the picture the author chose: album art between bars becomes a clean square, a normal thumbnail stays whole. Videos get their thumbnail as the cover too, so Explorer shows it instead of a random frame.
 
 **Albums.** A whole album uploaded as one video with chapters? It gets split into proper numbered tracks.
 

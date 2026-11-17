@@ -139,15 +139,9 @@ var (
 	current *Job
 )
 
-// Track cover: the video thumbnail is cropped to a centered square. On YouTube, music usually
-// has the album cover as a square in the middle of a 16:9 frame, so the crop leaves exactly that.
-//
-// The crop only happens during conversion, and yt-dlp doesn't convert a thumbnail that is
-// already JPEG. Hence the rule "jpg>png/jpg": JPEG → PNG, everything else (WebP) → JPEG.
-const (
-	coverFormat = "jpg>png/jpg"
-	squareCover = `ThumbnailsConvertor+FFmpeg_o:-vf crop="'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'"`
-)
+// Covers: the author's thumbnail, the picture they chose for the video (not a random frame).
+// MP3, M4A and MP4 can't hold WebP, so it's converted to JPEG. For music, album art between
+// bars gets cropped to a square afterwards (cover.go).
 
 // audioTags are clean tags for music. The rules run in order, before the download,
 // so the cleaned title and artist end up both in the tags and in the file name.
@@ -308,6 +302,11 @@ func buildArgs(j *Job) []string {
 			args = append(args, "-S", strings.Join(sort, ","))
 		}
 		args = append(args, "-f", "bv*+ba/b", "--merge-output-format", "mp4", "--remux-video", "mp4")
+		// The thumbnail as the file's cover: Explorer and players show it instead of some frame.
+		// Not for "one file": the pieces are glued by their first video stream.
+		if !merge {
+			args = append(args, "--embed-thumbnail", "--convert-thumbnails", "jpg")
+		}
 	} else {
 		// For M4A take the AAC track right away, so it doesn't need re-encoding.
 		if j.Format == "m4a" {
@@ -316,7 +315,7 @@ func buildArgs(j *Job) []string {
 			args = append(args, "-f", "ba/b")
 		}
 		args = append(args, "-x", "--audio-format", j.Format, "--audio-quality", "0")
-		args = append(args, "--embed-thumbnail", "--convert-thumbnails", coverFormat, "--ppa", squareCover)
+		args = append(args, "--embed-thumbnail", "--convert-thumbnails", "jpg")
 		args = append(args, audioTags...)
 		if isList { // track number = position in the playlist
 			args = append(args, "--parse-metadata", "%(playlist_index)s:%(track_number)s")
@@ -553,6 +552,24 @@ func pump() {
 		}
 		mu.Unlock()
 
+		// Album art between bars → a square cover (the split tracks get it in tagChapters).
+		mu.Lock()
+		var covers []string
+		if j.Mode == "audio" {
+			covers = append(covers, j.paths...)
+			for _, t := range j.tracks {
+				covers = append(covers, t.Filepath)
+			}
+		}
+		mu.Unlock()
+		done := map[string]bool{}
+		for _, p := range covers {
+			if !done[p] {
+				done[p] = true
+				squareCover(p)
+			}
+		}
+
 		// Tag the split tracks while the download still counts as active.
 		for _, s := range splits {
 			tagChapters(s)
@@ -717,5 +734,6 @@ func tagChapters(info splitInfo) {
 		} else {
 			os.Remove(tmp)
 		}
+		squareCover(src)
 	}
 }
