@@ -101,7 +101,7 @@ input[type=checkbox]:active{transform:scale(.8)}
 .st.done{color:var(--ok)}.st.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}.st.error{color:var(--err)}
 @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
 /* Progress: a sine wave that runs faster the faster the download goes (drawn in the script). */
-.wave{display:block;width:100%;height:26px;margin-top:4px}
+.wave{display:block;width:100%;height:18px;margin-top:6px}
 .log{margin-top:4px;font:11.5px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--dim);opacity:.85}
 .log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.55}
 .log div:last-child{opacity:1;color:var(--fg)}
@@ -607,62 +607,58 @@ function refresh() {
 refresh();
 setInterval(refresh, 700);
 
-// Progress wave. Each running download has a canvas; its state lives here by job id, so the wave
-// keeps flowing when the list is redrawn. The wave runs faster and gets taller the faster
-// the download goes, and slows down when it stalls. At 100% (converting, merging) the whole
-// line breathes slowly until the file is ready.
+// Progress wave, in the manner of Material 3's wavy progress indicator: a thick wave with
+// round ends for the downloaded part, a small gap, then a flat track for what's left.
+// The bends roll forward faster when the download is fast and almost stop when it stalls.
+// At 100% (converting, merging, the cover) the wave fills the whole line.
+// Each running download has a canvas; its state lives here by job id.
 var waveTarget = {}, waveState = {};
 (function () {
   var css = getComputedStyle(document.documentElement);
-  var acc = css.getPropertyValue('--acc').trim(), acc2 = css.getPropertyValue('--acc2').trim();
+  var acc = css.getPropertyValue('--acc').trim();
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
-  // A snake: the bends run along the line, but both ends stay on the middle, so the
-  // head goes straight ahead and doesn't thrash up and down. The bends fade in over the
-  // last ~40px before the head and the first ~20px after the start.
-  function sine(cx, x0, x1, mid, amp, phase) {
-    cx.beginPath();
-    for (var x = x0; x <= x1 + 1; x += 1.5) {
-      var xx = Math.min(x, x1);
-      var k = Math.min(1, (x1 - xx) / 40, (xx - x0) / 20);
-      k = k * k * (3 - 2 * k); // smooth, no corner where the fade starts
-      var y = mid + Math.sin(xx / 11 - phase) * amp * k;
-      x === x0 ? cx.moveTo(xx, y) : cx.lineTo(xx, y);
-    }
-    return cx;
-  }
+  var THICK = 4, AMP = 4, LEN = 30, GAP = 7; // px: line, wave height (half), wavelength, gap
   function frame(now) {
     var dt = Math.min(0.05, (now - last) / 1000), most = 0;
     last = now;
     document.querySelectorAll('canvas.wave').forEach(function (cv) {
       var id = cv.dataset.id, t = waveTarget[id] || { p: 0, v: 0 };
-      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, v: 0, breath: 0 });
+      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, v: 0 });
       var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+      if (!w) return; // hidden
       if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
       var cx = cv.getContext('2d');
       cx.setTransform(dpr, 0, 0, dpr, 0, 0);
       cx.clearRect(0, 0, w, h);
 
       var done = t.p >= 100;
-      st.v += ((done ? 0.3 : t.v) - st.v) * Math.min(1, dt * 2); // speed eases in and out
-      if (t.p < st.shown - 5) st.shown = t.p;                      // next video of a playlist: start over
+      st.v += ((done ? 1 : t.v) - st.v) * Math.min(1, dt * 2); // speed eases in and out
+      if (t.p < st.shown - 5) st.shown = t.p;                   // next video of a playlist: start over
       st.shown += (t.p - st.shown) * Math.min(1, dt * 4);
-      var energy = Math.log2(1 + st.v);                            // 0 when stalled, ~3 at 7 MB/s, ~5 at 30
+      var energy = Math.log2(1 + st.v);                         // 0 when stalled, ~3 at 7 MB/s, ~5 at 30
       most = Math.max(most, energy);
-      if (!still) { st.phase += dt * (1.2 + energy * 2.2); st.breath += dt * 2; }
-      var amp = done ? 2.5 + Math.sin(st.breath) * 1.5 : 1.5 + Math.min(energy, 5) * 1.1;
-      var mid = h / 2, head = Math.max(2, w * st.shown / 100);
+      if (!still) st.phase += dt * (0.6 + Math.min(energy, 5) * 1.1);
 
+      var pad = THICK / 2, mid = h / 2, end = w - pad;
+      var head = done ? end : pad + (end - pad) * st.shown / 100;
+      // The wave grows in over the first few % so it doesn't start as a lone blob.
+      var amp = AMP * Math.min(1, (head - pad) / LEN);
       cx.lineCap = 'round';
-      var g = cx.createLinearGradient(0, 0, head, 0);
-      g.addColorStop(0, acc); g.addColorStop(1, acc2);
-      // Glow: the same line, wide and faint, underneath. (A canvas shadow got cut off
-      // at the top and bottom edges and showed up as flat lines.)
-      cx.globalAlpha = 0.18 + Math.min(energy, 5) * 0.03;
-      cx.strokeStyle = acc; cx.lineWidth = 7;
-      sine(cx, 4, head - 2, mid, amp, st.phase).stroke();
-      cx.globalAlpha = 1;
-      cx.strokeStyle = g; cx.lineWidth = 3;
-      sine(cx, 2, head, mid, amp, st.phase).stroke();
+      cx.lineWidth = THICK;
+
+      if (!done && head + GAP < end) {                          // the track: what's left
+        cx.strokeStyle = 'rgba(127,127,127,.28)';
+        cx.beginPath(); cx.moveTo(head + GAP + THICK, mid); cx.lineTo(end, mid); cx.stroke();
+      }
+      cx.strokeStyle = acc;                                     // the wave: what's downloaded
+      cx.beginPath();
+      for (var x = pad; ; x += 1) {
+        var xx = Math.min(x, head);
+        var y = mid + Math.sin((xx / LEN) * 2 * Math.PI - st.phase) * amp;
+        x === pad ? cx.moveTo(xx, y) : cx.lineTo(xx, y);
+        if (xx >= head) break;
+      }
+      cx.stroke();
     });
     fx.energy += (most - fx.energy) * Math.min(1, dt * 2);
     requestAnimationFrame(frame);
