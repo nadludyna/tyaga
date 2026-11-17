@@ -325,6 +325,8 @@ func handler(remote bool, token func() string) http.Handler {
 			addJobs(links, o)
 		case "/api/cancel":
 			cancelJob(body.ID)
+		case "/api/retry":
+			retryJob(body.ID)
 		case "/api/clear":
 			clearFinished()
 		case "/api/bye":

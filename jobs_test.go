@@ -174,3 +174,65 @@ func TestCut(t *testing.T) {
 		t.Error("no fragments for playlists")
 	}
 }
+
+func TestRetryJob(t *testing.T) {
+	mu.Lock()
+	saved := jobs
+	jobs = []*Job{
+		{ID: 1, Status: "error", Error: "HTTP Error 403: Forbidden", Progress: 40, Files: []string{"a.mp3"}, paths: []string{"/x/a.mp3"}},
+		{ID: 2, Status: "done", Files: []string{"b.mp3"}},
+	}
+	mu.Unlock()
+	defer func() { mu.Lock(); jobs = saved; mu.Unlock() }()
+
+	retryJob(1)
+	retryJob(2) // a finished download stays as it is
+
+	mu.Lock()
+	defer mu.Unlock()
+	if j := jobs[0]; j.Status != "queued" || j.Error != "" || j.Progress != 0 || len(j.Files) != 0 || j.paths != nil {
+		t.Errorf("failed job after retry: %+v", *j)
+	}
+	if jobs[1].Status != "done" || len(jobs[1].Files) != 1 {
+		t.Errorf("finished job was touched: %+v", *jobs[1])
+	}
+}
+
+func TestThumbURL(t *testing.T) {
+	cases := map[string]string{
+		"Youtube|dQw4w9WgXcQ|https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/maxresdefault.webp": "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+		"Soundcloud|123|https://i1.sndcdn.com/a.jpg":                                     "https://i1.sndcdn.com/a.jpg",
+		"Generic|x|javascript:alert(1)":                                                  "",
+		"Generic|x|NA":                                                                   "",
+		"broken":                                                                         "",
+	}
+	for in, want := range cases {
+		if got := thumbURL(in); got != want {
+			t.Errorf("thumbURL(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func TestLog(t *testing.T) {
+	j := &Job{}
+	for _, l := range []string{
+		"[youtube] abc: Downloading webpage",
+		"[debug] noise",
+		"[download] Destination: /home/me/Downloads/TYAGA/Song.mp3",
+		"[download] Destination: /home/me/Downloads/TYAGA/Song.mp3",
+		"WARNING: something odd",
+		`[Merger] Merging formats into "/x/y/Video.mp4"`,
+		"[ExtractAudio] Destination: /x/Song.mp3",
+	} {
+		onLine(j, l)
+	}
+	want := []string{
+		"download · Destination: Song.mp3",
+		"WARNING: something odd",
+		`Merger · Merging formats into "Video.mp4"`,
+		"ExtractAudio · Destination: Song.mp3",
+	}
+	if !slices.Equal(j.Log, want) {
+		t.Errorf("log = %q\nwant %q", j.Log, want)
+	}
+}

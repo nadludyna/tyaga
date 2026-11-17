@@ -107,6 +107,8 @@ type Job struct {
 	Note     string   `json:"note"`     // something worth knowing about this link
 	Status   string   `json:"status"`   // queued, running, done, error, cancelled
 	Title    string   `json:"title"`    // title of the current video, numbered if it's a playlist
+	Thumb    string   `json:"thumb"`    // preview picture of the current video
+	Log      []string `json:"log"`      // the last few things yt-dlp said it's doing
 	Progress float64  `json:"progress"` // 0–100 for the current file
 	Speed    string   `json:"speed"`
 	ETA      string   `json:"eta"`
@@ -137,15 +139,9 @@ var (
 	current *Job
 )
 
-// Track cover: the video thumbnail is cropped to a centered square. On YouTube, music usually
-// has the album cover as a square in the middle of a 16:9 frame, so the crop leaves exactly that.
-//
-// The crop only happens during conversion, and yt-dlp doesn't convert a thumbnail that is
-// already JPEG. Hence the rule "jpg>png/jpg": JPEG → PNG, everything else (WebP) → JPEG.
-const (
-	coverFormat = "jpg>png/jpg"
-	squareCover = `ThumbnailsConvertor+FFmpeg_o:-vf crop="'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'"`
-)
+// Covers: the author's thumbnail, the picture they chose for the video (not a random frame).
+// MP3, M4A and MP4 can't hold WebP, so it's converted to JPEG. For music, album art between
+// bars gets cropped to a square afterwards (cover.go).
 
 // audioTags are clean tags for music. The rules run in order, before the download,
 // so the cleaned title and artist end up both in the tags and in the file name.
@@ -229,6 +225,7 @@ func buildArgs(j *Job) []string {
 		"--ffmpeg-location", filepath.Dir(tools.ffmpeg),
 		// Service lines that onLine() parses:
 		"--print", "before_dl:ITEM|%(playlist_index|)s|%(n_entries|)s|%(title)s",
+		"--print", "before_dl:THUMB|%(extractor_key)s|%(id)s|%(thumbnail|)s",
 		"--print", "after_move:FILE|%(filepath)s",
 		"--progress-template",
 		"download:PROG|%(progress.downloaded_bytes)s|%(progress.total_bytes,progress.total_bytes_estimate)s|%(progress.speed)s|%(progress.eta)s",
@@ -305,6 +302,11 @@ func buildArgs(j *Job) []string {
 			args = append(args, "-S", strings.Join(sort, ","))
 		}
 		args = append(args, "-f", "bv*+ba/b", "--merge-output-format", "mp4", "--remux-video", "mp4")
+		// The thumbnail as the file's cover: Explorer and players show it instead of some frame.
+		// Not for "one file": the pieces are glued by their first video stream.
+		if !merge {
+			args = append(args, "--embed-thumbnail", "--convert-thumbnails", "jpg")
+		}
 	} else {
 		// For M4A take the AAC track right away, so it doesn't need re-encoding.
 		if j.Format == "m4a" {
@@ -313,7 +315,7 @@ func buildArgs(j *Job) []string {
 			args = append(args, "-f", "ba/b")
 		}
 		args = append(args, "-x", "--audio-format", j.Format, "--audio-quality", "0")
-		args = append(args, "--embed-thumbnail", "--convert-thumbnails", coverFormat, "--ppa", squareCover)
+		args = append(args, "--embed-thumbnail", "--convert-thumbnails", "jpg")
 		args = append(args, audioTags...)
 		if isList { // track number = position in the playlist
 			args = append(args, "--parse-metadata", "%(playlist_index)s:%(track_number)s")
@@ -366,6 +368,25 @@ func num(s string) float64 {
 	return f
 }
 
+var ytID = regexp.MustCompile(`^[\w-]{11}$`)
+
+// thumbURL picks a preview picture from "extractor|id|thumbnail". For YouTube a small
+// 320×180 one is built from the id: the "thumbnail" yt-dlp gives is the full-size one.
+// Only http(s) links get through, the page puts this straight into <img src>.
+func thumbURL(s string) string {
+	p := strings.SplitN(s, "|", 3)
+	if len(p) < 3 {
+		return ""
+	}
+	if strings.HasPrefix(p[0], "Youtube") && ytID.MatchString(p[1]) {
+		return "https://i.ytimg.com/vi/" + p[1] + "/mqdefault.jpg"
+	}
+	if u, err := url.Parse(p[2]); err == nil && (u.Scheme == "https" || u.Scheme == "http") && u.Host != "" {
+		return p[2]
+	}
+	return ""
+}
+
 // onLine parses one line of yt-dlp output and updates the download. Call with mu held.
 func onLine(j *Job, line string) {
 	switch {
@@ -380,6 +401,8 @@ func onLine(j *Job, line string) {
 			j.Title = "[" + p[0] + "/" + p[1] + "] " + p[2]
 		}
 		j.Progress = 0
+	case strings.HasPrefix(line, "THUMB|"):
+		j.Thumb = thumbURL(line[6:])
 	case strings.HasPrefix(line, "PROG|"):
 		p := strings.Split(line[5:], "|")
 		if len(p) < 4 {
@@ -412,6 +435,40 @@ func onLine(j *Job, line string) {
 		}
 	case strings.HasPrefix(line, "ERROR"):
 		j.Error = explain(line)
+		j.addLog(line)
+	case strings.HasPrefix(line, "[") || strings.HasPrefix(line, "WARNING:"):
+		j.addLog(line)
+	}
+}
+
+// logSize: how many recent lines the page shows under the progress wave.
+const logSize = 4
+
+var destRe = regexp.MustCompile(`^(\[\w+\] (?:Destination|Merging formats into|Adding \w+ to|Writing \w+ to)[^:"]*:? ?"?)(.+?)("?)$`)
+
+// addLog keeps a short, readable line: "[download] Destination: C:\…\Song.mp3" → "download · Destination: Song.mp3".
+func (j *Job) addLog(line string) {
+	line = strings.TrimSpace(line)
+	if line == "" || strings.HasPrefix(line, "[debug]") {
+		return
+	}
+	if m := destRe.FindStringSubmatch(line); m != nil {
+		line = m[1] + filepath.Base(m[2]) + m[3]
+	}
+	if strings.HasPrefix(line, "[") {
+		if i := strings.Index(line, "] "); i > 0 {
+			line = line[1:i] + " · " + line[i+2:]
+		}
+	}
+	if r := []rune(line); len(r) > 140 {
+		line = string(r[:139]) + "…"
+	}
+	if n := len(j.Log); n > 0 && j.Log[n-1] == line {
+		return
+	}
+	j.Log = append(j.Log, line)
+	if len(j.Log) > logSize {
+		j.Log = j.Log[len(j.Log)-logSize:]
 	}
 }
 
@@ -487,10 +544,31 @@ func pump() {
 		mu.Lock()
 		splits := j.splits
 		j.splits = nil
+		if len(splits) > 0 {
+			j.addLog("[tags] Tagging the tracks split by chapters")
+		}
 		if j.Status == "running" {
 			j.Progress = 100 // the page shows "processing"
 		}
 		mu.Unlock()
+
+		// Album art between bars → a square cover (the split tracks get it in tagChapters).
+		mu.Lock()
+		var covers []string
+		if j.Mode == "audio" {
+			covers = append(covers, j.paths...)
+			for _, t := range j.tracks {
+				covers = append(covers, t.Filepath)
+			}
+		}
+		mu.Unlock()
+		done := map[string]bool{}
+		for _, p := range covers {
+			if !done[p] {
+				done[p] = true
+				squareCover(p)
+			}
+		}
 
 		// Tag the split tracks while the download still counts as active.
 		for _, s := range splits {
@@ -503,6 +581,9 @@ func pump() {
 		tracks := j.tracks
 		j.tracks = nil
 		doMerge := j.Status == "running" && len(tracks) > 0
+		if doMerge {
+			j.addLog(fmt.Sprintf("[merge] Gluing %d files into one", len(tracks)))
+		}
 		mu.Unlock()
 		if doMerge {
 			out, mergeErr := mergePlaylist(j, tracks)
@@ -553,6 +634,23 @@ func cancelJob(id int) {
 			}
 		}
 	}
+}
+
+// retryJob puts a failed or cancelled download back into the queue. Files that are
+// already there are skipped by yt-dlp (--no-overwrites), unfinished ones resume.
+func retryJob(id int) {
+	mu.Lock()
+	for _, j := range jobs {
+		// current == j: a cancelled download whose yt-dlp is still being stopped.
+		if j.ID == id && (j.Status == "error" || j.Status == "cancelled") && current != j {
+			j.Status, j.Error = "queued", ""
+			j.Progress, j.Speed, j.ETA = 0, "", ""
+			j.Files, j.paths, j.tracks, j.splits = []string{}, nil, nil, nil
+			j.Log = nil
+		}
+	}
+	mu.Unlock()
+	pump()
 }
 
 // clearFinished removes everything that is no longer downloading or waiting.
@@ -636,5 +734,6 @@ func tagChapters(info splitInfo) {
 		} else {
 			os.Remove(tmp)
 		}
+		squareCover(src)
 	}
 }

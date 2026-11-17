@@ -3,79 +3,197 @@
 <title>TYAGA</title>
 <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"%3E %3Crect width="256" height="256" rx="58" fill="%23161616"/%3E %3Cpath d="M176 0 V22" stroke="%238a96a3" stroke-width="6"/%3E %3Ccircle cx="176" cy="36" r="12" fill="none" stroke="%23fff" stroke-width="9"/%3E %3Cpath d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="%23fff" stroke-width="18"/%3E %3Cpath d="M85 42 L96 10 L107 42 Z" fill="%23fff"/%3E %3Cpath d="M103 36 L119 54" stroke="%23fff" stroke-width="9.9" stroke-linecap="round"/%3E %3Cg fill="%23161616" stroke="%23161616" stroke-width="12" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cg fill="%23ff6b2c" stroke="%23ff6b2c" stroke-width="2" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cpath d="M83.143 108.208 L83.143 139.792 L111.76599999999999 124 Z" fill="%23fff" stroke="%23fff" stroke-width="5.922" stroke-linejoin="round"/%3E %3Ccircle cx="131.32" cy="109.9" r="6" fill="%23161616"/%3E %3C/svg%3E'>
 <style>
-:root{--bg:#f6f5f2;--card:#fff;--fg:#1b1b1b;--dim:#777;--line:#e4e2dc;--acc:#d9480f;--ok:#2b8a3e;--err:#c92a2a}
-@media (prefers-color-scheme:dark){:root{--bg:#141414;--card:#1e1e1e;--fg:#eee;--dim:#8a8a8a;--line:#2e2e2e;--acc:#ff6b2c;--ok:#51cf66;--err:#ff6b6b}}
+:root{color-scheme:light dark;--bg:#f6f5f2;--card:rgba(255,255,255,.72);--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--acc:#e8590c;--acc2:#ff922b;--ok:#2b8a3e;--err:#c92a2a;--glow:rgba(232,89,12,.28)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f0f10;--card:rgba(28,28,30,.66);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif}
-main{max-width:720px;margin:40px auto;padding:0 16px}
-h1{font-size:20px;letter-spacing:.4em;margin:0 0 20px;font-weight:700;display:flex;align-items:baseline;gap:12px}
-h1 small{font-size:12px;letter-spacing:0;font-weight:400;color:var(--dim)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+html{min-height:100%}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif;overflow-x:hidden}
+
+/* Background: notes and play signs slowly falling (canvas, drawn in the script), a faint glow at the top. */
+.bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 80% 50% at 50% -10%,var(--glow),transparent 70%)}
+.bg canvas{width:100%;height:100%;display:block}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:50;pointer-events:none}
+/* A download finished: the fish jumps on the hook. */
+body.caught .logo .catch{animation:jump .9s cubic-bezier(.3,1.5,.5,1)}
+@keyframes jump{0%{transform:none}35%{transform:translateY(-18px) rotate(-10deg)}70%{transform:translateY(3px) rotate(4deg)}100%{transform:none}}
+.job.just{animation:flash 1.4s ease-out}
+@keyframes flash{0%{background:color-mix(in srgb,var(--ok) 22%,transparent)}100%{background:transparent}}
+
+main{max-width:760px;margin:0 auto;padding:56px 18px 28px;min-height:100vh;display:flex;flex-direction:column}
+/* The downloads card reaches the bottom of the window, its buttons stay at the bottom. */
+#jobsCard{flex:1;display:flex;flex-direction:column}
+#list{flex:1}
+header{display:flex;align-items:center;gap:16px;margin:0 0 26px;animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.logo{width:58px;height:58px;flex:none;border-radius:15px;box-shadow:0 10px 30px -8px var(--glow),0 0 0 1px var(--line);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.logo:hover{transform:rotate(-6deg) scale(1.06)}
+.logo .catch{transform-origin:176px 0;animation:bob 3.2s ease-in-out infinite}
+.logo .fish{transform-origin:100px 124px}
+body.busy .logo .catch{animation:reel 1.1s ease-in-out infinite}
+body.busy .logo .fish{animation:wiggle .35s ease-in-out infinite alternate}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(5px) rotate(1.5deg)}}
+@keyframes reel{0%,100%{transform:translateY(4px) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+@keyframes wiggle{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;background:linear-gradient(90deg,var(--fg) 30%,var(--acc) 50%,var(--fg) 70%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 7s linear infinite}
+@keyframes shine{from{background-position:100% 0}to{background-position:-200% 0}}
+.tag{font-size:13px;color:var(--dim);margin-top:4px}
+.tag small{display:inline-block;margin-left:8px;padding:1px 8px;border:1px solid var(--line);border-radius:99px;font-size:11px}
+
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);box-shadow:0 20px 50px -30px rgba(0,0,0,.6);animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .card+.card{margin-top:16px}
+main>.card:nth-of-type(2){animation-delay:.08s}main>.card:nth-of-type(3){animation-delay:.16s}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 .note{border-color:var(--acc);font-size:14px;white-space:pre-line}
 .note.err{border-color:var(--err);color:var(--err)}
-textarea{width:100%;min-height:84px;resize:vertical;background:transparent;color:inherit;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;outline-color:var(--acc)}
-.row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:12px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.seg button{border:0;background:transparent;color:inherit;padding:7px 14px;cursor:pointer;font:inherit}
-.seg button.on{background:var(--acc);color:#fff}
-label{color:var(--dim);cursor:pointer;user-select:none}
-input[type=checkbox]{accent-color:var(--acc)}
-.go{margin-left:auto;background:var(--acc);color:#fff;border:0;border-radius:8px;padding:8px 20px;font:inherit;font-weight:600;cursor:pointer}
-.msg{color:var(--err);margin-top:8px;min-height:1.2em;font-size:14px}
-.job{padding:12px 0;border-bottom:1px solid var(--line)}
+
+textarea{width:100%;min-height:90px;resize:vertical;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+body.drop textarea{border-color:var(--acc);border-style:dashed;box-shadow:0 0 0 4px var(--glow)}
+textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--glow);background:transparent}
+.row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:rgba(127,127,127,.05)}
+.seg button{border:0;background:transparent;color:inherit;padding:7px 14px;cursor:pointer;font:inherit;transition:background .25s,color .25s,transform .15s}
+.seg button:hover:not(.on){background:rgba(127,127,127,.12)}
+.seg button:active{transform:scale(.95)}
+.seg button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;box-shadow:0 4px 14px -4px var(--glow)}
+label{color:var(--dim);cursor:pointer;user-select:none;transition:color .2s}
+label:hover{color:var(--fg)}
+input[type=checkbox]{accent-color:var(--acc);transition:transform .15s}
+input[type=checkbox]:active{transform:scale(.8)}
+/* Options: switches on one line (pushed to both edges), checkboxes as chips that fill the width. */
+/* Both switches stretch to fill the line, every button the same width (grow = number of buttons). */
+.opts{flex-wrap:nowrap;gap:8px}
+.opts .seg{flex:2 1 0}
+#quality{flex-grow:4}
+.opts .seg button{flex:1;padding-left:6px;padding-right:6px}
+.chips{gap:8px}
+.chip{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(127,127,127,.05);white-space:nowrap;transition:border-color .2s,background .2s,color .2s,transform .15s}
+.chip:hover{border-color:rgba(127,127,127,.35)}
+.chip:active{transform:scale(.97)}
+.chip:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent);color:var(--fg)}
+.chip:has(input:disabled){opacity:.4;cursor:default}
+.cutrow:has(.times[hidden]){display:none}
+.cutrow{justify-content:center}
+.input{display:flex;gap:12px;align-items:stretch}
+.input textarea{flex:1}
+@media (max-width:560px){.input{flex-direction:column}.input .go{padding:12px}}
+.go{flex:none;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:transform .2s cubic-bezier(.3,1.6,.5,1),box-shadow .2s}
+.go:hover{transform:translateY(-2px);box-shadow:0 12px 28px -8px var(--glow)}
+.go:active{transform:translateY(0) scale(.96)}
+.go::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .6s}
+.go:hover::after{left:130%}
+.msg{color:var(--err);margin-top:8px;font-size:14px}
+.msg:empty{margin:0}
+
+.job{padding:13px 0;border-bottom:1px solid var(--line)}
 .job:last-child{border-bottom:0}
+.job.new{animation:slide .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes slide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+.job{display:flex;gap:14px;align-items:flex-start;border-radius:10px}
+.job .body{flex:1;min-width:0}
+.thumb{flex:none;width:80px;height:45px;border-radius:7px;object-fit:cover;background:var(--line);box-shadow:0 0 0 1px var(--line);opacity:0;transition:opacity .4s}
+.thumb.ok{opacity:1}
+.job.running .thumb{box-shadow:0 0 0 2px var(--acc),0 0 16px var(--glow)}
+@media (max-width:560px){.thumb{width:56px;height:32px}}
 .top{display:flex;gap:10px;align-items:baseline}
 .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .st{font-size:13px;color:var(--dim);white-space:nowrap}
-.st.done{color:var(--ok)}.st.error{color:var(--err)}
-.bar{height:4px;background:var(--line);border-radius:2px;margin-top:8px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.st.running{color:var(--acc)}
+.st.done{color:var(--ok);animation:pop .5s cubic-bezier(.3,1.6,.5,1)}.st.error{color:var(--err)}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
+/* Progress: a sine wave that runs faster the faster the download goes (drawn in the script). */
+.wave{display:block;width:100%;height:22px;margin-top:6px}
+.log{margin-top:4px;font:11.5px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--dim);opacity:.85}
+.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.55}
+.log div:last-child{opacity:1;color:var(--fg)}
+.log div:last-child::before{content:"› ";color:var(--acc)}
 .sub{font-size:12px;color:var(--dim);margin-top:4px;word-break:break-word}
 .sub.err{color:var(--err)}
 .sub a{color:var(--acc);display:block;margin-top:2px}
-.x{border:0;background:none;color:var(--dim);cursor:pointer;font-size:18px;line-height:1;padding:0 2px}
+.x{border:0;background:none;color:var(--dim);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;transition:color .2s,transform .2s}
+.x:hover{color:var(--err);transform:rotate(90deg)}
 .foot{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
-.foot button{background:none;border:0;color:var(--dim);cursor:pointer;font:inherit;padding:0}
+.foot button{background:none;border:0;color:var(--dim);cursor:pointer;font:inherit;padding:0;transition:color .2s}
 .foot button:hover{color:var(--fg)}
 .foot .right{margin-left:auto}
 .phone{margin-top:12px;font-size:14px;color:var(--dim)}
 .phone code{display:block;margin:6px 0;font-size:17px;color:var(--fg);word-break:break-all;user-select:all}
-.empty{color:var(--dim)}
-.times{color:var(--dim);display:inline-flex;gap:6px;align-items:center}
-.times input{width:68px;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 7px;font:inherit;outline-color:var(--acc)}
-.sub .link{background:none;border:0;padding:0;margin-top:2px;color:var(--acc);cursor:pointer;font:inherit}
+.empty{color:var(--dim);text-align:center;padding:22px 0 10px;height:100%;display:flex;flex-direction:column;justify-content:center}
+.empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35;animation:bob 3.2s ease-in-out infinite}
+.times{color:var(--dim);display:inline-flex;gap:6px;align-items:center;animation:rise .3s both}
+.times input{width:58px;background:rgba(127,127,127,.06);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 4px 5px 8px;font:inherit;font-variant-numeric:tabular-nums;outline:none;transition:border-color .2s,box-shadow .2s}
+.times input:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--glow)}
+.times b{font-weight:400;margin:0 -3px}
+/* Hints: anything with data-tip shows a bubble on hover (the page turns title="" into data-tip). */
+.form{z-index:2}
+[data-tip]{position:relative}
+[data-tip]::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 8px);z-index:10;width:max-content;max-width:280px;padding:8px 11px;border-radius:9px;background:#232325;color:#eee;border:1px solid rgba(255,255,255,.1);box-shadow:0 12px 30px -10px rgba(0,0,0,.6);font:12.5px/1.45 system-ui,sans-serif;letter-spacing:0;text-align:left;white-space:normal;pointer-events:none;opacity:0;transform:translateY(-4px);transition:opacity .15s,transform .15s;transition-delay:0s}
+[data-tip]:hover::after{opacity:1;transform:none;transition-delay:.25s}
+.seg button[data-tip]::after{left:50%;transform:translate(-50%,-4px)}
+.seg button[data-tip]:hover::after{transform:translate(-50%,0)}
+.seg{overflow:visible}.seg button:first-child{border-radius:9px 0 0 9px}.seg button:last-child{border-radius:0 9px 9px 0}
+[data-tip].tip-left::after{left:auto;right:0}
+.foot [data-tip]::after{top:auto;bottom:calc(100% + 8px)}
+.sub .link{background:none;border:0;padding:0;margin-top:3px;color:var(--acc);cursor:pointer;font:inherit;transition:opacity .2s}
+.sub .link:hover{opacity:.75}
+.sub .link.retry:hover{text-decoration:underline}
 
-</style></head><body><main>
-<h1>ТЯГА <small id="ver"></small></h1>
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style></head><body><div class="bg"><canvas id="fall"></canvas></div><canvas id="fx"></canvas><main>
+<header>
+  <svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
+    <rect width="256" height="256" rx="58" fill="#161616"/>
+    <path d="M176 0 V22" stroke="#8a96a3" stroke-width="6"/>
+    <g class="catch">
+      <circle cx="176" cy="36" r="12" fill="none" stroke="#fff" stroke-width="9"/>
+      <path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="#fff" stroke-width="18"/>
+      <path d="M85 42 L96 10 L107 42 Z" fill="#fff"/>
+      <path d="M103 36 L119 54" stroke="#fff" stroke-width="9.9" stroke-linecap="round"/>
+      <g class="fish">
+        <g fill="#161616" stroke="#161616" stroke-width="12" stroke-linejoin="round"><ellipse cx="100" cy="124" rx="54" ry="47"/><path d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/></g>
+        <g fill="#ff6b2c" stroke="#ff6b2c" stroke-width="2" stroke-linejoin="round"><ellipse cx="100" cy="124" rx="54" ry="47"/><path d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/></g>
+        <path d="M83.1 108.2 L83.1 139.8 L111.8 124 Z" fill="#fff" stroke="#fff" stroke-width="5.9" stroke-linejoin="round"/>
+        <circle cx="131.3" cy="109.9" r="6" fill="#161616"/>
+      </g>
+    </g>
+  </svg>
+  <div><h1>ТЯГА</h1><div class="tag">pulls video &amp; music off YouTube<small id="ver"></small></div></div>
+</header>
 
 <div class="card note" id="setup" hidden></div>
 
-<div class="card">
-  <textarea id="links" placeholder="YouTube links — one or more, separated by spaces or new lines.&#10;Enter — download, Shift+Enter — new line."></textarea>
-  <div class="row">
-    <div class="seg" id="mode"><button data-v="video" class="on">Video</button><button data-v="audio">Audio</button></div>
+<div class="card form">
+  <div class="input">
+    <textarea id="links" placeholder="YouTube links — one or more, separated by spaces or new lines.&#10;Enter — download, Shift+Enter — new line."></textarea>
+    <button class="go" id="go">Download</button>
+  </div>
+  <div class="row opts">
+    <div class="seg" id="mode"><button data-v="video" class="on" title="Video with sound, MP4">Video</button><button data-v="audio" title="Only the sound: music, podcasts. With a cover and clean tags">Audio</button></div>
     <div class="seg" id="format" data-for="audio" hidden>
       <button data-v="m4a" class="on" title="The original YouTube audio track, no re-encoding">M4A</button>
       <button data-v="mp3" title="Re-encoded at the highest quality, plays on anything">MP3</button>
     </div>
-    <label><input type="checkbox" id="playlist"> whole playlist</label>
-    <label id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"> as one file</label>
-    <label data-for="audio" id="splitBox" hidden><input type="checkbox" id="split" checked> split by chapters</label>
-    <div class="seg" id="quality" data-for="video" title="Maximum video quality">
+    <div class="seg" id="quality" data-for="video" title="Maximum video quality. Best — the highest there is">
       <button data-v="0" class="on">Best</button><button data-v="1080">1080p</button><button data-v="720">720p</button><button data-v="480">480p</button>
     </div>
-    <label data-for="video" title="H.264 + AAC — opens in DaVinci Resolve and any player"><input type="checkbox" id="edit"> for editing</label>
-    <label title="Cut sponsor ads, self-promo and &quot;subscribe!&quot; bits (SponsorBlock). For music also the non-music parts of a clip."><input type="checkbox" id="sponsors" checked> no sponsors</label>
-    <label id="cutBox" title="Download only a piece of the video"><input type="checkbox" id="cut"> fragment</label>
-    <span class="times" id="cutTimes" hidden>from <input id="from" placeholder="0:00"> to <input id="to" placeholder="end"></span>
-    <button class="go" id="go">Download</button>
+  </div>
+  <div class="row chips">
+    <label class="chip" title="If the link is a video inside a playlist, download the whole playlist, not just this video"><input type="checkbox" id="playlist"> whole playlist</label>
+    <label class="chip" id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"> as one file</label>
+    <label class="chip" data-for="audio" id="splitBox" hidden title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked> split by chapters</label>
+    <label class="chip" data-for="video" title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"> for editing</label>
+    <label class="chip" title="Cut sponsor ads, self-promo and &quot;subscribe!&quot; bits (SponsorBlock). For music also the non-music parts of a clip."><input type="checkbox" id="sponsors" checked> no sponsors</label>
+    <label class="chip" id="cutBox" title="Download only a piece of the video"><input type="checkbox" id="cut"> fragment</label>
+  </div>
+  <div class="row cutrow">
+    <span class="times" id="cutTimes" hidden title="Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty &quot;to&quot; — to the end.">
+      from <input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds">
+      to <input type="number" id="toM" min="0" placeholder="end" aria-label="to, minutes"><b>:</b><input type="number" id="toS" aria-label="to, seconds">
+    </span>
   </div>
   <div class="msg" id="msg"></div>
 </div>
 
-<div class="card">
+<div class="card" id="jobsCard">
   <div id="list"></div>
   <div class="foot">
     <button id="open" data-local>Open folder</button>
@@ -95,6 +213,7 @@ var TOKEN = new URLSearchParams(location.search).get('t');
 var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'error', cancelled: 'cancelled' };
 // stopped: Quit was clicked. (Not "closed": that's
 // window.closed, a built-in that silently ignores being set.)
+var seen = {}; // job ids already shown
 var state = {}, lastList = '', stopped = false, OFFLINE = 'TYAGA is not responding. Start the program again.';
 
 function $(id) { return document.getElementById(id); }
@@ -136,6 +255,16 @@ function segmented(id, onChange) {
   };
 }
 
+// Native title tooltips are slow and tiny: turn them into the styled data-tip bubbles.
+document.querySelectorAll('main [title]').forEach(function (e) {
+  e.dataset.tip = e.title;
+  e.removeAttribute('title');
+  // Near the right edge of the window the bubble opens to the left instead.
+  e.addEventListener('mouseenter', function () {
+    e.classList.toggle('tip-left', e.getBoundingClientRect().left + 300 > innerWidth);
+  });
+});
+
 // Elements with data-for="audio" / "video" are visible only in their mode.
 var mode = segmented('mode', function (m) {
   document.querySelectorAll('[data-for]').forEach(function (e) { e.hidden = e.dataset.for !== m; });
@@ -172,11 +301,40 @@ function syncBoxes() {
   $('cutBox').hidden = list;
   $('cutTimes').hidden = !cut;
   $('split').disabled = (list && $('merge').checked) || cut;
-  $('splitBox').style.opacity = $('split').disabled ? .4 : '';
 }
 $('playlist').onchange = $('merge').onchange = $('cut').onchange = syncBoxes;
 restore();
 syncBoxes();
+
+// Fragment times: two counters each, minutes and seconds. Seconds roll over into minutes
+// (0:59 ↑ → 1:00, 1:00 ↓ → 0:59), Shift + arrow steps by 10.
+var TIMES = ['fromM', 'fromS', 'toM', 'toS'];
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function rollover(m, s) {
+  var mm = $(m), ss = $(s);
+  if (ss.value === '' && mm.value === '') return;
+  var total = Math.max(0, Math.floor(+mm.value || 0) * 60 + Math.floor(+ss.value || 0));
+  mm.value = Math.floor(total / 60);
+  ss.value = pad(total % 60);
+}
+[['fromM', 'fromS'], ['toM', 'toS']].forEach(function (p) {
+  p.forEach(function (id) {
+    $(id).addEventListener('change', function () { rollover(p[0], p[1]); });
+    $(id).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); add(); return; }
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      var step = (e.shiftKey ? 10 : 1) * (e.key === 'ArrowUp' ? 1 : -1);
+      $(id).value = (+$(id).value || 0) + step;
+      rollover(p[0], p[1]);
+    });
+  });
+});
+// "m:ss" for the server, or "" when both counters are empty (= start / end).
+function timeOf(m, s) {
+  if ($(m).value === '' && $(s).value === '') return '';
+  return Math.floor(+$(m).value || 0) + ':' + pad(Math.floor(+$(s).value || 0));
+}
 
 // The switches as they are now, for /api/add.
 function options(text) {
@@ -185,7 +343,7 @@ function options(text) {
     text: text, mode: mode(), format: format(),
     quality: +quality(), playlist: list, split: $('split').checked, edit: $('edit').checked,
     merge: list && $('merge').checked, sponsors: $('sponsors').checked,
-    from: cut ? $('from').value.trim() : '', to: cut ? $('to').value.trim() : '',
+    from: cut ? timeOf('fromM', 'fromS') : '', to: cut ? timeOf('toM', 'toS') : '',
   };
 }
 
@@ -195,7 +353,10 @@ function add() {
   api('/api/add', options(text)).then(function (r) {
     $('msg').textContent = r.error || '';
     if (!r.error) { // a fragment is a one-off: the next link is whole again
-      $('links').value = $('from').value = $('to').value = '';
+      var b = $('go').getBoundingClientRect();
+      fx.burst(b.left + b.width / 2, b.top + b.height / 2, 12);
+      $('links').value = '';
+      TIMES.forEach(function (id) { $(id).value = ''; });
       $('cut').checked = false;
       syncBoxes();
     }
@@ -203,8 +364,25 @@ function add() {
   });
 }
 
-$('go').onclick = add;
-$('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); add(); } };
+$('go').onclick = function () { askNotify(); add(); };
+
+// Drag a link (from the address bar, a YouTube page, a chat) anywhere onto the page: it lands in the box.
+var dragDepth = 0;
+addEventListener('dragenter', function (e) { if (++dragDepth === 1) document.body.classList.add('drop'); e.preventDefault(); });
+addEventListener('dragleave', function () { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('drop'); } });
+addEventListener('dragover', function (e) { e.preventDefault(); });
+addEventListener('drop', function (e) {
+  e.preventDefault();
+  dragDepth = 0;
+  document.body.classList.remove('drop');
+  var t = (e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain') || '')
+    .split(/\s+/).filter(function (l) { return /^https?:\/\//.test(l); }).join('\n');
+  if (!t) return;
+  var box = $('links');
+  box.value = box.value.trim() ? box.value.trim() + '\n' + t : t;
+  box.focus();
+});
+$('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askNotify(); add(); } };
 $('open').onclick = function () { api('/api/open', {}); };
 $('clear').onclick = function () { api('/api/clear', {}).then(refresh); };
 $('quit').onclick = function () {
@@ -241,8 +419,31 @@ function statusText(j) {
   return j.mode === 'audio' ? '♪ ' + j.format.toUpperCase() + ' · ' + s : s;
 }
 
+// A system notification when a download finishes or fails while you're in another tab or window.
+// Permission is asked once, on the first Download click (browsers only allow asking after a click).
+var lastStatus = {}, caught = [];
+function ping(jobs) {
+  jobs.forEach(function (j) {
+    var was = lastStatus[j.id];
+    lastStatus[j.id] = j.status;
+    if (was !== 'running' || (j.status !== 'done' && j.status !== 'error')) return;
+    if (j.status === 'done') caught.push(j.id);
+    if (!document.hidden || !window.Notification || Notification.permission !== 'granted') return;
+    try {
+      var n = new Notification(j.status === 'done' ? 'Done ✓' : 'Failed', {
+        body: j.title || j.url, icon: document.querySelector('link[rel=icon]').href, tag: 'tyaga' + j.id,
+      });
+      n.onclick = function () { window.focus(); n.close(); };
+    } catch (e) {}
+  });
+}
+function askNotify() {
+  try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
+}
+
 function render() {
   $('ver').textContent = state.version || '';
+  $('ver').hidden = !state.version;
 
   // Setup: downloading yt-dlp / ffmpeg / Deno on first start, or something wasn't found.
   var note = state.setup || state.problem || '';
@@ -260,14 +461,39 @@ function render() {
   // Redraw the list only if something in it changed: otherwise a link
   // or the × button could vanish right under your finger.
   var list = $('list'), jobs = state.jobs || [];
+  // While something downloads, the fish in the logo gets reeled in.
+  var run = jobs.filter(function (j) { return j.status === 'running'; })[0];
+  document.body.classList.toggle('busy', !!run);
+  // The tab shows the progress, so it's visible from another tab too.
+  document.title = run ? Math.floor(run.progress) + '% · TYAGA' : 'TYAGA';
+  ping(jobs);
   var snapshot = JSON.stringify([jobs, state.ready, state.remote]);
   if (snapshot === lastList) return;
   lastList = snapshot;
   list.innerHTML = '';
-  if (!jobs.length) { list.append(el('div', 'empty', 'No downloads yet.')); return; }
+  if (!jobs.length) {
+    var empty = el('div', 'empty');
+    empty.innerHTML = '<svg viewBox="0 0 256 256"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="18"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg>';
+    empty.append('Nothing on the hook yet. Paste a link above.');
+    list.append(empty);
+    return;
+  }
 
   jobs.slice().reverse().forEach(function (j) { // newest first
-    var row = el('div', 'job'), top = el('div', 'top');
+    // Only rows that weren't there before slide in, not the whole list on every update.
+    var row = el('div', (seen[j.id] ? 'job ' : 'job new ') + j.status), top = el('div', 'top');
+    row.dataset.id = j.id;
+    if (j.thumb) {
+      var img = el('img', 'thumb');
+      img.alt = ''; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
+      img.onload = function () { img.classList.add('ok'); };
+      img.onerror = function () { img.remove(); };
+      img.src = j.thumb;
+      row.append(img);
+    }
+    var body = el('div', 'body');
+    row.append(body);
+    seen[j.id] = true;
     top.append(el('span', 'name', j.title || j.url), el('span', 'st ' + j.status, statusText(j)));
     if (j.status === 'queued' || j.status === 'running') {
       var x = el('button', 'x', '×');
@@ -275,18 +501,32 @@ function render() {
       x.onclick = function () { api('/api/cancel', { id: j.id }).then(refresh); };
       top.append(x);
     }
-    row.append(top);
+    body.append(top);
 
     if (j.status === 'running') {
-      var bar = el('div', 'bar'), fill = el('i');
-      fill.style.width = j.progress + '%';
-      bar.append(fill);
-      var details = [j.progress.toFixed(1) + '%', j.speed, j.eta && (j.eta + ' left')];
-      row.append(bar, el('div', 'sub', details.filter(Boolean).join(' · ')));
+      var wave = el('canvas', 'wave');
+      wave.dataset.id = j.id;
+      waveTarget[j.id] = { p: j.progress, v: parseFloat(j.speed) || 0 };
+      var details = j.progress >= 100 ? ['processing…'] : [j.progress.toFixed(1) + '%', j.speed, j.eta && (j.eta + ' left')];
+      body.append(wave, el('div', 'sub', details.filter(Boolean).join(' · ')));
+      if (j.log && j.log.length) {
+        var log = el('div', 'log');
+        j.log.forEach(function (l) { log.append(el('div', null, l)); });
+        body.append(log);
+      }
     }
-    if (j.note && j.status !== 'error') row.append(el('div', 'sub', j.note));
-    if (j.status === 'error' && j.error) row.append(el('div', 'sub err', j.error));
-    if (j.status === 'done' && j.error) row.append(el('div', 'sub', j.error)); // e.g. skipped videos in a merged playlist
+    if (j.note && j.status !== 'error') body.append(el('div', 'sub', j.note));
+    if (j.status === 'error' && j.error) body.append(el('div', 'sub err', j.error));
+    if (j.status === 'done' && j.error) body.append(el('div', 'sub', j.error)); // e.g. skipped videos in a merged playlist
+
+    // Failed or cancelled: one click puts it back in the queue. What's already downloaded is skipped.
+    if (j.status === 'error' || j.status === 'cancelled') {
+      var again = el('button', 'link retry', '↻ Retry');
+      again.onclick = function () { api('/api/retry', { id: j.id }).then(refresh); };
+      var rbox = el('div', 'sub');
+      rbox.append(again);
+      body.append(rbox);
+    }
 
     // On the computer: show the file in its folder.
     if (!state.remote && j.status === 'done' && j.files.length) {
@@ -294,7 +534,7 @@ function render() {
       reveal.onclick = function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); };
       var box = el('div', 'sub');
       box.append(reveal);
-      row.append(box);
+      body.append(box);
     }
 
     // On a phone: links to take the finished files with you.
@@ -306,9 +546,22 @@ function render() {
         a.download = name;
         files.append(a);
       });
-      row.append(files);
+      body.append(files);
     }
     list.append(row);
+  });
+
+  // Just finished: notes fly out of its row, the row flashes green, the fish jumps.
+  caught.splice(0).forEach(function (id) {
+    var row = list.querySelector('.job[data-id="' + id + '"]');
+    if (!row) return;
+    var r = row.getBoundingClientRect();
+    row.classList.add('just');
+    fx.burst(r.left + 40, r.top + r.height / 2, 26, true);
+    document.body.classList.remove('caught');
+    void document.body.offsetWidth; // restart the animation if it's still running
+    document.body.classList.add('caught');
+    setTimeout(function () { document.body.classList.remove('caught'); }, 950);
   });
 }
 
@@ -326,4 +579,162 @@ function refresh() {
 
 refresh();
 setInterval(refresh, 700);
+
+// Progress wave. Each running download has a canvas; its state lives here by job id, so the wave
+// keeps flowing when the list is redrawn. The wave runs faster and gets taller the faster
+// the download goes, and slows down when it stalls. At 100% (converting, merging) the whole
+// line breathes slowly until the file is ready.
+var waveTarget = {}, waveState = {};
+(function () {
+  var css = getComputedStyle(document.documentElement);
+  var acc = css.getPropertyValue('--acc').trim(), acc2 = css.getPropertyValue('--acc2').trim(), line = css.getPropertyValue('--line').trim();
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
+  function sine(cx, x0, x1, mid, amp, phase) {
+    cx.beginPath();
+    for (var x = x0; x <= x1; x += 2) {
+      var y = mid + Math.sin(x / 9 - phase) * amp;
+      x === x0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+    }
+    return cx;
+  }
+  function frame(now) {
+    var dt = Math.min(0.05, (now - last) / 1000), most = 0;
+    last = now;
+    document.querySelectorAll('canvas.wave').forEach(function (cv) {
+      var id = cv.dataset.id, t = waveTarget[id] || { p: 0, v: 0 };
+      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, v: 0, breath: 0 });
+      var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+      if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+      var cx = cv.getContext('2d');
+      cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx.clearRect(0, 0, w, h);
+
+      var done = t.p >= 100;
+      st.v += ((done ? 0.3 : t.v) - st.v) * Math.min(1, dt * 2); // speed eases in and out
+      if (t.p < st.shown - 5) st.shown = t.p;                      // next video of a playlist: start over
+      st.shown += (t.p - st.shown) * Math.min(1, dt * 4);
+      var energy = Math.log2(1 + st.v);                            // 0 when stalled, ~3 at 7 MB/s, ~5 at 30
+      most = Math.max(most, energy);
+      if (!still) { st.phase += dt * (1.2 + energy * 2.2); st.breath += dt * 2; }
+      var amp = done ? 2.5 + Math.sin(st.breath) * 1.5 : 1.5 + Math.min(energy, 5) * 1.1;
+      var mid = h / 2, head = Math.max(2, w * st.shown / 100);
+
+      cx.lineCap = 'round';
+      cx.strokeStyle = line; cx.lineWidth = 2;                     // the road ahead
+      sine(cx, 1, w - 1, mid, 1.5, st.phase * 0.3).stroke();
+
+      var g = cx.createLinearGradient(0, 0, head, 0);
+      g.addColorStop(0, acc); g.addColorStop(1, acc2);
+      cx.strokeStyle = g; cx.lineWidth = 3;
+      cx.shadowColor = acc; cx.shadowBlur = 8 + energy * 2;
+      sine(cx, 1, head, mid, amp, st.phase).stroke();
+      if (!done) {                                                 // the glowing head
+        cx.fillStyle = '#fff';
+        cx.beginPath(); cx.arc(head, mid + Math.sin(head / 9 - st.phase) * amp, 3, 0, 6.29); cx.fill();
+      }
+      cx.shadowBlur = 0;
+    });
+    fx.energy += (most - fx.energy) * Math.min(1, dt * 2);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// Background: notes and play signs falling slowly and swaying. Far ones are small, faint and slow,
+// near ones bigger and faster. They shy away from the mouse, and fall faster while something
+// downloads (fx.energy comes from the progress wave). fx.burst() throws a handful of them up
+// from a point on a layer above everything: when a download finishes, when a link goes in.
+// With "reduce motion" on in the system nothing moves and there are no bursts.
+var fx = { energy: 0, burst: function () {} };
+(function () {
+  var cv = $('fall'), cx = cv.getContext('2d'), top = $('fx'), tx = top.getContext('2d');
+  var W, H, dpr, items = [], sparks = [], color, color2, ok, mx = -999, my = -999, rush = 0;
+  var GLYPHS = ['♪', '♫', '♩', '▶', '▶', '•'];
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size() {
+    dpr = window.devicePixelRatio || 1;
+    W = innerWidth; H = innerHeight;
+    [cv, top].forEach(function (c) { c.width = W * dpr; c.height = H * dpr; });
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    tx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var css = getComputedStyle(document.documentElement);
+    color = css.getPropertyValue('--acc').trim() || '#ff6b2c';
+    color2 = css.getPropertyValue('--acc2').trim() || '#ffa94d';
+    ok = css.getPropertyValue('--ok').trim() || '#51cf66';
+    var want = Math.round(W * H / 26000);
+    while (items.length < want) items.push(spawn(true));
+    items.length = want;
+  }
+  function spawn(anywhere) {
+    var z = Math.random(); // 0 = far, 1 = near
+    return {
+      g: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+      x: Math.random() * W, y: anywhere ? Math.random() * H : -40, ox: 0,
+      z: z, s: 10 + z * 18, v: 12 + z * 34, // size px, fall speed px/s
+      a: 0.07 + z * 0.2, sway: 10 + Math.random() * 25, f: 0.3 + Math.random() * 0.5,
+      ph: Math.random() * 6.28, r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.6,
+    };
+  }
+  fx.burst = function (x, y, n, good) {
+    if (still) return;
+    for (var i = 0; i < n; i++) {
+      var ang = -Math.PI / 2 + (Math.random() - 0.5) * 2.2, sp = 180 + Math.random() * 320;
+      sparks.push({
+        g: GLYPHS[Math.floor(Math.random() * 5)], x: x, y: y,
+        vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r: 0, vr: (Math.random() - 0.5) * 8,
+        s: 12 + Math.random() * 14, life: 1, c: good && Math.random() < 0.35 ? ok : (Math.random() < 0.5 ? color : color2),
+      });
+    }
+    rush = 1; // the whole background gets a little gust
+  };
+  addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+  addEventListener('mouseout', function (e) { if (!e.relatedTarget) mx = my = -999; });
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min(0.05, (now - last) / 1000), t = now / 1000;
+    last = now;
+    rush = Math.max(0, rush - dt * 0.8);
+    var boost = 1 + Math.min(fx.energy, 5) * 0.35 + rush * 3;
+    cx.clearRect(0, 0, W, H);
+    cx.fillStyle = color;
+    cx.textAlign = tx.textAlign = 'center'; cx.textBaseline = tx.textBaseline = 'middle';
+    items.forEach(function (p, i) {
+      if (!still) {
+        p.y += p.v * boost * dt; p.r += p.vr * boost * dt;
+        // Shy of the cursor: pushed sideways, then drift back to their line.
+        var x = p.x + p.ox, dx = x - mx, dy = p.y - my, d2 = dx * dx + dy * dy;
+        if (d2 < 140 * 140) p.ox += (dx >= 0 ? 1 : -1) * (1 - Math.sqrt(d2) / 140) * 260 * dt;
+        p.ox *= Math.pow(0.4, dt);
+      }
+      if (p.y > H + 40) p = items[i] = spawn(false);
+      cx.save();
+      cx.globalAlpha = p.a;
+      cx.translate(p.x + p.ox + Math.sin(t * p.f + p.ph) * p.sway, p.y);
+      cx.rotate(p.r);
+      cx.font = p.s + 'px system-ui,sans-serif';
+      cx.fillText(p.g, 0, 0);
+      cx.restore();
+    });
+
+    tx.clearRect(0, 0, W, H);
+    sparks = sparks.filter(function (p) {
+      p.vy += 700 * dt; p.vx *= Math.pow(0.5, dt);
+      p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.life -= dt * 0.75;
+      if (p.life <= 0 || p.y > H + 50) return false;
+      tx.save();
+      tx.globalAlpha = Math.min(1, p.life * 1.5);
+      tx.fillStyle = p.c;
+      tx.shadowColor = p.c; tx.shadowBlur = 10;
+      tx.translate(p.x, p.y); tx.rotate(p.r);
+      tx.font = 'bold ' + p.s + 'px system-ui,sans-serif';
+      tx.fillText(p.g, 0, 0);
+      tx.restore();
+      return true;
+    });
+    if (!still) requestAnimationFrame(frame);
+  }
+  addEventListener('resize', size);
+  size();
+  requestAnimationFrame(frame);
+})();
 </script></body></html>
