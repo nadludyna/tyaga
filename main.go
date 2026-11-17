@@ -315,7 +315,7 @@ func handler(remote bool, token func() string) http.Handler {
 			if o.Format != "mp3" {
 				o.Format = "m4a"
 			}
-			if o.Quality != 1080 && o.Quality != 720 && o.Quality != 480 {
+			if o.Quality != 1440 && o.Quality != 1080 && o.Quality != 720 {
 				o.Quality = 0
 			}
 			if _, _, ok := cutRange(o.From, o.To); !ok {

@@ -21,7 +21,7 @@ One small program, nothing to install, and the interface is just a page in your 
 
 ## What it can do
 
-**Video.** MP4 at the best quality, or capped at 1080p / 720p / 480p if you'd rather not download a 4K monster. Tick "for editing" and you get H.264 + AAC instead of YouTube's usual VP9/AV1 + Opus, so it opens in DaVinci Resolve and any other editor. Above 1080p YouTube often has no H.264, so that may come out in 1080p.
+**Video.** MP4 at the best quality, or capped at 1440p / 1080p / 720p if you'd rather not download a 4K monster. Tick "for editing" and you get H.264 + AAC instead of YouTube's usual VP9/AV1 + Opus, so it opens in DaVinci Resolve and any other editor. Above 1080p YouTube often has no H.264, so that may come out in 1080p.
 
 **Music.** M4A (the original YouTube track, untouched) or MP3. The tags come out clean: real artist, title without "(Official Video)", year.
 
