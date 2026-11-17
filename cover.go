@@ -12,21 +12,21 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"io"
-	"net/http"
-	"net/url"
-	"sync"
-	"time"
-	"unicode"
 	"image"
 	"image/color"
 	"image/jpeg"
 	_ "image/png" // the embedded cover can be PNG too
+	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
+	"time"
+	"unicode"
 )
 
 // artBox finds an album cover framed by plain bars: it trims rows and columns that look like
