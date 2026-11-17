@@ -9,6 +9,10 @@
 [hidden]{display:none!important}
 html{min-height:100%}
 body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif;overflow-x:hidden}
+/* An app, not a document: Ctrl+A or a stray click doesn't paint the buttons and labels blue.
+   What's worth copying stays selectable: the links box, download titles, errors and the log. */
+body{-webkit-user-select:none;user-select:none}
+textarea,.name,.sub,.log{-webkit-user-select:text;user-select:text}
 
 /* Background: notes and play signs slowly falling (canvas, drawn in the script), a faint glow at the top. */
 .bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 80% 50% at 50% -10%,var(--glow),transparent 70%)}
@@ -368,6 +372,14 @@ function add() {
 }
 
 $('go').onclick = function () { askNotify(); add(); };
+
+// Ctrl+A anywhere outside a text field selects the links, not the whole page.
+addEventListener('keydown', function (e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a' && !/^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName)) {
+    e.preventDefault();
+    $('links').focus(); $('links').select();
+  }
+});
 
 // Drag a link (from the address bar, a YouTube page, a chat) anywhere onto the page: it lands in the box.
 var dragDepth = 0;

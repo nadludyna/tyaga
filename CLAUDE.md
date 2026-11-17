@@ -48,6 +48,10 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
   light must work too.
 - **No empty holes.** When something is added or removed, rebalance its neighbours so the
   whole thing still fits together. Rows keep their text in one column.
+- **Nothing moves when you click.** Flipping a switch must not change the size or place of
+  any control (fixed columns, not widths that depend on how many options are next to it).
+- **An app, not a document.** Buttons and labels don't get selected by Ctrl+A or a stray
+  click; only what's worth copying is selectable (the links box, titles, errors, the log).
 - **Orange is for the main thing only**: the Download button, the selected switches, the
   progress wave. Not frames, not glows around every item.
 - **Plain words for people.** No file paths, video ids, `[youtube]`-style tags or stack traces
