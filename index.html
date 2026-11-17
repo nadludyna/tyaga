@@ -109,6 +109,12 @@ input[type=checkbox]:active{transform:scale(.8)}
 .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .st{font-size:12.5px;color:var(--dim);white-space:nowrap;font-weight:500}
 .st.running{color:var(--acc)}.st.waiting{color:var(--dim)}
+/* While downloading (like Morphe): the state in colour under the title, and the track and
+   percent as pills on the right. The pills have a fixed width so they don't jiggle. */
+.kind .now{color:var(--acc);font-weight:500}
+.kind .now.waiting{color:var(--dim)}
+.pills{display:flex;gap:6px;flex:none}
+.pill{min-width:54px;text-align:center;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,transparent)}
 .st.done{color:var(--ok)}.st.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}.st.error{color:var(--err)}
 @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
 /* Progress: a sine wave that runs faster the faster the download goes (drawn in the script). */
@@ -474,7 +480,11 @@ function makeRow(j) {
   r.row.dataset.id = j.id;
   r.name = el('span', 'name');
   r.st = el('span', 'st');
-  r.top.append(r.name, r.st);
+  r.pills = el('span', 'pills');
+  r.pillTrack = el('span', 'pill');
+  r.pillPct = el('span', 'pill');
+  r.pills.append(r.pillTrack, r.pillPct);
+  r.top.append(r.name, r.st, r.pills);
   r.kind = el('div', 'kind');                // Audio · MP3 · one file
   r.live = el('div', 'live');                // wave + numbers + log, only while downloading
   r.wave = el('canvas', 'wave');
@@ -498,6 +508,8 @@ var ICON = {
   retry: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"/></svg>',
   folder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
   cancel: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  copy: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
 };
 
 function updateRow(r, j) {
@@ -536,18 +548,37 @@ function updateRow(r, j) {
   // No title yet (queued, or it failed before yt-dlp got one): the link, quieter and shorter.
   setText(r.name, j.title ? j.title.replace(/^\[\d+\/\d+\] /, '') : j.url.replace(/^https?:\/\/(www\.)?/, ''));
   r.name.classList.toggle('link', !j.title);
+  var running0 = j.status === 'running';
+  r.st.hidden = running0;          // while downloading the state goes under the title,
+  r.pills.hidden = !running0;      // and the pills take its place on the right
   setText(r.st, statusText(j));
-  setText(r.kind, kindText(j));
+  if (running0) {
+    var nowCls = 'now' + (j.wait > 0 ? ' waiting' : '');
+    var kindKey = statusText(j) + '|' + kindText(j) + '|' + nowCls;
+    if (r.kindKey !== kindKey) {
+      r.kindKey = kindKey;
+      r.kind.innerHTML = '';
+      r.kind.append(el('span', nowCls, statusText(j)), ' · ' + kindText(j));
+    }
+    r.pillTrack.hidden = !(j.of > 1 && j.pos);
+    setText(r.pillTrack, j.pos + ' / ' + j.of);
+    setText(r.pillPct, Math.floor(j.progress) + '%');
+  } else if (r.kindKey !== '') {
+    r.kindKey = '';
+    r.kind.textContent = kindText(j);
+  } else setText(r.kind, kindText(j));
 
   // While downloading: the wave, the numbers and the log.
   var running = j.status === 'running';
   r.live.hidden = !running;
   if (running) {
     waveTarget[j.id] = { p: j.progress, wait: waiting };
-    var track = j.of > 1 && j.pos ? 'Track ' + j.pos + ' of ' + j.of : '';
-    var nums = waiting ? [track, Math.floor(j.progress) + '%', 'YouTube asks for a pause, ' + j.wait + ' s']
-      : j.progress >= 100 ? [track, '100%']
-      : [track, Math.floor(j.progress) + '%', j.speed, j.eta && (j.eta + ' left')];
+    // Track and percent are in the pills; here: speed and time left, or why it's waiting.
+    var now = statusText(j);
+    var nums = waiting ? ['YouTube asks for a pause, ' + j.wait + ' s']
+      : now === 'converting' ? ['Converting and adding the cover']
+      : j.progress >= 100 ? ['Finishing up']
+      : [j.speed || 'Starting…', j.eta && (j.eta + ' left')];
     setText(r.nums, nums.filter(Boolean).join(' · '));
     var lines = (j.log || []).join('\n');
     if (r.logText !== lines) {
@@ -576,6 +607,19 @@ function updateRow(r, j) {
     if (j.status === 'error' || j.status === 'cancelled') {
       r.acts.append(button('acc', ICON.retry + 'Retry', 'Try again; whatever already downloaded is skipped',
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
+      // The full technical error, to send to someone (the page shows the plain-words version).
+      if (j.status === 'error') {
+        var copy = button('', ICON.copy + 'Copy error', 'Copies the link, the ТЯГА version and yt-dlp\'s own error message', function () {
+          var text = 'ТЯГА ' + (state.version || '') + '\nLink: ' + j.url + '\n' + (j.errorRaw || j.error || '');
+          var done = function (ok) {
+            copy.innerHTML = ok ? ICON.check + 'Copied' : ICON.copy + 'Couldn\'t copy';
+            setTimeout(function () { copy.innerHTML = ICON.copy + 'Copy error'; }, 1600);
+          };
+          try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); }
+          catch (e) { done(false); }
+        });
+        r.acts.append(copy);
+      }
     }
     if (j.status === 'done' && j.files.length) {
       r.acts.append(button('', ICON.folder + 'Show in folder', null,

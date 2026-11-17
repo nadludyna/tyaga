@@ -117,7 +117,8 @@ type Job struct {
 	Of       int      `json:"of"`    // so the progress goes once from 0 to 100% for the whole playlist
 	ETA      string   `json:"eta"`
 	Error    string   `json:"error"`
-	Files    []string `json:"files"` // names of finished files
+	ErrorRaw string   `json:"errorRaw"` // yt-dlp's own error line, for "Copy error"
+	Files    []string `json:"files"`    // names of finished files
 
 	mix    bool            // a YouTube Mix: only the first mixLimit videos
 	part   int             // video: 0 = the picture is downloading, 1 = the sound (a separate file)
@@ -409,6 +410,14 @@ func thumbURL(s string) string {
 	return ""
 }
 
+// speedText: "4.2 MB/s", or "350 KB/s" when it's slow (not "0.0 MB/s").
+func speedText(bytesPerSec float64) string {
+	if bytesPerSec < 1048576 {
+		return fmt.Sprintf("%.0f KB/s", bytesPerSec/1024)
+	}
+	return fmt.Sprintf("%.1f MB/s", bytesPerSec/1048576)
+}
+
 // overall turns how far the current file is (0…1) into the progress of the whole download:
 // in a playlist of 12, the 7th video half done is (6 + 0.5) / 12.
 func (j *Job) overall(frac float64) float64 {
@@ -468,7 +477,7 @@ func onLine(j *Job, line string) {
 		}
 		j.Speed, j.ETA = "", ""
 		if speed > 0 {
-			j.Speed = fmt.Sprintf("%.1f MB/s", speed/1048576)
+			j.Speed = speedText(speed)
 		}
 		if eta > 0 && j.Of <= 1 { // in a playlist it's only this video's time left: misleading
 			j.ETA = clock(eta)
@@ -496,7 +505,7 @@ func onLine(j *Job, line string) {
 			j.splits = append(j.splits, info)
 		}
 	case strings.HasPrefix(line, "ERROR"):
-		j.Error = explain(line)
+		j.Error, j.ErrorRaw = explain(line), line
 		j.addLog(line)
 	case strings.HasPrefix(line, "[download] Downloading item "):
 		// The next video of a playlist starts: the counter moves now, its title comes a bit later.
@@ -795,7 +804,7 @@ func retryJob(id int) {
 	for _, j := range jobs {
 		// current == j: a cancelled download whose yt-dlp is still being stopped.
 		if j.ID == id && (j.Status == "error" || j.Status == "cancelled") && current != j {
-			j.Status, j.Error = "queued", ""
+			j.Status, j.Error, j.ErrorRaw = "queued", "", ""
 			j.Progress, j.Speed, j.ETA = 0, "", ""
 			j.Files, j.paths, j.tracks, j.splits = []string{}, nil, nil, nil
 			j.Pos, j.Of, j.part, j.lastB = 0, 0, 0, 0

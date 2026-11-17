@@ -313,3 +313,9 @@ func TestExplain(t *testing.T) {
 		t.Errorf("other error: %q", got)
 	}
 }
+
+func TestSpeedText(t *testing.T) {
+	if speedText(52428) != "51 KB/s" || speedText(4404019) != "4.2 MB/s" {
+		t.Errorf("%q %q", speedText(52428), speedText(4404019))
+	}
+}
