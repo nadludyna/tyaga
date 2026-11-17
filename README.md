@@ -94,6 +94,8 @@ go build -o tyaga .
 
 Tests: `go test ./...` (the merge and cover tests need ffmpeg and skip themselves without it). Every pull request runs them, plus a build for every system.
 
+To see the page in every state without YouTube, there's a test stand: the program against a fake yt-dlp that prints what the real one does (`stand/README.md`). Notes for AI agents working on the repo are in `CLAUDE.md`.
+
 For Windows without the console window: `GOOS=windows GOARCH=amd64 go build -ldflags -H=windowsgui -o tyaga.exe .`
 
 Flags: `-out folder` sets where files go, `-no-browser` skips opening the page (ТЯГА then doesn't quit by itself).

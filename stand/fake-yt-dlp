@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+# A fake yt-dlp for the test stand (see stand/README.md): prints what the real one prints,
+# taken from real runs: a playlist, YouTube's 5-second pauses, thumbnail lines, two-file
+# videos, a jumpy speed. Makes real little files with covers. A link with FAIL in it fails with 403.
+import sys, os, time, json, random, subprocess
+a = sys.argv[1:]
+if '-U' in a or '--version' in a:
+    print('Latest version: 2026.11.10 from yt-dlp/yt-dlp\nyt-dlp is up to date (2026.11.10 from yt-dlp/yt-dlp)'); sys.exit(0)
+out = a[a.index('-P') + 1] if '-P' in a else '.'
+audio = '-x' in a
+fmt = a[a.index('--audio-format') + 1] if '--audio-format' in a else 'mp4'
+playlist = '--yes-playlist' in a
+def say(s, err=False):
+    print(s, file=sys.stderr if err else sys.stdout, flush=True)
+SONGS = [('Pilotredsky', 'Rotten Apple Juice', 'Ab3dEf5Gh7J'), ('Daft Punk', 'Digital Love', 'Kl9mNo1Pq3R'),
+         ('Lazy Lizard', 'Nice Little Penguin (Official Video)', 'St5uVw7Xy9Z')]
+items = SONGS if playlist else SONGS[:1]
+n = len(items)
+listname = 'My Wife Is Drink Paint - a very long playlist name that goes on and on'
+folder = os.path.join(out, listname) if playlist else out
+os.makedirs(folder, exist_ok=True)
+if playlist:
+    say('[youtube:tab] Extracting URL: https://www.youtube.com/playlist?list=PLxyz')
+    say('[youtube:tab] PLxyz: Downloading webpage'); time.sleep(0.6)
+    say('[download] Downloading playlist: ' + listname)
+    say(f'[youtube:tab] Playlist {listname}: Downloading {n} items of {n}')
+if any('FAIL' in x for x in a):
+    say('[youtube] Extracting URL: https://www.youtube.com/watch?v=FAILabcdefg')
+    say('[youtube] FAILabcdefg: Downloading webpage'); time.sleep(1)
+    say('ERROR: [youtube] FAILabcdefg: unable to download video data: HTTP Error 403: Forbidden', True)
+    sys.exit(1)
+for i, (artist, title, vid) in enumerate(items, 1):
+    if playlist: say(f'[download] Downloading item {i} of {n}')
+    say(f'[youtube] Extracting URL: https://www.youtube.com/watch?v={vid}')
+    for step in ['Downloading webpage', 'Downloading tv client config', 'Downloading player 4fcd6e4a', 'Downloading tv player API JSON', 'Downloading m3u8 information']:
+        say(f'[youtube] {vid}: {step}'); time.sleep(0.25)
+    say(f'[info] {vid}: Downloading 1 format(s): ' + ('251' if audio else '299+140'))
+    base = os.path.join(folder, (f'{i:02d} - ' if playlist else '') + f'{artist} - {title}')
+    say(f'[info] Downloading video thumbnail 44 ...')
+    say(f'[info] Writing video thumbnail 44 to: {base}.webp')
+    say(f'POS|{i if playlist else "NA"}|{n if playlist else "NA"}')
+    say(f'ITEM|{i if playlist else "NA"}|{n if playlist else "NA"}|{title}')
+    say(f'THUMB|Youtube|{vid}|https://i.ytimg.com/vi_webp/{vid}/maxresdefault.webp')
+    say('[download] Sleeping 5.00 seconds as required by the site...'); time.sleep(5)
+    parts = [('webm', 4_000_000)] if audio else [('f299.mp4', 40_000_000), ('f140.m4a', 3_000_000)]
+    for ext, total in parts:
+        say(f'[download] Destination: {base}.{ext}')
+        done, v = 0, 3e6
+        while done < total:
+            r = random.random()
+            v = 0.05e6 if r < 0.06 else max(0.2e6, min(12e6, v * random.uniform(0.75, 1.3)))
+            done = min(total, done + v * 0.5)
+            eta = int((total - done) / v)
+            say(f'PROG|{int(done)}|{total}|{v}|{eta}')
+            time.sleep(0.5 if r >= 0.06 else 1.5)
+        say(f'[download] 100% of {total/1e6:.2f}MiB in 00:00:0{random.randint(2,9)} at {v/1e6:.2f}MiB/s')
+    final = f'{base}.{fmt if audio else "mp4"}'
+    if audio:
+        say(f'[ExtractAudio] Destination: {final}')
+        say(f'Deleting original file {base}.webm (pass -k to keep)')
+    else:
+        say(f'[Merger] Merging formats into "{final}"')
+        say(f'Deleting original file {base}.f299.mp4 (pass -k to keep)')
+    # A thumbnail like YouTube's: 16:9; the first song has album art between plain bars.
+    from PIL import Image, ImageDraw
+    im = Image.new('RGB', (1280, 720), (24, 92, 70) if i == 1 else (40, 40, 60))
+    dr = ImageDraw.Draw(im)
+    if i == 1:
+        for y in range(720):
+            dr.line([(280, y), (999, y)], fill=(120 + y // 6, 60, 160))
+        dr.ellipse([440, 160, 840, 560], fill=(240, 200, 220))
+    else:
+        for x in range(1280):
+            dr.line([(x, 0), (x, 719)], fill=(x // 6, 80 + x // 20, 200 - x // 8))
+        dr.rectangle([100, 500, 700, 640], fill=(250, 250, 250))
+    thumb = base + '.thumb.jpg'; im.save(thumb, quality=88)
+    if audio:
+        cmd = ['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', 'sine=d=2', '-i', thumb, '-map', '0:a', '-map', '1:0',
+               '-c:v', 'copy', '-disposition:v:0', 'attached_pic', '-id3v2_version', '3', final]
+        if fmt == 'm4a': cmd[cmd.index('-c:v'):cmd.index('-c:v')] = ['-c:a', 'aac']
+    else:
+        cmd = ['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', 'testsrc=d=2:s=320x180', '-f', 'lavfi', '-i', 'sine=d=2', '-i', thumb,
+               '-map', '0:v', '-map', '1:a', '-map', '2:0', '-c:v:0', 'mpeg4', '-c:v:1', 'copy', '-disposition:v:1', 'attached_pic', final]
+    subprocess.run(cmd, check=False); os.remove(thumb)
+    time.sleep(1.2)
+    say(f'[ThumbnailsConvertor] Converting thumbnail "{base}.webp" to jpg')
+    say(f'[EmbedThumbnail] ffmpeg: Adding thumbnail to "{final}"')
+    say(f'[Metadata] Adding metadata to "{final}"'); time.sleep(0.4)
+    say(f'FILE|{final}')
+    if audio:
+        say('SONG|' + json.dumps({'filepath': final, 'artist': artist, 'title': title, 'album': None}))
+    if '--print' in a and any(x.startswith('after_move:TRACK') for x in a):
+        say('TRACK|' + json.dumps({'filepath': final, 'title': title, 'artist': artist, 'uploader': artist, 'playlist_title': listname, 'playlist_index': i}))
+if playlist: say(f'[download] Finished downloading playlist: {listname}')

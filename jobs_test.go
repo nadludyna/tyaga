@@ -216,24 +216,53 @@ func TestThumbURL(t *testing.T) {
 func TestLog(t *testing.T) {
 	j := &Job{}
 	for _, l := range []string{
-		"[youtube] abc: Downloading webpage",
+		"[youtube] Extracting URL: https://www.youtube.com/watch?v=abc",
+		"[youtube] dQw4w9WgXcQ: Downloading webpage",
+		"[youtube] dQw4w9WgXcQ: Downloading tv client config",
+		"[youtube] dQw4w9WgXcQ: Downloading player 4fcd6e4a",
+		"[info] Downloading video thumbnail 44 ...",
+		`[info] Writing video thumbnail 44 to: C:\Users\Me\Downloads\YouTube\My list\01 - Song.webp`,
 		"[debug] noise",
-		"[download] Destination: /home/me/Downloads/TYAGA/Song.mp3",
-		"[download] Destination: /home/me/Downloads/TYAGA/Song.mp3",
+		"[download] Sleeping 5.00 seconds as required by the site...",
+		`[download] Destination: C:\Users\Me\Downloads\YouTube\My list\01 - Song.webm`,
+		"[download] 100% of 4.00MiB in 00:00:08 at 4.61MiB/s",
 		"WARNING: something odd",
-		`[Merger] Merging formats into "/x/y/Video.mp4"`,
-		"[ExtractAudio] Destination: /x/Song.mp3",
+		`[ThumbnailsConvertor] Converting thumbnail "C:\Users\Me\Song.webp" to jpg`,
+		"[ExtractAudio] Destination: /home/me/Downloads/YouTube/Song.mp3",
+		"Deleting original file /home/me/Song.webm (pass -k to keep)",
+		`[EmbedThumbnail] ffmpeg: Adding thumbnail to "/home/me/Song.mp3"`,
 	} {
 		onLine(j, l)
 	}
 	want := []string{
-		"download · Destination: Song.mp3",
-		"WARNING: something odd",
-		`Merger · Merging formats into "Video.mp4"`,
-		"ExtractAudio · Destination: Song.mp3",
+		"⚠ something odd",
+		"Converting to Song.mp3",
+		"Adding the cover",
 	}
-	if !slices.Equal(j.Log, want) {
-		t.Errorf("log = %q\nwant %q", j.Log, want)
+	if !slices.Equal(j.Log[1:], want) || j.Log[0] != "Downloading 01 - Song.webm" {
+		t.Errorf("log = %q", j.Log)
+	}
+	for _, l := range j.Log {
+		if strings.ContainsAny(l, `\/`) {
+			t.Errorf("a path got into the log: %q", l)
+		}
+	}
+	if logLine("[youtube] dQw4w9WgXcQ: Downloading webpage") != "Reading the video page" ||
+		logLine("[download] Sleeping 5.00 seconds as required by the site...") != "" ||
+		logLine(`[Merger] Merging formats into "/x/Video.mp4"`) != "Joining the picture and the sound" {
+		t.Error("friendly lines changed")
+	}
+}
+
+func TestWaiting(t *testing.T) {
+	j := &Job{Speed: "1.0 MB/s"}
+	onLine(j, "[download] Sleeping 5.00 seconds as required by the site...")
+	if j.Wait != 5 || j.Speed != "" {
+		t.Errorf("during the pause: wait %d speed %q", j.Wait, j.Speed)
+	}
+	onLine(j, "PROG|1|10|1|1")
+	if j.Wait != 0 {
+		t.Errorf("still waiting after a progress line")
 	}
 }
 
@@ -265,5 +294,22 @@ func TestProgressVideoTwoFiles(t *testing.T) {
 	onLine(j, "PROG|100|100|1|1")
 	if j.Progress != 100 {
 		t.Errorf("all done: %v, want 100", j.Progress)
+	}
+}
+
+func TestNextItem(t *testing.T) {
+	j := &Job{Options: Options{Mode: "audio"}, Speed: "0.2 MB/s"}
+	onLine(j, "[download] Downloading item 2 of 3")
+	if j.Pos != 2 || j.Of != 3 || j.Speed != "" || j.Progress < 33.3 || j.Progress > 33.4 {
+		t.Errorf("item 2 of 3: pos %d/%d speed %q progress %v", j.Pos, j.Of, j.Speed, j.Progress)
+	}
+}
+
+func TestExplain(t *testing.T) {
+	if got := explain("ERROR: [youtube] FAILabcdefg: unable to download video data: HTTP Error 403: Forbidden"); !strings.HasPrefix(got, "YouTube refused") {
+		t.Errorf("403: %q", got)
+	}
+	if got := explain("ERROR: [youtube] dQw4w9WgXcQ: Video unavailable"); got != "Video unavailable" {
+		t.Errorf("other error: %q", got)
 	}
 }

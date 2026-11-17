@@ -111,17 +111,20 @@ type Job struct {
 	Log      []string `json:"log"`      // the last few things yt-dlp said it's doing
 	Progress float64  `json:"progress"` // 0–100 for the whole download (a playlist counts as one)
 	Speed    string   `json:"speed"`
+	Cover    int      `json:"cover"` // > 0: the finished file has a cover (/api/cover); changes when it does
+	Wait     int      `json:"wait"`  // seconds YouTube asked yt-dlp to wait before downloading; 0 = not waiting
+	Pos      int      `json:"pos"`   // in a playlist: which video this is (1…Of) and how many there are,
+	Of       int      `json:"of"`    // so the progress goes once from 0 to 100% for the whole playlist
 	ETA      string   `json:"eta"`
 	Error    string   `json:"error"`
 	Files    []string `json:"files"` // names of finished files
 
 	mix    bool            // a YouTube Mix: only the first mixLimit videos
-	pos    int             // in a playlist: which video this is (1…of) and how many there are,
-	of     int             // so the progress goes once from 0 to 100% for the whole playlist
 	part   int             // video: 0 = the picture is downloading, 1 = the sound (a separate file)
 	lastB  float64         // bytes downloaded at the last progress line, to notice a new file starting
 	paths  []string        // full paths of finished files
 	songs  map[string]song // audio: artist / title / album of each finished file, by path
+	cover  []byte          // the picture inside the finished file
 	splits []splitInfo     // videos that were split by chapters
 	tracks []track         // playlist items to glue into one file (Merge)
 }
@@ -367,8 +370,15 @@ func explain(line string) string {
 		return "YouTube wants you to sign in. Put a fresh youtube-cookies.txt next to the program."
 	case tooManyRe.MatchString(line):
 		return "YouTube is limiting requests for now. Try again later."
+	case strings.Contains(line, "HTTP Error 403"):
+		return "YouTube refused the download (HTTP 403). It usually goes through on Retry."
 	}
-	return strings.TrimPrefix(line, "ERROR: ")
+	// Whatever else: without "ERROR: [youtube] dQw4w9WgXcQ: " in front.
+	line = strings.TrimPrefix(line, "ERROR: ")
+	if m := tagRe.FindString(line); m != "" {
+		line = idRe.ReplaceAllString(line[len(m):], "")
+	}
+	return line
 }
 
 // num parses a number from yt-dlp output. Unknown values are printed as "NA" → NaN.
@@ -402,8 +412,8 @@ func thumbURL(s string) string {
 // overall turns how far the current file is (0…1) into the progress of the whole download:
 // in a playlist of 12, the 7th video half done is (6 + 0.5) / 12.
 func (j *Job) overall(frac float64) float64 {
-	if j.of > 1 && j.pos >= 1 && j.pos <= j.of {
-		return (float64(j.pos-1) + frac) / float64(j.of) * 100
+	if j.Of > 1 && j.Pos >= 1 && j.Pos <= j.Of {
+		return (float64(j.Pos-1) + frac) / float64(j.Of) * 100
 	}
 	return frac * 100
 }
@@ -426,11 +436,15 @@ func onLine(j *Job, line string) {
 	case strings.HasPrefix(line, "POS|"):
 		p := strings.Split(line[4:], "|")
 		if len(p) == 2 {
-			j.pos, j.of = int(num(p[0])), int(num(p[1]))
+			j.Pos, j.Of = int(num(p[0])), int(num(p[1]))
 		}
 	case strings.HasPrefix(line, "THUMB|"):
 		j.Thumb = thumbURL(line[6:])
+	case strings.HasPrefix(line, "[ExtractAudio]") || strings.HasPrefix(line, "[Merger]"):
+		j.Speed, j.ETA = "", "" // downloading is over for this one, converting now
+		j.addLog(line)
 	case strings.HasPrefix(line, "PROG|"):
+		j.Wait = 0
 		p := strings.Split(line[5:], "|")
 		if len(p) < 4 {
 			return
@@ -456,7 +470,7 @@ func onLine(j *Job, line string) {
 		if speed > 0 {
 			j.Speed = fmt.Sprintf("%.1f MB/s", speed/1048576)
 		}
-		if eta > 0 && j.of <= 1 { // in a playlist it's only this video's time left: misleading
+		if eta > 0 && j.Of <= 1 { // in a playlist it's only this video's time left: misleading
 			j.ETA = clock(eta)
 		}
 	case strings.HasPrefix(line, "FILE|"):
@@ -484,7 +498,19 @@ func onLine(j *Job, line string) {
 	case strings.HasPrefix(line, "ERROR"):
 		j.Error = explain(line)
 		j.addLog(line)
+	case strings.HasPrefix(line, "[download] Downloading item "):
+		// The next video of a playlist starts: the counter moves now, its title comes a bit later.
+		var n, of int
+		if _, err := fmt.Sscanf(line, "[download] Downloading item %d of %d", &n, &of); err == nil {
+			j.Pos, j.Of = n, of
+			j.Speed, j.ETA, j.Wait = "", "", 0
+			j.part, j.lastB = 0, 0
+			j.Progress = math.Max(j.Progress, j.overall(0))
+		}
 	case strings.HasPrefix(line, "[") || strings.HasPrefix(line, "WARNING:"):
+		if m := sleepRe.FindStringSubmatch(line); m != nil && strings.HasPrefix(line, "[download]") {
+			j.Wait, j.Speed, j.ETA = int(num(m[1])+0.5), "", "" // nothing is downloading during the pause
+		}
 		j.addLog(line)
 	}
 }
@@ -492,21 +518,67 @@ func onLine(j *Job, line string) {
 // logSize: how many recent lines the page shows under the progress wave.
 const logSize = 4
 
-var destRe = regexp.MustCompile(`^(\[\w+\] (?:Destination|Merging formats into|Adding \w+ to|Writing \w+ to)[^:"]*:? ?"?)(.+?)("?)$`)
+// pathRe finds a full path in a log line (Windows or Unix, quoted or not) and keeps just the file name.
+var pathRe = regexp.MustCompile(`(^|[\s"])(?:[A-Za-z]:[\\/]|/)[^"]*[\\/]([^"\\/]+)`)
 
-// addLog keeps a short, readable line: "[download] Destination: C:\…\Song.mp3" → "download · Destination: Song.mp3".
-func (j *Job) addLog(line string) {
+// tagRe: "[youtube] dQw4w9WgXcQ: " at the start of a yt-dlp line.
+var tagRe = regexp.MustCompile(`^\[([\w:]+)\] `)
+
+// idRe: the video id that "[youtube]" and "[info]" lines start with ("dQw4w9WgXcQ: ").
+var idRe = regexp.MustCompile(`^[\w-]{11}: `)
+
+var sleepRe = regexp.MustCompile(`Sleeping ([\d.]+) seconds`)
+
+// logLine turns a yt-dlp line into something a person reads in a second, or "" for the
+// many lines that only matter to a developer (thumbnail files, metadata, deleting temp files).
+func logLine(line string) string {
 	line = strings.TrimSpace(line)
-	if line == "" || strings.HasPrefix(line, "[debug]") {
-		return
-	}
-	if m := destRe.FindStringSubmatch(line); m != nil {
-		line = m[1] + filepath.Base(m[2]) + m[3]
-	}
-	if strings.HasPrefix(line, "[") {
-		if i := strings.Index(line, "] "); i > 0 {
-			line = line[1:i] + " · " + line[i+2:]
+	tag := ""
+	if m := tagRe.FindStringSubmatch(line); m != nil {
+		tag, line = m[1], line[len(m[0]):]
+		if tag == "youtube" || tag == "info" { // only these start with the id; "Destination" is 11 letters too
+			line = idRe.ReplaceAllString(line, "")
 		}
+	}
+	line = pathRe.ReplaceAllString(line, "$1$2")
+	has := func(s string) bool { return strings.Contains(line, s) }
+	switch {
+	case line == "" || tag == "debug":
+		return ""
+	case tag == "info" && has("thumbnail"), tag == "ThumbnailsConvertor", tag == "Metadata",
+		strings.HasPrefix(line, "Deleting original file"), tag == "youtube:tab",
+		has("Extracting URL"), strings.HasPrefix(line, "Downloading item "),
+		strings.HasPrefix(line, "Finished downloading playlist"), tag == "download" && strings.HasPrefix(line, "100% of"):
+		return ""
+	case has("Downloading webpage"):
+		return "Reading the video page"
+	case has("client config"), has("Downloading player"), has("API JSON"), has("m3u8 information"):
+		return "Asking YouTube for the formats"
+	case tag == "info" && has("format(s)"):
+		return "Picked the best format"
+	case tag == "download" && strings.HasPrefix(line, "Downloading playlist: "):
+		return "Playlist: " + strings.TrimPrefix(line, "Downloading playlist: ")
+	case tag == "download" && strings.HasPrefix(line, "Destination: "):
+		return "Downloading " + strings.TrimPrefix(line, "Destination: ")
+	case tag == "download" && has("Sleeping"):
+		return "" // shown as "waiting" with the seconds, not as a log line
+	case tag == "ExtractAudio" && strings.HasPrefix(line, "Destination: "):
+		return "Converting to " + strings.TrimPrefix(line, "Destination: ")
+	case tag == "Merger":
+		return "Joining the picture and the sound"
+	case tag == "EmbedThumbnail":
+		return "Adding the cover"
+	case strings.HasPrefix(line, "WARNING: "):
+		return "⚠ " + strings.TrimPrefix(line, "WARNING: ")
+	}
+	return line
+}
+
+// addLog adds a readable line to the short log the page shows.
+func (j *Job) addLog(line string) {
+	line = logLine(line)
+	if line == "" {
+		return
 	}
 	if r := []rune(line); len(r) > 140 {
 		line = string(r[:139]) + "…"
@@ -650,7 +722,7 @@ func pump() {
 				j.Status, j.Error = "error", mergeErr.Error()
 			default:
 				j.paths, j.Files = []string{out}, []string{filepath.Base(out)}
-				j.Title = filepath.Base(out)
+				j.Title = strings.TrimSuffix(filepath.Base(out), filepath.Ext(out)) // the playlist name, no ".mp3"
 				j.Progress = 100
 				if err != nil && j.Error != "" {
 					j.Error = "Some videos were skipped: " + j.Error
@@ -660,7 +732,19 @@ func pump() {
 			mu.Unlock()
 		}
 
+		// The cover that's really inside the finished file, for the page to show.
 		mu.Lock()
+		var last string
+		if n := len(j.paths); n > 0 && err == nil && j.Status == "running" {
+			last = j.paths[n-1]
+		}
+		mu.Unlock()
+		pic := coverOf(last)
+
+		mu.Lock()
+		if pic != nil {
+			j.cover, j.Cover = pic, j.Cover+1
+		}
 		if j.Status == "running" { // if the download was cancelled, the status is already "cancelled"
 			if err == nil {
 				j.Status = "done"
@@ -675,6 +759,18 @@ func pump() {
 		mu.Unlock()
 		pump()
 	}()
+}
+
+// jobCover returns the cover of a finished download, if it has one.
+func jobCover(id int) []byte {
+	mu.Lock()
+	defer mu.Unlock()
+	for _, j := range jobs {
+		if j.ID == id {
+			return j.cover
+		}
+	}
+	return nil
 }
 
 // cancelJob removes a queued download, or stops the running one.
@@ -702,7 +798,7 @@ func retryJob(id int) {
 			j.Status, j.Error = "queued", ""
 			j.Progress, j.Speed, j.ETA = 0, "", ""
 			j.Files, j.paths, j.tracks, j.splits = []string{}, nil, nil, nil
-			j.pos, j.of, j.part, j.lastB = 0, 0, 0, 0
+			j.Pos, j.Of, j.part, j.lastB = 0, 0, 0, 0
 			j.songs = nil
 			j.Log = nil
 		}
