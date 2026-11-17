@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TYAGA</title>
+<title>ТЯГА</title>
 <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"%3E %3Crect width="256" height="256" rx="58" fill="%23161616"/%3E %3Cpath d="M176 0 V22" stroke="%238a96a3" stroke-width="6"/%3E %3Ccircle cx="176" cy="36" r="12" fill="none" stroke="%23fff" stroke-width="9"/%3E %3Cpath d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="%23fff" stroke-width="18"/%3E %3Cpath d="M85 42 L96 10 L107 42 Z" fill="%23fff"/%3E %3Cpath d="M103 36 L119 54" stroke="%23fff" stroke-width="9.9" stroke-linecap="round"/%3E %3Cg fill="%23161616" stroke="%23161616" stroke-width="12" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cg fill="%23ff6b2c" stroke="%23ff6b2c" stroke-width="2" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cpath d="M83.143 108.208 L83.143 139.792 L111.76599999999999 124 Z" fill="%23fff" stroke="%23fff" stroke-width="5.922" stroke-linejoin="round"/%3E %3Ccircle cx="131.32" cy="109.9" r="6" fill="%23161616"/%3E %3C/svg%3E'>
 <style>
 :root{color-scheme:light dark;--bg:#f6f5f2;--card:rgba(255,255,255,.72);--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--acc:#e8590c;--acc2:#ff922b;--ok:#2b8a3e;--err:#c92a2a;--glow:rgba(232,89,12,.28)}
@@ -204,7 +204,7 @@ input[type=checkbox]:active{transform:scale(.8)}
   <div class="phone" id="phone" hidden>
     Open this on your phone (it has to be on the same Wi-Fi):
     <code id="phoneUrl"></code>
-    Finished files can be downloaded right to the phone. If it doesn't open, allow TYAGA in Windows Firewall.
+    Finished files can be downloaded right to the phone. If it doesn't open, allow ТЯГА (tyaga.exe) in Windows Firewall.
   </div>
 </div>
 
@@ -214,7 +214,7 @@ var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'er
 // stopped: Quit was clicked. (Not "closed": that's
 // window.closed, a built-in that silently ignores being set.)
 var seen = {}; // job ids already shown
-var state = {}, lastList = '', stopped = false, OFFLINE = 'TYAGA is not responding. Start the program again.';
+var state = {}, lastList = '', stopped = false, OFFLINE = 'ТЯГА is not responding. Start the program again.';
 
 function $(id) { return document.getElementById(id); }
 
@@ -400,7 +400,7 @@ addEventListener('pagehide', function () {
 
 function showClosed() {
   document.querySelector('main').innerHTML =
-    '<h1>ТЯГА</h1><div class="card">TYAGA is closed. Run it again when you need it.</div>';
+    '<h1>ТЯГА</h1><div class="card">ТЯГА is closed. Run it again when you need it.</div>';
 }
 $('lan').onclick = function () {
   api('/api/lan', { on: !(state.lan && state.lan.on) }).then(function (r) {
@@ -465,7 +465,7 @@ function render() {
   var run = jobs.filter(function (j) { return j.status === 'running'; })[0];
   document.body.classList.toggle('busy', !!run);
   // The tab shows the progress, so it's visible from another tab too.
-  document.title = run ? Math.floor(run.progress) + '% · TYAGA' : 'TYAGA';
+  document.title = run ? Math.floor(run.progress) + '% · ТЯГА' : 'ТЯГА';
   ping(jobs);
   var snapshot = JSON.stringify([jobs, state.ready, state.remote]);
   if (snapshot === lastList) return;
