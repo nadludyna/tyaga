@@ -109,13 +109,17 @@ type Job struct {
 	Title    string   `json:"title"`    // title of the current video, numbered if it's a playlist
 	Thumb    string   `json:"thumb"`    // preview picture of the current video
 	Log      []string `json:"log"`      // the last few things yt-dlp said it's doing
-	Progress float64  `json:"progress"` // 0–100 for the current file
+	Progress float64  `json:"progress"` // 0–100 for the whole download (a playlist counts as one)
 	Speed    string   `json:"speed"`
 	ETA      string   `json:"eta"`
 	Error    string   `json:"error"`
 	Files    []string `json:"files"` // names of finished files
 
 	mix    bool        // a YouTube Mix: only the first mixLimit videos
+	pos    int         // in a playlist: which video this is (1…of) and how many there are,
+	of     int         // so the progress goes once from 0 to 100% for the whole playlist
+	part   int         // video: 0 = the picture is downloading, 1 = the sound (a separate file)
+	lastB  float64     // bytes downloaded at the last progress line, to notice a new file starting
 	paths  []string    // full paths of finished files
 	splits []splitInfo // videos that were split by chapters
 	tracks []track     // playlist items to glue into one file (Merge)
@@ -224,11 +228,15 @@ func buildArgs(j *Job) []string {
 		"--match-filter", "!is_live",
 		"--ffmpeg-location", filepath.Dir(tools.ffmpeg),
 		// Service lines that onLine() parses:
+		"--print", "before_dl:POS|%(playlist_autonumber|)s|%(n_entries|)s",
 		"--print", "before_dl:ITEM|%(playlist_index|)s|%(n_entries|)s|%(title)s",
 		"--print", "before_dl:THUMB|%(extractor_key)s|%(id)s|%(thumbnail|)s",
 		"--print", "after_move:FILE|%(filepath)s",
 		"--progress-template",
 		"download:PROG|%(progress.downloaded_bytes)s|%(progress.total_bytes,progress.total_bytes_estimate)s|%(progress.speed)s|%(progress.eta)s",
+		// --print turns on quiet mode, which hides what yt-dlp is doing ("[youtube] …",
+		// "[download] Destination: …"). The page shows those lines as a log, so back on.
+		"--no-quiet",
 		"-P", outDir,
 	}
 	// YouTube requires running its JavaScript; yt-dlp needs Deno for that.
@@ -387,6 +395,15 @@ func thumbURL(s string) string {
 	return ""
 }
 
+// overall turns how far the current file is (0…1) into the progress of the whole download:
+// in a playlist of 12, the 7th video half done is (6 + 0.5) / 12.
+func (j *Job) overall(frac float64) float64 {
+	if j.of > 1 && j.pos >= 1 && j.pos <= j.of {
+		return (float64(j.pos-1) + frac) / float64(j.of) * 100
+	}
+	return frac * 100
+}
+
 // onLine parses one line of yt-dlp output and updates the download. Call with mu held.
 func onLine(j *Job, line string) {
 	switch {
@@ -400,7 +417,13 @@ func onLine(j *Job, line string) {
 		if p[0] != "" && p[0] != "NA" {
 			j.Title = "[" + p[0] + "/" + p[1] + "] " + p[2]
 		}
-		j.Progress = 0
+		j.part, j.lastB = 0, 0
+		j.Progress = j.overall(0)
+	case strings.HasPrefix(line, "POS|"):
+		p := strings.Split(line[4:], "|")
+		if len(p) == 2 {
+			j.pos, j.of = int(num(p[0])), int(num(p[1]))
+		}
 	case strings.HasPrefix(line, "THUMB|"):
 		j.Thumb = thumbURL(line[6:])
 	case strings.HasPrefix(line, "PROG|"):
@@ -409,14 +432,27 @@ func onLine(j *Job, line string) {
 			return
 		}
 		done, total, speed, eta := num(p[0]), num(p[1]), num(p[2]), num(p[3])
+		// A video comes as two files, the picture and then the sound: the bytes drop back
+		// to almost nothing when the second one starts. The picture is the big one, so it
+		// fills the bar to 90% and the sound does the rest, instead of 0→100% twice.
+		if j.Mode == "video" && j.part == 0 && j.lastB > 0 && done < j.lastB/4 {
+			j.part = 1
+		}
+		if done > 0 {
+			j.lastB = done
+		}
 		if total > 0 {
-			j.Progress = math.Min(100, done/total*100)
+			f := math.Min(1, done/total)
+			if j.Mode == "video" {
+				f = []float64{f * 0.9, 0.9 + f*0.1}[min(j.part, 1)]
+			}
+			j.Progress = math.Max(j.Progress, j.overall(f)) // never backwards within one video
 		}
 		j.Speed, j.ETA = "", ""
 		if speed > 0 {
 			j.Speed = fmt.Sprintf("%.1f MB/s", speed/1048576)
 		}
-		if eta > 0 {
+		if eta > 0 && j.of <= 1 { // in a playlist it's only this video's time left: misleading
 			j.ETA = clock(eta)
 		}
 	case strings.HasPrefix(line, "FILE|"):
@@ -646,6 +682,7 @@ func retryJob(id int) {
 			j.Status, j.Error = "queued", ""
 			j.Progress, j.Speed, j.ETA = 0, "", ""
 			j.Files, j.paths, j.tracks, j.splits = []string{}, nil, nil, nil
+			j.pos, j.of, j.part, j.lastB = 0, 0, 0, 0
 			j.Log = nil
 		}
 	}

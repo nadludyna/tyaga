@@ -236,3 +236,34 @@ func TestLog(t *testing.T) {
 		t.Errorf("log = %q\nwant %q", j.Log, want)
 	}
 }
+
+func TestProgressWholePlaylist(t *testing.T) {
+	j := &Job{Options: Options{Mode: "audio"}}
+	onLine(j, "POS|7|12")
+	onLine(j, "ITEM|7|12|Song")
+	if j.Progress != 50 {
+		t.Errorf("start of the 7th of 12: %v, want 50", j.Progress)
+	}
+	onLine(j, "PROG|50|100|1000|5")
+	if j.Progress != 54.166666666666664 || j.ETA != "" {
+		t.Errorf("7th half done: %v (eta %q), want ~54.2 and no eta", j.Progress, j.ETA)
+	}
+}
+
+func TestProgressVideoTwoFiles(t *testing.T) {
+	j := &Job{Options: Options{Mode: "video"}}
+	onLine(j, "ITEM|||Video")
+	onLine(j, "PROG|500|1000|1|1")
+	onLine(j, "PROG|1000|1000|1|1")
+	if j.Progress != 90 {
+		t.Errorf("picture done: %v, want 90", j.Progress)
+	}
+	onLine(j, "PROG|10|100|1|1") // the sound starts: must not jump back
+	if j.Progress < 90 || j.Progress > 91 {
+		t.Errorf("sound started: %v, want ~90.1", j.Progress)
+	}
+	onLine(j, "PROG|100|100|1|1")
+	if j.Progress != 100 {
+		t.Errorf("all done: %v, want 100", j.Progress)
+	}
+}

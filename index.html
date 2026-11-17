@@ -3,8 +3,8 @@
 <title>ТЯГА</title>
 <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"%3E %3Crect width="256" height="256" rx="58" fill="%23161616"/%3E %3Cpath d="M176 0 V22" stroke="%238a96a3" stroke-width="6"/%3E %3Ccircle cx="176" cy="36" r="12" fill="none" stroke="%23fff" stroke-width="9"/%3E %3Cpath d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="%23fff" stroke-width="18"/%3E %3Cpath d="M85 42 L96 10 L107 42 Z" fill="%23fff"/%3E %3Cpath d="M103 36 L119 54" stroke="%23fff" stroke-width="9.9" stroke-linecap="round"/%3E %3Cg fill="%23161616" stroke="%23161616" stroke-width="12" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cg fill="%23ff6b2c" stroke="%23ff6b2c" stroke-width="2" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cpath d="M83.143 108.208 L83.143 139.792 L111.76599999999999 124 Z" fill="%23fff" stroke="%23fff" stroke-width="5.922" stroke-linejoin="round"/%3E %3Ccircle cx="131.32" cy="109.9" r="6" fill="%23161616"/%3E %3C/svg%3E'>
 <style>
-:root{color-scheme:light dark;--bg:#f6f5f2;--card:rgba(255,255,255,.72);--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--acc:#e8590c;--acc2:#ff922b;--ok:#2b8a3e;--err:#c92a2a;--glow:rgba(232,89,12,.28)}
-@media (prefers-color-scheme:dark){:root{--bg:#0f0f10;--card:rgba(28,28,30,.66);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
+:root{color-scheme:light dark;--bg:#f6f5f2;--card:rgba(255,255,255,.93);--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--acc:#e8590c;--acc2:#ff922b;--ok:#2b8a3e;--err:#c92a2a;--glow:rgba(232,89,12,.28)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{min-height:100%}
@@ -39,7 +39,7 @@ h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;
 .tag{font-size:13px;color:var(--dim);margin-top:4px}
 .tag small{display:inline-block;margin-left:8px;padding:1px 8px;border:1px solid var(--line);border-radius:99px;font-size:11px}
 
-.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);box-shadow:0 20px 50px -30px rgba(0,0,0,.6);animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 50px -30px rgba(0,0,0,.6);animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .card+.card{margin-top:16px}
 main>.card:nth-of-type(2){animation-delay:.08s}main>.card:nth-of-type(3){animation-delay:.16s}
 @keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
@@ -634,7 +634,7 @@ var waveTarget = {}, waveState = {};
       var done = t.p >= 100;
       st.v += ((done ? 1 : t.v) - st.v) * Math.min(1, dt * 2); // speed eases in and out
       if (t.p < st.shown - 5) st.shown = t.p;                   // next video of a playlist: start over
-      st.shown += (t.p - st.shown) * Math.min(1, dt * 4);
+      st.shown += (t.p - st.shown) * Math.min(1, dt * 2.2); // glide, don't jump
       var energy = Math.log2(1 + st.v);                         // 0 when stalled, ~3 at 7 MB/s, ~5 at 30
       most = Math.max(most, energy);
       if (!still) st.phase += dt * (0.6 + Math.min(energy, 5) * 1.1);
@@ -678,7 +678,7 @@ var fx = { energy: 0, burst: function () {} };
   var GLYPHS = ['♪', '♫', '♩', '▶', '▶', '•'];
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function size() {
-    dpr = window.devicePixelRatio || 1;
+    dpr = 1; // a soft background doesn't need sharp pixels; on a 2× screen this is 4× less work
     W = innerWidth; H = innerHeight;
     [cv, top].forEach(function (c) { c.width = W * dpr; c.height = H * dpr; });
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -687,7 +687,7 @@ var fx = { energy: 0, burst: function () {} };
     color = css.getPropertyValue('--acc').trim() || '#ff6b2c';
     color2 = css.getPropertyValue('--acc2').trim() || '#ffa94d';
     ok = css.getPropertyValue('--ok').trim() || '#51cf66';
-    var want = Math.round(W * H / 26000);
+    var want = Math.round(W * H / 38000);
     while (items.length < want) items.push(spawn(true));
     items.length = want;
   }
