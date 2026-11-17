@@ -2,13 +2,17 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/jpeg"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -109,5 +113,72 @@ func TestSquareCover(t *testing.T) {
 		if out, err := exec.Command(ffmpeg, "-v", "error", "-i", song, "-map", "0:a", "-f", "null", "-").CombinedOutput(); err != nil {
 			t.Errorf("%s: audio broken: %v %s", ext, err, out)
 		}
+	}
+}
+
+func TestSame(t *testing.T) {
+	yes := [][2]string{
+		{"Daft Punk", "daft punk"},
+		{"Daft Punk & Pharrell Williams", "Daft Punk"},
+		{"Get Lucky (feat. Pharrell Williams) [Radio Edit]", "Get Lucky"},
+		{"魅力的なBEMANI", "魅力的なBEMANI"},
+		{"Song — Remastered 2011", "Song Remastered 2011"},
+	}
+	no := [][2]string{
+		{"Daft Punk", "Justice"},
+		{"Lucky", "Get Lucky Tonight Forever"[:0]}, // empty never matches
+		{"AB", "ABBA"},                             // too short to count as "contains"
+		{"One", "Someone Else"},
+	}
+	for _, c := range yes {
+		if !same(c[0], c[1]) {
+			t.Errorf("same(%q, %q) = false, want true", c[0], c[1])
+		}
+	}
+	for _, c := range no {
+		if same(c[0], c[1]) {
+			t.Errorf("same(%q, %q) = true, want false", c[0], c[1])
+		}
+	}
+}
+
+// TestAlbumArt: a fake catalogue. The wrong artist is skipped, the 1200×1200 picture is asked for.
+func TestAlbumArt(t *testing.T) {
+	var b bytes.Buffer
+	jpeg.Encode(&b, picture(40, 40, 0, color.RGBA{0, 0, 0, 255}), nil)
+	pic := b.Bytes()
+	var asked []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		asked = append(asked, r.URL.String())
+		switch {
+		case r.URL.Path == "/search":
+			base := "http://" + r.Host
+			fmt.Fprintf(w, `{"results":[
+				{"artistName":"Someone Else","trackName":"Get Lucky","artworkUrl100":"%s/wrong/100x100bb.jpg"},
+				{"artistName":"Daft Punk & Pharrell Williams","trackName":"Get Lucky (feat. Pharrell Williams)","collectionName":"Random Access Memories","artworkUrl100":"%s/ram/100x100bb.jpg"}]}`, base, base)
+		case r.URL.Path == "/ram/1200x1200bb.jpg":
+			w.Write(pic)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+	saved := itunesURL
+	itunesURL = srv.URL + "/search"
+	defer func() { itunesURL = saved }()
+
+	if got := albumArt("Daft Punk", "Get Lucky", ""); !bytes.Equal(got, pic) {
+		t.Fatalf("no cover found; asked %v", asked)
+	}
+	for _, a := range asked {
+		if strings.Contains(a, "/wrong/") {
+			t.Errorf("took the cover of the wrong artist: %s", a)
+		}
+	}
+	if got := albumArt("Nobody Known", "Nothing", ""); got != nil {
+		t.Errorf("a cover for a song that isn't there")
+	}
+	if got := albumArt("", "Get Lucky", ""); got != nil {
+		t.Errorf("a cover without an artist: too easy to get a wrong one")
 	}
 }
