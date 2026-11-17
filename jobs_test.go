@@ -91,11 +91,11 @@ func TestOnLine(t *testing.T) {
 	if j.Title != "[3/12] A | title with bars" {
 		t.Errorf("title: %q", j.Title)
 	}
-	onLine(j, "PROG|512|1024|1048576|65")
+	onLine(j, "PROG|512|1024|NA|1048576|65|NA|NA")
 	if j.Progress != 50 || j.Speed != "1.0 MB/s" || j.ETA != "1:05" {
 		t.Errorf("progress: %v %q %q", j.Progress, j.Speed, j.ETA)
 	}
-	onLine(j, "PROG|NA|NA|NA|NA") // unknown values must not break anything
+	onLine(j, "PROG|NA|NA|NA|NA|NA|NA|NA") // unknown values must not break anything
 	onLine(j, "FILE|/out/My list/003 - Song.m4a")
 	if len(j.Files) != 1 || j.Files[0] != "003 - Song.m4a" {
 		t.Errorf("files: %v", j.Files)
@@ -260,7 +260,7 @@ func TestWaiting(t *testing.T) {
 	if j.Wait != 5 || j.Speed != "" {
 		t.Errorf("during the pause: wait %d speed %q", j.Wait, j.Speed)
 	}
-	onLine(j, "PROG|1|10|1|1")
+	onLine(j, "PROG|1|10|NA|1|1|NA|NA")
 	if j.Wait != 0 {
 		t.Errorf("still waiting after a progress line")
 	}
@@ -273,7 +273,7 @@ func TestProgressWholePlaylist(t *testing.T) {
 	if j.Progress != 50 {
 		t.Errorf("start of the 7th of 12: %v, want 50", j.Progress)
 	}
-	onLine(j, "PROG|50|100|1000|5")
+	onLine(j, "PROG|50|100|NA|1000|5|NA|NA")
 	if j.Progress != 54.166666666666664 || j.ETA != "" {
 		t.Errorf("7th half done: %v (eta %q), want ~54.2 and no eta", j.Progress, j.ETA)
 	}
@@ -282,16 +282,16 @@ func TestProgressWholePlaylist(t *testing.T) {
 func TestProgressVideoTwoFiles(t *testing.T) {
 	j := &Job{Options: Options{Mode: "video"}}
 	onLine(j, "ITEM|||Video")
-	onLine(j, "PROG|500|1000|1|1")
-	onLine(j, "PROG|1000|1000|1|1")
+	onLine(j, "PROG|500|1000|NA|1|1|NA|NA")
+	onLine(j, "PROG|1000|1000|NA|1|1|NA|NA")
 	if j.Progress != 90 {
 		t.Errorf("picture done: %v, want 90", j.Progress)
 	}
-	onLine(j, "PROG|10|100|1|1") // the sound starts: must not jump back
+	onLine(j, "PROG|10|100|NA|1|1|NA|NA") // the sound starts: must not jump back
 	if j.Progress < 90 || j.Progress > 91 {
 		t.Errorf("sound started: %v, want ~90.1", j.Progress)
 	}
-	onLine(j, "PROG|100|100|1|1")
+	onLine(j, "PROG|100|100|NA|1|1|NA|NA")
 	if j.Progress != 100 {
 		t.Errorf("all done: %v, want 100", j.Progress)
 	}
@@ -317,5 +317,28 @@ func TestExplain(t *testing.T) {
 func TestSpeedText(t *testing.T) {
 	if speedText(52428) != "51 KB/s" || speedText(4404019) != "4.2 MB/s" {
 		t.Errorf("%q %q", speedText(52428), speedText(4404019))
+	}
+}
+
+// A long video in pieces: the size guess starts far too low; the pieces count is what's true.
+func TestProgressFragments(t *testing.T) {
+	j := &Job{Options: Options{Mode: "video"}}
+	onLine(j, "ITEM|||Long video")
+	onLine(j, "PROG|3000000|NA|3100000|3000000|730|10|2041") // guess says 97%, pieces say 0.5%
+	if j.Progress > 1 {
+		t.Errorf("piece 10 of 2041: %v%%, want ~0.4", j.Progress)
+	}
+	onLine(j, "PROG|900000000|NA|950000000|3000000|300|1020|2041")
+	if j.Progress < 44 || j.Progress > 46 {
+		t.Errorf("piece 1020 of 2041: %v%%, want ~45 (half of the picture's 90)", j.Progress)
+	}
+	if logLine("[hlsnative] Total fragments: 2041") != "" || logLine("[info] dQw4w9WgXcQ: Downloading m3u8 manifest") != "" {
+		t.Error("piece details got into the log")
+	}
+}
+
+func TestFormatNumberHidden(t *testing.T) {
+	if got := logLine(`[download] Destination: C:\\x\\Song.f299.mp4`); got != "Downloading Song.mp4" {
+		t.Errorf("%q", got)
 	}
 }

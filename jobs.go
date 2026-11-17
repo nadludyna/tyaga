@@ -239,7 +239,8 @@ func buildArgs(j *Job) []string {
 		"--print", "before_dl:THUMB|%(extractor_key)s|%(id)s|%(thumbnail|)s",
 		"--print", "after_move:FILE|%(filepath)s",
 		"--progress-template",
-		"download:PROG|%(progress.downloaded_bytes)s|%(progress.total_bytes,progress.total_bytes_estimate)s|%(progress.speed)s|%(progress.eta)s",
+		// done | exact size | size estimate | speed | eta | fragment | of fragments
+		"download:PROG|%(progress.downloaded_bytes)s|%(progress.total_bytes)s|%(progress.total_bytes_estimate)s|%(progress.speed)s|%(progress.eta)s|%(progress.fragment_index)s|%(progress.fragment_count)s",
 		// --print turns on quiet mode, which hides what yt-dlp is doing ("[youtube] …",
 		// "[download] Destination: …"). The page shows those lines as a log, so back on.
 		"--no-quiet",
@@ -455,10 +456,11 @@ func onLine(j *Job, line string) {
 	case strings.HasPrefix(line, "PROG|"):
 		j.Wait = 0
 		p := strings.Split(line[5:], "|")
-		if len(p) < 4 {
+		if len(p) < 7 {
 			return
 		}
-		done, total, speed, eta := num(p[0]), num(p[1]), num(p[2]), num(p[3])
+		done, total, guess, speed, eta := num(p[0]), num(p[1]), num(p[2]), num(p[3]), num(p[4])
+		frag, frags := num(p[5]), num(p[6])
 		// A video comes as two files, the picture and then the sound: the bytes drop back
 		// to almost nothing when the second one starts. The picture is the big one, so it
 		// fills the bar to 90% and the sound does the rest, instead of 0→100% twice.
@@ -468,8 +470,19 @@ func onLine(j *Job, line string) {
 		if done > 0 {
 			j.lastB = done
 		}
-		if total > 0 {
-			f := math.Min(1, done/total)
+		// How far this file is. Downloaded in pieces (HLS, DASH), the size is only a guess that
+		// starts far too low (a long video showed 90% at once), so count the pieces instead.
+		f := math.NaN()
+		switch {
+		case frags > 0 && frag >= 0:
+			f = frag / frags
+		case total > 0:
+			f = done / total
+		case guess > 0:
+			f = done / guess
+		}
+		if !math.IsNaN(f) {
+			f = math.Min(1, f)
 			if j.Mode == "video" {
 				f = []float64{f * 0.9, 0.9 + f*0.1}[min(j.part, 1)]
 			}
@@ -536,6 +549,9 @@ var tagRe = regexp.MustCompile(`^\[([\w:]+)\] `)
 // idRe: the video id that "[youtube]" and "[info]" lines start with ("dQw4w9WgXcQ: ").
 var idRe = regexp.MustCompile(`^[\w-]{11}: `)
 
+// formatRe: YouTube's format number yt-dlp puts in a file name while it downloads the parts.
+var formatRe = regexp.MustCompile(`\.f\d+(\.\w+)\b`)
+
 var sleepRe = regexp.MustCompile(`Sleeping ([\d.]+) seconds`)
 
 // logLine turns a yt-dlp line into something a person reads in a second, or "" for the
@@ -550,6 +566,7 @@ func logLine(line string) string {
 		}
 	}
 	line = pathRe.ReplaceAllString(line, "$1$2")
+	line = formatRe.ReplaceAllString(line, "$1") // "Song.f299.mp4" → "Song.mp4"
 	has := func(s string) bool { return strings.Contains(line, s) }
 	switch {
 	case line == "" || tag == "debug":
@@ -559,6 +576,8 @@ func logLine(line string) string {
 		has("Extracting URL"), strings.HasPrefix(line, "Downloading item "),
 		strings.HasPrefix(line, "Finished downloading playlist"), tag == "download" && strings.HasPrefix(line, "100% of"):
 		return ""
+	case tag == "hlsnative" || tag == "dashsegments", has("m3u8 manifest"), strings.HasPrefix(line, "Total fragments"):
+		return "" // how YouTube cuts the file into pieces: nothing a person needs
 	case has("Downloading webpage"):
 		return "Reading the video page"
 	case has("client config"), has("Downloading player"), has("API JSON"), has("m3u8 information"):

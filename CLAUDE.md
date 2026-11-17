@@ -97,6 +97,9 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
 - YouTube makes yt-dlp sleep a few seconds per video ("Sleeping 5.00 seconds"): show it as
   waiting, not as a stuck download.
 - Progress: a playlist counts as a whole; a video is two files (picture 90 %, sound 10 %).
+- Long videos come in pieces (HLS/DASH): yt-dlp only *guesses* the size, and the guess starts
+  far too low (a 12-minute download showed 90 % at once). Count the pieces
+  (`fragment_index / fragment_count`) when there are any; the size guess only as a last resort.
 - Covers: the real album art from the Apple Music catalogue (iTunes Search API, no key; only
   when artist and title clearly match), else the thumbnail, squared if it's art between bars.
   YouTube Music has no public API — don't build on its internal one.
