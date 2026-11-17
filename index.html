@@ -662,24 +662,30 @@ function refresh() {
 refresh();
 setInterval(refresh, 700);
 
-// Progress wave, in the manner of Material 3's wavy progress indicator: a thick wave with
-// round ends for the done part, a small gap, then a flat track for what's left.
-// The wave rolls at one steady pace; the bar grows smoothly at the download's average speed.
-// At 100% (converting, the cover, merging) the wave fills the whole line.
+// Progress wave, done the way Material 3's LinearWavyProgressIndicator does it (the Morphe
+// app uses that one as is):
+// - a thick wave with round ends for the done part, a gap, a flat track for the rest;
+// - the wave rolls at one steady pace, one wavelength per second;
+// - it's flat near the start and the end (up to 10 %, from 95 %) and rises/settles smoothly;
+// - the bar follows the progress with a soft spring: progress comes in steps, and a spring
+//   keeps its speed when the target moves again, so it glides instead of lurching each time.
+// At 100 % (converting, the cover, merging) the line is full and flat, still rolling gently.
 // Each running download has a canvas; its state lives here by job id.
 var waveTarget = {}, waveState = {};
 (function () {
   var css = getComputedStyle(document.documentElement);
   var acc = css.getPropertyValue('--acc').trim();
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
-  var THICK = 4, AMP = 4, LEN = 30, GAP = 7; // px: line, wave height (half), wavelength, gap
-  var CALM = 3, RUSH = 0;                    // rad/s: one steady pace, like Material 3 does (the bar growing is what reads as "faster")
+  var THICK = 4, AMP = 4, LEN = 30, GAP = 7;   // px: line, wave height (half), wavelength, gap
+  var PACE = 2 * Math.PI;                       // rad/s: one wavelength per second
+  var K = 4, C = 2 * Math.sqrt(K);              // the spring: very soft (progress comes in big steps every
+                                                // 0.7 s; stiffer ones lurched in a simulation), critically damped
   function frame(now) {
     var dt = Math.min(0.05, (now - last) / 1000), most = 0;
     last = now;
     document.querySelectorAll('canvas.wave').forEach(function (cv) {
       var id = cv.dataset.id, t = waveTarget[id] || { p: 0 };
-      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, boost: 0, rate: 0, lastP: t.p, lastT: now });
+      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, vel: 0, amp: 0 });
       var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
       if (!w) return; // hidden
       if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
@@ -687,51 +693,38 @@ var waveTarget = {}, waveState = {};
       cx.setTransform(dpr, 0, 0, dpr, 0, 0);
       cx.clearRect(0, 0, w, h);
 
-      var done = t.p >= 100;
-      // The page hears about progress in steps (every 0.7 s). Going straight for each new value
-      // made the bar lurch and pause, and the wave pulse with it. Instead: keep an average
-      // speed over the last steps and move at that speed in between, gently pulled toward
-      // where the download should be by now.
-      if (t.p !== st.lastP) {
-        if (t.p < st.lastP - 5) { st.shown = t.p; st.rate = 0; }  // started over (retry)
-        else {
-          var r = Math.max(0, (t.p - st.lastP) / Math.max(0.2, (now - st.lastT) / 1000));
-          st.rate = st.rate ? st.rate * 0.65 + r * 0.35 : r;
-        }
-        st.lastP = t.p; st.lastT = now;
+      if (t.p < st.shown - 5) { st.shown = t.p; st.vel = 0; }    // started over (retry): no slide back
+      if (still) st.shown = t.p;
+      else {
+        st.vel += (K * (t.p - st.shown) - C * st.vel) * dt;
+        st.shown = Math.max(st.shown, Math.min(100, st.shown + st.vel * dt)); // never back
+        st.phase += dt * PACE;
       }
-      if (t.wait || done) st.rate *= Math.pow(0.2, dt);          // nothing comes in: ease to a stop
-      var since = Math.min(1.5, (now - st.lastT) / 1000);         // don't run ahead too far
-      var aim = Math.min(100, st.lastP + st.rate * since);
-      st.shown = Math.max(st.shown, st.shown + (aim - st.shown) * Math.min(1, dt * 2.5)); // never back
-      // The wave hurries with the average speed (px/s on screen), eased both ways.
-      var want = done || t.wait ? 0 : Math.min(1, st.rate / 100 * w / 30);
-      st.boost += (want - st.boost) * Math.min(1, dt * 1.5);
-      most = Math.max(most, st.boost);
-      if (!still) st.phase += dt * (CALM + RUSH * st.boost);
+      var f = st.shown / 100;
+      var ampWant = f > 0.1 && f < 0.95 && !still ? AMP : 0;
+      st.amp += (ampWant - st.amp) * Math.min(1, dt * 3);
+      most = Math.max(most, f);
 
       var pad = THICK / 2, mid = h / 2, end = w - pad;
-      // At least one full bend is always there, so even at 0% the wave is alive.
-      var head = done ? end : Math.max(pad + LEN, pad + (end - pad) * st.shown / 100);
-      var amp = AMP;
+      var head = Math.max(pad + THICK, pad + (end - pad) * f);
       cx.lineCap = 'round';
       cx.lineWidth = THICK;
-
-      if (!done && head + GAP < end) {                           // the track: what's left
+      if (head + GAP < end) {                                     // the track: what's left
         cx.strokeStyle = 'rgba(127,127,127,.28)';
         cx.beginPath(); cx.moveTo(head + GAP + THICK, mid); cx.lineTo(end, mid); cx.stroke();
       }
-      cx.strokeStyle = acc;                                      // the wave: what's done
+      cx.strokeStyle = acc;                                       // the wave: what's done
       cx.beginPath();
       for (var x = pad; ; x += 1) {
         var xx = Math.min(x, head);
-        var y = mid + Math.sin((xx / LEN) * 2 * Math.PI - st.phase) * amp;
+        var y = mid + Math.sin((xx / LEN) * 2 * Math.PI - st.phase) * st.amp;
         x === pad ? cx.moveTo(xx, y) : cx.lineTo(xx, y);
         if (xx >= head) break;
       }
       cx.stroke();
     });
-    fx.energy += (most * 4 - fx.energy) * Math.min(1, dt * 2);
+    // The background speeds up with the progress, smoothed (like Morphe's patcher screen).
+    fx.energy += (most - fx.energy) * Math.min(1, dt * 0.8);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -791,7 +784,7 @@ var fx = { energy: 0, burst: function () {} };
     var dt = Math.min(0.05, (now - last) / 1000), t = now / 1000;
     last = now;
     rush = Math.max(0, rush - dt * 0.8);
-    var boost = 1 + Math.min(fx.energy, 5) * 0.35 + rush * 3;
+    var boost = 1 + fx.energy * 2 + rush * 3; // 1× at rest, up to 3× as a download nears its end
     cx.clearRect(0, 0, W, H);
     cx.fillStyle = color;
     cx.textAlign = tx.textAlign = 'center'; cx.textBaseline = tx.textBaseline = 'middle';

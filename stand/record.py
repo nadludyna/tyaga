@@ -30,7 +30,7 @@ with sync_playwright() as p:
     pg.fill('#links', link); pg.click('#go')
     pg.evaluate('window.__s=[];(function f(){for(const id in waveState){const s=waveState[id];'
                 'const c=document.querySelector(`canvas.wave[data-id="${id}"]`);if(c&&c.offsetParent)'
-                'window.__s.push([performance.now(),+id,s.phase,s.boost,s.shown])}requestAnimationFrame(f)})()')
+                'window.__s.push([performance.now(),+id,s.phase,s.amp,s.shown])}requestAnimationFrame(f)})()')
     t0, k = time.time(), 0
     while time.time() - t0 < secs:
         pg.screenshot(path=f'{out}/s{k:03d}.png'); k += 1
