@@ -105,7 +105,7 @@ func consoleUTF8() {
 // showError shows an error in a message box: there's no console window to print it to.
 func showError(msg string) {
 	text, _ := syscall.UTF16PtrFromString(msg)
-	title, _ := syscall.UTF16PtrFromString("TYAGA")
+	title, _ := syscall.UTF16PtrFromString("ТЯГА")
 	const iconError = 0x10
 	syscall.NewLazyDLL("user32.dll").NewProc("MessageBoxW").Call(0,
 		uintptr(unsafe.Pointer(text)), uintptr(unsafe.Pointer(title)), iconError)

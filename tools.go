@@ -163,7 +163,7 @@ func setupTools() {
 				problems = append(problems, n.name+" not found. "+installHint(n.name))
 			} else if err := download(n.name, a); err != nil {
 				logf("Error downloading %s: %v", n.name, err)
-				problems = append(problems, "Could not download "+n.name+". Check your internet and restart TYAGA. "+installHint(n.name))
+				problems = append(problems, "Could not download "+n.name+". Check your internet and restart ТЯГА. "+installHint(n.name))
 			} else {
 				path = find(n.name)
 			}

@@ -74,7 +74,7 @@ var seen struct {
 	last time.Time
 }
 
-// pageSeen: some page (on the computer or a phone) just asked for the state.
+// pageSeen: the page just asked for the state.
 func pageSeen() {
 	seen.Lock()
 	seen.last = time.Now()
@@ -131,7 +131,6 @@ func quit() {
 		killTree(running)
 	}
 	mu.Unlock()
-	setLAN(false)
 	os.Remove(instanceFile())
 	if logFile != nil {
 		logFile.Close()
