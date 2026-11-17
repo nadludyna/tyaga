@@ -58,12 +58,14 @@ input[type=checkbox]{accent-color:var(--acc);transition:transform .15s}
 input[type=checkbox]:active{transform:scale(.8)}
 /* Options: switches on one line (pushed to both edges), checkboxes as chips that fill the width. */
 /* Both switches stretch to fill the line, every button the same width (grow = number of buttons). */
-.opts{flex-wrap:nowrap;gap:8px}
-.opts .seg{flex:2 1 0}
-#quality{flex-grow:4}
+/* Fixed columns, so nothing moves when a switch flips: Video/Audio always takes a third,
+   the switch next to it (4 qualities or 2 formats) two thirds; the checkboxes, equal columns. */
+.opts{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.opts .seg{display:flex}
 .opts .seg button{flex:1;padding-left:6px;padding-right:6px}
-.chips{gap:8px}
-.chip{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(127,127,127,.05);white-space:nowrap;transition:border-color .2s,background .2s,color .2s,transform .15s}
+.chips{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+@media (max-width:560px){.opts{grid-template-columns:1fr}.chips{grid-auto-flow:row;grid-template-columns:1fr 1fr}}
+.chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(127,127,127,.05);white-space:nowrap;transition:border-color .2s,background .2s,color .2s,transform .15s}
 .chip:hover{border-color:rgba(127,127,127,.35)}
 .chip:active{transform:scale(.97)}
 .chip:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent);color:var(--fg)}
