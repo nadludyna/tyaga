@@ -622,6 +622,8 @@ func logLine(line string) string {
 		return ""
 	case tag == "hlsnative" || tag == "dashsegments", has("m3u8 manifest"), strings.HasPrefix(line, "Total fragments"):
 		return "" // how YouTube cuts the file into pieces: nothing a person needs
+	case has("JS challenge"), strings.HasPrefix(line, "[jsc"):
+		return "Passing YouTube's check" // yt-dlp runs YouTube's script with Deno to be let in
 	case has("Downloading webpage"):
 		return "Reading the video page"
 	case has("client config"), has("Downloading player"), has("API JSON"), has("m3u8 information"):

@@ -355,3 +355,9 @@ func TestLiveLine(t *testing.T) {
 		t.Errorf("live line stays after the step ended: %q", j.Now)
 	}
 }
+
+func TestJSChallenge(t *testing.T) {
+	if got := logLine("[youtube] [jsc:deno] Solving JS challenges using deno"); got != "Passing YouTube's check" {
+		t.Errorf("%q", got)
+	}
+}

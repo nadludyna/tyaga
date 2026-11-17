@@ -11,43 +11,45 @@
   <img src="https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-161616" alt="Windows, macOS, Linux">
 </p>
 
-**ТЯГА** (say *TYA-ga*; the file is called `tyaga`) is a Russian and Ukrainian word for *pull*, *draw*, *traction*, from *тянуть*, "to pull". Pulling a file down off the internet is *стянуть*, so the name is the whole job: ТЯГА pulls video and music off YouTube and onto your disk. The icon says the same: a hook that caught a fat fish with a play button on its side.
-
-One small program, nothing to install, and the interface is just a page in your browser. The heavy lifting is done by [yt-dlp](https://github.com/yt-dlp/yt-dlp); ТЯГА makes it pleasant.
+ТЯГА downloads video and music from YouTube: paste a link, pick video or audio, get a clean file with proper tags and a real cover. One small program, nothing to install; the interface is a page in your browser. The heavy lifting is done by [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
 <p align="center">
-  <img src="docs/screenshot.png" width="680" alt="ТЯГА: a link box, video/audio switches and a download queue with a progress wave">
+  <img src="docs/screenshot.png" width="680" alt="ТЯГА: a link box, video/audio switches and a download with a progress wave and a live step list">
 </p>
-
-## What it can do
-
-**Video.** MP4 at the best quality, or capped at 1440p / 1080p / 720p if you'd rather not download a 4K monster. Tick "for editing" and you get H.264 + AAC instead of YouTube's usual VP9/AV1 + Opus, so it opens in DaVinci Resolve and any other editor. Above 1080p YouTube often has no H.264, so that may come out in 1080p.
-
-**Music.** M4A (the original YouTube track, untouched) or MP3. The tags come out clean: real artist, title without "(Official Video)", year.
-
-**Covers.** For music ТЯГА looks up the real album cover in the Apple Music catalogue by artist and title (1200×1200), and uses it only when both clearly match, so a wrong album never sneaks in. Only the artist and the song name are sent, nothing else. When the song isn't there, the cover is the picture the author chose for the video, not a random frame: album art sitting between bars becomes a clean square, a normal thumbnail stays whole. Videos get their thumbnail as the cover too, so Explorer shows it.
-
-**Albums.** A whole album uploaded as one video with chapters? It gets split into proper numbered tracks.
-
-**Playlists and channels.** A playlist goes into its own folder, numbered. A channel link works too, and you get its videos. Or tick "as one file" to glue the whole playlist into one long audio or video, where every video becomes a chapter.
-
-**No sponsors.** SponsorBlock cuts the "this video is sponsored by…" bits and the "don't forget to subscribe". For music it also trims the talking and the movie-scene intros from clips, leaving just the song.
-
-**Just a piece.** Need only the solo from 1:20 to 3:45? Tick "fragment" and set the minutes and seconds: type them or spin them with the arrows (Shift jumps by 10, seconds roll over into minutes). Only that bit is downloaded, cut exactly where you said.
-
-**Try again.** YouTube sometimes throws a random 403. A failed or cancelled download has a Retry button: it goes back into the queue, and whatever already downloaded is skipped.
-
-**Watch it go.** The progress is a wave that runs faster the faster the download goes and slows down when it stalls. Under it, a short log of what yt-dlp is doing right now. The progress is in the tab title too, and when a download finishes while you're in another window, you get a notification.
-
-Plus the little things: a queue (paste ten links at once, or drag a link onto the page), a thumbnail next to every download, "Show in folder" for finished ones, which also say exactly what came out (Audio · MP3, Video · MP4 · 1080p), a hint on every switch when you hover it, the switches remember how you left them, and endless YouTube Mixes are stopped after the first 25 videos. And it's alive: notes fall in the background and dodge the cursor, and when a download is done the fish on the hook jumps.
-
-Everything lands in `Downloads/YouTube`. If you'd rather it didn't move, turn on "reduce motion" in your system: ТЯГА keeps still then.
 
 ## Run it
 
 1. Grab the archive for your system from [Releases](../../releases/latest).
 2. Unpack it anywhere.
 3. Run `tyaga`. A page opens. That's it.
+
+## What it can do
+
+**Video.** MP4 at the best quality, or capped at 1440p / 1080p / 720p. Tick "for editing" and you get H.264 + AAC instead of YouTube's usual VP9/AV1 + Opus, so it opens in DaVinci Resolve and any other editor (above 1080p YouTube often has no H.264, so that may come out in 1080p).
+
+**Music.** M4A (the original YouTube track, untouched) or MP3. Clean tags: real artist, title without "(Official Video)", year.
+
+**Real covers.** For music ТЯГА looks up the album cover in the Apple Music catalogue by artist and title (1200×1200) and uses it only when both clearly match. Only the artist and the song name are sent. Otherwise the cover is the picture the author chose for the video: album art between bars becomes a clean square, a normal thumbnail stays whole. Videos get their thumbnail as the cover too, so Explorer shows it.
+
+**Albums.** A whole album uploaded as one video with chapters is split into numbered tracks.
+
+**Playlists and channels.** A playlist goes into its own numbered folder; a channel link works too. Or tick "as one file" to glue the playlist into one long audio or video, with a chapter per video.
+
+**No sponsors.** SponsorBlock cuts "this video is sponsored by…" and "don't forget to subscribe". For music it also trims the talking and movie-scene intros from clips.
+
+**Just a piece.** Tick "fragment" and set the minutes and seconds (arrows work, Shift jumps by 10). Only that bit is downloaded, cut exactly there.
+
+**See what's going on.** A Material-style wavy progress bar for the whole download (a playlist counts as one), the track (2 / 12) and percent, the speed and time left. Under it, the steps as a small live timeline: what's done, and what's happening right now ("Downloading the picture · piece 1 359 of 2 041 · 1.9 GB"), including YouTube's short pauses. The channel is shown under the title. The progress is in the tab title too, and you get a notification when a download finishes while you're elsewhere.
+
+**When it fails.** Plain words for what happened, a Retry button (whatever already downloaded is skipped) and Copy error, which copies the technical details to send to someone.
+
+**When it's done.** The row shows the cover that's really inside the file and what came out (Audio · MP3, Video · MP4 · 1080p), with "Show in folder".
+
+Plus: a queue (paste ten links at once, or drag a link onto the page), a hint on every switch, the switches remember how you left them, endless YouTube Mixes stop after 25 videos, and the page is light enough for a weak laptop. Notes fall in the background and speed up as a download goes; the fish on the hook jumps when one is done. Turn on "reduce motion" in your system and ТЯГА keeps still.
+
+Everything lands in `Downloads/YouTube`.
+
+## Good to know
 
 On the first run ТЯГА fetches what it needs into a `bin` folder next to itself: yt-dlp, ffmpeg and Deno (yt-dlp needs Deno to deal with YouTube). On Windows that's about 250 MB, once. Every download is checked against the checksum its project publishes. yt-dlp updates itself on every start, because YouTube keeps changing things. Already have these tools installed? ТЯГА uses yours.
 
@@ -80,6 +82,7 @@ cover.go     covers: the real album art from Apple Music, or the thumbnail squar
 tools.go     finding and downloading yt-dlp, ffmpeg, Deno
 proc_*.go    the bits that differ between Windows and Linux/macOS
 index.html   the whole page
+stand/       a test stand: the program against a fake yt-dlp
 ```
 
 Only the Go standard library, no third-party packages. The icon and the "Properties → Details" info of the Windows exe live in `winres/` and get baked into `rsrc_windows_*.syso`, which `go build` picks up by itself.
@@ -101,6 +104,10 @@ For Windows without the console window: `GOOS=windows GOARCH=amd64 go build -ldf
 Flags: `-out folder` sets where files go, `-no-browser` skips opening the page (ТЯГА then doesn't quit by itself).
 
 To publish a release with builds for every system: Actions → Release → Run workflow → a version like `v1.2.0`.
+
+## The name
+
+**ТЯГА** (say *TYA-ga*; the file is called `tyaga`) is a Russian and Ukrainian word for *pull*, *traction*, from *тянуть*, "to pull"; pulling a file down off the internet is *стянуть*. That's the whole job. The icon says the same: a hook that caught a fat fish with a play button on its side.
 
 ## How it started
 
