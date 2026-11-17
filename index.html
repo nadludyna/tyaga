@@ -587,13 +587,19 @@ setInterval(refresh, 700);
 var waveTarget = {}, waveState = {};
 (function () {
   var css = getComputedStyle(document.documentElement);
-  var acc = css.getPropertyValue('--acc').trim(), acc2 = css.getPropertyValue('--acc2').trim(), line = css.getPropertyValue('--line').trim();
+  var acc = css.getPropertyValue('--acc').trim(), acc2 = css.getPropertyValue('--acc2').trim();
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
+  // A snake: the bends run along the line, but both ends stay on the middle, so the
+  // head goes straight ahead and doesn't thrash up and down. The bends fade in over the
+  // last ~40px before the head and the first ~20px after the start.
   function sine(cx, x0, x1, mid, amp, phase) {
     cx.beginPath();
-    for (var x = x0; x <= x1; x += 2) {
-      var y = mid + Math.sin(x / 9 - phase) * amp;
-      x === x0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+    for (var x = x0; x <= x1 + 1; x += 1.5) {
+      var xx = Math.min(x, x1);
+      var k = Math.min(1, (x1 - xx) / 40, (xx - x0) / 20);
+      k = k * k * (3 - 2 * k); // smooth, no corner where the fade starts
+      var y = mid + Math.sin(xx / 11 - phase) * amp * k;
+      x === x0 ? cx.moveTo(xx, y) : cx.lineTo(xx, y);
     }
     return cx;
   }
@@ -620,18 +626,11 @@ var waveTarget = {}, waveState = {};
       var mid = h / 2, head = Math.max(2, w * st.shown / 100);
 
       cx.lineCap = 'round';
-      cx.strokeStyle = line; cx.lineWidth = 2;                     // the road ahead
-      sine(cx, 1, w - 1, mid, 1.5, st.phase * 0.3).stroke();
-
       var g = cx.createLinearGradient(0, 0, head, 0);
       g.addColorStop(0, acc); g.addColorStop(1, acc2);
       cx.strokeStyle = g; cx.lineWidth = 3;
       cx.shadowColor = acc; cx.shadowBlur = 8 + energy * 2;
       sine(cx, 1, head, mid, amp, st.phase).stroke();
-      if (!done) {                                                 // the glowing head
-        cx.fillStyle = '#fff';
-        cx.beginPath(); cx.arc(head, mid + Math.sin(head / 9 - st.phase) * amp, 3, 0, 6.29); cx.fill();
-      }
       cx.shadowBlur = 0;
     });
     fx.energy += (most - fx.energy) * Math.min(1, dt * 2);
