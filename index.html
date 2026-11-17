@@ -60,7 +60,11 @@ label:hover{color:var(--fg)}
 input[type=checkbox]{accent-color:var(--acc);transition:transform .15s}
 input[type=checkbox]:active{transform:scale(.8)}
 /* Options: switches on one line (pushed to both edges), checkboxes as chips that fill the width. */
-.opts{justify-content:space-between}
+/* Both switches stretch to fill the line, every button the same width (grow = number of buttons). */
+.opts{flex-wrap:nowrap;gap:8px}
+.opts .seg{flex:2 1 0}
+#quality{flex-grow:4}
+.opts .seg button{flex:1;padding-left:6px;padding-right:6px}
 .chips{gap:8px}
 .chip{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(127,127,127,.05);white-space:nowrap;transition:border-color .2s,background .2s,color .2s,transform .15s}
 .chip:hover{border-color:rgba(127,127,127,.35)}
