@@ -47,7 +47,7 @@ main>.card:nth-of-type(2){animation-delay:.08s}main>.card:nth-of-type(3){animati
 .note{border-color:var(--acc);font-size:14px;white-space:pre-line}
 .note.err{border-color:var(--err);color:var(--err)}
 
-textarea{width:100%;min-height:76px;resize:vertical;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+textarea{width:100%;min-height:90px;resize:vertical;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
 body.drop textarea{border-color:var(--acc);border-style:dashed;box-shadow:0 0 0 4px var(--glow)}
 textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--glow);background:transparent}
 .row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:14px}
@@ -76,12 +76,12 @@ input[type=checkbox]:active{transform:scale(.8)}
 .chip:has(input:disabled){opacity:.38;cursor:default;border-color:var(--line);background:transparent;color:var(--dim)}
 .cutrow:has(.times[hidden]){display:none}
 .cutrow{justify-content:center}
-.input{display:flex;gap:10px;align-items:flex-end} /* Download sits at the box's bottom right, like Send in a chat */
+.input{display:flex;gap:12px;align-items:stretch}
 .input textarea{flex:1}
-@media (max-width:560px){.input{flex-direction:column}.input .go{padding:9px}}
+@media (max-width:560px){.input{flex-direction:column}.input .go{padding:12px}}
 /* Every button answers the same calm way: a little lighter under the mouse, a little smaller
    while pressed. No jumps, no flashes. */
-.go{flex:none;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:7px 20px;font:inherit;font-size:14.5px;font-weight:650;cursor:pointer;transition:filter .15s ease,transform .1s ease}
+.go{flex:none;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:filter .15s ease,transform .1s ease}
 .go:hover{filter:brightness(1.08)}
 .go:active{transform:scale(.97);filter:brightness(.95)}
 .msg{color:var(--err);margin-top:8px;font-size:14px}
