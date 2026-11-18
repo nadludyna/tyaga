@@ -1,5 +1,5 @@
 # Checks every pull request and every push to main: formatting, vet, tests,
-# and that TYAGA still builds for every system it's released for.
+# and that TYAGA still builds for Windows, the system it's released for.
 name: CI
 
 on:
@@ -43,9 +43,9 @@ jobs:
           fi
           git checkout -- rsrc_windows_*.syso # keep the committed ones
 
-      - name: Build for every system
+      - name: Build for Windows
         run: |
-          for target in windows/amd64 windows/arm64 linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
-            echo "$target"
-            GOOS=${target%/*} GOARCH=${target#*/} CGO_ENABLED=0 go build -tags production -o /dev/null .
+          for arch in amd64 arm64; do
+            echo "windows/$arch"
+            GOOS=windows GOARCH=$arch CGO_ENABLED=0 go build -tags production -o /dev/null .
           done
