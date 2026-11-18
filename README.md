@@ -60,7 +60,7 @@ Tests: `go test ./...`. The test stand (`stand/README.md`) runs the program agai
 
 ## How it started
 
-As `TYAGA.cmd`: a batch file and a TypeScript program in one file, Windows-only and needing Deno installed. Then it grew up and was rewritten in Go, into one program that runs everywhere.
+As `TYAGA.cmd`: a batch file and a TypeScript program in one file, Windows-only and needing Deno installed. Then it grew up and was rewritten in Go, into one program that runs everywhere. Then it got its own window and tray and became a Windows app: that's where it's used.
 
 ## License
 
