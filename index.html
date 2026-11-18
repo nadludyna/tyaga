@@ -279,7 +279,7 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 </div>
 
 <div class="card" id="jobsCard">
-  <button class="lhead" id="lhead" title="Show or hide the downloads"><span id="lsum"></span><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>
+  <button class="lhead" id="lhead" aria-label="Show or hide the downloads"><span id="lsum"></span><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>
   <div id="list"></div>
   <div class="foot">
     <button class="btn" id="open" title="The folder where everything is saved"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
@@ -855,7 +855,9 @@ function foldedHeight() {
 }
 function windowFit() {
   if (!fold.on) return;
-  var bottom = $('jobsCard').getBoundingClientRect().bottom;
+  // From the layout, not getBoundingClientRect: at start the cards are still rising into place
+  // (a 14 px slide), and measuring then made the window that much too tall.
+  var card = $('jobsCard'), bottom = card.offsetTop + card.offsetHeight;
   api('/api/window', { text: 'height', n: Math.ceil(bottom + parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom)) }).catch(function () {});
 }
 function setFold(on, animate) {
