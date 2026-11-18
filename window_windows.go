@@ -21,10 +21,17 @@ import (
 	"path/filepath"
 	"strings"
 	"sync/atomic"
+	"syscall"
+	"time"
+	"unsafe"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
+	"github.com/wailsapp/wails/v3/pkg/w32"
 )
+
+// place shows the window for the first time, in the middle of the screen (see runWindow).
+var place = func() {}
 
 //go:embed winres/icon.ico
 var trayIcon []byte
@@ -45,6 +52,7 @@ func runWindow(token string) bool {
 		if win == nil {
 			return
 		}
+		place()
 		win.Show()
 		if win.IsMinimised() {
 			win.UnMinimise()
@@ -79,6 +87,7 @@ func runWindow(token string) bool {
 		Height:          winHeight,
 		DisableResize:   true,
 		InitialPosition: application.WindowCentered,
+		Hidden:          true,                    // shown by place() once the page has set the height, centred
 		URL:             "/?t=" + token + "&w=1", // w: the page is the window (see html.app in index.html)
 		Frameless:       true,
 		BackgroundType:  application.BackgroundTypeTransparent,
@@ -102,22 +111,56 @@ func runWindow(token string) bool {
 			fullHeight.Store(int64(min(winHeight, sc.WorkArea.Height-16)))
 		}
 	})
+	// At start the window stays hidden until the page has told it how tall it is (the list
+	// folds when it's empty), then it appears in the middle of the screen. Centring it at its
+	// first size and then shrinking it left it high up. If the page never asks, it shows anyway.
+	var placed atomic.Bool
+	place = func() {
+		if placed.CompareAndSwap(false, true) {
+			win.Center()
+			win.Show()
+			win.Focus()
+		}
+	}
+	go func() { time.Sleep(3 * time.Second); place() }()
+	// Growing keeps the top edge where it is, unless the bottom would go under the taskbar:
+	// then the window moves up just enough (a folded window sits in the middle of the screen,
+	// so unfolding it usually does need that).
+	onScreen := func() {
+		sc, err := win.GetScreen()
+		if err != nil || sc == nil || sc.WorkArea.Height == 0 {
+			return
+		}
+		b, wa := win.Bounds(), sc.WorkArea
+		if bottom := wa.Y + wa.Height - 8; b.Y+b.Height > bottom {
+			b.Y = max(wa.Y+8, bottom-b.Height)
+			win.SetBounds(b)
+		}
+	}
+	// × (or Alt+F4) hides the window to the tray, and says so: downloads go on there.
+	toTray := func() {
+		win.Hide()
+		trayBalloon("ТЯГА is in the tray", "Downloads go on. Click the icon to open ТЯГА; Quit is in its menu.")
+	}
 	windowControl = func(action string, n int) {
 		full := int(fullHeight.Load())
 		switch action {
 		case "min":
 			win.Minimise()
 		case "close":
-			win.Hide()
+			toTray()
 		case "full":
 			win.SetSize(winWidth, full)
+			onScreen()
+			place()
 		case "height":
 			win.SetSize(winWidth, max(120, min(n, full)))
+			place()
 		}
 	}
 	win.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
 		e.Cancel()
-		win.Hide()
+		toTray()
 	})
 
 	menu := app.NewMenu()
@@ -243,4 +286,32 @@ func runLogin() {
 // loginDir is the sign-in window's web view data, per folder like the main window's.
 func loginDir() string {
 	return filepath.Join(filepath.Dir(webviewDataDir()), "login-"+folderID())
+}
+
+// ---------------------------------------------------------------------------
+//  A message from the tray icon
+// ---------------------------------------------------------------------------
+
+var findWindowEx = syscall.NewLazyDLL("user32.dll").NewProc("FindWindowExW")
+
+// trayBalloon shows a Windows notification from ТЯГА's tray icon. Wails has no call for it,
+// so this finds the icon itself: Wails keeps it on a hidden message window of its window
+// class, with id 1 for the first (and only) tray icon. Windows says no to every other window.
+func trayBalloon(title, text string) {
+	class := w32.MustStringToUTF16Ptr("WailsWebviewWindow")
+	var after uintptr
+	for i := 0; i < 16; i++ {
+		h, _, _ := findWindowEx.Call(uintptr(w32.HWND_MESSAGE), after, uintptr(unsafe.Pointer(class)), 0)
+		if h == 0 {
+			return
+		}
+		after = h
+		nid := w32.NOTIFYICONDATA{HWnd: w32.HWND(h), UID: 1, UFlags: w32.NIF_INFO, DwInfoFlags: w32.NIIF_INFO}
+		nid.CbSize = uint32(unsafe.Sizeof(nid))
+		copy(nid.SzInfoTitle[:len(nid.SzInfoTitle)-1], w32.MustStringToUTF16(title))
+		copy(nid.SzInfo[:len(nid.SzInfo)-1], w32.MustStringToUTF16(text))
+		if w32.ShellNotifyIcon(w32.NIM_MODIFY, &nid) {
+			return
+		}
+	}
 }

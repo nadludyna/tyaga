@@ -38,7 +38,8 @@ second shows that it's working; anything over ten says how far along it is (Niel
 response-time limits).
 
 **6. Windows habits.** Enter does the main thing, Esc closes or cancels, the cursor is already
-where you type, a window opens where you'll look for it.
+where you type, a window opens in the middle of the screen. Nothing disappears silently: when
+× hides ТЯГА to the tray, a notification says it's there and the downloads go on.
 
 ## Nielsen's ten, the way they apply here
 
