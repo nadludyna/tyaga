@@ -419,6 +419,11 @@ addEventListener('drop', function (e) {
   box.value = box.value.trim() ? box.value.trim() + '\n' + t : t;
   box.focus();
 });
+// In ТЯГА's own window (WebView2) a right-click gives only what an app needs: copy and paste
+// in text, not the browser's Back / Reload / Print.
+if (window.chrome && window.chrome.webview) addEventListener('contextmenu', function (e) {
+  if (!e.target.closest('textarea,input,.name,.sub,.log') && !String(getSelection())) e.preventDefault();
+});
 $('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askNotify(); add(); } };
 $('open').onclick = function () { api('/api/open', {}); };
 $('clear').onclick = function () { api('/api/clear', {}).then(refresh); };

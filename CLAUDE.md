@@ -34,7 +34,7 @@ through a page in the browser. One Go program: a tiny local server + one embedde
 2. **Check your own work before showing it** (see "Before you show anything"). The owner
    should not have to point out problems you could have seen yourself.
 3. **Give the owner a test build**, not a PR: cross-compile and send the exe
-   (`GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H=windowsgui -X main.version=test-<sha>"`),
+   (`GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -tags production -trimpath -ldflags "-s -w -H=windowsgui -X main.version=test-<sha>"`),
    zipped as `tyaga/tyaga.exe`. He runs it next to his normal copy, not instead of it.
 4. **One branch = one working session.** A session starts when the owner sits down to work
    on ТЯГА; everything done in it goes to one branch (commit and push as you go, no PR yet).

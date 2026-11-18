@@ -1,10 +1,13 @@
-// ТЯГА (TYAGA) downloads video and audio from YouTube with yt-dlp, through a page in your browser.
+// ТЯГА (TYAGA) downloads video and audio from YouTube with yt-dlp.
 //
-// How it works: the program starts a tiny web server on your computer and opens a page
-// in the browser. The page sends links to the server, the server runs yt-dlp for them one
-// at a time and reads its output, and the page asks for progress every 0.7 s.
-// On Windows there's no console window: TYAGA quits by the Quit button on the page,
-// or by itself once the page is closed and the downloads are finished (see app.go).
+// How it works: one page (index.html) and a small API behind it. The page sends links,
+// the program runs yt-dlp for them one at a time and reads its output, and the page asks
+// for progress every 0.7 s.
+// On Windows the page lives in ТЯГА's own window with a tray icon (window_windows.go),
+// served straight to the window with no network port. Elsewhere, or with -no-browser,
+// the program starts a tiny web server on this computer and opens the page in the browser;
+// then it quits by the Quit button on the page, or by itself once the page is closed and
+// the downloads are finished (see app.go).
 //
 // Only this computer can reach the server, and only the page that knows the token.
 package main
@@ -44,13 +47,18 @@ func main() {
 	consoleUTF8()
 	home, _ := os.UserHomeDir()
 	out := flag.String("out", filepath.Join(home, "Downloads", "YouTube"), "folder for downloads")
-	noBrowser := flag.Bool("no-browser", false, "don't open the browser on start")
+	noBrowser := flag.Bool("no-browser", false, "no window and no browser: just the server, its address is in the log")
 	flag.Parse()
 
 	appDir = programDir()
 	binDir = filepath.Join(appDir, "bin")
 	cookiesFile = filepath.Join(appDir, "youtube-cookies.txt")
 	outDir = *out
+
+	// Windows: ТЯГА's own window. It returns when ТЯГА quits.
+	if !*noBrowser && runWindow(randomToken()) {
+		return
+	}
 
 	// Launched again while already running: just bring up the page of the running one.
 	if alreadyRunning() {

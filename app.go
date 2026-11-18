@@ -1,11 +1,12 @@
 package main
 
-// Living without a console window. On Windows TYAGA is built as a window-less program,
+// Living without a console window. On Windows TYAGA is built without a console,
 // so everything that used to be the console's job is done here:
 //   - messages go to tyaga.log next to the program;
-//   - a second launch doesn't start a second TYAGA, it opens the page of the running one;
-//   - TYAGA quits by the Quit button on the page, or by itself when the page is closed
-//     and nothing is downloading anymore.
+//   - in the browser version: a second launch doesn't start a second TYAGA, it opens the page
+//     of the running one, and TYAGA quits by the Quit button on the page, or by itself when
+//     the page is closed and nothing is downloading anymore.
+// (The Windows window does its own single instance and quitting: window_windows.go.)
 
 import (
 	"fmt"
@@ -135,5 +136,5 @@ func quit() {
 	if logFile != nil {
 		logFile.Close()
 	}
-	os.Exit(0)
+	exitApp()
 }
