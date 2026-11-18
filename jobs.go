@@ -348,7 +348,10 @@ func buildArgs(j *Job) []string {
 		}
 	}
 
-	if fileExists(cookiesFile) {
+	// Signed in (login.go): from the browser, read afresh every time, or from the cookies file.
+	if b := browserSource(); b != "" {
+		args = append(args, "--cookies-from-browser", b)
+	} else if fileExists(cookiesFile) {
 		args = append(args, "--cookies", cookiesFile)
 	}
 	return append(args, "--", j.URL) // "--" so the link can't be taken for an option

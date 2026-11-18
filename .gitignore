@@ -4,6 +4,7 @@ bin/
 
 # YouTube cookies give access to your account: never commit them
 youtube-cookies.txt
+youtube-signin.txt
 *cookies*.txt
 
 # Built binaries

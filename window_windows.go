@@ -29,6 +29,7 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 	"github.com/wailsapp/wails/v3/pkg/w32"
+	"golang.org/x/sys/windows/registry"
 )
 
 // place shows the window for the first time, in the middle of the screen (see runWindow).
@@ -230,8 +231,25 @@ func webviewDataDir() string {
 
 const canLogin = true
 
-// Google's sign-in page, going on to YouTube once you're in.
-const signInURL = "https://accounts.google.com/ServiceLogin?service=youtube&continue=https%3A%2F%2Fwww.youtube.com%2F"
+// defaultBrowser is the browser that opens links, as yt-dlp names it ("" = unknown).
+func defaultBrowser() string {
+	k, err := registry.OpenKey(registry.CURRENT_USER,
+		`Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice`, registry.QUERY_VALUE)
+	if err != nil {
+		return ""
+	}
+	defer k.Close()
+	id, _, _ := k.GetStringValue("ProgId")
+	for _, p := range []struct{ prefix, name string }{
+		{"Brave", "brave"}, {"Firefox", "firefox"}, {"ChromeHTML", "chrome"}, {"MSEdge", "edge"},
+		{"Vivaldi", "vivaldi"}, {"Opera", "opera"}, {"Chromium", "chromium"}, {"Whale", "whale"},
+	} {
+		if strings.HasPrefix(id, p.prefix) {
+			return p.name
+		}
+	}
+	return ""
+}
 
 // signedInJS runs on every page of the sign-in window: once YouTube is open with an account
 // (SAPISID is the cookie YouTube's own scripts read to make signed-in requests), it tells ТЯГА.

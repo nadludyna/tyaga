@@ -14,5 +14,6 @@ func windowControl(action string, n int) {}
 // Signing in from ТЯГА needs its own window, so only on Windows (login.go).
 const canLogin = false
 
-func runLogin()        {}
-func loginDir() string { return "" }
+func runLogin()              {}
+func defaultBrowser() string { return "" }
+func loginDir() string       { return "" }
