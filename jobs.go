@@ -792,7 +792,7 @@ func pump() {
 			}
 			done[p] = true
 			s := songs[p]
-			if fixCover(p, albumArt(s.Artist, s.Title, "")) {
+			if fixCover(p, albumArt(s.Artist, s.Title, s.Album)) {
 				mu.Lock()
 				j.addLog("[cover] The real album cover for " + s.Title)
 				mu.Unlock()

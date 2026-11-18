@@ -182,3 +182,34 @@ func TestAlbumArt(t *testing.T) {
 		t.Errorf("a cover without an artist: too easy to get a wrong one")
 	}
 }
+
+// TestPickReleases: one song on many releases. The known album wins; without it, the
+// earliest release of exactly that song; compilations of various artists never.
+func TestPickReleases(t *testing.T) {
+	all := []release{
+		{ArtistName: "Daft Punk", CollectionArtistName: "Various Artists", TrackName: "Get Lucky", CollectionName: "Now 85", ReleaseDate: "2013-01-01", ArtworkURL100: "now"},
+		{ArtistName: "Daft Punk", TrackName: "Get Lucky (Radio Edit)", CollectionName: "Get Lucky - Single", ReleaseDate: "2013-04-19", ArtworkURL100: "edit"},
+		{ArtistName: "Daft Punk", TrackName: "Get Lucky", CollectionName: "Random Access Memories (10th Anniversary Edition)", ReleaseDate: "2023-05-12", ArtworkURL100: "anniv"},
+		{ArtistName: "Daft Punk", TrackName: "Get Lucky", CollectionName: "Random Access Memories", ReleaseDate: "2013-05-17", ArtworkURL100: "ram"},
+		{ArtistName: "Daft Punk", TrackName: "Get Lucky", CollectionName: "Get Lucky - Single", ReleaseDate: "2013-04-19", ArtworkURL100: "single"},
+	}
+	first := func(album string) string {
+		got := pickReleases(all, "song", "Daft Punk", "Get Lucky", album)
+		if len(got) == 0 {
+			return ""
+		}
+		return got[0].ArtworkURL100
+	}
+	if got := first("Random Access Memories"); got != "ram" {
+		t.Errorf("album known: got %q, want the album's cover", got)
+	}
+	if got := first("Get Lucky"); got != "single" {
+		t.Errorf("the single as the album: got %q, want the single's cover", got)
+	}
+	if got := first("Some Bootleg"); got != "" {
+		t.Errorf("album not in the catalogue: got %q, want none (the thumbnail stays)", got)
+	}
+	if got := first(""); got != "single" {
+		t.Errorf("no album: got %q, want the earliest exact release", got)
+	}
+}

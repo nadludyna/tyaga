@@ -23,6 +23,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -236,6 +237,12 @@ func same(a, b string) bool {
 // albumArt finds the real cover. With a title it looks for that song and takes its album's
 // cover; with only an album (a full album split by chapters) it looks for the album.
 // nil when nothing matches clearly enough, or there's no internet.
+//
+// One song sits on many releases (the album, the single, a "Greatest Hits", a live album,
+// someone's compilation), and the first one the catalogue gives is often not the right one.
+// So: when the album is known (YouTube Music tells it), only that album's cover will do;
+// without it, the earliest release of exactly that song by that artist, which is where it
+// first came out. Compilations of various artists never count.
 func albumArt(artist, title, album string) []byte {
 	if norm(artist) == "" || (norm(title) == "" && norm(album) == "") {
 		return nil
@@ -245,34 +252,22 @@ func albumArt(artist, title, album string) []byte {
 		entity, name = "album", album
 	}
 	term := artist + " " + name
-	key := entity + "|" + norm(term)
+	key := entity + "|" + norm(term) + "|" + norm(album)
 	if v, ok := artCache.Load(key); ok {
 		return v.([]byte)
 	}
 	var art []byte
 	defer func() { artCache.Store(key, art) }()
 
-	q := url.Values{"term": {term}, "media": {"music"}, "entity": {entity}, "limit": {"10"}}
+	q := url.Values{"term": {term}, "media": {"music"}, "entity": {entity}, "limit": {"25"}}
 	body := get(itunesURL + "?" + q.Encode())
 	var res struct {
-		Results []struct {
-			ArtistName     string `json:"artistName"`
-			TrackName      string `json:"trackName"`
-			CollectionName string `json:"collectionName"`
-			ArtworkURL100  string `json:"artworkUrl100"`
-		} `json:"results"`
+		Results []release `json:"results"`
 	}
 	if body == nil || json.Unmarshal(body, &res) != nil {
 		return nil
 	}
-	for _, r := range res.Results {
-		got := r.TrackName
-		if entity == "album" {
-			got = r.CollectionName
-		}
-		if !same(r.ArtistName, artist) || !same(got, name) || r.ArtworkURL100 == "" {
-			continue
-		}
+	for _, r := range pickReleases(res.Results, entity, artist, name, album) {
 		// The address says the size: ask for 1200×1200 instead of 100×100.
 		big := strings.Replace(r.ArtworkURL100, "100x100bb", "1200x1200bb", 1)
 		for _, u := range []string{big, r.ArtworkURL100} {
@@ -285,6 +280,59 @@ func albumArt(artist, title, album string) []byte {
 		}
 	}
 	return nil
+}
+
+// release: one search result of the Apple Music catalogue.
+type release struct {
+	ArtistName           string `json:"artistName"`
+	CollectionArtistName string `json:"collectionArtistName"`
+	TrackName            string `json:"trackName"`
+	CollectionName       string `json:"collectionName"`
+	ReleaseDate          string `json:"releaseDate"` // 2013-05-17T07:00:00Z: sorts as text
+	ArtworkURL100        string `json:"artworkUrl100"`
+}
+
+// releaseKind cuts what Apple adds to a release's name: "Get Lucky - Single" → "Get Lucky".
+var releaseKind = regexp.MustCompile(`(?i)\s+-\s+(single|ep)$`)
+
+// pickReleases: the results whose cover may go into the file, best first (see albumArt).
+func pickReleases(all []release, entity, artist, name, album string) []release {
+	var ok []release
+	for _, r := range all {
+		got := r.TrackName
+		if entity == "album" {
+			got = r.CollectionName
+		}
+		if r.ArtworkURL100 == "" || !same(r.ArtistName, artist) || !same(got, name) {
+			continue
+		}
+		if strings.EqualFold(r.CollectionArtistName, "Various Artists") {
+			continue
+		}
+		if entity == "song" && norm(album) != "" {
+			// The album is known: its cover or none. The thumbnail YouTube Music gives
+			// is that album's cover too, so "none" still ends up right.
+			if norm(releaseKind.ReplaceAllString(r.CollectionName, "")) != norm(album) {
+				continue
+			}
+		}
+		ok = append(ok, r)
+	}
+	// Exactly the song first ("Get Lucky", not "Get Lucky (Radio Edit)"), then the earliest.
+	exact := func(r release) bool {
+		got := r.TrackName
+		if entity == "album" {
+			got = r.CollectionName
+		}
+		return strings.EqualFold(strings.TrimSpace(releaseKind.ReplaceAllString(got, "")), strings.TrimSpace(name))
+	}
+	sort.SliceStable(ok, func(i, j int) bool {
+		if ei, ej := exact(ok[i]), exact(ok[j]); ei != ej {
+			return ei
+		}
+		return ok[i].ReleaseDate < ok[j].ReleaseDate
+	})
+	return ok
 }
 
 // get downloads a small thing from the internet; nil on any problem.
