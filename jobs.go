@@ -639,11 +639,12 @@ func logLine(line string) string {
 	case tag == "download" && strings.HasPrefix(line, "Downloading playlist: "):
 		return "Playlist: " + strings.TrimPrefix(line, "Downloading playlist: ")
 	case tag == "download" && strings.HasPrefix(line, "Destination: "):
-		return "Downloading " + strings.TrimPrefix(line, "Destination: ")
+		return fileStep // which file it is (the picture or the sound) only the job knows: addLog
+
 	case tag == "download" && has("Sleeping"):
 		return "" // shown as "waiting" with the seconds, not as a log line
 	case tag == "ExtractAudio" && strings.HasPrefix(line, "Destination: "):
-		return "Converting to " + strings.TrimPrefix(line, "Destination: ")
+		return "Converting to " + strings.ToUpper(strings.TrimPrefix(filepath.Ext(line), "."))
 	case tag == "Merger":
 		return "Joining the picture and the sound"
 	case tag == "EmbedThumbnail":
@@ -654,11 +655,30 @@ func logLine(line string) string {
 	return line
 }
 
+// fileStep stands for "yt-dlp starts a file" until addLog says which one (no file names on the page).
+const fileStep = "\x00file"
+
 // addLog adds a readable line to the short log the page shows.
 func (j *Job) addLog(line string) {
 	line = logLine(line)
 	if line == "" {
 		return
+	}
+	if line == fileStep {
+		// A video comes as two files, the picture first: the second since the last join is the sound.
+		line = "Downloading the sound"
+		if j.Mode == "video" {
+			line = "Downloading the picture"
+			for i := len(j.Log) - 1; i >= 0; i-- {
+				if j.Log[i] == "Joining the picture and the sound" {
+					break
+				}
+				if j.Log[i] == "Downloading the picture" {
+					line = "Downloading the sound"
+					break
+				}
+			}
+		}
 	}
 	j.Now = "" // a new step: the live line of the last one is over
 	if r := []rune(line); len(r) > 140 {

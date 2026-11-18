@@ -100,7 +100,7 @@ input[type=checkbox]:active{transform:scale(.8)}
 .cover.ok{opacity:1;transform:none}
 /* Same place as the cover, for rows that have none: queued, failed, cancelled, or a file
    without a picture. Keeps every row's text in one column. */
-.ph{flex:none;width:58px;height:58px;border-radius:9px;display:grid;place-items:center;background:rgba(127,127,127,.08);box-shadow:0 0 0 1px var(--line);color:var(--dim)}
+.ph{animation:fadein .25s ease both;flex:none;width:58px;height:58px;border-radius:9px;display:grid;place-items:center;background:rgba(127,127,127,.08);box-shadow:0 0 0 1px var(--line);color:var(--dim)}
 .ph svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .job.error .ph{color:var(--err);background:color-mix(in srgb,var(--err) 9%,transparent)}
 .name.link{color:var(--dim)}
@@ -244,6 +244,12 @@ html.app #game{flex:1;min-height:0;margin-top:10px;position:relative;border-radi
 html.app .fadeout{opacity:0!important;transition:opacity .14s ease}
 html.app #list.fadein{animation:fadein .22s ease both}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
+/* Things that appear because a switch changed (a chip, the format buttons, the Play button,
+   a row's buttons or message) fade in instead of popping up. */
+.chips .chip,.opts .seg,.foot .play,.acts .btn,.job .body>.sub,.msg:not(:empty){animation:fadein .2s ease both}
+/* A row's live part (wave, numbers, steps) unfolds when the download starts and folds away
+   when it ends (see reveal()). */
+.live.slide{overflow:hidden;transition:height .3s cubic-bezier(.4,0,.2,1),opacity .25s ease}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
 html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
@@ -290,10 +296,10 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
   <div class="row chips">
     <label class="chip" title="If the link is a video inside a playlist, download the whole playlist, not just this video"><input type="checkbox" id="playlist"> whole playlist</label>
     <label class="chip" id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"> as one file</label>
+    <label class="chip" id="cutBox" title="Download only a piece of the video"><input type="checkbox" id="cut"> fragment</label>
     <label class="chip" data-for="audio" id="splitBox" hidden title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked> split by chapters</label>
     <label class="chip" data-for="video" title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"> for editing</label>
     <label class="chip" title="Cut sponsor ads, self-promo and &quot;subscribe!&quot; bits (SponsorBlock). For music also the non-music parts of a clip."><input type="checkbox" id="sponsors" checked> no sponsors</label>
-    <label class="chip" id="cutBox" title="Download only a piece of the video"><input type="checkbox" id="cut"> fragment</label>
   </div>
   <div class="row cutrow">
     <span class="times" id="cutTimes" hidden title="Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty &quot;to&quot; — to the end.">
@@ -687,7 +693,6 @@ function updateRow(r, j) {
 
   // While downloading: the wave, the numbers and the log.
   var running = j.status === 'running';
-  r.live.hidden = !running;
   if (running) {
     waveTarget[j.id] = { p: j.progress, wait: waiting };
     // Track and percent are in the pills; here: speed and time left, or why it's waiting.
@@ -699,6 +704,7 @@ function updateRow(r, j) {
     setText(r.nums, nums.filter(Boolean).join(' · '));
     renderSteps(r, j);
   }
+  reveal(r.live, running, !!r.status); // after its content is in, so it unfolds to the right height
 
   // A note, an error, or skipped videos of a merged playlist.
   var msg = j.status === 'error' ? j.error : j.status === 'done' ? j.error : j.note;
@@ -742,6 +748,26 @@ function updateRow(r, j) {
     r.acts.hidden = !r.acts.children.length;
   }
   r.status = j.status;
+}
+
+// reveal shows or hides a part by folding it open or shut (animate: not for a row's first look).
+function reveal(e, show, animate) {
+  if (e._shown === show) return;
+  e._shown = show;
+  clearTimeout(e._t);
+  e.classList.remove('slide'); e.style.height = e.style.opacity = '';
+  if (!animate || matchMedia('(prefers-reduced-motion: reduce)').matches) { e.hidden = !show; return; }
+  var from = e.hidden ? 0 : e.offsetHeight;
+  e.hidden = false;
+  var to = show ? e.offsetHeight : 0;
+  e.style.height = from + 'px'; e.style.opacity = show ? 0 : 1;
+  void e.offsetHeight;
+  e.classList.add('slide');
+  e.style.height = to + 'px'; e.style.opacity = show ? 1 : 0;
+  e._t = setTimeout(function () {
+    e.classList.remove('slide'); e.style.height = e.style.opacity = '';
+    if (!show) e.hidden = true;
+  }, 320);
 }
 
 // The step feed under the wave: done steps with a tick, the current one live. Updated

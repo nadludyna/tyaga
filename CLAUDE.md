@@ -64,6 +64,13 @@ at the part you changed, in every state:
   playlist as one file); failed with Retry; several downloads at once;
 - a wide window and a narrow one (~420 px); dark and light theme.
 
+**Transitions are part of the check, every time.** List every state change your work touches
+(something appears, disappears, expands, collapses, a view switches, the list clears, hover,
+press, the mouse leaving the window and coming back) and watch each one frame by frame on the
+stand (screenshots ~100 ms apart). Anything that pops, vanishes, jumps or snaps is a bug: fix
+it before the build. See rule 1a in `docs/ui-principles.md`. The owner should not have to
+name them one by one.
+
 For each screenshot ask: is there an empty hole? Is something misaligned with its neighbours?
 Do colours compete? Is any text a developer's text (paths, ids, `[tags]`)? Does it say what's
 really happening right now? Check the wave numbers `stand/record.py` prints (never stops,

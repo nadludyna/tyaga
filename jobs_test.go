@@ -236,10 +236,10 @@ func TestLog(t *testing.T) {
 	}
 	want := []string{
 		"⚠ something odd",
-		"Converting to Song.mp3",
+		"Converting to MP3",
 		"Adding the cover",
 	}
-	if !slices.Equal(j.Log[1:], want) || j.Log[0] != "Downloading 01 - Song.webm" {
+	if !slices.Equal(j.Log[1:], want) || j.Log[0] != "Downloading the sound" {
 		t.Errorf("log = %q", j.Log)
 	}
 	for _, l := range j.Log {
@@ -338,8 +338,14 @@ func TestProgressFragments(t *testing.T) {
 }
 
 func TestFormatNumberHidden(t *testing.T) {
-	if got := logLine(`[download] Destination: C:\\x\\Song.f299.mp4`); got != "Downloading Song.mp4" {
-		t.Errorf("%q", got)
+	j := &Job{Options: Options{Mode: "video"}}
+	j.addLog(`[download] Destination: C:\\x\\Song.f299.mp4`)
+	j.addLog(`[download] Destination: C:\\x\\Song.f140.m4a`)
+	j.addLog("[Merger] Merging formats into \"C:\\x\\Song.mp4\"")
+	j.addLog(`[download] Destination: C:\\x\\Next.f299.mp4`)
+	want := []string{"Downloading the picture", "Downloading the sound", "Joining the picture and the sound", "Downloading the picture"}
+	if !slices.Equal(j.Log, want) {
+		t.Errorf("%q", j.Log)
 	}
 }
 
