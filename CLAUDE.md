@@ -37,7 +37,7 @@ through a page in the browser. One Go program: a tiny local server + one embedde
    (`GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -tags production -trimpath -ldflags "-s -w -H=windowsgui -X main.version=test-NN"`).
    He runs it next to his normal copy, not instead of it. Builds are numbered so he can tell
    which came after which: put each one on his PC as
-   `Desktop\клоны репо\ТЯГА builds\NN — DD.MM HH-MM — <what's new, in Russian> (<sha>)\tyaga.exe`
+   `Desktop\клоны репо\ТЯГА builds\NN · DD.MM HH.MM · <what's new, in Russian>\tyaga.exe`
    (his local time, Europe/Warsaw) and build it with `-X main.version=test-NN`, so the page shows the number
    too. Tell him the folder; no zips in the chat.
 4. **One branch = one working session.** A session starts when the owner sits down to work
