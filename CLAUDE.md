@@ -39,7 +39,7 @@ through a page in the browser. One Go program: a tiny local server + one embedde
    which came after which: put each one on his PC as
    `Desktop\клоны репо\ТЯГА builds\NN — DD.MM HH-MM — <what's new, in Russian> (<sha>)\tyaga.exe`
    (his local time, Europe/Warsaw) and build it with `-X main.version=test-NN`, so the page shows the number
-   too. Tell him the folder; no zips in the chat.
+   too. Old builds are kept, never deleted. Tell him the folder; no zips in the chat.
 4. **One branch = one working session.** A session starts when the owner sits down to work
    on ТЯГА; everything done in it goes to one branch (commit and push as you go, no PR yet).
    When he says the session is over ("заканчиваем сессию"), update the README, open the PR
