@@ -5,8 +5,9 @@ package main
 //   ffmpeg — merging video and audio, converting, covers;
 //   Deno   — yt-dlp uses it to run YouTube's JavaScript.
 //
-// First look in the bin folder next to the program, then in PATH.
-// Whatever is missing gets downloaded into bin from the official GitHub release pages.
+// First look in tyaga-data\bin next to the program, then in PATH.
+// On Windows whatever is missing gets downloaded into bin from the official GitHub release
+// pages. Elsewhere (only the test stand and development) they have to be in PATH.
 
 import (
 	"archive/zip"
@@ -93,10 +94,6 @@ func ytdlpAsset() (asset, bool) {
 	file := map[string]string{
 		"windows/amd64": "yt-dlp.exe",
 		"windows/arm64": "yt-dlp.exe",
-		"linux/amd64":   "yt-dlp_linux",
-		"linux/arm64":   "yt-dlp_linux_aarch64",
-		"darwin/amd64":  "yt-dlp_macos",
-		"darwin/arm64":  "yt-dlp_macos",
 	}[runtime.GOOS+"/"+runtime.GOARCH]
 	if file == "" {
 		return asset{}, false
@@ -109,10 +106,6 @@ func denoAsset() (asset, bool) {
 	file := map[string]string{
 		"windows/amd64": "deno-x86_64-pc-windows-msvc.zip",
 		"windows/arm64": "deno-aarch64-pc-windows-msvc.zip",
-		"linux/amd64":   "deno-x86_64-unknown-linux-gnu.zip",
-		"linux/arm64":   "deno-aarch64-unknown-linux-gnu.zip",
-		"darwin/amd64":  "deno-x86_64-apple-darwin.zip",
-		"darwin/arm64":  "deno-aarch64-apple-darwin.zip",
 	}[runtime.GOOS+"/"+runtime.GOARCH]
 	if file == "" {
 		return asset{}, false
@@ -120,8 +113,6 @@ func denoAsset() (asset, bool) {
 	return asset{url: base + file, zipped: []string{exeName("deno")}, sums: base + file + ".sha256sum"}, true
 }
 
-// ffmpeg is downloaded automatically only on Windows: the Linux builds come as tar.xz,
-// and on Linux and Mac it's easier to install ffmpeg with a package manager.
 func ffmpegAsset() (asset, bool) {
 	base := "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/"
 	switch runtime.GOOS + "/" + runtime.GOARCH {
@@ -135,11 +126,8 @@ func ffmpegAsset() (asset, bool) {
 
 // installHint is what to tell the user if a program couldn't be obtained.
 func installHint(name string) string {
-	switch runtime.GOOS {
-	case "darwin":
-		return "Install it: brew install " + name
-	case "linux":
-		return "Install it with your package manager, e.g.: sudo apt install " + name
+	if runtime.GOOS != "windows" {
+		return "Put " + name + " into PATH." // the test stand and development
 	}
 	return "Download " + name + " manually and put it into the bin folder next to the program."
 }

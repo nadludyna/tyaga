@@ -1,8 +1,10 @@
 # ТЯГА — notes for AI agents (and humans) working on this repo
 
-ТЯГА (say *TYA-ga*; the file is `tyaga`) downloads video and music from YouTube with yt-dlp,
-through a page in the browser. One Go program: a tiny local server + one embedded page
-(`index.html`). Read `README.md` for what it does for people.
+ТЯГА (say *TYA-ga*; the file is `tyaga`) downloads video and music from YouTube with yt-dlp.
+A **Windows app**: one Go program with its own window and tray icon (Wails, WebView2) showing
+one embedded page (`index.html`). On Linux the same program serves the page to a browser; that
+is only for the test stand and development, there are no macOS or Linux releases.
+Read `README.md` for what it does for people.
 
 ## The owner
 
@@ -119,6 +121,11 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
 - Covers: the real album art from the Apple Music catalogue (iTunes Search API, no key; only
   when artist and title clearly match), else the thumbnail, squared if it's art between bars.
   YouTube Music has no public API — don't build on its internal one.
+- One song is on many releases (album, single, "Greatest Hits", someone's compilation) and
+  Apple often lists a compilation first: Orbital's "In Sides" tracks got the cover of "20".
+  When YouTube Music gives the album, only that album's cover counts; for a plain video, the
+  album where the song first came out (the album's own date, from the lookup API: a song's
+  date is the same on every album). `TYAGA_LIVE=1 go test -run Live` checks the real catalogue.
 - Mock data hides real problems. A demo page is not a test: use the stand.
 - Portable: ТЯГА writes nothing outside its own folder (`tyaga-data`, see data.go) and the
   downloads folder. Anything new it keeps goes there, with a line on why in data.go.
@@ -131,7 +138,9 @@ jobs.go      queue, yt-dlp command line, reading its output (progress, log, erro
 cover.go     covers (Apple Music art, squaring thumbnails)
 merge.go     a playlist glued into one file
 tools.go     finding / downloading yt-dlp, ffmpeg, Deno
-app.go       quitting when the page is closed
+window_windows.go  the window, tray icon, tray menu, sign-in window (Windows)
+proc_*.go    starting / stopping yt-dlp, opening folders (Windows, and Linux for the stand)
+app.go       the log; quitting when the page is closed (browser mode)
 data.go      tyaga-data, the one folder next to the exe where ТЯГА keeps everything (portable)
 login.go     signing in to YouTube
 index.html   the whole page (the game during downloads is in it too)

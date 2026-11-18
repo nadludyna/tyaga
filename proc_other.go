@@ -2,14 +2,13 @@
 
 package main
 
-// Things that work differently on Linux and macOS.
+// Linux: only for the test stand and development (ТЯГА is a Windows app).
 
 import (
 	"fmt"
 	"net/url"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"syscall"
 )
 
@@ -30,13 +29,9 @@ func killTree(cmd *exec.Cmd) {
 func openURL(url string)    { openWith(url) }
 func openFolder(dir string) { openWith(dir) }
 
-// revealFile shows the file in the file manager: selected on macOS and in Linux file managers
-// that support it (most do, through D-Bus), otherwise just its folder.
+// revealFile shows the file in the file manager, selected where it supports that (through
+// D-Bus), otherwise just its folder.
 func revealFile(path string) {
-	if runtime.GOOS == "darwin" {
-		exec.Command("open", "-R", path).Start()
-		return
-	}
 	uri := (&url.URL{Scheme: "file", Path: path}).String()
 	err := exec.Command("dbus-send", "--session", "--dest=org.freedesktop.FileManager1", "--type=method_call",
 		"/org/freedesktop/FileManager1", "org.freedesktop.FileManager1.ShowItems",
@@ -46,13 +41,7 @@ func revealFile(path string) {
 	}
 }
 
-func openWith(target string) {
-	name := "xdg-open"
-	if runtime.GOOS == "darwin" {
-		name = "open"
-	}
-	exec.Command(name, target).Start()
-}
+func openWith(target string) { exec.Command("xdg-open", target).Start() }
 
 func consoleUTF8() {}
 

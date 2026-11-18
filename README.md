@@ -28,7 +28,7 @@ On the first run ТЯГА fetches yt-dlp, ffmpeg and Deno (about 250 MB, once, e
 ## What it can do
 
 - **Video:** MP4 at the best quality or capped at 1440p / 1080p / 720p. "For editing" gives H.264 + AAC, which opens in DaVinci Resolve and any editor.
-- **Music:** M4A (the original track) or MP3, clean tags, and the real album cover from the Apple Music catalogue when artist and title clearly match.
+- **Music:** M4A (the original track) or MP3, clean tags, and the real cover of the album the track is from (from the Apple Music catalogue), not of some compilation that has the same song.
 - **Albums** uploaded as one long video get split into tracks by chapters.
 - **Playlists and channels** go into a numbered folder, or "as one file" with a chapter per video.
 - **No sponsors:** SponsorBlock cuts the ads and "don't forget to subscribe".
