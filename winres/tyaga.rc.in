@@ -1,5 +1,6 @@
 // Windows resources: the icon and what "Properties → Details" shows.
-1 ICON "icon.ico"
+// The icon is number 3: that is where Wails looks for the window icon.
+3 ICON "icon.ico"
 
 1 VERSIONINFO
 FILEVERSION     @MAJOR@,@MINOR@,@PATCH@,0

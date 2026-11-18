@@ -34,13 +34,20 @@ through a page in the browser. One Go program: a tiny local server + one embedde
 2. **Check your own work before showing it** (see "Before you show anything"). The owner
    should not have to point out problems you could have seen yourself.
 3. **Give the owner a test build**, not a PR: cross-compile and send the exe
-   (`GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -H=windowsgui -X main.version=test-<sha>"`),
-   zipped as `tyaga/tyaga.exe`. He runs it next to his normal copy, not instead of it.
+   (`GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -tags production -trimpath -ldflags "-s -w -H=windowsgui -X main.version=test-NN"`).
+   He runs it next to his normal copy, not instead of it. Builds are numbered so he can tell
+   which came after which: put each one on his PC as
+   `Desktop\клоны репо\ТЯГА builds\NN — DD.MM HH-MM — <what's new, in Russian> (<sha>)\tyaga.exe`
+   (his local time, Europe/Warsaw) and build it with `-X main.version=test-NN`, so the page shows the number
+   too. Old builds are kept, never deleted. Tell him the folder; no zips in the chat.
 4. **One branch = one working session.** A session starts when the owner sits down to work
    on ТЯГА; everything done in it goes to one branch (commit and push as you go, no PR yet).
    When he says the session is over ("заканчиваем сессию"), update the README, open the PR
    for that branch, and he goes off to do other things. The next session starts a new branch
-   from `main`.
+   from `main`. All threads of a session work on that one branch; if a thread had to make its
+   own, it is merged into the session's branch and then deleted. Branches are deleted after
+   their PR is merged (GitHub does it by itself: "Automatically delete head branches" is on),
+   so the repo holds only `main` and the current session's branch.
 5. **The README is updated at the end of a session**, not after every change. Its top stays
    short and holds only what rarely changes: what ТЯГА is, how to start it, the screenshot.
    Details and the things that change often go further down.
@@ -57,6 +64,13 @@ at the part you changed, in every state:
   playlist as one file); failed with Retry; several downloads at once;
 - a wide window and a narrow one (~420 px); dark and light theme.
 
+**Transitions are part of the check, every time.** List every state change your work touches
+(something appears, disappears, expands, collapses, a view switches, the list clears, hover,
+press, the mouse leaving the window and coming back) and watch each one frame by frame on the
+stand (screenshots ~100 ms apart). Anything that pops, vanishes, jumps or snaps is a bug: fix
+it before the build. See rule 1a in `docs/ui-principles.md`. The owner should not have to
+name them one by one.
+
 For each screenshot ask: is there an empty hole? Is something misaligned with its neighbours?
 Do colours compete? Is any text a developer's text (paths, ids, `[tags]`)? Does it say what's
 really happening right now? Check the wave numbers `stand/record.py` prints (never stops,
@@ -67,6 +81,8 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
 
 ## Design rules
 
+- **How the page behaves** (nothing jumps, never freezes, Nielsen's ten): `docs/ui-principles.md`.
+  Check every change against it.
 - Reference: **Material 3 Expressive** (the owner likes how the Morphe app looks). Dark first,
   light must work too.
 - **No empty holes.** When something is added or removed, rebalance its neighbours so the
@@ -104,6 +120,8 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
   when artist and title clearly match), else the thumbnail, squared if it's art between bars.
   YouTube Music has no public API — don't build on its internal one.
 - Mock data hides real problems. A demo page is not a test: use the stand.
+- Portable: ТЯГА writes nothing outside its own folder (`tyaga-data`, see data.go) and the
+  downloads folder. Anything new it keeps goes there, with a line on why in data.go.
 
 ## Map
 
@@ -114,6 +132,9 @@ cover.go     covers (Apple Music art, squaring thumbnails)
 merge.go     a playlist glued into one file
 tools.go     finding / downloading yt-dlp, ffmpeg, Deno
 app.go       quitting when the page is closed
-index.html   the whole page
+data.go      tyaga-data, the one folder next to the exe where ТЯГА keeps everything (portable)
+login.go     signing in to YouTube
+index.html   the whole page (the game during downloads is in it too)
+menu.html    the tray icon's menu (Windows), a little window of its own
 stand/       the test stand
 ```

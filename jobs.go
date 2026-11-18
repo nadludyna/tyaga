@@ -348,7 +348,10 @@ func buildArgs(j *Job) []string {
 		}
 	}
 
-	if fileExists(cookiesFile) {
+	// Signed in (login.go): from the browser, read afresh every time, or from the cookies file.
+	if b := browserSource(); b != "" {
+		args = append(args, "--cookies-from-browser", b)
+	} else if fileExists(cookiesFile) {
 		args = append(args, "--cookies", cookiesFile)
 	}
 	return append(args, "--", j.URL) // "--" so the link can't be taken for an option
@@ -372,6 +375,9 @@ func explain(line string) string {
 	case sponsorRe.MatchString(line):
 		return "SponsorBlock didn't answer. Untick \"no sponsors\" and add the link again."
 	case signInRe.MatchString(line):
+		if canLogin {
+			return "YouTube wants you to sign in. Sign in, then Retry."
+		}
 		return "YouTube wants you to sign in. Put a fresh youtube-cookies.txt next to the program."
 	case tooManyRe.MatchString(line):
 		return "YouTube is limiting requests for now. Try again later."
@@ -506,20 +512,20 @@ func onLine(j *Job, line string) {
 		case guess > 0:
 			f = done / guess
 		}
-		// The live line: which file, how many pieces, how much.
+		// The live line: which file, how many parts, how much (always "of" what, or "so far").
 		what := "Downloading the sound"
 		if j.Mode == "video" && j.part == 0 {
 			what = "Downloading the picture"
 		}
 		now := []string{what}
 		if frags > 0 && frag >= 0 {
-			now = append(now, fmt.Sprintf("piece %s of %s", thousands(frag), thousands(frags)))
+			now = append(now, fmt.Sprintf("part %s of %s", thousands(frag), thousands(frags)))
 		}
 		switch {
 		case done > 0 && total > 0:
 			now = append(now, sizeText(done)+" of "+sizeText(total))
-		case done > 0:
-			now = append(now, sizeText(done))
+		case done > 0: // in parts the full size isn't known yet
+			now = append(now, sizeText(done)+" so far")
 		}
 		j.Now = strings.Join(now, " · ")
 		if !math.IsNaN(f) {
@@ -633,11 +639,12 @@ func logLine(line string) string {
 	case tag == "download" && strings.HasPrefix(line, "Downloading playlist: "):
 		return "Playlist: " + strings.TrimPrefix(line, "Downloading playlist: ")
 	case tag == "download" && strings.HasPrefix(line, "Destination: "):
-		return "Downloading " + strings.TrimPrefix(line, "Destination: ")
+		return fileStep // which file it is (the picture or the sound) only the job knows: addLog
+
 	case tag == "download" && has("Sleeping"):
 		return "" // shown as "waiting" with the seconds, not as a log line
 	case tag == "ExtractAudio" && strings.HasPrefix(line, "Destination: "):
-		return "Converting to " + strings.TrimPrefix(line, "Destination: ")
+		return "Converting to " + strings.ToUpper(strings.TrimPrefix(filepath.Ext(line), "."))
 	case tag == "Merger":
 		return "Joining the picture and the sound"
 	case tag == "EmbedThumbnail":
@@ -648,11 +655,30 @@ func logLine(line string) string {
 	return line
 }
 
+// fileStep stands for "yt-dlp starts a file" until addLog says which one (no file names on the page).
+const fileStep = "\x00file"
+
 // addLog adds a readable line to the short log the page shows.
 func (j *Job) addLog(line string) {
 	line = logLine(line)
 	if line == "" {
 		return
+	}
+	if line == fileStep {
+		// A video comes as two files, the picture first: the second since the last join is the sound.
+		line = "Downloading the sound"
+		if j.Mode == "video" {
+			line = "Downloading the picture"
+			for i := len(j.Log) - 1; i >= 0; i-- {
+				if j.Log[i] == "Joining the picture and the sound" {
+					break
+				}
+				if j.Log[i] == "Downloading the picture" {
+					line = "Downloading the sound"
+					break
+				}
+			}
+		}
 	}
 	j.Now = "" // a new step: the live line of the last one is over
 	if r := []rune(line); len(r) > 140 {

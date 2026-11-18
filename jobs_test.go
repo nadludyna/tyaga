@@ -105,7 +105,7 @@ func TestOnLine(t *testing.T) {
 		t.Errorf("tracks: %+v", j.tracks)
 	}
 	onLine(j, "ERROR: [youtube] abc: Sign in to confirm you're not a bot")
-	if !strings.Contains(j.Error, "cookies") {
+	if !strings.Contains(j.Error, "sign in") {
 		t.Errorf("error: %q", j.Error)
 	}
 }
@@ -236,10 +236,10 @@ func TestLog(t *testing.T) {
 	}
 	want := []string{
 		"⚠ something odd",
-		"Converting to Song.mp3",
+		"Converting to MP3",
 		"Adding the cover",
 	}
-	if !slices.Equal(j.Log[1:], want) || j.Log[0] != "Downloading 01 - Song.webm" {
+	if !slices.Equal(j.Log[1:], want) || j.Log[0] != "Downloading the sound" {
 		t.Errorf("log = %q", j.Log)
 	}
 	for _, l := range j.Log {
@@ -338,8 +338,14 @@ func TestProgressFragments(t *testing.T) {
 }
 
 func TestFormatNumberHidden(t *testing.T) {
-	if got := logLine(`[download] Destination: C:\\x\\Song.f299.mp4`); got != "Downloading Song.mp4" {
-		t.Errorf("%q", got)
+	j := &Job{Options: Options{Mode: "video"}}
+	j.addLog(`[download] Destination: C:\\x\\Song.f299.mp4`)
+	j.addLog(`[download] Destination: C:\\x\\Song.f140.m4a`)
+	j.addLog("[Merger] Merging formats into \"C:\\x\\Song.mp4\"")
+	j.addLog(`[download] Destination: C:\\x\\Next.f299.mp4`)
+	want := []string{"Downloading the picture", "Downloading the sound", "Joining the picture and the sound", "Downloading the picture"}
+	if !slices.Equal(j.Log, want) {
+		t.Errorf("%q", j.Log)
 	}
 }
 
@@ -347,7 +353,7 @@ func TestLiveLine(t *testing.T) {
 	j := &Job{Options: Options{Mode: "video"}}
 	onLine(j, "CHAN|Pilotredsky - Topic")
 	onLine(j, "PROG|327155712|NA|9000000000|3000000|300|1020|2041")
-	if j.Channel != "Pilotredsky" || j.Now != "Downloading the picture · piece 1 020 of 2 041 · 312 MB" {
+	if j.Channel != "Pilotredsky" || j.Now != "Downloading the picture · part 1 020 of 2 041 · 312 MB so far" {
 		t.Errorf("channel %q, now %q", j.Channel, j.Now)
 	}
 	onLine(j, "[Merger] Merging formats into \"/x/V.mp4\"")
@@ -359,5 +365,14 @@ func TestLiveLine(t *testing.T) {
 func TestJSChallenge(t *testing.T) {
 	if got := logLine("[youtube] [jsc:deno] Solving JS challenges using deno"); got != "Passing YouTube's check" {
 		t.Errorf("%q", got)
+	}
+}
+
+func TestHasSignIn(t *testing.T) {
+	visit := "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t1893456000\tVISITOR_INFO1_LIVE\tx\n"
+	in := visit + "#HttpOnly_.youtube.com\tTRUE\t/\tTRUE\t1893456000\t__Secure-3PSID\ty\n"
+	google := visit + ".google.com\tTRUE\t/\tTRUE\t1893456000\tSAPISID\tz\n"
+	if hasSignIn([]byte(visit)) || hasSignIn([]byte(google)) || !hasSignIn([]byte(in)) {
+		t.Error("hasSignIn: a visit, Google only and a YouTube sign-in told apart wrongly")
 	}
 }

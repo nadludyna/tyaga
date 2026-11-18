@@ -53,7 +53,7 @@ jobs:
             exe=tyaga; [ "$os" = windows ] && exe=tyaga.exe
             gui=""; [ "$os" = windows ] && gui="-H=windowsgui" # no console window on Windows
             mkdir -p "build/$name/tyaga"
-            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath \
+            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -tags production -trimpath \
               -ldflags "-s -w $gui -X main.version=$VERSION" -o "build/$name/tyaga/$exe" .
             if [ "$os" = windows ]; then
               (cd "build/$name" && zip -qr "../../dist/$name.zip" tyaga)
