@@ -28,7 +28,7 @@ On the first run ТЯГА fetches yt-dlp, ffmpeg and Deno (about 250 MB, once, e
 ## What it can do
 
 - **Video:** MP4 at the best quality or capped at 1440p / 1080p / 720p. "For editing" gives H.264 + AAC, which opens in DaVinci Resolve and any editor.
-- **Music:** M4A (the original track) or MP3, clean tags, and the real album cover from the Apple Music catalogue when artist and title clearly match.
+- **Music:** M4A (the original track) or MP3, clean tags, and the real cover of the album the track is from (from the Apple Music catalogue), not of some compilation that has the same song.
 - **Albums** uploaded as one long video get split into tracks by chapters.
 - **Playlists and channels** go into a numbered folder, or "as one file" with a chapter per video.
 - **No sponsors:** SponsorBlock cuts the ads and "don't forget to subscribe".
@@ -60,7 +60,7 @@ Tests: `go test ./...`. The test stand (`stand/README.md`) runs the program agai
 
 ## How it started
 
-As `TYAGA.cmd`: a batch file and a TypeScript program in one file, Windows-only and needing Deno installed. Then it grew up and was rewritten in Go, into one program that runs everywhere.
+As `TYAGA.cmd`: a batch file and a TypeScript program in one file, Windows-only and needing Deno installed. Then it grew up and was rewritten in Go, into one program that runs everywhere. Then it got its own window and tray and became a Windows app: that's where it's used.
 
 ## License
 

@@ -2,8 +2,8 @@ package main
 
 // Living without a console window. On Windows TYAGA is built without a console,
 // so everything that used to be the console's job is done here:
-//   - messages go to tyaga.log next to the program;
-//   - in the browser version: a second launch doesn't start a second TYAGA, it opens the page
+//   - messages go to tyaga-data\tyaga.log next to the program;
+//   - in the browser version (the test stand on Linux): a second launch doesn't start a second TYAGA, it opens the page
 //     of the running one, and TYAGA quits by itself when the page is closed and nothing is downloading anymore.
 // (The Windows window does its own single instance and quitting: window_windows.go.)
 

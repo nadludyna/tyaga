@@ -1,5 +1,3 @@
-# Programs TYAGA downloads by itself
-bin/
 *.part
 
 # YouTube cookies give access to your account: never commit them
@@ -12,7 +10,5 @@ tyaga
 tyaga.exe
 dist/
 
-# What TYAGA keeps next to itself while running
+# Everything TYAGA keeps next to itself (data.go)
 tyaga-data/
-tyaga.log
-.tyaga-running

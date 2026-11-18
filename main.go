@@ -4,10 +4,10 @@
 // the program runs yt-dlp for them one at a time and reads its output, and the page asks
 // for progress every 0.7 s.
 // On Windows the page lives in ТЯГА's own window with a tray icon (window_windows.go),
-// served straight to the window with no network port. Elsewhere, or with -no-browser,
-// the program starts a tiny web server on this computer and opens the page in the browser;
-// then it quits by itself once the page is closed and
-// the downloads are finished (see app.go).
+// served straight to the window with no network port. ТЯГА is a Windows app; on Linux
+// (the test stand, stand/) the program starts a tiny web server on this computer and the
+// page opens in a browser, and it quits by itself once the page is closed and the downloads
+// are finished (see app.go).
 //
 // Only this computer can reach the server, and only the page that knows the token.
 package main

@@ -4,7 +4,7 @@ package main
 
 import "os"
 
-// Only the Windows build has its own window; elsewhere ТЯГА runs in the browser.
+// Not Windows: the test stand and development. No window; the page opens in the browser.
 func runWindow(token string) bool { return false }
 
 var exitApp = func() { os.Exit(0) }
