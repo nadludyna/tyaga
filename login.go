@@ -141,7 +141,7 @@ func browserSource() string {
 }
 
 // signinFile remembers which browser to read the sign-in from.
-func signinFile() string { return filepath.Join(appDir, "youtube-signin.txt") }
+func signinFile() string { return filepath.Join(dataDir, "youtube-signin.txt") }
 
 func browserName(b string) string {
 	if n, ok := map[string]string{"brave": "Brave", "firefox": "Firefox", "chrome": "Chrome", "edge": "Edge",

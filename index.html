@@ -18,7 +18,6 @@ textarea,.name,.sub,.log{-webkit-user-select:text;user-select:text}
 /* Background: notes and play signs slowly falling (canvas, drawn in the script), a faint glow at the top. */
 .bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 80% 50% at 50% -10%,var(--glow),transparent 70%)}
 .bg canvas{width:100%;height:100%;display:block}
-#fx{position:fixed;inset:0;width:100%;height:100%;z-index:50;pointer-events:none}
 /* A download finished: the fish jumps on the hook. */
 body.caught .logo .catch{animation:jump .9s cubic-bezier(.3,1.5,.5,1)}
 @keyframes jump{0%{transform:none}35%{transform:translateY(-18px) rotate(-10deg)}70%{transform:translateY(3px) rotate(4deg)}100%{transform:none}}
@@ -48,15 +47,15 @@ main>.card:nth-of-type(2){animation-delay:.08s}main>.card:nth-of-type(3){animati
 .note{border-color:var(--acc);font-size:14px;white-space:pre-line}
 .note.err{border-color:var(--err);color:var(--err)}
 
-textarea{width:100%;min-height:90px;resize:vertical;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+textarea{width:100%;min-height:76px;resize:vertical;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
 body.drop textarea{border-color:var(--acc);border-style:dashed;box-shadow:0 0 0 4px var(--glow)}
 textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--glow);background:transparent}
 .row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:14px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:rgba(127,127,127,.05)}
-.seg button{border:0;background:transparent;color:inherit;padding:7px 14px;cursor:pointer;font:inherit;transition:background .25s,color .25s,transform .15s}
+.seg button{border:0;background:transparent;color:inherit;padding:5px 12px;cursor:pointer;font:inherit;font-size:13.5px;transition:background .15s ease,color .15s ease,transform .1s ease}
 .seg button:hover:not(.on){background:rgba(127,127,127,.12)}
-.seg button:active{transform:scale(.95)}
-.seg button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;font-weight:600;box-shadow:0 4px 14px -4px var(--glow)}
+.seg button:active{transform:scale(.97)}
+.seg button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;font-weight:600;box-shadow:none}
 label{color:var(--dim);cursor:pointer;user-select:none;transition:color .2s}
 label:hover{color:var(--fg)}
 input[type=checkbox]{accent-color:var(--acc);transition:transform .15s}
@@ -70,21 +69,21 @@ input[type=checkbox]:active{transform:scale(.8)}
 .opts .seg button{flex:1;padding-left:6px;padding-right:6px}
 .chips{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
 @media (max-width:560px){.opts{grid-template-columns:1fr}.chips{grid-auto-flow:row;grid-template-columns:1fr 1fr}}
-.chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(127,127,127,.05);white-space:nowrap;transition:border-color .2s,background .2s,color .2s,transform .15s}
-.chip:hover{border-color:rgba(127,127,127,.35)}
+.chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.05);font-size:13.5px;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
+.chip:hover{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.1)}
 .chip:active{transform:scale(.97)}
 .chip:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent);color:var(--fg)}
 .chip:has(input:disabled){opacity:.38;cursor:default;border-color:var(--line);background:transparent;color:var(--dim)}
 .cutrow:has(.times[hidden]){display:none}
 .cutrow{justify-content:center}
-.input{display:flex;gap:12px;align-items:stretch}
+.input{display:flex;gap:10px;align-items:flex-end} /* Download sits at the box's bottom right, like Send in a chat */
 .input textarea{flex:1}
-@media (max-width:560px){.input{flex-direction:column}.input .go{padding:12px}}
-.go{flex:none;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:transform .2s cubic-bezier(.3,1.6,.5,1),box-shadow .2s}
-.go:hover{transform:translateY(-2px);box-shadow:0 12px 28px -8px var(--glow)}
-.go:active{transform:translateY(0) scale(.96)}
-.go::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .6s}
-.go:hover::after{left:130%}
+@media (max-width:560px){.input{flex-direction:column}.input .go{padding:9px}}
+/* Every button answers the same calm way: a little lighter under the mouse, a little smaller
+   while pressed. No jumps, no flashes. */
+.go{flex:none;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:7px 20px;font:inherit;font-size:14.5px;font-weight:650;cursor:pointer;transition:filter .15s ease,transform .1s ease}
+.go:hover{filter:brightness(1.08)}
+.go:active{transform:scale(.97);filter:brightness(.95)}
 .msg{color:var(--err);margin-top:8px;font-size:14px}
 .msg:empty{margin:0}
 
@@ -116,13 +115,14 @@ input[type=checkbox]:active{transform:scale(.8)}
 .kind .now.waiting{color:var(--dim)}
 .pills{display:flex;gap:6px;flex:none}
 .pill{min-width:54px;text-align:center;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,transparent)}
+.pill.all{min-width:96px}
 .st.done{color:var(--ok)}.st.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}.st.error{color:var(--err)}
 @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
 /* Progress: a sine wave that runs faster the faster the download goes (drawn in the script). */
 .wave{display:block;width:100%;height:18px;margin-top:6px}
 /* The steps, as a small vertical timeline on a quiet panel: done steps get a tick in a
    circle, the current one an orange dot that breathes, joined by a thin line. The live
-   numbers of the current step (piece 17 of 80 · 8 MB) are little pills, like the counters
+   numbers of the current step (part 17 of 80 · 8 MB so far) are little pills, like the counters
    above. New steps slide in, old ones fold away at the top. */
 /* Fixed height (four steps), the newest step always on the bottom line: the panel never
    grows or shrinks while steps come and go, so nothing below it moves. Older steps leave
@@ -147,20 +147,19 @@ input[type=checkbox]:active{transform:scale(.8)}
 .live .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sub.err{color:var(--err)}
 .sub a{color:var(--acc);display:block;margin-top:2px}
-.foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-.foot .btn{flex:1;justify-content:center;padding:9px 14px;font-size:14px}
-.foot .quit:hover{border-color:var(--err);color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
+.foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.foot .play{margin-left:auto;min-width:150px;justify-content:center}
 /* Buttons: soft pills with an icon; the accent one is for the thing you most likely want. */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.07);color:var(--fg);font:inherit;font-size:13px;line-height:1.2;cursor:pointer;transition:border-color .2s,background .2s,color .2s,transform .15s}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.07);color:var(--fg);font:inherit;font-size:13px;line-height:1.2;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
 .btn svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
 .btn:hover{border-color:rgba(127,127,127,.4);background:rgba(127,127,127,.14)}
-.btn:active{transform:scale(.96)}
+.btn:active{transform:scale(.97)}
 .btn.acc{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 45%,transparent);background:color-mix(in srgb,var(--acc) 12%,transparent)}
 .btn.acc:hover{background:color-mix(in srgb,var(--acc) 22%,transparent);border-color:var(--acc)}
 .btn.ghost{color:var(--dim)}
 .btn.ghost:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}
 .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
-@media (max-width:560px){.foot .btn{padding:9px 6px;font-size:13px;white-space:nowrap}.foot .btn svg{display:none}}
+
 .empty{color:var(--dim);text-align:center;padding:26px 0 18px}
 .empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35;animation:bob 3.2s ease-in-out infinite}
 .times{color:var(--dim);display:inline-flex;gap:6px;align-items:center;animation:rise .3s both}
@@ -228,14 +227,21 @@ html.app .lhead:hover{color:var(--fg)}
 .lhead svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
 html.app #jobsCard.folded .lhead svg{transform:rotate(180deg)}
 html.app #jobsCard.folded{flex:none}
-html.app #jobsCard #list,html.app #jobsCard .foot{transition:opacity .2s}
-html.app #jobsCard.folded #list,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+html.app #jobsCard #list,html.app #jobsCard #game,html.app #jobsCard .foot{transition:opacity .2s}
+html.app #jobsCard.folded #list,html.app #jobsCard.folded #game,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
 html.app #jobsCard.anim{transition:height .25s cubic-bezier(.2,.8,.2,1)}
+html.app #jobsCard.come{animation:rise .3s cubic-bezier(.2,.8,.2,1) both}
+html.app #jobsCard.leave{opacity:0;transform:translateY(8px);transition:opacity .18s ease,transform .18s ease}
 html.app #list{margin-top:10px}
+/* The game takes the list's place, same size, so nothing around it moves. */
+html.app #game{flex:1;min-height:0;margin-top:10px;position:relative;border-radius:12px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;animation:fadein .2s ease both}
+#game canvas{display:block;width:100%;height:100%}
+#game.playing canvas{cursor:none}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
 html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
-</style></head><body><div class="bg"><canvas id="fall"></canvas></div><canvas id="fx"></canvas><main>
+</style></head><body><div class="bg"><canvas id="fall"></canvas></div><main>
 <header>
   <svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
     <rect width="256" height="256" rx="58" fill="#161616"/>
@@ -295,10 +301,11 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 <div class="card" id="jobsCard">
   <button class="lhead" id="lhead" aria-label="Show or hide the downloads"><span id="lsum"></span><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>
   <div id="list"></div>
+  <div id="game" hidden><canvas id="gameCv"></canvas></div>
   <div class="foot">
     <button class="btn" id="open" title="The folder where everything is saved"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
     <button class="btn" id="clear" title="Remove finished, failed and cancelled downloads from the list (the files stay)"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>Clear finished</button>
-    <button class="btn quit" id="quit" title="Downloads stop; unfinished files resume next time"><svg viewBox="0 0 24 24"><path d="M12 3v8M7 6a8 8 0 1 0 10 0"/></svg>Quit</button>
+    <button class="btn play" id="play" hidden title="A little game while it downloads. It doesn't stop when the download ends: finish it, or come back to it later"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="5" height="3" rx="1"/><rect x="10" y="5" width="5" height="3" rx="1"/><rect x="16" y="5" width="4" height="3" rx="1"/><circle cx="13" cy="14" r="2"/><path d="M8 20h8"/></svg><span id="playT">Play while you wait</span></button>
   </div>
 </div>
 
@@ -318,9 +325,7 @@ if (new URLSearchParams(location.search).get('w')) {
   });
 }
 var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'error', cancelled: 'cancelled' };
-// stopped: Quit was clicked. (Not "closed": that's
-// window.closed, a built-in that silently ignores being set.)
-var state = {}, stopped = false, OFFLINE = 'ТЯГА is not responding. Start the program again.';
+var state = {}, OFFLINE = 'ТЯГА is not responding. Start the program again.';
 
 function $(id) { return document.getElementById(id); }
 
@@ -459,8 +464,6 @@ function add() {
   api('/api/add', options(text)).then(function (r) {
     $('msg').textContent = r.error || '';
     if (!r.error) { // a fragment is a one-off: the next link is whole again
-      var b = $('go').getBoundingClientRect();
-      fx.burst(b.left + b.width / 2, b.top + b.height / 2, 12);
       $('links').value = '';
       TIMES.forEach(function (id) { $(id).value = ''; });
       $('cut').checked = false;
@@ -504,22 +507,20 @@ if (window.chrome && window.chrome.webview) addEventListener('contextmenu', func
 $('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askNotify(); add(); } };
 $('open').onclick = function () { api('/api/open', {}); };
 $('clear').onclick = function () { api('/api/clear', {}).then(refresh); };
-$('quit').onclick = function () {
-  var busy = (state.jobs || []).some(function (j) { return j.status === 'queued' || j.status === 'running'; });
-  if (busy && !confirm('Something is still downloading. Quit anyway?')) return;
-  stopped = true;
-  api('/api/quit', {}).catch(function () {}).then(showClosed);
-};
 
 // Closing or reloading the page: tell TYAGA. If no page comes back, it finishes
 // the downloads and quits by itself.
 addEventListener('pagehide', function () {
-  if (!stopped) navigator.sendBeacon('/api/bye?t=' + encodeURIComponent(TOKEN));
+  navigator.sendBeacon('/api/bye?t=' + encodeURIComponent(TOKEN));
 });
 
-function showClosed() {
-  document.querySelector('main').innerHTML =
-    '<h1>ТЯГА</h1><div class="card">ТЯГА is closed. Run it again when you need it.</div>';
+
+// In a playlist: "video" or "track", and how far the current one is (the progress counts the
+// whole playlist: video 3 of 12 half done is 21 %).
+function itemWord(j) { return j.mode === 'audio' ? 'track' : 'video'; }
+function itemPct(j) {
+  if (!(j.of > 1 && j.pos)) return null;
+  return Math.max(0, Math.min(100, Math.floor((j.progress / 100 * j.of - (j.pos - 1)) * 100)));
 }
 
 // What the download is: "Audio · MP3", "Video · MP4 · 1080p", plus fragment / one file.
@@ -551,6 +552,7 @@ function ping(jobs) {
     lastStatus[j.id] = j.status;
     if (was !== 'running' || (j.status !== 'done' && j.status !== 'error')) return;
     if (j.status === 'done') caught.push(j.id);
+    game.note((j.status === 'done' ? 'Downloaded: ' : 'Failed: ') + (j.title || 'a download').replace(/^\[\d+\/\d+\] /, '').slice(0, 40), j.status !== 'done');
     if (!document.hidden || !window.Notification || Notification.permission !== 'granted') return;
     try {
       var n = new Notification(j.status === 'done' ? 'Done ✓' : 'Failed', {
@@ -581,7 +583,7 @@ function makeRow(j) {
   r.st = el('span', 'st');
   r.pills = el('span', 'pills');
   r.pillTrack = el('span', 'pill');
-  r.pillPct = el('span', 'pill');
+  r.pillPct = el('span', 'pill tip-left');
   r.pills.append(r.pillTrack, r.pillPct);
   r.top.append(r.name, r.st, r.pills);
   r.kind = el('div', 'kind');                // Audio · MP3 · one file
@@ -660,9 +662,14 @@ function updateRow(r, j) {
       r.kind.innerHTML = '';
       r.kind.append(el('span', nowCls, statusText(j)), ' · ' + kindText(j));
     }
-    r.pillTrack.hidden = !(j.of > 1 && j.pos);
-    setText(r.pillTrack, j.pos + ' / ' + j.of);
-    setText(r.pillPct, Math.floor(j.progress) + '%');
+    // Numbers always say what they count: "video 3 of 12", "40% of all" (the whole playlist).
+    var list = j.of > 1 && j.pos;
+    r.pillTrack.hidden = !list;
+    setText(r.pillTrack, itemWord(j) + ' ' + j.pos + ' of ' + j.of);
+    setText(r.pillPct, Math.floor(j.progress) + '%' + (list ? ' of all' : ''));
+    r.pillPct.classList.toggle('all', !!list);
+    var tip = list ? 'How far the whole playlist is' : 'How far the download is';
+    if (r.pillPct.dataset.tip !== tip) r.pillPct.dataset.tip = tip;
   } else if (r.kindKey !== '') {
     r.kindKey = '';
     r.kind.textContent = kindText(j);
@@ -678,7 +685,7 @@ function updateRow(r, j) {
     var nums = waiting ? ['Paused']
       : now === 'converting' ? ['Converting and adding the cover']
       : j.progress >= 100 ? ['Finishing up']
-      : [j.speed || 'Starting…', j.eta && (j.eta + ' left')];
+      : [j.speed || 'Starting…', j.eta && (j.eta + ' left'), itemPct(j) != null && 'this ' + itemWord(j) + ' ' + itemPct(j) + '%'];
     setText(r.nums, nums.filter(Boolean).join(' · '));
     renderSteps(r, j);
   }
@@ -756,7 +763,7 @@ function renderSteps(r, j) {
     }
     if (e.dataset.t !== w.t) {
       e.dataset.t = w.t;
-      // "Downloading the picture · piece 17 of 80 · 8 MB" → the words, then the numbers as pills.
+      // "Downloading the picture · part 17 of 80 · 8 MB of 20 MB" → the words, then the numbers as pills.
       var parts = w.c === 'cur' ? w.t.split(' · ') : [w.t];
       e.innerHTML = '';
       e.append(el('span', null, parts[0]));
@@ -829,7 +836,7 @@ function render() {
   $('setup').classList.toggle('err', !state.setup && !!state.problem);
 
   var list = $('list'), jobs = state.jobs || [];
-  if (APP) syncFold(jobs);
+  if (APP) { syncFold(jobs); syncPlay(); }
   // While something downloads, the fish in the logo gets reeled in.
   var run = jobs.filter(function (j) { return j.status === 'running'; })[0];
   document.body.classList.toggle('busy', !!run);
@@ -864,13 +871,11 @@ function render() {
     if (!alive[id]) { rows[id].row.remove(); delete rows[id]; }
   });
 
-  // Just finished: notes fly out of its row, the row flashes green, the fish jumps.
+  // Just finished: the row glows green for a moment and the fish on the hook jumps.
   caught.splice(0).forEach(function (id) {
     var row = list.querySelector('.job[data-id="' + id + '"]');
     if (!row) return;
-    var r = row.getBoundingClientRect();
     row.classList.add('just');
-    fx.burst(r.left + 40, r.top + r.height / 2, 26, true);
     document.body.classList.remove('caught');
     void document.body.offsetWidth; // restart the animation if it's still running
     document.body.classList.add('caught');
@@ -880,26 +885,63 @@ function render() {
 
 // The list card's fold (ТЯГА's window only, see .lhead in the styles).
 var APP = document.documentElement.classList.contains('app');
-var fold = { on: false, count: -1, busy: false };
+var fold = { on: false, gone: false, count: -1 };
 function foldSummary(jobs) {
   if (!jobs.length) return 'Nothing on the hook yet';
   var n = { running: 0, queued: 0, done: 0, error: 0 }, run = null;
   jobs.forEach(function (j) { if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
   var parts = [];
-  if (run) parts.push(statusText(run) === 'waiting' ? 'Waiting' : 'Downloading ' + Math.floor(run.progress) + '%');
+  if (run) parts.push(statusText(run) === 'waiting' ? 'Waiting for YouTube'
+    : run.of > 1 && run.pos ? 'Downloading ' + itemWord(run) + ' ' + run.pos + ' of ' + run.of + ', ' + Math.floor(run.progress) + '% of all'
+    : 'Downloading ' + Math.floor(run.progress) + '%');
   if (n.queued) parts.push(n.queued + ' queued');
   if (n.done) parts.push(n.done + ' done');
   var html = parts.map(function (t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }).join(' · ');
   if (n.error) html += (html ? ' · ' : '') + '<span class="bad">' + n.error + ' failed</span>';
   return html || jobs.length + (jobs.length === 1 ? ' download' : ' downloads');
 }
+// Nothing in the list: no list card at all, the window is just the first card. The first link
+// that goes in brings the card in, open; clearing the list takes it away again (not while the
+// game is open: that waits until you close it).
 function syncFold(jobs) {
   var html = foldSummary(jobs);
   if ($('lsum').innerHTML !== html) $('lsum').innerHTML = html;
-  if (fold.count < 0) setFold(!jobs.length, false);           // first look: empty → folded
-  else if (jobs.length > fold.count && fold.on) setFold(false, true); // a link went in
-  else if (!jobs.length && fold.count > 0 && !fold.on) setFold(true, true); // the list was cleared
+  if (fold.count < 0) { if (jobs.length) setFold(false, false); else setGone(true, false); }  // first look
+  else if (jobs.length && fold.gone) setGone(false, true);                // the first link went in
+  else if (jobs.length > fold.count && fold.on) setFold(false, true);     // another one, while folded
+  else if (!jobs.length && !fold.gone && !game.open) setGone(true, true); // the list was cleared
   fold.count = jobs.length;
+}
+// The list card goes away (fades, then the window shrinks to the first card) or comes in (the
+// window grows first, invisibly: it's transparent; then the card fades and rises in, open).
+function setGone(on, animate) {
+  var card = $('jobsCard');
+  fold.gone = on;
+  animate = animate && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (on) {
+    var away = function () {
+      if (!fold.gone) return;
+      card.hidden = true;
+      card.classList.remove('leave');
+      windowFit();
+    };
+    if (!animate) return away();
+    card.classList.add('leave');
+    setTimeout(away, 180);
+    return;
+  }
+  fold.on = false;
+  card.classList.remove('folded', 'anim', 'leave');
+  card.style.height = '';
+  var show = function () {
+    if (fold.gone) return;
+    card.hidden = false;
+    if (animate) { card.classList.remove('come'); void card.offsetWidth; card.classList.add('come'); }
+  };
+  api('/api/window', { text: 'full' }).catch(function () {}).then(function () {
+    if (!animate) return show();
+    return new Promise(function (ok) { var t = setTimeout(ok, 300); addEventListener('resize', function f() { removeEventListener('resize', f); clearTimeout(t); setTimeout(ok, 30); }); }).then(show);
+  });
 }
 // The window is as tall as the cards: full when unfolded, down to the folded line when folded.
 // Growing: the window first (it's transparent, so that's invisible), then the card slides open.
@@ -909,10 +951,10 @@ function foldedHeight() {
   return Math.ceil($('lhead').getBoundingClientRect().bottom - card.getBoundingClientRect().top + parseFloat(getComputedStyle(card).paddingBottom) + 1);
 }
 function windowFit() {
-  if (!fold.on) return;
+  if (!fold.on && !fold.gone) return;
   // From the layout, not getBoundingClientRect: at start the cards are still rising into place
   // (a 14 px slide), and measuring then made the window that much too tall.
-  var card = $('jobsCard'), bottom = card.offsetTop + card.offsetHeight;
+  var card = fold.gone ? document.querySelector('.card.form') : $('jobsCard'), bottom = card.offsetTop + card.offsetHeight;
   api('/api/window', { text: 'height', n: Math.ceil(bottom + parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom)) }).catch(function () {});
 }
 function setFold(on, animate) {
@@ -951,19 +993,204 @@ function setFold(on, animate) {
 if (APP) {
   $('lhead').onclick = function () { setFold(!fold.on, true); };
   // The first card can grow (fragment times, an error): the folded window follows it.
-  if (window.ResizeObserver) new ResizeObserver(function () { if (fold.on) windowFit(); }).observe(document.querySelector('.card.form'));
+  if (window.ResizeObserver) new ResizeObserver(function () { if (fold.on || fold.gone) windowFit(); }).observe(document.querySelector('.card.form'));
+}
+
+// A little game while it downloads (ТЯГА's window only): knock out the bricks with a ball.
+// It takes the list's place in the list card, so the line on top keeps saying how the downloads
+// go. It is never cut off: a finished download only shows a short line in the game's corner,
+// and the game stays until you close it (the button again, or Esc). Closed, hidden or folded,
+// it pauses and keeps where you were; a click goes on. Calm colours: the bricks are the text
+// colour in a few strengths, orange stays for the downloads.
+var game = { open: false, note: function () {} };
+(function () {
+  if (!APP) return;
+  var box = $('game'), cv = $('gameCv'), cx = cv.getContext('2d');
+  var W = 0, H = 0, dpr = 1, fg = '#eee', dim = '#888', ok = '#51cf66', err = '#ff6b6b';
+  var COLS = 10, ROWS = 5, GAP = 6, SIDE = 14, TOP = 34, BH = 16;
+  var pad = { x: 0, w: 88, h: 10 }, ball = { x: 0, y: 0, vx: 0, vy: 0, r: 6, stuck: true };
+  var bricks = [], lives = 3, score = 0, level = 1, mode = 'ready', keys = {}, note = null, raf = 0, last = 0;
+
+  function colors() {
+    var css = getComputedStyle(document.documentElement);
+    fg = css.getPropertyValue('--fg').trim(); dim = css.getPropertyValue('--dim').trim();
+    ok = css.getPropertyValue('--ok').trim(); err = css.getPropertyValue('--err').trim();
+  }
+  function speed() { return Math.min(620, 340 * (1 + 0.08 * (level - 1))); }
+  function layout() {
+    var r = box.getBoundingClientRect();
+    if (!r.width) return false;
+    var oldW = W;
+    W = r.width; H = r.height; dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    var bw = (W - 2 * SIDE - GAP * (COLS - 1)) / COLS;
+    bricks.forEach(function (b, i) {
+      b.x = SIDE + (i % COLS) * (bw + GAP); b.y = TOP + Math.floor(i / COLS) * (BH + GAP); b.w = bw; b.h = BH;
+    });
+    pad.w = Math.max(70, Math.min(110, W / 8));
+    pad.y = H - 26;
+    if (oldW) pad.x = pad.x / oldW * W; else pad.x = (W - pad.w) / 2;
+    pad.x = Math.max(0, Math.min(W - pad.w, pad.x));
+    if (ball.stuck) stick();
+    return true;
+  }
+  function newBricks() {
+    bricks = [];
+    for (var i = 0; i < COLS * ROWS; i++) bricks.push({ alive: true, fade: 0 });
+    layout();
+  }
+  function stick() { ball.stuck = true; ball.x = pad.x + pad.w / 2; ball.y = pad.y - ball.r - 1; }
+  function launch() {
+    var a = (Math.random() - 0.5) * 0.6; // a little to the side, never straight up
+    ball.stuck = false; ball.vx = speed() * Math.sin(a); ball.vy = -speed() * Math.cos(a);
+  }
+  function restart() { lives = 3; score = 0; level = 1; newBricks(); stick(); }
+  function click() {
+    if (mode === 'over') { restart(); mode = 'ready'; return; }
+    if (mode === 'ready' || mode === 'paused') { mode = 'play'; if (ball.stuck) launch(); }
+    else if (mode === 'play' && ball.stuck) launch();
+  }
+  function pause() { if (mode === 'play') mode = 'paused'; }
+
+  function step(dt) {
+    var kv = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0);
+    if (kv) pad.x = Math.max(0, Math.min(W - pad.w, pad.x + kv * 560 * dt));
+    bricks.forEach(function (b) { if (b.fade > 0) b.fade = Math.max(0, b.fade - dt / 0.18); });
+    if (mode !== 'play') { if (ball.stuck) stick(); return; }
+    if (ball.stuck) { stick(); return; }
+    var n = Math.ceil(speed() * dt / 3), h = dt / n;
+    for (var k = 0; k < n; k++) {
+      ball.x += ball.vx * h; ball.y += ball.vy * h;
+      if (ball.x < ball.r) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
+      if (ball.x > W - ball.r) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
+      if (ball.y < ball.r) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
+      // The paddle: where it hits says where it goes (the middle up, the edges to the side).
+      if (ball.vy > 0 && ball.y + ball.r >= pad.y && ball.y - ball.r <= pad.y + pad.h &&
+          ball.x >= pad.x - ball.r && ball.x <= pad.x + pad.w + ball.r) {
+        var off = Math.max(-1, Math.min(1, (ball.x - (pad.x + pad.w / 2)) / (pad.w / 2))), a = off * 1.05;
+        ball.vx = speed() * Math.sin(a); ball.vy = -speed() * Math.cos(a);
+        ball.y = pad.y - ball.r;
+      }
+      if (ball.y - ball.r > H) { // missed
+        if (--lives <= 0) { mode = 'over'; lives = 0; }
+        stick();
+        if (mode === 'play') mode = 'ready';
+        return;
+      }
+      for (var i = 0; i < bricks.length; i++) {
+        var b = bricks[i];
+        if (!b.alive) continue;
+        var nx = Math.max(b.x, Math.min(ball.x, b.x + b.w)), ny = Math.max(b.y, Math.min(ball.y, b.y + b.h));
+        var dx = ball.x - nx, dy = ball.y - ny;
+        if (dx * dx + dy * dy > ball.r * ball.r) continue;
+        b.alive = false; b.fade = 1;
+        score += 10 * (ROWS - Math.floor(i / COLS));
+        // Off the side it went into less deeply.
+        var px = Math.min(ball.x + ball.r - b.x, b.x + b.w - (ball.x - ball.r));
+        var py = Math.min(ball.y + ball.r - b.y, b.y + b.h - (ball.y - ball.r));
+        if (px < py) ball.vx = -ball.vx; else ball.vy = -ball.vy;
+        break;
+      }
+      if (!bricks.some(function (b) { return b.alive; })) { level++; newBricks(); stick(); mode = 'ready'; return; }
+    }
+  }
+
+  function text(t, x, y, size, color, align) {
+    cx.font = size + 'px system-ui,sans-serif'; cx.fillStyle = color; cx.textAlign = align || 'center';
+    cx.fillText(t, x, y);
+  }
+  function rrect(x, y, w, h, r) { cx.beginPath(); cx.roundRect ? cx.roundRect(x, y, w, h, r) : cx.rect(x, y, w, h); cx.fill(); }
+  function draw() {
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.clearRect(0, 0, W, H);
+    cx.textBaseline = 'middle';
+    var ALPHA = [0.5, 0.41, 0.33, 0.26, 0.2];
+    bricks.forEach(function (b, i) {
+      if (!b.alive && !b.fade) return;
+      var f = b.alive ? 1 : b.fade, s = b.alive ? 0 : (1 - f) * 3;
+      cx.globalAlpha = ALPHA[Math.floor(i / COLS)] * f; cx.fillStyle = fg;
+      rrect(b.x + s, b.y + s / 2, b.w - 2 * s, b.h - s, 4);
+    });
+    cx.globalAlpha = 0.85; cx.fillStyle = fg; rrect(pad.x, pad.y, pad.w, pad.h, 5);
+    cx.globalAlpha = 1; cx.beginPath(); cx.arc(ball.x, ball.y, ball.r, 0, 7); cx.fill();
+    text('Level ' + level + '   Score ' + score, SIDE, 17, 12.5, dim, 'left');
+    text('Balls left ' + lives, W - SIDE, 17, 12.5, dim, 'right');
+    if (note && performance.now() < note.until) text(note.t, W / 2, 17, 12.5, note.bad ? err : ok);
+    var msg = mode === 'ready' ? (ball.stuck && level > 1 && score && bricks.every(function (b) { return b.alive; }) ? 'Level ' + level + '. ' : '') + 'Click to launch the ball'
+      : mode === 'paused' ? 'Paused. Click to go on'
+      : mode === 'over' ? 'Game over, score ' + score + '. Click to play again' : '';
+    if (msg) {
+      var y = Math.min(H - 64, TOP + ROWS * (BH + GAP) + (pad.y - TOP - ROWS * (BH + GAP)) / 2);
+      text(msg, W / 2, y, 15, fg);
+      if (mode !== 'over') text('Move with the mouse or ← →. Esc closes the game, it stays where you left it', W / 2, y + 24, 12.5, dim);
+    }
+    box.classList.toggle('playing', mode === 'play');
+  }
+  function frame(now) {
+    raf = 0;
+    if (!game.open) return;
+    if (document.hidden || $('jobsCard').classList.contains('folded')) pause();
+    var dt = Math.min(0.033, (now - last) / 1000); last = now;
+    if (!W && !layout()) { raf = requestAnimationFrame(frame); return; }
+    step(dt); draw();
+    raf = requestAnimationFrame(frame);
+  }
+  function run() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+
+  cv.addEventListener('mousemove', function (e) {
+    var r = cv.getBoundingClientRect();
+    pad.x = Math.max(0, Math.min(W - pad.w, e.clientX - r.left - pad.w / 2));
+  });
+  cv.addEventListener('mousedown', function (e) { e.preventDefault(); click(); });
+  cv.addEventListener('mouseleave', pause); // reaching for something else: the ball waits
+  addEventListener('blur', pause);
+  addEventListener('keydown', function (e) {
+    if (!game.open || /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName)) return;
+    if (e.key === 'Escape') { e.preventDefault(); game.toggle(false); return; }
+    if (e.key === ' ') { e.preventDefault(); click(); return; }
+    if (/^(ArrowLeft|ArrowRight|a|d)$/.test(e.key)) { keys[e.key] = true; e.preventDefault(); }
+  });
+  addEventListener('keyup', function (e) { delete keys[e.key]; });
+  if (window.ResizeObserver) new ResizeObserver(function () { if (game.open) layout(); }).observe(box);
+
+  game.toggle = function (on) {
+    game.open = on;
+    $('list').hidden = on;
+    box.hidden = !on;
+    keys = {};
+    if (on) {
+      colors();
+      if (!bricks.length) restart();
+      W = 0; layout();
+      pause();
+      run();
+    } else {
+      pause();
+      if (!(state.jobs || []).length) setGone(true, true); // the list was cleared meanwhile
+    }
+    syncPlay();
+  };
+  game.note = function (t, bad) { if (game.open) note = { t: t, bad: bad, until: performance.now() + 4000 }; };
+  $('play').onclick = function () { game.toggle(!game.open); };
+})();
+// The button shows while something downloads, and while the game is open.
+function syncPlay() {
+  if (!APP) return;
+  var busy = (state.jobs || []).some(function (j) { return j.status === 'queued' || j.status === 'running'; });
+  $('play').hidden = !(busy || game.open);
+  setText($('playT'), game.open ? 'Back to the list' : 'Play while you wait');
+  var tip = game.open ? 'The game waits where you left it (Esc does the same)' : 'A little game while it downloads. It doesn\'t stop when the download ends: finish it, or come back to it later';
+  if ($('play').dataset.tip !== tip) $('play').dataset.tip = tip;
 }
 
 function refresh() {
-  if (stopped) return;
   api('/api/state')
     .then(function (s) {
-      if (stopped) return; // an answer that was on its way when Quit was clicked
       state = s;
       if ($('msg').textContent === OFFLINE) $('msg').textContent = '';
       render();
     })
-    .catch(function () { if (!stopped && $('msg')) $('msg').textContent = OFFLINE; });
+    .catch(function () { if ($('msg')) $('msg').textContent = OFFLINE; });
 }
 
 refresh();
@@ -1039,30 +1266,23 @@ var waveTarget = {}, waveState = {};
 
 // Background: notes and play signs falling slowly and swaying. Far ones are small, faint and slow,
 // near ones bigger and faster. They shy away from the mouse, and fall faster while something
-// downloads (fx.energy comes from the progress wave). fx.burst() throws a handful of them up
-// from a point on a layer above everything: when a download finishes, when a link goes in.
-// With "reduce motion" on in the system nothing moves and there are no bursts.
-var fx = { energy: 0, burst: function () {} };
+// downloads (fx.energy comes from the progress wave). No bursts or confetti: calm, not a show.
+// With "reduce motion" on in the system nothing moves.
+var fx = { energy: 0 };
 (function () {
-  var cv = $('fall'), cx = cv.getContext('2d'), top = $('fx'), tx = top.getContext('2d');
-  var W, H, TW, TH, ox = 0, oy = 0, dpr, items = [], sparks = [], color, color2, ok, mx = -999, my = -999, rush = 0;
+  var cv = $('fall'), cx = cv.getContext('2d');
+  var W, H, ox = 0, oy = 0, dpr, items = [], color, mx = -999, my = -999;
   var GLYPHS = ['♪', '♫', '♩', '▶', '▶', '•'];
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function size() {
     dpr = 1; // a soft background doesn't need sharp pixels; on a 2× screen this is 4× less work
     // The notes fill their box: the whole page in the browser, the list card in ТЯГА's window.
-    // The bursts fly over everything, on the whole page.
     var r = cv.getBoundingClientRect();
     W = Math.round(r.width) || innerWidth; H = Math.round(r.height) || innerHeight; ox = r.left; oy = r.top;
-    TW = innerWidth; TH = innerHeight;
     cv.width = W * dpr; cv.height = H * dpr;
-    top.width = TW * dpr; top.height = TH * dpr;
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    tx.setTransform(dpr, 0, 0, dpr, 0, 0);
     var css = getComputedStyle(document.documentElement);
     color = css.getPropertyValue('--acc').trim() || '#ff6b2c';
-    color2 = css.getPropertyValue('--acc2').trim() || '#ffa94d';
-    ok = css.getPropertyValue('--ok').trim() || '#51cf66';
     var want = Math.round(W * H / 38000);
     while (items.length < want) items.push(spawn(true));
     items.length = want;
@@ -1077,29 +1297,16 @@ var fx = { energy: 0, burst: function () {} };
       ph: Math.random() * 6.28, r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.6,
     };
   }
-  fx.burst = function (x, y, n, good) {
-    if (still) return;
-    for (var i = 0; i < n; i++) {
-      var ang = -Math.PI / 2 + (Math.random() - 0.5) * 2.2, sp = 180 + Math.random() * 320;
-      sparks.push({
-        g: GLYPHS[Math.floor(Math.random() * 5)], x: x, y: y,
-        vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r: 0, vr: (Math.random() - 0.5) * 8,
-        s: 12 + Math.random() * 14, life: 1, c: good && Math.random() < 0.35 ? ok : (Math.random() < 0.5 ? color : color2),
-      });
-    }
-    rush = 1; // the whole background gets a little gust
-  };
   addEventListener('mousemove', function (e) { mx = e.clientX - ox; my = e.clientY - oy; });
   addEventListener('mouseout', function (e) { if (!e.relatedTarget) mx = my = -999; });
   var last = performance.now();
   function frame(now) {
     var dt = Math.min(0.05, (now - last) / 1000), t = now / 1000;
     last = now;
-    rush = Math.max(0, rush - dt * 0.8);
-    var boost = 1 + fx.energy * 2 + rush * 3; // 1× at rest, up to 3× as a download nears its end
+    var boost = 1 + fx.energy * 2; // 1× at rest, up to 3× as a download nears its end
     cx.clearRect(0, 0, W, H);
     cx.fillStyle = color;
-    cx.textAlign = tx.textAlign = 'center'; cx.textBaseline = tx.textBaseline = 'middle';
+    cx.textAlign = 'center'; cx.textBaseline = 'middle';
     items.forEach(function (p, i) {
       if (!still) {
         p.y += p.v * boost * dt; p.r += p.vr * boost * dt;
@@ -1118,21 +1325,6 @@ var fx = { energy: 0, burst: function () {} };
       cx.restore();
     });
 
-    tx.clearRect(0, 0, TW, TH);
-    sparks = sparks.filter(function (p) {
-      p.vy += 700 * dt; p.vx *= Math.pow(0.5, dt);
-      p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.life -= dt * 0.75;
-      if (p.life <= 0 || p.y > TH + 50) return false;
-      tx.save();
-      tx.globalAlpha = Math.min(1, p.life * 1.5);
-      tx.fillStyle = p.c;
-      tx.shadowColor = p.c; tx.shadowBlur = 10;
-      tx.translate(p.x, p.y); tx.rotate(p.r);
-      tx.font = 'bold ' + p.s + 'px system-ui,sans-serif';
-      tx.fillText(p.g, 0, 0);
-      tx.restore();
-      return true;
-    });
     if (!still) requestAnimationFrame(frame);
   }
   addEventListener('resize', size);

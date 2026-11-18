@@ -113,6 +113,8 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
   when artist and title clearly match), else the thumbnail, squared if it's art between bars.
   YouTube Music has no public API — don't build on its internal one.
 - Mock data hides real problems. A demo page is not a test: use the stand.
+- Portable: ТЯГА writes nothing outside its own folder (`tyaga-data`, see data.go) and the
+  downloads folder. Anything new it keeps goes there, with a line on why in data.go.
 
 ## Map
 
@@ -123,6 +125,9 @@ cover.go     covers (Apple Music art, squaring thumbnails)
 merge.go     a playlist glued into one file
 tools.go     finding / downloading yt-dlp, ffmpeg, Deno
 app.go       quitting when the page is closed
-index.html   the whole page
+data.go      tyaga-data, the one folder next to the exe where ТЯГА keeps everything (portable)
+login.go     signing in to YouTube
+index.html   the whole page (the game during downloads is in it too)
+menu.html    the tray icon's menu (Windows), a little window of its own
 stand/       the test stand
 ```

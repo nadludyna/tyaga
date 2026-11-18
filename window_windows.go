@@ -10,12 +10,10 @@ package main
 //   - its size is fixed, so nothing jumps: the download list scrolls inside its card;
 //   - the close button hides the window to the tray, downloads go on;
 //   - a click on the tray icon brings the window back;
-//   - Quit (tray menu or the page) stops everything and exits.
+//   - Quit in the tray menu stops everything and exits.
 
 import (
-	"crypto/sha256"
 	_ "embed"
-	"encoding/hex"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -165,20 +163,75 @@ func runWindow(token string) bool {
 		toTray()
 	})
 
-	menu := app.NewMenu()
-	menu.Add("Open ТЯГА").OnClick(func(*application.Context) { showWin() })
-	menu.Add("Open the downloads folder").OnClick(func(*application.Context) {
-		os.MkdirAll(outDir, 0o755)
-		openFolder(outDir)
+	// The tray icon's menu (right click): a little window of ТЯГА's own (menu.html) in the same
+	// look as the main one, instead of Windows' grey menu. It opens by the mouse, over the
+	// taskbar, and goes away when you click anywhere else. Quitting while something downloads
+	// asks in the menu itself.
+	menuWin := app.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:          "ТЯГА",
+		Width:          menuWidth,
+		Height:         menuHeight,
+		DisableResize:  true,
+		Hidden:         true,
+		AlwaysOnTop:    true,
+		URL:            "/menu?t=" + token,
+		Frameless:      true,
+		BackgroundType: application.BackgroundTypeTransparent,
+		Windows: application.WindowsWindow{
+			Theme:                             application.SystemDefault,
+			DisableFramelessWindowDecorations: true,
+			HiddenOnTaskbar:                   true,
+		},
 	})
-	menu.AddSeparator()
-	menu.Add("Quit").OnClick(func(*application.Context) { askQuit(app, win, showWin) })
+	menuWin.OnWindowEvent(events.Common.WindowLostFocus, func(*application.WindowEvent) { menuWin.Hide() })
+	showMenu := func() {
+		if hwnd := w32.HWND(uintptr(menuWin.NativeWindow())); hwnd != 0 {
+			if x, y, ok := w32.GetCursorPos(); ok {
+				// In screen pixels: above the mouse (the taskbar is usually at the bottom),
+				// centred on it, kept inside the screen's free area.
+				r := w32.GetWindowRect(hwnd)
+				w, h := int(r.Right-r.Left), int(r.Bottom-r.Top)
+				mi := w32.MONITORINFO{}
+				mi.CbSize = uint32(unsafe.Sizeof(mi))
+				w32.GetMonitorInfo(w32.MonitorFromPoint(x, y, w32.MONITOR_DEFAULTTONEAREST), &mi)
+				wa := mi.RcWork
+				nx, ny := x-w/2, y-h
+				if ny < int(wa.Top) {
+					ny = y // taskbar on top
+				}
+				nx = max(int(wa.Left), min(nx, int(wa.Right)-w))
+				ny = max(int(wa.Top), min(ny, int(wa.Bottom)-h))
+				w32.SetWindowPos(hwnd, 0, nx, ny, 0, 0, w32.SWP_NOSIZE|w32.SWP_NOZORDER|w32.SWP_NOACTIVATE)
+			}
+		}
+		menuWin.Show()
+		menuWin.Focus()
+	}
+	trayAction = func(what string) any {
+		switch what {
+		case "busy":
+			return map[string]int{"busy": downloading()}
+		case "open":
+			menuWin.Hide()
+			showWin()
+		case "folder":
+			menuWin.Hide()
+			os.MkdirAll(outDir, 0o755)
+			openFolder(outDir)
+		case "quit":
+			menuWin.Hide()
+			go func() { time.Sleep(100 * time.Millisecond); quit() }() // let the answer reach the menu first
+		case "hide":
+			menuWin.Hide()
+		}
+		return map[string]bool{"ok": true}
+	}
 
 	tray := app.SystemTray.New()
 	tray.SetIcon(trayIcon)
 	tray.SetTooltip("ТЯГА")
-	tray.SetMenu(menu)
 	tray.OnClick(showWin)
+	tray.OnRightClick(showMenu)
 
 	go setupTools()
 	if err := app.Run(); err != nil {
@@ -190,39 +243,27 @@ func runWindow(token string) bool {
 // The window's size: the page's cards plus a little room for their shadows.
 const winWidth, winHeight = 800, 800
 
-// askQuit quits right away when nothing is going on, and asks first when something is.
-func askQuit(app *application.App, win *application.WebviewWindow, showWin func()) {
-	if !busy() {
-		quit()
-		return
-	}
-	showWin()
-	d := app.Dialog.Question().
-		SetTitle("ТЯГА").
-		SetMessage("Something is still downloading. Quit anyway?\n\nUnfinished files resume when you download them again.")
-	yes := d.AddButton("Quit")
-	yes.OnClick(quit)
-	no := d.AddButton("Keep downloading")
-	d.SetDefaultButton(no)
-	d.SetCancelButton(no)
-	d.AttachToWindow(win)
-	d.Show()
-}
+// The tray menu's window: the menu card (menu.html) plus room for its shadow.
+const menuWidth, menuHeight = 256, 176
 
-// folderID tells copies of ТЯГА in different folders apart.
-func folderID() string {
-	sum := sha256.Sum256([]byte(strings.ToLower(appDir)))
-	return hex.EncodeToString(sum[:8])
-}
+// webviewDataDir is where WebView2 keeps its cache and the page's remembered switches: in
+// tyaga-data (data.go), so every copy of ТЯГА has its own.
+func webviewDataDir() string { return filepath.Join(dataDir, "webview") }
 
-// webviewDataDir is where WebView2 keeps its cache and the page's remembered switches.
-// It's per folder too, so a test copy doesn't share switches with the normal one.
-func webviewDataDir() string {
+// moveOldWindowData: builds before tyaga-data kept the web view data in
+// %LOCALAPPDATA%\TYAGA\webview-<folder id> and login-<folder id>.
+func moveOldWindowData(d string) {
 	base := os.Getenv("LOCALAPPDATA")
 	if base == "" {
-		base = os.TempDir()
+		return
 	}
-	return filepath.Join(base, "TYAGA", "webview-"+folderID())
+	old := filepath.Join(base, "TYAGA")
+	if filepath.Dir(d) == old {
+		return // tyaga-data couldn't be made next to the program: it lives here now
+	}
+	moveIn(filepath.Join(old, "webview-"+folderID()), filepath.Join(d, "webview"))
+	moveIn(filepath.Join(old, "login-"+folderID()), filepath.Join(d, "login"))
+	os.Remove(old) // only goes if nothing else is in it
 }
 
 // ---------------------------------------------------------------------------
@@ -306,10 +347,8 @@ func runLogin() {
 	app.Run()
 }
 
-// loginDir is the sign-in window's web view data, per folder like the main window's.
-func loginDir() string {
-	return filepath.Join(filepath.Dir(webviewDataDir()), "login-"+folderID())
-}
+// loginDir is the sign-in window's web view data, next to the main window's.
+func loginDir() string { return filepath.Join(dataDir, "login") }
 
 // ---------------------------------------------------------------------------
 //  A message from the tray icon

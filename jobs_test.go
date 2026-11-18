@@ -347,7 +347,7 @@ func TestLiveLine(t *testing.T) {
 	j := &Job{Options: Options{Mode: "video"}}
 	onLine(j, "CHAN|Pilotredsky - Topic")
 	onLine(j, "PROG|327155712|NA|9000000000|3000000|300|1020|2041")
-	if j.Channel != "Pilotredsky" || j.Now != "Downloading the picture · piece 1 020 of 2 041 · 312 MB" {
+	if j.Channel != "Pilotredsky" || j.Now != "Downloading the picture · part 1 020 of 2 041 · 312 MB so far" {
 		t.Errorf("channel %q, now %q", j.Channel, j.Now)
 	}
 	onLine(j, "[Merger] Merging formats into \"/x/V.mp4\"")

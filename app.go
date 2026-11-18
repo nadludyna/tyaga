@@ -4,8 +4,7 @@ package main
 // so everything that used to be the console's job is done here:
 //   - messages go to tyaga.log next to the program;
 //   - in the browser version: a second launch doesn't start a second TYAGA, it opens the page
-//     of the running one, and TYAGA quits by the Quit button on the page, or by itself when
-//     the page is closed and nothing is downloading anymore.
+//     of the running one, and TYAGA quits by itself when the page is closed and nothing is downloading anymore.
 // (The Windows window does its own single instance and quitting: window_windows.go.)
 
 import (
@@ -31,11 +30,11 @@ func logf(format string, a ...any) {
 }
 
 func openLog() {
-	logFile, _ = os.Create(filepath.Join(appDir, "tyaga.log")) // read-only folder: just no log
+	logFile, _ = os.Create(filepath.Join(dataDir, "tyaga.log")) // read-only folder: just no log
 }
 
 // instanceFile holds the address of the running TYAGA, so a second launch can find it.
-func instanceFile() string { return filepath.Join(appDir, ".tyaga-running") }
+func instanceFile() string { return filepath.Join(dataDir, ".tyaga-running") }
 
 // alreadyRunning: if TYAGA from this folder is already running, open its page and say true.
 func alreadyRunning() bool {
@@ -91,6 +90,19 @@ func pageClosed() {
 }
 
 // busy: something is downloading or waiting, or the first-start setup is still going.
+// downloading is how many downloads are queued or running.
+func downloading() int {
+	mu.Lock()
+	defer mu.Unlock()
+	n := 0
+	for _, j := range jobs {
+		if j.Status == "queued" || j.Status == "running" {
+			n++
+		}
+	}
+	return n
+}
+
 func busy() bool {
 	if status, _, _ := tools.state(); status != "" {
 		return true

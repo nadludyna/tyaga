@@ -512,20 +512,20 @@ func onLine(j *Job, line string) {
 		case guess > 0:
 			f = done / guess
 		}
-		// The live line: which file, how many pieces, how much.
+		// The live line: which file, how many parts, how much (always "of" what, or "so far").
 		what := "Downloading the sound"
 		if j.Mode == "video" && j.part == 0 {
 			what = "Downloading the picture"
 		}
 		now := []string{what}
 		if frags > 0 && frag >= 0 {
-			now = append(now, fmt.Sprintf("piece %s of %s", thousands(frag), thousands(frags)))
+			now = append(now, fmt.Sprintf("part %s of %s", thousands(frag), thousands(frags)))
 		}
 		switch {
 		case done > 0 && total > 0:
 			now = append(now, sizeText(done)+" of "+sizeText(total))
-		case done > 0:
-			now = append(now, sizeText(done))
+		case done > 0: // in parts the full size isn't known yet
+			now = append(now, sizeText(done)+" so far")
 		}
 		j.Now = strings.Join(now, " · ")
 		if !math.IsNaN(f) {

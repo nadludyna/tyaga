@@ -6,7 +6,7 @@
 // On Windows the page lives in ТЯГА's own window with a tray icon (window_windows.go),
 // served straight to the window with no network port. Elsewhere, or with -no-browser,
 // the program starts a tiny web server on this computer and opens the page in the browser;
-// then it quits by the Quit button on the page, or by itself once the page is closed and
+// then it quits by itself once the page is closed and
 // the downloads are finished (see app.go).
 //
 // Only this computer can reach the server, and only the page that knows the token.
@@ -33,13 +33,22 @@ import (
 //go:embed index.html
 var page []byte
 
+// The tray icon's menu on Windows, a little page of its own (window_windows.go).
+//
+//go:embed menu.html
+var menuPage []byte
+
+// trayAction is what the tray menu's buttons do (Windows only).
+var trayAction = func(string) any { return nil }
+
 // version is set when a release is built (see .github/workflows/release.yml).
 var version = "dev"
 
 var (
 	appDir      string // folder the program lives in
+	dataDir     string // everything ТЯГА keeps (data.go)
 	binDir      string // yt-dlp, ffmpeg and Deno get downloaded here
-	cookiesFile string // optional youtube-cookies.txt next to the program
+	cookiesFile string // youtube-cookies.txt: from the sign-in window, or put next to the program by hand
 	outDir      string // where downloads are saved
 )
 
@@ -52,8 +61,12 @@ func main() {
 	flag.Parse()
 
 	appDir = programDir()
-	binDir = filepath.Join(appDir, "bin")
-	cookiesFile = filepath.Join(appDir, "youtube-cookies.txt")
+	dataDir = makeDataDir()
+	binDir = filepath.Join(dataDir, "bin")
+	cookiesFile = filepath.Join(dataDir, "youtube-cookies.txt")
+	if byHand := filepath.Join(appDir, "youtube-cookies.txt"); fileExists(byHand) {
+		cookiesFile = byHand
+	}
 	outDir = *out
 
 	// The sign-in window (login.go): started by ТЯГА itself, closes when you close it.
@@ -85,7 +98,7 @@ func main() {
 
 	logf("TYAGA %s is running. Files are saved to %s", version, outDir)
 	logf("If the browser didn't open: %s", address)
-	logf("To quit: the Quit button on the page, or just close the page.")
+	logf("To quit: just close the page.")
 
 	go setupTools()
 	if !*noBrowser {
@@ -137,10 +150,14 @@ func handler(token string) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// The page itself is served to anyone: there is nothing secret in it, the token comes in the URL.
-		if r.URL.Path == "/" {
+		if r.URL.Path == "/" || r.URL.Path == "/menu" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Header().Set("Cache-Control", "no-store")
-			w.Write(page)
+			if r.URL.Path == "/menu" {
+				w.Write(menuPage)
+			} else {
+				w.Write(page)
+			}
 			return
 		}
 
@@ -242,6 +259,9 @@ func handler(token string) http.Handler {
 			pageClosed()
 		case "/api/window": // the buttons of ТЯГА's own window, which has no system title bar
 			windowControl(body.Text, body.N)
+		case "/api/tray": // the tray menu's buttons
+			writeJSON(w, trayAction(body.Text))
+			return
 		case "/api/quit":
 			writeJSON(w, map[string]bool{"ok": true})
 			go func() { time.Sleep(200 * time.Millisecond); quit() }() // let the answer reach the page first

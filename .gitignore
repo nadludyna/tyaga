@@ -13,5 +13,6 @@ tyaga.exe
 dist/
 
 # What TYAGA keeps next to itself while running
+tyaga-data/
 tyaga.log
 .tyaga-running
