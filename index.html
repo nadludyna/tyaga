@@ -174,21 +174,36 @@ input[type=checkbox]:active{transform:scale(.8)}
 .foot [data-tip]::after{top:auto;bottom:calc(100% + 8px)}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-/* In ТЯГА's own window (Windows) there's no system title bar: the page is the whole window.
-   A strip along the top drags the window (double-click maximizes, edges snap, all by Windows
-   itself), with the window buttons on the right. The page scrolls below the strip. */
-.winbar{display:none}
-html.app .winbar{display:flex;justify-content:flex-end;position:fixed;top:0;left:0;right:0;height:38px;z-index:60;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
-html.app body{position:fixed;inset:38px 0 0 0;min-height:0;overflow-y:auto}
-html.app main{padding-top:18px}
-.winbar button{app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;width:46px;height:38px;border:0;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:default;transition:background .15s,color .15s}
-.winbar button:hover{background:var(--line);color:var(--fg)}
-.winbar button.x:hover{background:#c42b1c;color:#fff}
-.winbar svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3}
+/* In ТЯГА's own window (Windows) the window is the cards themselves: no frame, no background,
+   the desktop shows around them. The logo and the window buttons sit in the first card; its top
+   row and the gaps between the cards drag the window (Windows' own dragging: double-click,
+   snapping). The window has a fixed size: the download list scrolls inside its card, nothing
+   grows. The falling notes live in the list card, the glow in the first one. */
+.wbtns{display:none}
+html.app,html.app body{background:transparent}
+html.app{--card:#1a1a1c}
+@media (prefers-color-scheme:light){html.app{--card:#fff}}
+html.app body{position:fixed;inset:0;min-height:0;overflow:hidden;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
+html.app main{max-width:none;height:100%;margin:0;padding:12px 14px 16px;display:flex;flex-direction:column}
+html.app .card{flex:none;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;box-shadow:0 6px 18px -8px rgba(0,0,0,.55)}
+html.app .card+.card{margin-top:12px}
+html.app .card.form{background:radial-gradient(ellipse 70% 90% at 12% -30%,var(--glow),transparent 65%),var(--card)}
+html.app header{margin:-4px -6px 16px 0;animation:none;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
+html.app header .logo{width:46px;height:46px;border-radius:12px;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
+html.app header h1{font-size:22px}
+html.app .wbtns{display:flex;gap:2px;margin-left:auto;align-self:flex-start}
+.wbtns button{app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:default;transition:background .15s,color .15s}
+.wbtns button:hover{background:var(--line);color:var(--fg)}
+.wbtns button.x:hover{background:#c42b1c;color:#fff}
+.wbtns svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3}
+html.app #jobsCard{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+html.app #jobsCard>*{position:relative;z-index:1}
+html.app #list{flex:1;min-height:0;overflow-y:auto;margin-right:-10px;padding-right:10px}
+html.app #jobsCard>.bg{position:absolute;inset:0;z-index:0;background:none;border-radius:inherit;overflow:hidden}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
 html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
-</style></head><body><div class="bg"><canvas id="fall"></canvas></div><canvas id="fx"></canvas><div class="winbar"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button id="wMax" title="Maximize" aria-label="Maximize"><svg viewBox="0 0 14 14"><rect x="2.5" y="2.5" width="9" height="9" rx="1.5"/></svg></button><button class="x" id="wClose" title="Hide to the tray (downloads go on)" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div><main>
+</style></head><body><div class="bg"><canvas id="fall"></canvas></div><canvas id="fx"></canvas><main>
 <header>
   <svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
     <rect width="256" height="256" rx="58" fill="#161616"/>
@@ -207,6 +222,7 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
     </g>
   </svg>
   <div><h1>ТЯГА</h1><div class="tag">pulls video &amp; music off YouTube<small id="ver"></small></div></div>
+  <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Hide to the tray (downloads go on)" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
 </header>
 
 <div class="card note" id="setup" hidden></div>
@@ -254,10 +270,15 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 
 </main><script>
 var TOKEN = new URLSearchParams(location.search).get('t');
-// In ТЯГА's own window (see .winbar in the styles): its buttons.
+// In ТЯГА's own window (see html.app in the styles): the logo goes into the first card,
+// the falling notes into the list card, and the window buttons work.
 if (new URLSearchParams(location.search).get('w')) {
   document.documentElement.classList.add('app');
-  ['Min', 'Max', 'Close'].forEach(function (b) {
+  var form = document.querySelector('.card.form');
+  form.insertBefore(document.querySelector('header'), form.firstChild);
+  var jobsCard = document.getElementById('jobsCard');
+  jobsCard.insertBefore(document.querySelector('.bg'), jobsCard.firstChild);
+  ['Min', 'Close'].forEach(function (b) {
     document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
   });
 }
@@ -871,13 +892,18 @@ var waveTarget = {}, waveState = {};
 var fx = { energy: 0, burst: function () {} };
 (function () {
   var cv = $('fall'), cx = cv.getContext('2d'), top = $('fx'), tx = top.getContext('2d');
-  var W, H, dpr, items = [], sparks = [], color, color2, ok, mx = -999, my = -999, rush = 0;
+  var W, H, TW, TH, ox = 0, oy = 0, dpr, items = [], sparks = [], color, color2, ok, mx = -999, my = -999, rush = 0;
   var GLYPHS = ['♪', '♫', '♩', '▶', '▶', '•'];
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function size() {
     dpr = 1; // a soft background doesn't need sharp pixels; on a 2× screen this is 4× less work
-    W = innerWidth; H = innerHeight;
-    [cv, top].forEach(function (c) { c.width = W * dpr; c.height = H * dpr; });
+    // The notes fill their box: the whole page in the browser, the list card in ТЯГА's window.
+    // The bursts fly over everything, on the whole page.
+    var r = cv.getBoundingClientRect();
+    W = Math.round(r.width) || innerWidth; H = Math.round(r.height) || innerHeight; ox = r.left; oy = r.top;
+    TW = innerWidth; TH = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    top.width = TW * dpr; top.height = TH * dpr;
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
     tx.setTransform(dpr, 0, 0, dpr, 0, 0);
     var css = getComputedStyle(document.documentElement);
@@ -910,7 +936,7 @@ var fx = { energy: 0, burst: function () {} };
     }
     rush = 1; // the whole background gets a little gust
   };
-  addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+  addEventListener('mousemove', function (e) { mx = e.clientX - ox; my = e.clientY - oy; });
   addEventListener('mouseout', function (e) { if (!e.relatedTarget) mx = my = -999; });
   var last = performance.now();
   function frame(now) {
@@ -939,11 +965,11 @@ var fx = { energy: 0, burst: function () {} };
       cx.restore();
     });
 
-    tx.clearRect(0, 0, W, H);
+    tx.clearRect(0, 0, TW, TH);
     sparks = sparks.filter(function (p) {
       p.vy += 700 * dt; p.vx *= Math.pow(0.5, dt);
       p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.life -= dt * 0.75;
-      if (p.life <= 0 || p.y > H + 50) return false;
+      if (p.life <= 0 || p.y > TH + 50) return false;
       tx.save();
       tx.globalAlpha = Math.min(1, p.life * 1.5);
       tx.fillStyle = p.c;
@@ -957,6 +983,7 @@ var fx = { energy: 0, burst: function () {} };
     if (!still) requestAnimationFrame(frame);
   }
   addEventListener('resize', size);
+  if (window.ResizeObserver) new ResizeObserver(size).observe(cv.parentNode);
   size();
   requestAnimationFrame(frame);
 })();

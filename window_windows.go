@@ -5,8 +5,9 @@ package main
 // ТЯГА's own window on Windows (Wails, on the Edge WebView2 that comes with Windows 10/11).
 // The page and its API are the same as in the browser; Wails just serves them to the window
 // itself, with no network port at all. The window lives next to a tray icon:
-//   - there's no system title bar: the page is the whole window, rounded and shadowed by
-//     Windows 11 itself; a strip along the top of the page drags it and holds the buttons;
+//   - the window is the page's cards themselves: no frame and no background, the desktop
+//     shows around them; the first card's top row (logo, buttons) and the gaps drag it;
+//   - its size is fixed, so nothing jumps: the download list scrolls inside its card;
 //   - the close button hides the window to the tray, downloads go on;
 //   - a click on the tray icon brings the window back;
 //   - Quit (tray menu or the page) stops everything and exits.
@@ -21,7 +22,6 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
-	"golang.org/x/sys/windows/registry"
 )
 
 //go:embed winres/icon.ico
@@ -71,40 +71,45 @@ func runWindow(token string) bool {
 	logf("TYAGA %s is running. Files are saved to %s", version, outDir)
 	exitApp = func() { app.Quit() }
 
-	dark := systemDark()
-	bg := application.NewRGB(0xf6, 0xf5, 0xf2) // the page's own background, so opening doesn't flash white
-	if dark {
-		bg = application.NewRGB(0x0f, 0x0f, 0x10)
-	}
 	win = app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:            "ТЯГА",
-		Width:            860,
-		Height:           860,
-		MinWidth:         420,
-		MinHeight:        520,
-		InitialPosition:  application.WindowCentered,
-		URL:              "/?t=" + token + "&w=1", // w: the page draws its own title bar
-		Frameless:        true,
-		BackgroundColour: bg,
-		DevToolsEnabled:  os.Getenv("TYAGA_DEVTOOLS") == "1",
+		Title:           "ТЯГА",
+		Width:           winWidth,
+		Height:          winHeight,
+		DisableResize:   true,
+		InitialPosition: application.WindowCentered,
+		URL:             "/?t=" + token + "&w=1", // w: the page is the window (see html.app in index.html)
+		Frameless:       true,
+		BackgroundType:  application.BackgroundTypeTransparent,
+		DevToolsEnabled: os.Getenv("TYAGA_DEVTOOLS") == "1",
 		Permissions: map[application.PermissionType]application.Permission{
 			application.PermissionNotifications: application.PermissionAllow,
 		},
 		Windows: application.WindowsWindow{
-			Theme:                  application.SystemDefault,
-			NonClientRegionSupport: true, // the page's "app-region: drag" strip drags it like a title bar
+			Theme:                             application.SystemDefault,
+			DisableFramelessWindowDecorations: true, // no frame or square shadow around the cards
+			NonClientRegionSupport:            true, // the page's "app-region: drag" parts drag it like a title bar
 		},
 	})
 	windowControl = func(action string) {
 		switch action {
 		case "min":
 			win.Minimise()
-		case "max":
-			win.ToggleMaximise()
 		case "close":
 			win.Hide()
 		}
 	}
+	// A small screen (or big scaling): the window fits into it rather than going under the taskbar.
+	fitted := false
+	win.OnWindowEvent(events.Common.WindowShow, func(*application.WindowEvent) {
+		if fitted {
+			return
+		}
+		fitted = true
+		if sc, err := win.GetScreen(); err == nil && sc != nil && sc.WorkArea.Height > 0 && sc.WorkArea.Height-16 < winHeight {
+			win.SetSize(winWidth, sc.WorkArea.Height-16)
+			win.Center()
+		}
+	})
 	win.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
 		e.Cancel()
 		win.Hide()
@@ -131,6 +136,9 @@ func runWindow(token string) bool {
 	}
 	return true
 }
+
+// The window's size: the page's cards plus a little room for their shadows.
+const winWidth, winHeight = 800, 800
 
 // askQuit quits right away when nothing is going on, and asks first when something is.
 func askQuit(app *application.App, win *application.WebviewWindow, showWin func()) {
@@ -165,15 +173,4 @@ func webviewDataDir() string {
 		base = os.TempDir()
 	}
 	return filepath.Join(base, "TYAGA", "webview-"+folderID())
-}
-
-// systemDark: Windows is set to the dark app mode.
-func systemDark() bool {
-	k, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`, registry.QUERY_VALUE)
-	if err != nil {
-		return false
-	}
-	defer k.Close()
-	light, _, err := k.GetIntegerValue("AppsUseLightTheme")
-	return err == nil && light == 0
 }
