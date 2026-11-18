@@ -8,3 +8,5 @@ import "os"
 func runWindow(token string) bool { return false }
 
 var exitApp = func() { os.Exit(0) }
+
+func windowControl(action string) {}

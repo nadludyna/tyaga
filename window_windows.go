@@ -5,6 +5,8 @@ package main
 // ТЯГА's own window on Windows (Wails, on the Edge WebView2 that comes with Windows 10/11).
 // The page and its API are the same as in the browser; Wails just serves them to the window
 // itself, with no network port at all. The window lives next to a tray icon:
+//   - there's no system title bar: the page is the whole window, rounded and shadowed by
+//     Windows 11 itself; a strip along the top of the page drags it and holds the buttons;
 //   - the close button hides the window to the tray, downloads go on;
 //   - a click on the tray icon brings the window back;
 //   - Quit (tray menu or the page) stops everything and exits.
@@ -28,6 +30,9 @@ var trayIcon []byte
 // exitApp is how quit() leaves: through Wails when there's a window, so the tray icon
 // disappears with it instead of hanging around until the mouse passes over it.
 var exitApp = func() { os.Exit(0) }
+
+// windowControl is what the page's own window buttons do (the window has no system title bar).
+var windowControl = func(action string) {}
 
 // runWindow opens ТЯГА in its own window and returns when ТЯГА quits.
 // A second launch from the same folder doesn't start a second ТЯГА: it brings up the window
@@ -78,14 +83,28 @@ func runWindow(token string) bool {
 		MinWidth:         420,
 		MinHeight:        520,
 		InitialPosition:  application.WindowCentered,
-		URL:              "/?t=" + token,
+		URL:              "/?t=" + token + "&w=1", // w: the page draws its own title bar
+		Frameless:        true,
 		BackgroundColour: bg,
 		DevToolsEnabled:  os.Getenv("TYAGA_DEVTOOLS") == "1",
 		Permissions: map[application.PermissionType]application.Permission{
 			application.PermissionNotifications: application.PermissionAllow,
 		},
-		Windows: application.WindowsWindow{Theme: application.SystemDefault},
+		Windows: application.WindowsWindow{
+			Theme:                  application.SystemDefault,
+			NonClientRegionSupport: true, // the page's "app-region: drag" strip drags it like a title bar
+		},
 	})
+	windowControl = func(action string) {
+		switch action {
+		case "min":
+			win.Minimise()
+		case "max":
+			win.ToggleMaximise()
+		case "close":
+			win.Hide()
+		}
+	}
 	win.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
 		e.Cancel()
 		win.Hide()

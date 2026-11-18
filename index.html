@@ -174,7 +174,21 @@ input[type=checkbox]:active{transform:scale(.8)}
 .foot [data-tip]::after{top:auto;bottom:calc(100% + 8px)}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-</style></head><body><div class="bg"><canvas id="fall"></canvas></div><canvas id="fx"></canvas><main>
+/* In ТЯГА's own window (Windows) there's no system title bar: the page is the whole window.
+   A strip along the top drags the window (double-click maximizes, edges snap, all by Windows
+   itself), with the window buttons on the right. The page scrolls below the strip. */
+.winbar{display:none}
+html.app .winbar{display:flex;justify-content:flex-end;position:fixed;top:0;left:0;right:0;height:38px;z-index:60;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
+html.app body{position:fixed;inset:38px 0 0 0;min-height:0;overflow-y:auto}
+html.app main{padding-top:18px}
+.winbar button{app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;width:46px;height:38px;border:0;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:default;transition:background .15s,color .15s}
+.winbar button:hover{background:var(--line);color:var(--fg)}
+.winbar button.x:hover{background:#c42b1c;color:#fff}
+.winbar svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3}
+html.app ::-webkit-scrollbar{width:10px}
+html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
+html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
+</style></head><body><div class="bg"><canvas id="fall"></canvas></div><canvas id="fx"></canvas><div class="winbar"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button id="wMax" title="Maximize" aria-label="Maximize"><svg viewBox="0 0 14 14"><rect x="2.5" y="2.5" width="9" height="9" rx="1.5"/></svg></button><button class="x" id="wClose" title="Hide to the tray (downloads go on)" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div><main>
 <header>
   <svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
     <rect width="256" height="256" rx="58" fill="#161616"/>
@@ -240,6 +254,13 @@ input[type=checkbox]:active{transform:scale(.8)}
 
 </main><script>
 var TOKEN = new URLSearchParams(location.search).get('t');
+// In ТЯГА's own window (see .winbar in the styles): its buttons.
+if (new URLSearchParams(location.search).get('w')) {
+  document.documentElement.classList.add('app');
+  ['Min', 'Max', 'Close'].forEach(function (b) {
+    document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
+  });
+}
 var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'error', cancelled: 'cancelled' };
 // stopped: Quit was clicked. (Not "closed": that's
 // window.closed, a built-in that silently ignores being set.)
