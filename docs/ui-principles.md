@@ -1,9 +1,15 @@
 # How ТЯГА's window behaves
 
 The basics every change to the page is checked against. They come from Jakob Nielsen's ten
-usability heuristics (1994), which most UI guidelines still build on, plus two rules of our
+usability heuristics (1994), which most UI guidelines still build on, plus rules of our
 own. The visual rules (colours, motion, Material 3) are in `CLAUDE.md` under "Design rules";
 this file is about behaviour.
+
+## How to check a change
+
+Walk through it as the owner would, start to finish, not state by state: paste a link, sign in,
+quit. Count what he has to do. Any step the program could have done itself, any moment where
+he has to guess what's going on or wait without knowing why, is a bug to fix before showing.
 
 ## Ours first
 
@@ -19,6 +25,20 @@ by themselves while you look at them, and nothing moves when you click.
 **2. The window never freezes and nothing is lost.** Every click answers at once (at least a
 visible change), the work goes on in the background, and closing the window or the program
 doesn't throw away what was done: unfinished files resume, finished ones stay.
+
+**3. Don't make the person do what the program can do.** If ТЯГА can tell that a step is
+done, it takes the next one itself. The sign-in window closes by itself once you're signed in;
+"close this window when you're done" is a bug. Every step left to the person needs a reason.
+
+**4. Good defaults, asked once.** The settings most people want are already on; whatever you
+change is remembered. Nothing asks the same question twice.
+
+**5. Answer at once, say how long.** A click shows something within 0.1 s; anything over a
+second shows that it's working; anything over ten says how far along it is (Nielsen's
+response-time limits).
+
+**6. Windows habits.** Enter does the main thing, Esc closes or cancels, the cursor is already
+where you type, a window opens where you'll look for it.
 
 ## Nielsen's ten, the way they apply here
 

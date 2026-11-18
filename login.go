@@ -4,9 +4,10 @@ package main
 //
 // "Sign in to YouTube" on the page starts a second copy of ТЯГА with -login: just a window
 // with Google's sign-in page, in a web view with its own data folder (runLogin, Windows
-// only). When that window is closed, yt-dlp reads the cookies from that data folder (it's
+// only). It closes by itself once YouTube opens with an account (or when you close it); then
+// yt-dlp reads the cookies from that data folder (it's
 // the same Chromium format as Chrome's) and writes them out as youtube-cookies.txt, which
-// every download already uses. The window has to be closed first: while it's open, the web
+// every download already uses. The window has to be gone first: while it's open, the web
 // view keeps its cookie database locked.
 
 import (
@@ -86,7 +87,7 @@ func takeCookies() string {
 			logf("Sign-in: yt-dlp couldn't read the cookies:\n%s", s)
 			return "Couldn't take the sign-in from that window. Try once more."
 		}
-		return "Not signed in: sign in in that window, wait until YouTube opens, then close it."
+		return "Not signed in: the window was closed before YouTube opened with your account."
 	}
 	if err := os.Rename(tmp, cookiesFile); err != nil {
 		os.Remove(tmp)

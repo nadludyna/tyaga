@@ -701,7 +701,7 @@ function updateRow(r, j) {
     }
     // Failed or cancelled: back into the queue. What's already downloaded is skipped.
     if (j.status === 'error' || j.status === 'cancelled') {
-      if (needIn) r.acts.append(button('acc', ICON.user + 'Sign in', 'Opens a window with YouTube\'s sign-in; close it when you\'re in, then Retry', signIn));
+      if (needIn) r.acts.append(button('acc', ICON.user + 'Sign in', 'Opens a window with YouTube\'s sign-in; it closes by itself once you\'re in. Then Retry', signIn));
       r.acts.append(button(needIn ? '' : 'acc', ICON.retry + 'Retry', 'Try again; whatever already downloaded is skipped',
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
       // The full technical error, to send to someone (the page shows the plain-words version).
@@ -788,7 +788,7 @@ function renderAcct() {
   var armed = L.in && !L.open && Date.now() < acctArm;
   var cls = L.open ? 'wait' : armed ? 'arm' : L.in ? 'in' : '';
   var text = L.open ? 'Signing in…' : armed ? 'Sign out?' : L.in ? 'Signed in' : 'Sign in to YouTube';
-  var tip = L.open ? 'Sign in in the other window, then close it'
+  var tip = L.open ? 'Sign in in the other window; it closes by itself once you\'re in'
     : armed ? 'Click again to sign out: ТЯГА forgets your YouTube account'
     : L.in ? 'ТЯГА downloads as your YouTube account. Click to sign out'
     : 'Some videos need a signed-in account, and sometimes YouTube asks to prove you\'re not a bot';

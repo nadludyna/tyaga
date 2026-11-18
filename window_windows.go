@@ -189,14 +189,34 @@ const canLogin = true
 // Google's sign-in page, going on to YouTube once you're in.
 const signInURL = "https://accounts.google.com/ServiceLogin?service=youtube&continue=https%3A%2F%2Fwww.youtube.com%2F"
 
+// signedInJS runs on every page of the sign-in window: once YouTube is open with an account
+// (SAPISID is the cookie YouTube's own scripts read to make signed-in requests), it tells ТЯГА.
+// It keeps checking, since the cookie can arrive a moment after the page.
+const signedInJS = `(function () {
+  if (window.__tyaga) return; window.__tyaga = 1;
+  var t = setInterval(function () {
+    if (/(^|\.)youtube\.com$/.test(location.hostname) && /(^|; )(__Secure-3PAPISID|SAPISID)=/.test(document.cookie)) {
+      clearInterval(t);
+      window.chrome.webview.postMessage('tyaga:signed-in');
+    }
+  }, 500);
+})()`
+
 // runLogin is ТЯГА started with -login: one ordinary window with Google's sign-in page, in a
-// web view with its own data folder, so its cookies can be read once it's closed. Closing the
-// window ends it. Started again while open, it brings up the open one.
+// web view with its own data folder, so its cookies can be read once it's closed. It closes by
+// itself once you're signed in (or when you close it). Started again while open, it brings up
+// the open one.
 func runLogin() {
 	var win *application.WebviewWindow
-	app := application.New(application.Options{
+	var app *application.App
+	app = application.New(application.Options{
 		Name:   "ТЯГА",
 		Assets: application.AssetOptions{Handler: http.NotFoundHandler(), DisableLogging: true},
+		RawMessageHandler: func(_ application.Window, msg string, from *application.OriginInfo) {
+			if msg == "tyaga:signed-in" && from != nil && strings.HasSuffix(strings.SplitN(strings.TrimPrefix(from.Origin, "https://"), "/", 2)[0], "youtube.com") {
+				app.Quit()
+			}
+		},
 		SingleInstance: &application.SingleInstanceOptions{
 			UniqueID: "tyaga-login-" + folderID(),
 			OnSecondInstanceLaunch: func(application.SecondInstanceData) {
@@ -209,13 +229,14 @@ func runLogin() {
 		Windows: application.WindowsOptions{WebviewUserDataPath: loginDir()},
 	})
 	win = app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:           "ТЯГА · sign in to YouTube, then close this window",
+		Title:           "ТЯГА · sign in to YouTube",
 		Width:           520,
 		Height:          760,
 		InitialPosition: application.WindowCentered,
 		URL:             signInURL,
 		Windows:         application.WindowsWindow{Theme: application.SystemDefault},
 	})
+	win.OnWindowEvent(events.Windows.WebViewNavigationCompleted, func(*application.WindowEvent) { win.ExecJS(signedInJS) })
 	app.Run()
 }
 
