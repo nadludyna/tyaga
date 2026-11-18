@@ -60,7 +60,7 @@ function fresh() {
 }
 document.addEventListener('visibilitychange', function () { if (!document.hidden) fresh(); });
 addEventListener('focus', fresh);
-addEventListener('blur', function () { tray('hide'); });
+addEventListener('blur', function () { tray('hide'); }); // ТЯГА ignores this right after opening
 addEventListener('keydown', function (e) { if (e.key === 'Escape') tray('hide'); });
 addEventListener('contextmenu', function (e) { e.preventDefault(); });
 $('open').onclick = function () { tray('open'); };

@@ -1,11 +1,12 @@
 package main
 
-// Portable: everything ТЯГА keeps lives in one folder next to the program, tyaga-data.
+// Portable: everything ТЯГА keeps lives in one hidden folder next to the program, tyaga-data.
 // Copy the program somewhere and it starts clean; delete the folder and nothing of ТЯГА is
 // left on the computer. What's in it, and why:
 //
 //	bin\              yt-dlp, ffmpeg and Deno, downloaded once (only if they aren't installed)
-//	webview\          the window's browser data: the switches you picked (Windows)
+//	webview\          the window's browser data: the switches you picked (Windows; WebView2
+//	                  can't run without such a folder; its caches are deleted at every start)
 //	login\            ТЯГА's own sign-in window, only for Chrome/Edge users (Windows)
 //	tyaga.log         what happened in the last run, for when something goes wrong
 //	youtube-signin.txt  which browser the YouTube sign-in is read from
@@ -30,6 +31,9 @@ func makeDataDir() string {
 		}
 		d = filepath.Join(base, "TYAGA", folderID())
 		os.MkdirAll(d, 0o755)
+	}
+	if filepath.Dir(d) == appDir {
+		hideDataDir(d)
 	}
 	moveOldData(d)
 	return d

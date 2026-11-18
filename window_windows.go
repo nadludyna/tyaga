@@ -47,6 +47,7 @@ var windowControl = func(action string, n int) {}
 // A second launch from the same folder doesn't start a second ТЯГА: it brings up the window
 // of the running one (a copy in another folder is a different ТЯГА and runs side by side).
 func runWindow(token string) bool {
+	trimWebview(webviewDataDir())
 	var win *application.WebviewWindow
 	showWin := func() {
 		if win == nil {
@@ -73,6 +74,7 @@ func runWindow(token string) bool {
 		},
 		Windows: application.WindowsOptions{
 			WebviewUserDataPath:           webviewDataDir(),
+			AdditionalBrowserArgs:         lightWebview,
 			DisableQuitOnLastWindowClosed: true, // the window only hides; Quit is in the tray
 		},
 	})
@@ -155,6 +157,7 @@ func runWindow(token string) bool {
 			place()
 		case "height":
 			win.SetSize(winWidth, max(120, min(n, full)))
+			onScreen()
 			place()
 		}
 	}
@@ -183,9 +186,23 @@ func runWindow(token string) bool {
 			HiddenOnTaskbar:                   true,
 		},
 	})
-	menuWin.OnWindowEvent(events.Common.WindowLostFocus, func(*application.WindowEvent) { menuWin.Hide() })
+	// Shown: when. Windows sends a right click twice (button up, then "context menu"), and the
+	// taskbar takes the focus back for a moment right after the click; neither may close it.
+	var menuShown atomic.Int64
+	menuWin.OnWindowEvent(events.Common.WindowLostFocus, func(*application.WindowEvent) {
+		if time.Since(time.UnixMilli(menuShown.Load())) > 500*time.Millisecond {
+			menuWin.Hide()
+		}
+	})
 	showMenu := func() {
-		if hwnd := w32.HWND(uintptr(menuWin.NativeWindow())); hwnd != 0 {
+		if time.Since(time.UnixMilli(menuShown.Load())) < 400*time.Millisecond {
+			return
+		}
+		menuShown.Store(time.Now().UnixMilli())
+		hwnd := w32.HWND(uintptr(menuWin.NativeWindow()))
+		if hwnd == 0 {
+			logf("Tray menu: its window isn't there")
+		} else {
 			if x, y, ok := w32.GetCursorPos(); ok {
 				// In screen pixels: above the mouse (the taskbar is usually at the bottom),
 				// centred on it, kept inside the screen's free area.
@@ -202,10 +219,14 @@ func runWindow(token string) bool {
 				nx = max(int(wa.Left), min(nx, int(wa.Right)-w))
 				ny = max(int(wa.Top), min(ny, int(wa.Bottom)-h))
 				w32.SetWindowPos(hwnd, 0, nx, ny, 0, 0, w32.SWP_NOSIZE|w32.SWP_NOZORDER|w32.SWP_NOACTIVATE)
+				logf("Tray menu: at %d,%d, %dx%d (mouse %d,%d)", nx, ny, w, h, x, y)
 			}
 		}
 		menuWin.Show()
 		menuWin.Focus()
+		if hwnd != 0 {
+			w32.SetForegroundWindow(hwnd)
+		}
 	}
 	trayAction = func(what string) any {
 		switch what {
@@ -222,7 +243,9 @@ func runWindow(token string) bool {
 			menuWin.Hide()
 			go func() { time.Sleep(100 * time.Millisecond); quit() }() // let the answer reach the menu first
 		case "hide":
-			menuWin.Hide()
+			if time.Since(time.UnixMilli(menuShown.Load())) > 500*time.Millisecond {
+				menuWin.Hide()
+			}
 		}
 		return map[string]bool{"ok": true}
 	}
@@ -245,6 +268,35 @@ const winWidth, winHeight = 800, 800
 
 // The tray menu's window: the menu card (menu.html) plus room for its shadow.
 const menuWidth, menuHeight = 256, 176
+
+// lightWebview: WebView2 is Edge inside, and by itself it downloads Edge's add-ons into its
+// data folder (DRM for Netflix, speech recognition, ad-block lists: some 60 MB) and phones home.
+// ТЯГА's page needs none of it.
+var lightWebview = []string{"--disable-component-update", "--disable-background-networking"}
+
+// trimWebview deletes what WebView2 only keeps to be faster next time or downloaded by itself,
+// before it starts (while it runs, its files are locked). What's left is a few MB: the
+// page's switches and the sign-in.
+func trimWebview(dir string) {
+	ebw := filepath.Join(dir, "EBWebView")
+	for _, d := range []string{"GrShaderCache", "ShaderCache", "GraphiteDawnCache", "component_crx_cache",
+		"WidevineCdm", "Subresource Filter", "Speech Recognition", "hyphen-data", "BrowserMetrics", "Crashpad",
+		"OnDeviceHeadSuggestModel", "ZxcvbnData", "SafetyTips", "TrustTokenKeyCommitments"} {
+		os.RemoveAll(filepath.Join(ebw, d))
+	}
+	for _, d := range []string{"Cache", "Code Cache", "GPUCache", "DawnGraphiteCache", "DawnWebGPUCache"} {
+		os.RemoveAll(filepath.Join(ebw, "Default", d))
+	}
+}
+
+// hideDataDir makes tyaga-data a hidden folder: it's ТЯГА's business, not something to look at.
+func hideDataDir(d string) {
+	if p, err := syscall.UTF16PtrFromString(d); err == nil {
+		if a, err := syscall.GetFileAttributes(p); err == nil {
+			syscall.SetFileAttributes(p, a|syscall.FILE_ATTRIBUTE_HIDDEN)
+		}
+	}
+}
 
 // webviewDataDir is where WebView2 keeps its cache and the page's remembered switches: in
 // tyaga-data (data.go), so every copy of ТЯГА has its own.
@@ -310,6 +362,7 @@ const signedInJS = `(function () {
 // itself once you're signed in (or when you close it). Started again while open, it brings up
 // the open one.
 func runLogin() {
+	trimWebview(loginDir())
 	var win *application.WebviewWindow
 	var app *application.App
 	app = application.New(application.Options{
@@ -329,7 +382,7 @@ func runLogin() {
 				}
 			},
 		},
-		Windows: application.WindowsOptions{WebviewUserDataPath: loginDir()},
+		Windows: application.WindowsOptions{WebviewUserDataPath: loginDir(), AdditionalBrowserArgs: lightWebview},
 	})
 	win = app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:           "ТЯГА · sign in to YouTube",

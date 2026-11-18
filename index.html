@@ -213,9 +213,10 @@ html.app .acct:not([hidden])+.wbtns{margin-left:8px}
 .wbtns button:hover{background:var(--line);color:var(--fg)}
 .wbtns button.x:hover{background:#c42b1c;color:#fff}
 .wbtns svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3}
-html.app #jobsCard{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+html.app #jobsCard.gaming{flex:1}
 html.app #jobsCard>*{position:relative;z-index:1}
-html.app #list{flex:1;min-height:0;overflow-y:auto;margin-right:-10px;scrollbar-gutter:stable}
+html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;margin-right:-10px;scrollbar-gutter:stable}
 html.app #jobsCard>.bg{position:absolute;inset:0;z-index:0;background:none;border-radius:inherit;overflow:hidden}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
@@ -223,7 +224,7 @@ html.app #jobsCard>.bg{position:absolute;inset:0;z-index:0;background:none;borde
 html.app .lhead{display:flex;align-items:center;gap:10px;width:100%;flex:none;margin:-4px 0 0;padding:2px 4px;border:0;border-radius:8px;background:transparent;color:var(--dim);font:inherit;font-size:13.5px;text-align:left;cursor:pointer;transition:color .15s}
 html.app .lhead:hover{color:var(--fg)}
 .lhead #lsum{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.lhead .bad{color:var(--err)}
+.lhead .bad{color:var(--err)}.lhead .good{color:var(--ok)}
 .lhead svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
 html.app #jobsCard.folded .lhead svg{transform:rotate(180deg)}
 html.app #jobsCard.folded{flex:none}
@@ -552,7 +553,8 @@ function ping(jobs) {
     lastStatus[j.id] = j.status;
     if (was !== 'running' || (j.status !== 'done' && j.status !== 'error')) return;
     if (j.status === 'done') caught.push(j.id);
-    game.note((j.status === 'done' ? 'Downloaded: ' : 'Failed: ') + (j.title || 'a download').replace(/^\[\d+\/\d+\] /, '').slice(0, 40), j.status !== 'done');
+    // While the game is open, the list's top line says it for a few seconds.
+    if (game.open) headNote = { t: (j.status === 'done' ? '✓ Downloaded: ' : 'Failed: ') + (j.title || 'a download').replace(/^\[\d+\/\d+\] /, ''), bad: j.status !== 'done', until: Date.now() + 5000 };
     if (!document.hidden || !window.Notification || Notification.permission !== 'granted') return;
     try {
       var n = new Notification(j.status === 'done' ? 'Done ✓' : 'Failed', {
@@ -567,6 +569,8 @@ function askNotify() {
 }
 
 var rows = {}; // job id → its row and the parts of it
+// In ТЯГА's window the window follows the rows' height (see windowFit).
+var rowWatch = window.ResizeObserver ? new ResizeObserver(function () { fitLater(); }) : null;
 
 function button(cls, label, title, onclick) {
   var b = el('button', 'btn ' + cls);
@@ -597,6 +601,7 @@ function makeRow(j) {
   r.acts = el('div', 'acts');
   r.body.append(r.top, r.kind, r.live, r.msg, r.acts);
   r.row.append(r.body);
+  if (APP && rowWatch) rowWatch.observe(r.row);
   return r;
 }
 
@@ -836,7 +841,7 @@ function render() {
   $('setup').classList.toggle('err', !state.setup && !!state.problem);
 
   var list = $('list'), jobs = state.jobs || [];
-  if (APP) { syncFold(jobs); syncPlay(); }
+  if (APP) { syncFold(jobs); syncPlay(); fitLater(); }
   // While something downloads, the fish in the logo gets reeled in.
   var run = jobs.filter(function (j) { return j.status === 'running'; })[0];
   document.body.classList.toggle('busy', !!run);
@@ -886,7 +891,10 @@ function render() {
 // The list card's fold (ТЯГА's window only, see .lhead in the styles).
 var APP = document.documentElement.classList.contains('app');
 var fold = { on: false, gone: false, count: -1 };
+var headNote = null;
 function foldSummary(jobs) {
+  if (headNote && Date.now() < headNote.until)
+    return '<span class="' + (headNote.bad ? 'bad' : 'good') + '">' + headNote.t.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>';
   if (!jobs.length) return 'Nothing on the hook yet';
   var n = { running: 0, queued: 0, done: 0, error: 0 }, run = null;
   jobs.forEach(function (j) { if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
@@ -938,7 +946,7 @@ function setGone(on, animate) {
     card.hidden = false;
     if (animate) { card.classList.remove('come'); void card.offsetWidth; card.classList.add('come'); }
   };
-  api('/api/window', { text: 'full' }).catch(function () {}).then(function () {
+  api('/api/window', { text: 'height', n: openHeight() }).catch(function () {}).then(function () {
     if (!animate) return show();
     return new Promise(function (ok) { var t = setTimeout(ok, 300); addEventListener('resize', function f() { removeEventListener('resize', f); clearTimeout(t); setTimeout(ok, 30); }); }).then(show);
   });
@@ -950,13 +958,36 @@ function foldedHeight() {
   var card = $('jobsCard');
   return Math.ceil($('lhead').getBoundingClientRect().bottom - card.getBoundingClientRect().top + parseFloat(getComputedStyle(card).paddingBottom) + 1);
 }
-function windowFit() {
-  if (!fold.on && !fold.gone) return;
-  // From the layout, not getBoundingClientRect: at start the cards are still rising into place
-  // (a 14 px slide), and measuring then made the window that much too tall.
-  var card = fold.gone ? document.querySelector('.card.form') : $('jobsCard'), bottom = card.offsetTop + card.offsetHeight;
-  api('/api/window', { text: 'height', n: Math.ceil(bottom + parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom)) }).catch(function () {});
+// The window fits what's in it, no empty space under the list: it grows when a download is
+// added (up to the full height, then the list scrolls) and shrinks when rows get shorter or go.
+// The game gets the full height. Sent only when the height really changes.
+function mainPad() { return parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom); }
+function openHeight() { // the open list card's natural height, measured without painting
+  var card = $('jobsCard'), list = $('list');
+  var was = [card.hidden, card.className, card.style.height];
+  card.hidden = false; card.classList.remove('folded', 'leave', 'come', 'anim'); card.style.height = '';
+  var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + mainPad();
+  card.hidden = was[0]; card.className = was[1]; card.style.height = was[2];
+  return Math.ceil(n);
 }
+var lastFit = 0;
+function windowFit() {
+  if (!APP) return;
+  if (game.open) { if (lastFit !== -1) { lastFit = -1; api('/api/window', { text: 'full' }).catch(function () {}); } return; }
+  var n;
+  if (fold.gone || fold.on) {
+    // From the layout, not getBoundingClientRect: at start the cards are still rising into place
+    // (a 14 px slide), and measuring then made the window that much too tall.
+    var card = fold.gone ? document.querySelector('.card.form') : $('jobsCard');
+    n = Math.ceil(card.offsetTop + card.offsetHeight + mainPad());
+  } else if ($('jobsCard').classList.contains('anim')) return; // sliding open: it fits at the end
+  else n = openHeight();
+  if (n === lastFit) return;
+  lastFit = n;
+  api('/api/window', { text: 'height', n: n }).catch(function () {});
+}
+var fitSoon = 0;
+function fitLater() { if (!fitSoon) fitSoon = requestAnimationFrame(function () { fitSoon = 0; windowFit(); }); }
 function setFold(on, animate) {
   var card = $('jobsCard');
   fold.on = on;
@@ -964,7 +995,7 @@ function setFold(on, animate) {
   if (!animate || matchMedia('(prefers-reduced-motion: reduce)').matches) {
     card.classList.toggle('folded', on);
     card.style.height = on ? foldedHeight() + 'px' : '';
-    if (on) windowFit(); else api('/api/window', { text: 'full' }).catch(function () {});
+    windowFit();
     return;
   }
   if (on) {
@@ -975,7 +1006,8 @@ function setFold(on, animate) {
     setTimeout(function () { if (fold.on) windowFit(); }, 260);
   } else {
     var from = card.offsetHeight;
-    api('/api/window', { text: 'full' }).catch(function () {}).then(function () {
+    lastFit = openHeight();
+    api('/api/window', { text: 'height', n: lastFit }).catch(function () {}).then(function () {
       return new Promise(function (ok) { var t = setTimeout(ok, 300); addEventListener('resize', function f() { removeEventListener('resize', f); clearTimeout(t); setTimeout(ok, 30); }); });
     }).then(function () {
       if (fold.on) return;
@@ -986,37 +1018,37 @@ function setFold(on, animate) {
       void card.offsetHeight;
       card.classList.add('anim');
       card.style.height = to + 'px';
-      setTimeout(function () { if (!fold.on) { card.classList.remove('anim'); card.style.height = ''; } }, 260);
+      setTimeout(function () { if (!fold.on) { card.classList.remove('anim'); card.style.height = ''; windowFit(); } }, 260);
     });
   }
 }
 if (APP) {
   $('lhead').onclick = function () { setFold(!fold.on, true); };
   // The first card can grow (fragment times, an error): the folded window follows it.
-  if (window.ResizeObserver) new ResizeObserver(function () { if (fold.on || fold.gone) windowFit(); }).observe(document.querySelector('.card.form'));
+  if (window.ResizeObserver) new ResizeObserver(fitLater).observe(document.querySelector('.card.form'));
 }
 
 // A little game while it downloads (ТЯГА's window only): knock out the bricks with a ball.
 // It takes the list's place in the list card, so the line on top keeps saying how the downloads
-// go. It is never cut off: a finished download only shows a short line in the game's corner,
-// and the game stays until you close it (the button again, or Esc). Closed, hidden or folded,
-// it pauses and keeps where you were; a click goes on. Calm colours: the bricks are the text
-// colour in a few strengths, orange stays for the downloads.
-var game = { open: false, note: function () {} };
+// go. It is never cut off: a finished download is said in that top line for a few seconds
+// (not in the game itself), and the game stays until you close it (the button again, or Esc). Closed, hidden or folded,
+// it pauses and keeps where you were; a click goes on. The bricks are a soft rainbow (the
+// owner asked for colour), the ball and paddle the text colour.
+var game = { open: false };
 (function () {
   if (!APP) return;
   var box = $('game'), cv = $('gameCv'), cx = cv.getContext('2d');
   var W = 0, H = 0, dpr = 1, fg = '#eee', dim = '#888', ok = '#51cf66', err = '#ff6b6b';
   var COLS = 10, ROWS = 5, GAP = 6, SIDE = 14, TOP = 34, BH = 16;
   var pad = { x: 0, w: 88, h: 10 }, ball = { x: 0, y: 0, vx: 0, vy: 0, r: 6, stuck: true };
-  var bricks = [], lives = 3, score = 0, level = 1, mode = 'ready', keys = {}, note = null, raf = 0, last = 0;
+  var bricks = [], lives = 3, score = 0, level = 1, mode = 'ready', keys = {}, raf = 0, last = 0;
 
   function colors() {
     var css = getComputedStyle(document.documentElement);
     fg = css.getPropertyValue('--fg').trim(); dim = css.getPropertyValue('--dim').trim();
     ok = css.getPropertyValue('--ok').trim(); err = css.getPropertyValue('--err').trim();
   }
-  function speed() { return Math.min(620, 340 * (1 + 0.08 * (level - 1))); }
+  function speed() { return Math.min(460, 250 * (1 + 0.07 * (level - 1))); } // px/s: calm at first, a bit faster each level
   function layout() {
     var r = box.getBoundingClientRect();
     if (!r.width) return false;
@@ -1104,18 +1136,19 @@ var game = { open: false, note: function () {} };
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
     cx.clearRect(0, 0, W, H);
     cx.textBaseline = 'middle';
-    var ALPHA = [0.5, 0.41, 0.33, 0.26, 0.2];
+    // A soft rainbow, one colour a row (pastel in the dark theme, deeper in the light one).
+    var light = matchMedia('(prefers-color-scheme: light)').matches;
+    var ROW = light ? ['#e57373', '#ffa726', '#f9c22e', '#66bb6a', '#42a5f5'] : ['#ff8a80', '#ffb74d', '#ffe082', '#a5d6a7', '#90caf9'];
     bricks.forEach(function (b, i) {
       if (!b.alive && !b.fade) return;
       var f = b.alive ? 1 : b.fade, s = b.alive ? 0 : (1 - f) * 3;
-      cx.globalAlpha = ALPHA[Math.floor(i / COLS)] * f; cx.fillStyle = fg;
+      cx.globalAlpha = 0.9 * f; cx.fillStyle = ROW[Math.floor(i / COLS)];
       rrect(b.x + s, b.y + s / 2, b.w - 2 * s, b.h - s, 4);
     });
     cx.globalAlpha = 0.85; cx.fillStyle = fg; rrect(pad.x, pad.y, pad.w, pad.h, 5);
     cx.globalAlpha = 1; cx.beginPath(); cx.arc(ball.x, ball.y, ball.r, 0, 7); cx.fill();
     text('Level ' + level + '   Score ' + score, SIDE, 17, 12.5, dim, 'left');
     text('Balls left ' + lives, W - SIDE, 17, 12.5, dim, 'right');
-    if (note && performance.now() < note.until) text(note.t, W / 2, 17, 12.5, note.bad ? err : ok);
     var msg = mode === 'ready' ? (ball.stuck && level > 1 && score && bricks.every(function (b) { return b.alive; }) ? 'Level ' + level + '. ' : '') + 'Click to launch the ball'
       : mode === 'paused' ? 'Paused. Click to go on'
       : mode === 'over' ? 'Game over, score ' + score + '. Click to play again' : '';
@@ -1157,6 +1190,7 @@ var game = { open: false, note: function () {} };
     game.open = on;
     $('list').hidden = on;
     box.hidden = !on;
+    $('jobsCard').classList.toggle('gaming', on);
     keys = {};
     if (on) {
       colors();
@@ -1164,13 +1198,14 @@ var game = { open: false, note: function () {} };
       W = 0; layout();
       pause();
       run();
+      windowFit();
     } else {
       pause();
       if (!(state.jobs || []).length) setGone(true, true); // the list was cleared meanwhile
+      else windowFit();
     }
     syncPlay();
   };
-  game.note = function (t, bad) { if (game.open) note = { t: t, bad: bad, until: performance.now() + 4000 }; };
   $('play').onclick = function () { game.toggle(!game.open); };
 })();
 // The button shows while something downloads, and while the game is open.
@@ -1283,16 +1318,31 @@ var fx = { energy: 0 };
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
     var css = getComputedStyle(document.documentElement);
     color = css.getPropertyValue('--acc').trim() || '#ff6b2c';
+    sprites = {};
     var want = Math.round(W * H / 38000);
     while (items.length < want) items.push(spawn(true));
     items.length = want;
+  }
+  // Each note is drawn once into a little picture (per glyph and size) and then only stamped:
+  // stamping a picture is far cheaper than laying out text every frame, and looks the same.
+  var sprites = {};
+  function sprite(g, s) {
+    var k = g + s, sp = sprites[k];
+    if (sp) return sp;
+    sp = sprites[k] = document.createElement('canvas');
+    sp.width = sp.height = Math.ceil(s * 1.6);
+    var c = sp.getContext('2d');
+    c.fillStyle = color; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.font = s + 'px system-ui,sans-serif';
+    c.fillText(g, sp.width / 2, sp.height / 2);
+    return sp;
   }
   function spawn(anywhere) {
     var z = Math.random(); // 0 = far, 1 = near
     return {
       g: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
       x: Math.random() * W, y: anywhere ? Math.random() * H : -40, ox: 0,
-      z: z, s: 10 + z * 18, v: 12 + z * 34, // size px, fall speed px/s
+      z: z, s: 10 + Math.round(z * 9) * 2, v: 12 + z * 34, // size px (even: fewer pictures), fall speed px/s
       a: 0.07 + z * 0.2, sway: 10 + Math.random() * 25, f: 0.3 + Math.random() * 0.5,
       ph: Math.random() * 6.28, r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.6,
     };
@@ -1304,9 +1354,13 @@ var fx = { energy: 0 };
     var dt = Math.min(0.05, (now - last) / 1000), t = now / 1000;
     last = now;
     var boost = 1 + fx.energy * 2; // 1× at rest, up to 3× as a download nears its end
+    cx.setTransform(1, 0, 0, 1, 0, 0);
     cx.clearRect(0, 0, W, H);
-    cx.fillStyle = color;
-    cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    if (game.open) { // the game covers the list card: nothing to see
+      cx.globalAlpha = 1;
+      if (!still) requestAnimationFrame(frame);
+      return;
+    }
     items.forEach(function (p, i) {
       if (!still) {
         p.y += p.v * boost * dt; p.r += p.vr * boost * dt;
@@ -1316,13 +1370,10 @@ var fx = { energy: 0 };
         p.ox *= Math.pow(0.4, dt);
       }
       if (p.y > H + 40) p = items[i] = spawn(false);
-      cx.save();
+      var sp = sprite(p.g, p.s), c = Math.cos(p.r), s = Math.sin(p.r);
       cx.globalAlpha = p.a;
-      cx.translate(p.x + p.ox + Math.sin(t * p.f + p.ph) * p.sway, p.y);
-      cx.rotate(p.r);
-      cx.font = p.s + 'px system-ui,sans-serif';
-      cx.fillText(p.g, 0, 0);
-      cx.restore();
+      cx.setTransform(c, s, -s, c, p.x + p.ox + Math.sin(t * p.f + p.ph) * p.sway, p.y);
+      cx.drawImage(sp, -sp.width / 2, -sp.height / 2);
     });
 
     if (!still) requestAnimationFrame(frame);
