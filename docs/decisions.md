@@ -9,7 +9,7 @@ Updated at the end of every work session.
   Linux releases (nobody uses them, and a desktop window needs CGO and per-OS builds there).
   Linux stays only as browser mode for the test stand.
 - **Wails v3 for the window.** Pure Go on Windows (no CGO), a tray icon out of the box, the
-  same `index.html`; about +4 MB. Rejected: bare WebView2 (window, tray and menus by hand),
+  same `index.html`; the exe grew from 7.5 to about 13 MB. Rejected: bare WebView2 (window, tray and menus by hand),
   Wails v2 (no tray), Electron (100+ MB), Tauri (Rust).
 - **A frameless, transparent window: the cards are the window.** It looks like the app, not
   like a browser in a frame. The window height follows the content (no empty space, nothing
