@@ -241,6 +241,8 @@ html.app #list{margin-top:10px}
 html.app #game{flex:1;min-height:0;margin-top:10px;position:relative;border-radius:12px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;animation:fadein .2s ease both}
 #game canvas{display:block;width:100%;height:100%}
 #game.playing canvas{cursor:none}
+html.app .fadeout{opacity:0!important;transition:opacity .14s ease}
+html.app #list.fadein{animation:fadein .22s ease both}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
@@ -1212,25 +1214,62 @@ var game = { open: false };
   addEventListener('keyup', function (e) { delete keys[e.key]; });
   if (window.ResizeObserver) new ResizeObserver(function () { if (game.open) layout(); }).observe(box);
 
+  // Switching: the window grows first if it must (it's transparent, so that's invisible); the
+  // list fades out, the card glides to its new height and the game fades in; back the same way.
+  var still = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
+  var switchN = 0; // a newer switch cancels the steps of an older one
+  function glide(card, from, done) {
+    var to = card.offsetHeight;
+    if (still() || Math.abs(to - from) < 2) return done();
+    card.style.height = from + 'px';
+    void card.offsetHeight;
+    card.classList.add('anim');
+    card.style.height = to + 'px';
+    setTimeout(function () { card.classList.remove('anim'); card.style.height = ''; done(); }, 270);
+  }
+  function fadeOut(e, then) {
+    if (still()) return then();
+    e.classList.add('fadeout');
+    setTimeout(function () { e.classList.remove('fadeout'); then(); }, 140);
+  }
   game.toggle = function (on) {
+    var card = $('jobsCard'), list = $('list'), my = ++switchN;
     game.open = on;
-    $('list').hidden = on;
-    box.hidden = !on;
-    $('jobsCard').classList.toggle('gaming', on);
     keys = {}; aim = null;
+    syncPlay();
     if (on) {
       colors();
       if (!bricks.length) restart();
-      W = 0; layout();
       pause();
-      run();
-      windowFit();
+      var from = card.offsetHeight;
+      lastFit = -1;
+      api('/api/window', { text: 'full' }).catch(function () {}).then(function () {
+        return new Promise(function (ok) { var t = setTimeout(ok, 250); addEventListener('resize', function f() { removeEventListener('resize', f); clearTimeout(t); setTimeout(ok, 30); }); });
+      }).then(function () {
+        if (my !== switchN) return;
+        fadeOut(list, function () {
+          if (my !== switchN) return;
+          list.hidden = true;
+          card.classList.add('gaming');
+          box.hidden = false;
+          W = 0; layout();
+          run();
+          glide(card, from, function () { if (my === switchN) layout(); });
+        });
+      });
     } else {
       pause();
-      if (!(state.jobs || []).length) setGone(true, true); // the list was cleared meanwhile
-      else windowFit();
+      fadeOut(box, function () {
+        if (my !== switchN) return;
+        var from = card.offsetHeight;
+        box.hidden = true;
+        card.classList.remove('gaming');
+        list.hidden = false;
+        list.classList.remove('fadein'); void list.offsetWidth; list.classList.add('fadein');
+        if (!(state.jobs || []).length) return setGone(true, true); // the list was cleared meanwhile
+        glide(card, from, function () { if (my === switchN) windowFit(); });
+      });
     }
-    syncPlay();
   };
   $('play').onclick = function () { game.toggle(!game.open); };
 })();
