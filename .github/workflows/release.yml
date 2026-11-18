@@ -1,5 +1,5 @@
 # Making a release: Actions → Release → Run workflow → enter a version, e.g. v1.0.0.
-# Builds TYAGA for Windows, macOS and Linux and puts the archives on the Releases page.
+# Builds TYAGA for Windows (x64 and ARM) and puts the zips on the Releases page.
 name: Release
 
 on:
@@ -46,20 +46,13 @@ jobs:
         run: |
           set -eu
           mkdir -p dist
-          for target in windows/amd64 windows/arm64 linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
-            os=${target%/*}; arch=${target#*/}
-            label=$os; [ "$os" = darwin ] && label=macos # Go calls macOS "darwin"; people don't
-            name="tyaga-$VERSION-$label-$arch"
-            exe=tyaga; [ "$os" = windows ] && exe=tyaga.exe
-            gui=""; [ "$os" = windows ] && gui="-H=windowsgui" # no console window on Windows
+          for arch in amd64 arm64; do
+            name="tyaga-$VERSION-windows-$arch"
             mkdir -p "build/$name/tyaga"
-            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -tags production -trimpath \
-              -ldflags "-s -w $gui -X main.version=$VERSION" -o "build/$name/tyaga/$exe" .
-            if [ "$os" = windows ]; then
-              (cd "build/$name" && zip -qr "../../dist/$name.zip" tyaga)
-            else
-              tar -C "build/$name" -czf "dist/$name.tar.gz" tyaga
-            fi
+            # -H=windowsgui: no console window
+            GOOS=windows GOARCH=$arch CGO_ENABLED=0 go build -tags production -trimpath \
+              -ldflags "-s -w -H=windowsgui -X main.version=$VERSION" -o "build/$name/tyaga/tyaga.exe" .
+            (cd "build/$name" && zip -qr "../../dist/$name.zip" tyaga)
           done
           ls -la dist
 
