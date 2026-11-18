@@ -232,7 +232,10 @@ html.app #jobsCard #list,html.app #jobsCard #game,html.app #jobsCard .foot{trans
 html.app #jobsCard.folded #list,html.app #jobsCard.folded #game,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
 html.app #jobsCard.anim{transition:height .25s cubic-bezier(.2,.8,.2,1)}
 html.app #jobsCard.come{animation:rise .3s cubic-bezier(.2,.8,.2,1) both}
-html.app #jobsCard.leave{opacity:0;transform:translateY(8px);transition:opacity .18s ease,transform .18s ease}
+/* Going away: the card folds up to nothing and fades (the window follows once it's gone). */
+html.app #jobsCard.leave{height:0!important;padding-top:0;padding-bottom:0;margin-top:0!important;border-color:transparent;opacity:0;transition:height .36s cubic-bezier(.4,0,.2,1),padding .36s cubic-bezier(.4,0,.2,1),margin .36s cubic-bezier(.4,0,.2,1),opacity .3s ease,border-color .36s}
+/* A row that leaves the list (Clear finished) folds up and fades, the rows below slide up. */
+.job.bye{overflow:hidden;opacity:0;transition:height .26s cubic-bezier(.4,0,.2,1),padding .26s cubic-bezier(.4,0,.2,1),margin .26s cubic-bezier(.4,0,.2,1),opacity .18s ease;height:0!important;padding-top:0!important;padding-bottom:0!important;margin-top:0!important;margin-bottom:0!important;border-width:0!important}
 html.app #list{margin-top:10px}
 /* The game takes the list's place, same size, so nothing around it moves. */
 html.app #game{flex:1;min-height:0;margin-top:10px;position:relative;border-radius:12px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;animation:fadein .2s ease both}
@@ -849,6 +852,11 @@ function render() {
   document.title = run ? Math.floor(run.progress) + '% · ТЯГА' : 'ТЯГА';
   ping(jobs);
 
+  if (!jobs.length && APP) { // the list card folds away (setGone); its rows fold up meanwhile
+    Object.keys(rows).forEach(function (id) { bye(rows[id].row); });
+    rows = {};
+    return;
+  }
   if (!jobs.length) {
     if (!list.querySelector('.empty')) {
       list.innerHTML = '';
@@ -873,7 +881,7 @@ function render() {
     if (list.children[i] !== r.row) list.insertBefore(r.row, list.children[i] || null);
   });
   Object.keys(rows).forEach(function (id) {
-    if (!alive[id]) { rows[id].row.remove(); delete rows[id]; }
+    if (!alive[id]) { bye(rows[id].row); delete rows[id]; }
   });
 
   // Just finished: the row glows green for a moment and the fish on the hook jumps.
@@ -895,7 +903,7 @@ var headNote = null;
 function foldSummary(jobs) {
   if (headNote && Date.now() < headNote.until)
     return '<span class="' + (headNote.bad ? 'bad' : 'good') + '">' + headNote.t.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>';
-  if (!jobs.length) return 'Nothing on the hook yet';
+  if (!jobs.length) return APP ? $('lsum').innerHTML : 'Nothing on the hook yet'; // app: the card is leaving, keep its line
   var n = { running: 0, queued: 0, done: 0, error: 0 }, run = null;
   jobs.forEach(function (j) { if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
   var parts = [];
@@ -911,6 +919,14 @@ function foldSummary(jobs) {
 // Nothing in the list: no list card at all, the window is just the first card. The first link
 // that goes in brings the card in, open; clearing the list takes it away again (not while the
 // game is open: that waits until you close it).
+// A row leaves: it folds up and fades, then it's gone. With "reduce motion": at once.
+function bye(row) {
+  if (!APP || matchMedia('(prefers-reduced-motion: reduce)').matches || !row.offsetHeight) return row.remove();
+  row.style.height = row.offsetHeight + 'px';
+  void row.offsetHeight;
+  row.classList.add('bye');
+  setTimeout(function () { row.remove(); }, 280);
+}
 function syncFold(jobs) {
   var html = foldSummary(jobs);
   if ($('lsum').innerHTML !== html) $('lsum').innerHTML = html;
@@ -934,8 +950,10 @@ function setGone(on, animate) {
       windowFit();
     };
     if (!animate) return away();
+    card.style.height = card.offsetHeight + 'px'; // from its height, so the fold can be animated
+    void card.offsetHeight;
     card.classList.add('leave');
-    setTimeout(away, 180);
+    setTimeout(function () { card.style.height = ''; away(); }, 380);
     return;
   }
   fold.on = false;
@@ -973,6 +991,7 @@ function openHeight() { // the open list card's natural height, measured without
 var lastFit = 0;
 function windowFit() {
   if (!APP) return;
+  if ($('jobsCard').classList.contains('leave')) return; // folding away: the window follows at the end
   if (game.open) { if (lastFit !== -1) { lastFit = -1; api('/api/window', { text: 'full' }).catch(function () {}); } return; }
   var n;
   if (fold.gone || fold.on) {
