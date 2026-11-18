@@ -44,7 +44,10 @@ through a page in the browser. One Go program: a tiny local server + one embedde
    on ТЯГА; everything done in it goes to one branch (commit and push as you go, no PR yet).
    When he says the session is over ("заканчиваем сессию"), update the README, open the PR
    for that branch, and he goes off to do other things. The next session starts a new branch
-   from `main`.
+   from `main`. All threads of a session work on that one branch; if a thread had to make its
+   own, it is merged into the session's branch and then deleted. Branches are deleted after
+   their PR is merged (GitHub does it by itself: "Automatically delete head branches" is on),
+   so the repo holds only `main` and the current session's branch.
 5. **The README is updated at the end of a session**, not after every change. Its top stays
    short and holds only what rarely changes: what ТЯГА is, how to start it, the screenshot.
    Details and the things that change often go further down.
