@@ -7,7 +7,8 @@
 @media (prefers-color-scheme:dark){:root{--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html{min-height:100%}
+/* The scrollbar's place is kept even without one, so the page doesn't shift sideways when the list gets long. */
+html{min-height:100%;scrollbar-gutter:stable}
 body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif;overflow-x:hidden}
 /* An app, not a document: Ctrl+A or a stray click doesn't paint the buttons and labels blue.
    What's worth copying stays selectable: the links box, download titles, errors and the log. */
@@ -123,9 +124,11 @@ input[type=checkbox]:active{transform:scale(.8)}
    circle, the current one an orange dot that breathes, joined by a thin line. The live
    numbers of the current step (piece 17 of 80 · 8 MB) are little pills, like the counters
    above. New steps slide in, old ones fold away at the top. */
-.log{margin-top:8px;padding:8px 12px 8px 10px;border-radius:12px;background:rgba(127,127,127,.06);box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.5;color:var(--dim)}
-.log:empty{display:none}
-.log div{position:relative;display:flex;align-items:center;gap:6px;min-height:24px;padding-left:24px;white-space:nowrap;overflow:hidden;max-height:24px;transition:opacity .35s,max-height .35s,min-height .35s}
+/* Fixed height (four steps), the newest step always on the bottom line: the panel never
+   grows or shrinks while steps come and go, so nothing below it moves. Older steps leave
+   over the top edge. */
+.log{margin-top:8px;padding:8px 12px 8px 10px;height:112px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;border-radius:12px;background:rgba(127,127,127,.06);box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.5;color:var(--dim)}
+.log div{flex:none;position:relative;display:flex;align-items:center;gap:6px;min-height:24px;padding-left:24px;white-space:nowrap;overflow:hidden;max-height:24px;transition:opacity .35s,max-height .35s,min-height .35s}
 .log div > span:first-child{overflow:hidden;text-overflow:ellipsis}
 .log div::before{content:"";position:absolute;left:4px;top:7px;width:10px;height:10px;border-radius:50%;box-sizing:border-box}
 .log div:not(:last-child)::after{content:"";position:absolute;left:8.5px;top:19px;height:12px;width:1px;background:var(--line)}
@@ -137,9 +140,11 @@ input[type=checkbox]:active{transform:scale(.8)}
 @keyframes breathe{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 45%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--acc) 0%,transparent)}}
 .log .tag{flex:none;padding:0 8px;border-radius:999px;font-size:11.5px;line-height:18px;font-variant-numeric:tabular-nums;color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent)}
 .log .in{animation:stepin .35s cubic-bezier(.2,.8,.2,1)}
-@keyframes stepin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes stepin{from{opacity:0;max-height:0;min-height:0}to{opacity:1;max-height:24px;min-height:24px}}
 .log .out{opacity:0;max-height:0;min-height:0}
 .sub{font-size:12px;color:var(--dim);margin-top:4px;word-break:break-word}
+/* The speed line under the wave stays one line, whatever the width. */
+.live .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sub.err{color:var(--err)}
 .sub a{color:var(--acc);display:block;margin-top:2px}
 .foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
@@ -179,7 +184,7 @@ input[type=checkbox]:active{transform:scale(.8)}
    itself), with the window buttons on the right. The page scrolls below the strip. */
 .winbar{display:none}
 html.app .winbar{display:flex;justify-content:flex-end;position:fixed;top:0;left:0;right:0;height:38px;z-index:60;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
-html.app body{position:fixed;inset:38px 0 0 0;min-height:0;overflow-y:auto}
+html.app body{position:fixed;inset:38px 0 0 0;min-height:0;overflow-y:auto;scrollbar-gutter:stable}
 html.app main{padding-top:18px}
 .winbar button{app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;width:46px;height:38px;border:0;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:default;transition:background .15s,color .15s}
 .winbar button:hover{background:var(--line);color:var(--fg)}
@@ -411,7 +416,7 @@ function add() {
       syncBoxes();
     }
     refresh();
-  });
+  }, function () { $('msg').textContent = OFFLINE; });
 }
 
 $('go').onclick = function () { askNotify(); add(); };

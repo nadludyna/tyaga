@@ -67,6 +67,8 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
 
 ## Design rules
 
+- **How the page behaves** (nothing jumps, never freezes, Nielsen's ten): `docs/ui-principles.md`.
+  Check every change against it.
 - Reference: **Material 3 Expressive** (the owner likes how the Morphe app looks). Dark first,
   light must work too.
 - **No empty holes.** When something is added or removed, rebalance its neighbours so the
