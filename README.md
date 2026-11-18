@@ -14,7 +14,7 @@
 ТЯГА downloads video and music from YouTube: paste a link, pick video or audio, get a clean file with proper tags and a real cover. One small program for Windows, nothing to install, nothing left behind. The heavy lifting is done by [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
 <p align="center">
-  <img src="docs/screenshot.png" width="680" alt="ТЯГА: a link box, video/audio switches and a download with a progress wave and a live step list">
+  <img src="docs/screenshot.png" width="680" alt="ТЯГА's window: a link box, video/audio switches and a download with a progress wave and a live step list">
 </p>
 
 ## Run it
