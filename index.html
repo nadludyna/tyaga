@@ -205,6 +205,20 @@ html.app #jobsCard{flex:1;min-height:0;display:flex;flex-direction:column;overfl
 html.app #jobsCard>*{position:relative;z-index:1}
 html.app #list{flex:1;min-height:0;overflow-y:auto;margin-right:-10px;scrollbar-gutter:stable}
 html.app #jobsCard>.bg{position:absolute;inset:0;z-index:0;background:none;border-radius:inherit;overflow:hidden}
+/* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
+   It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
+.lhead{display:none}
+html.app .lhead{display:flex;align-items:center;gap:10px;width:100%;flex:none;margin:-4px 0 0;padding:2px 4px;border:0;border-radius:8px;background:transparent;color:var(--dim);font:inherit;font-size:13.5px;text-align:left;cursor:pointer;transition:color .15s}
+html.app .lhead:hover{color:var(--fg)}
+.lhead #lsum{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.lhead .bad{color:var(--err)}
+.lhead svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
+html.app #jobsCard.folded .lhead svg{transform:rotate(180deg)}
+html.app #jobsCard.folded{flex:none}
+html.app #jobsCard #list,html.app #jobsCard .foot{transition:opacity .2s}
+html.app #jobsCard.folded #list,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+html.app #jobsCard.anim{transition:height .25s cubic-bezier(.2,.8,.2,1)}
+html.app #list{margin-top:10px}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
 html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
@@ -265,6 +279,7 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 </div>
 
 <div class="card" id="jobsCard">
+  <button class="lhead" id="lhead" title="Show or hide the downloads"><span id="lsum"></span><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>
   <div id="list"></div>
   <div class="foot">
     <button class="btn" id="open" title="The folder where everything is saved"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
@@ -282,6 +297,7 @@ if (new URLSearchParams(location.search).get('w')) {
   var form = document.querySelector('.card.form');
   form.insertBefore(document.querySelector('header'), form.firstChild);
   var jobsCard = document.getElementById('jobsCard');
+  jobsCard.classList.add('folded'); // until the list is known: no flash of a big empty card
   jobsCard.insertBefore(document.querySelector('.bg'), jobsCard.firstChild);
   ['Min', 'Close'].forEach(function (b) {
     document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
@@ -758,6 +774,7 @@ function render() {
   $('setup').classList.toggle('err', !state.setup && !!state.problem);
 
   var list = $('list'), jobs = state.jobs || [];
+  if (APP) syncFold(jobs);
   // While something downloads, the fish in the logo gets reeled in.
   var run = jobs.filter(function (j) { return j.status === 'running'; })[0];
   document.body.classList.toggle('busy', !!run);
@@ -804,6 +821,80 @@ function render() {
     document.body.classList.add('caught');
     setTimeout(function () { document.body.classList.remove('caught'); }, 950);
   });
+}
+
+// The list card's fold (ТЯГА's window only, see .lhead in the styles).
+var APP = document.documentElement.classList.contains('app');
+var fold = { on: false, count: -1, busy: false };
+function foldSummary(jobs) {
+  if (!jobs.length) return 'Nothing on the hook yet';
+  var n = { running: 0, queued: 0, done: 0, error: 0 }, run = null;
+  jobs.forEach(function (j) { if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
+  var parts = [];
+  if (run) parts.push(statusText(run) === 'waiting' ? 'Waiting' : 'Downloading ' + Math.floor(run.progress) + '%');
+  if (n.queued) parts.push(n.queued + ' queued');
+  if (n.done) parts.push(n.done + ' done');
+  var html = parts.map(function (t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }).join(' · ');
+  if (n.error) html += (html ? ' · ' : '') + '<span class="bad">' + n.error + ' failed</span>';
+  return html || jobs.length + (jobs.length === 1 ? ' download' : ' downloads');
+}
+function syncFold(jobs) {
+  var html = foldSummary(jobs);
+  if ($('lsum').innerHTML !== html) $('lsum').innerHTML = html;
+  if (fold.count < 0) setFold(!jobs.length, false);           // first look: empty → folded
+  else if (jobs.length > fold.count && fold.on) setFold(false, true); // a link went in
+  else if (!jobs.length && fold.count > 0 && !fold.on) setFold(true, true); // the list was cleared
+  fold.count = jobs.length;
+}
+// The window is as tall as the cards: full when unfolded, down to the folded line when folded.
+// Growing: the window first (it's transparent, so that's invisible), then the card slides open.
+// Shrinking: the card slides shut, then the window follows.
+function foldedHeight() {
+  var card = $('jobsCard');
+  return Math.ceil($('lhead').getBoundingClientRect().bottom - card.getBoundingClientRect().top + parseFloat(getComputedStyle(card).paddingBottom) + 1);
+}
+function windowFit() {
+  if (!fold.on) return;
+  var bottom = $('jobsCard').getBoundingClientRect().bottom;
+  api('/api/window', { text: 'height', n: Math.ceil(bottom + parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom)) }).catch(function () {});
+}
+function setFold(on, animate) {
+  var card = $('jobsCard');
+  fold.on = on;
+  card.classList.remove('anim');
+  if (!animate || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    card.classList.toggle('folded', on);
+    card.style.height = on ? foldedHeight() + 'px' : '';
+    if (on) windowFit(); else api('/api/window', { text: 'full' }).catch(function () {});
+    return;
+  }
+  if (on) {
+    card.style.height = card.offsetHeight + 'px';
+    void card.offsetHeight;
+    card.classList.add('anim', 'folded');
+    card.style.height = foldedHeight() + 'px';
+    setTimeout(function () { if (fold.on) windowFit(); }, 260);
+  } else {
+    var from = card.offsetHeight;
+    api('/api/window', { text: 'full' }).catch(function () {}).then(function () {
+      return new Promise(function (ok) { var t = setTimeout(ok, 300); addEventListener('resize', function f() { removeEventListener('resize', f); clearTimeout(t); setTimeout(ok, 30); }); });
+    }).then(function () {
+      if (fold.on) return;
+      card.classList.remove('folded');
+      card.style.height = '';
+      var to = card.offsetHeight;
+      card.style.height = from + 'px';
+      void card.offsetHeight;
+      card.classList.add('anim');
+      card.style.height = to + 'px';
+      setTimeout(function () { if (!fold.on) { card.classList.remove('anim'); card.style.height = ''; } }, 260);
+    });
+  }
+}
+if (APP) {
+  $('lhead').onclick = function () { setFold(!fold.on, true); };
+  // The first card can grow (fragment times, an error): the folded window follows it.
+  if (window.ResizeObserver) new ResizeObserver(function () { if (fold.on) windowFit(); }).observe(document.querySelector('.card.form'));
 }
 
 function refresh() {

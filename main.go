@@ -230,7 +230,7 @@ func handler(token string) http.Handler {
 		case "/api/bye":
 			pageClosed()
 		case "/api/window": // the buttons of ТЯГА's own window, which has no system title bar
-			windowControl(body.Text)
+			windowControl(body.Text, body.N)
 		case "/api/quit":
 			writeJSON(w, map[string]bool{"ok": true})
 			go func() { time.Sleep(200 * time.Millisecond); quit() }() // let the answer reach the page first

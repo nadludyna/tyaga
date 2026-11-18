@@ -19,6 +19,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
@@ -32,7 +33,7 @@ var trayIcon []byte
 var exitApp = func() { os.Exit(0) }
 
 // windowControl is what the page's own window buttons do (the window has no system title bar).
-var windowControl = func(action string) {}
+var windowControl = func(action string, n int) {}
 
 // runWindow opens ТЯГА in its own window and returns when ТЯГА quits.
 // A second launch from the same folder doesn't start a second ТЯГА: it brings up the window
@@ -90,26 +91,29 @@ func runWindow(token string) bool {
 			NonClientRegionSupport:            true, // the page's "app-region: drag" parts drag it like a title bar
 		},
 	})
-	windowControl = func(action string) {
+	// The window's full height: the page's, or less on a small screen (or with big scaling),
+	// so it doesn't go under the taskbar. The page asks for it when the list unfolds and for
+	// just the cards' height when it folds; the top edge stays where it is.
+	var fullHeight atomic.Int64
+	fullHeight.Store(winHeight)
+	win.OnWindowEvent(events.Common.WindowShow, func(*application.WindowEvent) {
+		if sc, err := win.GetScreen(); err == nil && sc != nil && sc.WorkArea.Height > 0 {
+			fullHeight.Store(int64(min(winHeight, sc.WorkArea.Height-16)))
+		}
+	})
+	windowControl = func(action string, n int) {
+		full := int(fullHeight.Load())
 		switch action {
 		case "min":
 			win.Minimise()
 		case "close":
 			win.Hide()
+		case "full":
+			win.SetSize(winWidth, full)
+		case "height":
+			win.SetSize(winWidth, max(120, min(n, full)))
 		}
 	}
-	// A small screen (or big scaling): the window fits into it rather than going under the taskbar.
-	fitted := false
-	win.OnWindowEvent(events.Common.WindowShow, func(*application.WindowEvent) {
-		if fitted {
-			return
-		}
-		fitted = true
-		if sc, err := win.GetScreen(); err == nil && sc != nil && sc.WorkArea.Height > 0 && sc.WorkArea.Height-16 < winHeight {
-			win.SetSize(winWidth, sc.WorkArea.Height-16)
-			win.Center()
-		}
-	})
 	win.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
 		e.Cancel()
 		win.Hide()
