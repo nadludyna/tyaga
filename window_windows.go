@@ -160,8 +160,9 @@ func runWindow(token string) bool {
 			win.SetSize(winWidth, want)
 			onScreen()
 			place()
-			b := win.Bounds()
-			logf("Window: the page asked for %d, the limit is %d, it got %dx%d", n, full, b.Width, b.Height)
+			if b := win.Bounds(); b.Height != want {
+				logf("Window: the page asked for %d (limit %d) and got %d", n, full, b.Height)
+			}
 		}
 	}
 	win.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {

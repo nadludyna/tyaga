@@ -1001,7 +1001,9 @@ function windowFit() {
     n = Math.ceil(card.offsetTop + card.offsetHeight + mainPad());
   } else if ($('jobsCard').classList.contains('anim')) return; // sliding open: it fits at the end
   else n = openHeight();
-  if (n === lastFit) return;
+  // Asked already and the window has it (or as much as fits): nothing to do. If Windows didn't
+  // apply it (it happens when a few come at once), ask again.
+  if (n === lastFit && (Math.abs(innerHeight - n) <= 1 || innerHeight >= 800)) return;
   lastFit = n;
   api('/api/window', { text: 'height', n: n }).catch(function () {});
 }
@@ -1105,7 +1107,8 @@ var game = { open: false };
 
   function step(dt) {
     var kv = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0);
-    if (kv) pad.x = Math.max(0, Math.min(W - pad.w, pad.x + kv * 560 * dt));
+    if (kv) { pad.x = Math.max(0, Math.min(W - pad.w, pad.x + kv * 560 * dt)); aim = null; }
+    else if (aim != null) pad.x += (aim - pad.x) * Math.min(1, dt * 22);
     bricks.forEach(function (b) { if (b.fade > 0) b.fade = Math.max(0, b.fade - dt / 0.18); });
     if (mode !== 'play') { if (ball.stuck) stick(); return; }
     if (ball.stuck) { stick(); return; }
@@ -1189,9 +1192,13 @@ var game = { open: false };
   }
   function run() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
 
-  cv.addEventListener('mousemove', function (e) {
+  // The paddle glides to the mouse (quickly, but never jumps), and follows it over the whole
+  // window, so coming back into the game doesn't snap it across.
+  var aim = null;
+  addEventListener('mousemove', function (e) {
+    if (!game.open) return;
     var r = cv.getBoundingClientRect();
-    pad.x = Math.max(0, Math.min(W - pad.w, e.clientX - r.left - pad.w / 2));
+    aim = Math.max(0, Math.min(W - pad.w, e.clientX - r.left - pad.w / 2));
   });
   cv.addEventListener('mousedown', function (e) { e.preventDefault(); click(); });
   cv.addEventListener('mouseleave', pause); // reaching for something else: the ball waits
@@ -1210,7 +1217,7 @@ var game = { open: false };
     $('list').hidden = on;
     box.hidden = !on;
     $('jobsCard').classList.toggle('gaming', on);
-    keys = {};
+    keys = {}; aim = null;
     if (on) {
       colors();
       if (!bricks.length) restart();
