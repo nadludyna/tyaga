@@ -213,3 +213,22 @@ func TestPickReleases(t *testing.T) {
 		t.Errorf("no album: got %q, want the earliest exact release", got)
 	}
 }
+
+// TestPickReleasesOrbital: real results (Apple, 2026-11) for a track of Orbital's "In Sides"
+// album on YouTube Music. The compilation "20" comes first; it used to win.
+func TestPickReleasesOrbital(t *testing.T) {
+	all := []release{
+		{ArtistName: "Orbital", TrackName: "The Girl with the Sun in Her Head", CollectionName: "20", ReleaseDate: "1997-04-21T07:00:00Z", ArtworkURL100: "20"},
+		{ArtistName: "Orbital", TrackName: "The Girl with the Sun in Her Head (Floex Remix)", CollectionName: "30 Something", ReleaseDate: "1991-01-01T08:00:00Z", ArtworkURL100: "30"},
+		{ArtistName: "Orbital", TrackName: "The Girl with the Sun in Her Head", CollectionName: "In Sides", ReleaseDate: "1997-04-21T07:00:00Z", ArtworkURL100: "insides"},
+		{ArtistName: "Orbital", TrackName: "The Girl with the Sun in Her Head", CollectionName: "A Beginner's Guide (Best Of)", ReleaseDate: "1997-04-21T07:00:00Z", ArtworkURL100: "best"},
+	}
+	got := pickReleases(all, "song", "Orbital", "The Girl With The Sun In Her Head", "In Sides")
+	if len(got) == 0 || got[0].ArtworkURL100 != "insides" {
+		t.Errorf("In Sides: got %v, want the In Sides cover", got)
+	}
+	got = pickReleases(all, "song", "Orbital", "The Girl With The Sun In Her Head", "Orbital 20")
+	if len(got) == 0 || got[0].ArtworkURL100 != "20" {
+		t.Errorf("Orbital 20: got %v, want the cover of \"20\"", got)
+	}
+}

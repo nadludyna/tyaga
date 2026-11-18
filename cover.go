@@ -312,7 +312,9 @@ func pickReleases(all []release, entity, artist, name, album string) []release {
 		if entity == "song" && norm(album) != "" {
 			// The album is known: its cover or none. The thumbnail YouTube Music gives
 			// is that album's cover too, so "none" still ends up right.
-			if norm(releaseKind.ReplaceAllString(r.CollectionName, "")) != norm(album) {
+			// YouTube Music sometimes puts the artist in front ("Orbital 20" is Apple's "20").
+			c := norm(releaseKind.ReplaceAllString(r.CollectionName, ""))
+			if c != norm(album) && norm(artist)+" "+c != norm(album) {
 				continue
 			}
 		}
