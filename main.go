@@ -48,12 +48,19 @@ func main() {
 	home, _ := os.UserHomeDir()
 	out := flag.String("out", filepath.Join(home, "Downloads", "YouTube"), "folder for downloads")
 	noBrowser := flag.Bool("no-browser", false, "no window and no browser: just the server, its address is in the log")
+	loginWin := flag.Bool("login", false, "only the window for signing in to YouTube (the page opens it)")
 	flag.Parse()
 
 	appDir = programDir()
 	binDir = filepath.Join(appDir, "bin")
 	cookiesFile = filepath.Join(appDir, "youtube-cookies.txt")
 	outDir = *out
+
+	// The sign-in window (login.go): started by ТЯГА itself, closes when you close it.
+	if *loginWin {
+		runLogin()
+		return
+	}
 
 	// Windows: ТЯГА's own window. It returns when ТЯГА quits.
 	if !*noBrowser && runWindow(randomToken()) {
@@ -162,7 +169,7 @@ func handler(token string) http.Handler {
 				defer mu.Unlock()
 				writeJSON(w, map[string]any{
 					"version": version, "ready": ready, "setup": status, "problem": problem,
-					"out": outDir, "jobs": jobs,
+					"out": outDir, "jobs": jobs, "login": loginState(),
 				})
 			case "/api/cover":
 				id, _ := strconv.Atoi(r.URL.Query().Get("id"))
@@ -225,6 +232,10 @@ func handler(token string) http.Handler {
 			cancelJob(body.ID)
 		case "/api/retry":
 			retryJob(body.ID)
+		case "/api/login":
+			startLogin()
+		case "/api/logout":
+			logout()
 		case "/api/clear":
 			clearFinished()
 		case "/api/bye":

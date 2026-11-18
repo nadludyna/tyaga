@@ -372,6 +372,9 @@ func explain(line string) string {
 	case sponsorRe.MatchString(line):
 		return "SponsorBlock didn't answer. Untick \"no sponsors\" and add the link again."
 	case signInRe.MatchString(line):
+		if canLogin {
+			return "YouTube wants you to sign in. Sign in, then Retry."
+		}
 		return "YouTube wants you to sign in. Put a fresh youtube-cookies.txt next to the program."
 	case tooManyRe.MatchString(line):
 		return "YouTube is limiting requests for now. Try again later."

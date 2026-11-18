@@ -16,6 +16,7 @@ import (
 	"crypto/sha256"
 	_ "embed"
 	"encoding/hex"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -177,4 +178,48 @@ func webviewDataDir() string {
 		base = os.TempDir()
 	}
 	return filepath.Join(base, "TYAGA", "webview-"+folderID())
+}
+
+// ---------------------------------------------------------------------------
+//  The sign-in window (login.go)
+// ---------------------------------------------------------------------------
+
+const canLogin = true
+
+// Google's sign-in page, going on to YouTube once you're in.
+const signInURL = "https://accounts.google.com/ServiceLogin?service=youtube&continue=https%3A%2F%2Fwww.youtube.com%2F"
+
+// runLogin is ТЯГА started with -login: one ordinary window with Google's sign-in page, in a
+// web view with its own data folder, so its cookies can be read once it's closed. Closing the
+// window ends it. Started again while open, it brings up the open one.
+func runLogin() {
+	var win *application.WebviewWindow
+	app := application.New(application.Options{
+		Name:   "ТЯГА",
+		Assets: application.AssetOptions{Handler: http.NotFoundHandler(), DisableLogging: true},
+		SingleInstance: &application.SingleInstanceOptions{
+			UniqueID: "tyaga-login-" + folderID(),
+			OnSecondInstanceLaunch: func(application.SecondInstanceData) {
+				if win != nil {
+					win.Show()
+					win.Focus()
+				}
+			},
+		},
+		Windows: application.WindowsOptions{WebviewUserDataPath: loginDir()},
+	})
+	win = app.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:           "ТЯГА · sign in to YouTube, then close this window",
+		Width:           520,
+		Height:          760,
+		InitialPosition: application.WindowCentered,
+		URL:             signInURL,
+		Windows:         application.WindowsWindow{Theme: application.SystemDefault},
+	})
+	app.Run()
+}
+
+// loginDir is the sign-in window's web view data, per folder like the main window's.
+func loginDir() string {
+	return filepath.Join(filepath.Dir(webviewDataDir()), "login-"+folderID())
 }

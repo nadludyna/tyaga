@@ -105,7 +105,7 @@ func TestOnLine(t *testing.T) {
 		t.Errorf("tracks: %+v", j.tracks)
 	}
 	onLine(j, "ERROR: [youtube] abc: Sign in to confirm you're not a bot")
-	if !strings.Contains(j.Error, "cookies") {
+	if !strings.Contains(j.Error, "sign in") {
 		t.Errorf("error: %q", j.Error)
 	}
 }
@@ -359,5 +359,14 @@ func TestLiveLine(t *testing.T) {
 func TestJSChallenge(t *testing.T) {
 	if got := logLine("[youtube] [jsc:deno] Solving JS challenges using deno"); got != "Passing YouTube's check" {
 		t.Errorf("%q", got)
+	}
+}
+
+func TestHasSignIn(t *testing.T) {
+	visit := "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t1893456000\tVISITOR_INFO1_LIVE\tx\n"
+	in := visit + "#HttpOnly_.youtube.com\tTRUE\t/\tTRUE\t1893456000\t__Secure-3PSID\ty\n"
+	google := visit + ".google.com\tTRUE\t/\tTRUE\t1893456000\tSAPISID\tz\n"
+	if hasSignIn([]byte(visit)) || hasSignIn([]byte(google)) || !hasSignIn([]byte(in)) {
+		t.Error("hasSignIn: a visit, Google only and a YouTube sign-in told apart wrongly")
 	}
 }
