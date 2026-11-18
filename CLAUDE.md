@@ -11,6 +11,8 @@ Read `README.md` for what it does for people.
 - Talk to the owner in **Russian**, casually. He is not a developer: explain jargon in a few
   words, show results, don't lecture.
 - Everything in the repo (code, comments, README, commits, PRs) is in **English**.
+- His PC: Windows, 1920×1080 at **125 % scaling** (work area 1536×824). Check sizes for that.
+  Main browser: Brave.
 - The name is **ТЯГА** everywhere people see it. Latin `tyaga` only where it's a file name.
 
 ## Talking it through
@@ -19,6 +21,9 @@ Read `README.md` for what it does for people.
   honestly whether it's a good idea. Good → do it, maybe with a small improvement (say which
   and why). Bad → say plainly that it's a bad idea, why, and what would work better. Never
   agree just because he asked.
+- **Push back openly.** What he said earlier is not law: if it no longer fits (a rule, a
+  "keep this as is"), say so, propose better and say why. He'd rather argue than guess. Don't
+  invent disagreement for its own sake either.
 - **He tends to say "go" to a confident answer** ("it's an AI, it probably knows better").
   So don't sound surer than you are, give the reason behind every choice, and say what you
   don't know or didn't check.
@@ -41,7 +46,9 @@ Read `README.md` for what it does for people.
    which came after which: put each one on his PC as
    `Desktop\клоны репо\ТЯГА builds\NN — DD.MM HH-MM — <what's new, in Russian> (<sha>)\tyaga.exe`
    (his local time, Europe/Warsaw) and build it with `-X main.version=test-NN`, so the page shows the number
-   too. Old builds are kept, never deleted. Tell him the folder; no zips in the chat.
+   too. Old builds are kept, never deleted. Tell him the folder; no zips in the chat. Each build
+   report says what was checked (transitions included) and how, and what wasn't.
+   Getting it there: his PC has Go; a Remote Control session can build it from the branch.
 4. **One branch = one working session.** A session starts when the owner sits down to work
    on ТЯГА; everything done in it goes to one branch (commit and push as you go, no PR yet).
    When he says the session is over ("заканчиваем сессию"), update the README, open the PR
@@ -50,10 +57,18 @@ Read `README.md` for what it does for people.
    own, it is merged into the session's branch and then deleted. Branches are deleted after
    their PR is merged (GitHub does it by itself: "Automatically delete head branches" is on),
    so the repo holds only `main` and the current session's branch.
-5. **The README is updated at the end of a session**, not after every change. Its top stays
-   short and holds only what rarely changes: what ТЯГА is, how to start it, the screenshot.
-   Details and the things that change often go further down.
-6. Releases are made by the owner: Actions → Release, with a version like `v1.2.0`.
+5. **At the end of a session: the README and `docs/decisions.md`**, not after every change.
+   The README's top stays short and holds only what rarely changes: what ТЯГА is, how to
+   start it, the screenshot. Details and the things that change often go further down.
+   `docs/decisions.md` gets a couple of lines per decision made in the session: what was
+   chosen, why, what was rejected.
+6. **A session starts with a self-audit**: before he tests anything, go through the latest
+   build against `docs/ui-principles.md` and bring him a list of problems.
+7. Releases are made by the owner: Actions → Release, with a version like `v1.2.0`. Never
+   delete and recreate a release: a fix gets the next version (semver: `v1.2.1` for a fix,
+   `v1.3.0` for something new).
+8. Claude can't delete branches on GitHub (refused): the owner does it at
+   github.com/nadludyna/tyaga/branches.
 
 ## Before you show anything
 
@@ -127,8 +142,14 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
   album where the song first came out (the album's own date, from the lookup API: a song's
   date is the same on every album). `TYAGA_LIVE=1 go test -run Live` checks the real catalogue.
 - Mock data hides real problems. A demo page is not a test: use the stand.
-- Portable: ТЯГА writes nothing outside its own folder (`tyaga-data`, see data.go) and the
-  downloads folder. Anything new it keeps goes there, with a line on why in data.go.
+- Portable: ТЯГА writes nothing outside its own folder (`tyaga-data`, hidden, next to the exe,
+  see data.go) and the downloads folder: nothing in AppData, the registry or anywhere else,
+  and it cleans up after itself (WebView2 caches are trimmed). Anything new it keeps goes
+  there, with a line on why in data.go. WebView2 by default writes to AppData: always set its
+  data folder.
+- YouTube sign-in: yt-dlp reads the cookies of the browser he uses (Brave) afresh on every
+  download. ТЯГА's own sign-in window is only a fallback for Chrome and Edge, whose cookies
+  can't be read on Windows. Never commit cookies.
 
 ## Map
 
