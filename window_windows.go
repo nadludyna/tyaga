@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"syscall"
@@ -276,10 +277,14 @@ func runLogin() {
 		Width:           520,
 		Height:          760,
 		InitialPosition: application.WindowCentered,
-		URL:             signInURL,
-		Windows:         application.WindowsWindow{Theme: application.SystemDefault},
+		// Not URL + ExecJS: Wails holds ExecJS back until its own page script says it's ready,
+		// which never happens on Google's and YouTube's pages, so the check never ran. A start
+		// page with JS instead: Wails then adds the JS as a script that runs at the start of
+		// every page the window opens, and the start page goes on to Google's sign-in.
+		HTML:    `<!doctype html><meta charset="utf-8"><script>location.replace(` + strconv.Quote(signInURL) + `)</script>`,
+		JS:      signedInJS,
+		Windows: application.WindowsWindow{Theme: application.SystemDefault},
 	})
-	win.OnWindowEvent(events.Windows.WebViewNavigationCompleted, func(*application.WindowEvent) { win.ExecJS(signedInJS) })
 	app.Run()
 }
 
