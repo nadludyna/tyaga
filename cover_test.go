@@ -232,3 +232,37 @@ func TestPickReleasesOrbital(t *testing.T) {
 		t.Errorf("Orbital 20: got %v, want the cover of \"20\"", got)
 	}
 }
+
+// TestFirstAlbum: a plain video, no album known. Every Orbital result says 1997 for the song;
+// the catalogue's album dates show In Sides (1996) came before the compilation 20 (2009).
+func TestFirstAlbum(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/lookup" || r.URL.Query().Get("id") != "20,1,30" {
+			http.NotFound(w, r)
+			return
+		}
+		fmt.Fprint(w, `{"results":[
+			{"wrapperType":"collection","collectionId":20,"releaseDate":"2009-01-01T08:00:00Z"},
+			{"wrapperType":"collection","collectionId":1,"releaseDate":"1996-01-01T08:00:00Z"},
+			{"wrapperType":"collection","collectionId":30,"releaseDate":"1995-01-01T08:00:00Z"}]}`)
+	}))
+	defer srv.Close()
+	saved := itunesURL
+	itunesURL = srv.URL + "/search"
+	defer func() { itunesURL = saved }()
+
+	all := []release{
+		{ArtistName: "Orbital", TrackName: "The Girl with the Sun in Her Head", CollectionName: "20", CollectionID: 20, ReleaseDate: "1997-04-21T07:00:00Z", ArtworkURL100: "20"},
+		{ArtistName: "Orbital", TrackName: "The Girl with the Sun in Her Head", CollectionName: "In Sides", CollectionID: 1, ReleaseDate: "1997-04-21T07:00:00Z", ArtworkURL100: "insides"},
+		{ArtistName: "Orbital", TrackName: "The Girl with the Sun in Her Head - Single", CollectionName: "The Girl with the Sun in Her Head - Single", CollectionID: 30, ReleaseDate: "1997-04-21T07:00:00Z", ArtworkURL100: "single"},
+		{ArtistName: "Orbital", TrackName: "The Girl with the Sun in Her Head (Floex Remix)", CollectionName: "30 Something", ReleaseDate: "1991-01-01T08:00:00Z", ArtworkURL100: "remix"},
+	}
+	got := firstAlbum(pickReleases(all, "song", "Orbital", "The Girl With The Sun In Her Head", ""))
+	var order []string
+	for _, r := range got {
+		order = append(order, r.ArtworkURL100)
+	}
+	if strings.Join(order, " ") != "insides 20 single" {
+		t.Errorf("order %v, want In Sides, then 20, then the single; no remix", order)
+	}
+}
