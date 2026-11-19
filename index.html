@@ -4,7 +4,10 @@
 <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"%3E %3Crect width="256" height="256" rx="58" fill="%23161616"/%3E %3Cpath d="M176 0 V22" stroke="%238a96a3" stroke-width="6"/%3E %3Ccircle cx="176" cy="36" r="12" fill="none" stroke="%23fff" stroke-width="9"/%3E %3Cpath d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="%23fff" stroke-width="18"/%3E %3Cpath d="M85 42 L96 10 L107 42 Z" fill="%23fff"/%3E %3Cpath d="M103 36 L119 54" stroke="%23fff" stroke-width="9.9" stroke-linecap="round"/%3E %3Cg fill="%23161616" stroke="%23161616" stroke-width="12" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cg fill="%23ff6b2c" stroke="%23ff6b2c" stroke-width="2" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cpath d="M83.143 108.208 L83.143 139.792 L111.76599999999999 124 Z" fill="%23fff" stroke="%23fff" stroke-width="5.922" stroke-linejoin="round"/%3E %3Ccircle cx="131.32" cy="109.9" r="6" fill="%23161616"/%3E %3C/svg%3E'>
 <style>
 :root{color-scheme:light dark;--bg:#f6f5f2;--card:rgba(255,255,255,.93);--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--acc:#e8590c;--acc2:#ff922b;--ok:#2b8a3e;--err:#c92a2a;--glow:rgba(232,89,12,.28)}
-@media (prefers-color-scheme:dark){:root{--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
+/* The theme follows Windows until the theme button picks one (data-theme, remembered). */
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 /* The scrollbar's place is kept even without one, so the page doesn't shift sideways when the list gets long. */
@@ -224,8 +227,9 @@ header{position:relative;z-index:3}
    grows. The falling notes live in the list card, the glow in the first one. */
 .wbtns{display:none}
 html.app,html.app body{background:transparent}
-html.app{--card:#1a1a1c}
-@media (prefers-color-scheme:light){html.app{--card:#fff}}
+html.app{--card:#fff}
+html.app[data-theme=dark]{--card:#1a1a1c}
+@media (prefers-color-scheme:dark){html.app:not([data-theme=light]){--card:#1a1a1c}}
 html.app body{position:fixed;inset:0;min-height:0;overflow:hidden;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
 html.app main{max-width:none;height:100%;margin:0;padding:12px 14px 16px;display:flex;flex-direction:column}
 html.app .card{flex:none;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;box-shadow:0 6px 18px -8px rgba(0,0,0,.55)}
@@ -236,7 +240,24 @@ html.app header .logo{width:46px;height:46px;border-radius:12px;app-region:no-dr
 html.app header h1{font-size:22px}
 html.app .wbtns{display:flex;gap:2px;margin-left:auto;align-self:flex-start}
 html.app .acct{align-self:flex-start;margin-top:2px}
-html.app .acct:not([hidden])+.wbtns{margin-left:8px}
+/* The theme button: a sun that turns into a moon (its bite slides in, the rays draw in). */
+.tbtn{flex:none;align-self:flex-start;margin-left:8px;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s,transform .1s;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
+.acct[hidden]+.tbtn{margin-left:auto}
+.tbtn:hover{background:var(--line);color:var(--fg)}
+.tbtn:active{transform:scale(.92)}
+.tbtn svg{width:18px;height:18px;overflow:visible}
+.tbtn .body{fill:currentColor;transform-origin:12px 12px;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.tbtn .bite{transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.tbtn .rays{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;transform-origin:12px 12px;transition:transform .5s cubic-bezier(.3,1.4,.5,1),opacity .3s}
+.tbtn.moon .body{transform:scale(1.35)}
+.tbtn.moon .bite{transform:translate(-5px,5px)}
+.tbtn.moon .rays{transform:rotate(-90deg) scale(.4);opacity:0}
+html.app .tbtn+.wbtns{margin-left:2px}
+/* Switching the theme: the new one spreads in a circle from the button (the View Transitions
+   API: one snapshot, then the graphics card animates it). */
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){animation:themein .55s cubic-bezier(.4,0,.2,1)}
+@keyframes themein{from{clip-path:circle(0 at var(--tx,90%) var(--ty,40px))}to{clip-path:circle(var(--tr,150%) at var(--tx,90%) var(--ty,40px))}}
 .wbtns button{app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:default;transition:background .15s,color .15s}
 .wbtns button:hover{background:var(--line);color:var(--fg)}
 .wbtns button.x:hover{background:#c42b1c;color:#fff}
@@ -303,6 +324,7 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
   </svg>
   <div><h1>ТЯГА</h1><div class="tag">pulls video &amp; music off YouTube<small id="ver"></small></div></div>
   <button class="btn acct" id="acct" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.3 3.9-5 7-5s5.8 1.7 7 5"/></svg><span id="acctT">Sign in to YouTube</span></button>
+  <button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Hide to the tray (downloads go on)" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
 </header>
 
@@ -353,6 +375,9 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 
 </main><script>
 var TOKEN = new URLSearchParams(location.search).get('t');
+// The theme: Windows' own until the theme button picks one; that choice is remembered (the
+// tray menu reads it too).
+try { var t0 = localStorage.getItem('tyaga-theme'); if (t0 === 'light' || t0 === 'dark') document.documentElement.dataset.theme = t0; } catch (e) {}
 // In ТЯГА's own window (see html.app in the styles): the logo goes into the first card,
 // the falling notes into the list card, and the window buttons work.
 if (new URLSearchParams(location.search).get('w')) {
@@ -527,6 +552,36 @@ function add() {
 }
 
 $('go').onclick = function () { askNotify(); add(); };
+function isDark() {
+  var t = document.documentElement.dataset.theme;
+  return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+}
+var themeHooks = []; // what has to pick up the new colours (canvases draw with them)
+function syncThemeBtn() {
+  var b = $('theme'), dark = isDark();
+  b.classList.toggle('moon', dark);
+  b.dataset.tip = dark ? 'Light theme' : 'Dark theme';
+  b.classList.add('tip-left');
+}
+$('theme').onclick = function () {
+  var want = isDark() ? 'light' : 'dark', b = $('theme').getBoundingClientRect(), root = document.documentElement;
+  var apply = function () {
+    root.dataset.theme = want;
+    try { localStorage.setItem('tyaga-theme', want); } catch (e) {}
+    syncThemeBtn();
+    themeHooks.forEach(function (f) { f(); });
+  };
+  if (!document.startViewTransition || still()) return apply();
+  // The circle grows from the button's middle to the farthest corner.
+  var x = b.left + b.width / 2, y = b.top + b.height / 2;
+  root.style.setProperty('--tx', x + 'px'); root.style.setProperty('--ty', y + 'px');
+  root.style.setProperty('--tr', Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 'px');
+  document.startViewTransition(apply);
+};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+  syncThemeBtn(); themeHooks.forEach(function (f) { f(); });
+});
+syncThemeBtn();
 // The fish is cast as soon as a link goes in (add() checks it's not empty).
 
 // Ctrl+A anywhere outside a text field selects the links, not the whole page.
@@ -1243,6 +1298,7 @@ var game = { open: false };
     fg = css.getPropertyValue('--fg').trim(); dim = css.getPropertyValue('--dim').trim();
     ok = css.getPropertyValue('--ok').trim(); err = css.getPropertyValue('--err').trim();
   }
+  themeHooks.push(colors);
   function speed() { return Math.min(460, 250 * (1 + 0.07 * (level - 1))); } // px/s: calm at first, a bit faster each level
   function layout() {
     var r = box.getBoundingClientRect();
@@ -1333,7 +1389,7 @@ var game = { open: false };
     cx.clearRect(0, 0, W, H);
     cx.textBaseline = 'middle';
     // A soft rainbow, one colour a row (pastel in the dark theme, deeper in the light one).
-    var light = matchMedia('(prefers-color-scheme: light)').matches;
+    var light = !isDark();
     var ROW = light ? ['#e57373', '#ffa726', '#f9c22e', '#66bb6a', '#42a5f5'] : ['#ff8a80', '#ffb74d', '#ffe082', '#a5d6a7', '#90caf9'];
     bricks.forEach(function (b, i) {
       if (!b.alive && !b.fade) return;
@@ -1490,6 +1546,7 @@ var waveTarget = {}, waveState = {};
 (function () {
   var css = getComputedStyle(document.documentElement);
   var acc = css.getPropertyValue('--acc').trim();
+  themeHooks.push(function () { acc = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(); });
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
   var THICK = 4, AMP = 4, LEN = 30, GAP = 7;   // px: line, wave height (half), wavelength, gap
   var PACE = 2 * Math.PI;                       // rad/s: one wavelength per second
@@ -1649,6 +1706,7 @@ function falling(cv, quiet) {
     if (!still) raf = requestAnimationFrame(frame);
   }
   addEventListener('resize', size);
+  themeHooks.push(size);
   if (window.ResizeObserver) new ResizeObserver(size).observe(cv.parentNode);
   size();
   raf = requestAnimationFrame(frame);
