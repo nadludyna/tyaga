@@ -14,6 +14,7 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -116,6 +117,7 @@ func runWindow(token string) bool {
 	// At start the window stays hidden until the page has told it how tall it is (the list
 	// folds when it's empty), then it appears in the middle of the screen. Centring it at its
 	// first size and then shrinking it left it high up. If the page never asks, it shows anyway.
+	windowHidden = func() bool { return !win.IsVisible() || win.IsMinimised() }
 	var placed atomic.Bool
 	place = func() {
 		if placed.CompareAndSwap(false, true) {
@@ -157,11 +159,18 @@ func runWindow(token string) bool {
 			place()
 		case "height":
 			want := max(120, min(n, full))
+			t0, y0 := time.Now(), win.Bounds().Y
 			win.SetSize(winWidth, want)
 			onScreen()
 			place()
-			if b := win.Bounds(); b.Height != want {
+			b := win.Bounds()
+			if b.Height != want {
 				logf("Window: the page asked for %d (limit %d) and got %d", n, full, b.Height)
+			}
+			// How long Windows takes and whether the window had to move up: to see what a
+			// stutter on his PC is made of (the stand can't show real window resizing).
+			if took := time.Since(t0); took > 30*time.Millisecond || b.Y != y0 {
+				logf("Window: resized to %d in %d ms, moved by %d", want, took.Milliseconds(), b.Y-y0)
 			}
 		}
 	}
@@ -260,6 +269,7 @@ func runWindow(token string) bool {
 	tray.OnClick(showWin)
 	tray.OnRightClick(showMenu)
 
+	go showProgress(win, tray)
 	go setupTools()
 	if err := app.Run(); err != nil {
 		fail("Could not open the window: " + err.Error())
@@ -432,5 +442,82 @@ func trayBalloon(title, text string) {
 		if w32.ShellNotifyIcon(w32.NIM_MODIFY, &nid) {
 			return
 		}
+	}
+}
+
+// ---------------------------------------------------------------------------
+//  Progress on the taskbar button and the tray icon
+// ---------------------------------------------------------------------------
+
+// showProgress puts the download's progress on ТЯГА's taskbar button (a bar across the icon,
+// like a browser's download), so it can be watched with the window out of the way, and in
+// the tray icon's tooltip. Yellow while YouTube makes it wait, moving while there's no number
+// yet, nothing when nothing downloads.
+func showProgress(win *application.WebviewWindow, tray *application.SystemTray) {
+	time.Sleep(2 * time.Second) // the window is up by then
+	var tb *taskbarList
+	application.InvokeSync(func() { tb = newTaskbarList() })
+	if tb == nil {
+		logf("Taskbar progress: not available")
+	}
+	last := ""
+	for range time.Tick(700 * time.Millisecond) {
+		state, value, tip := 0, 0, "ТЯГА"
+		mu.Lock()
+		for _, j := range jobs {
+			if j.Status != "running" {
+				continue
+			}
+			p := int(j.Progress)
+			switch {
+			case j.Wait > 0 && p <= 0:
+				state, tip = 8, "ТЯГА · waiting for YouTube" // TBPF_PAUSED
+			case p <= 0:
+				state, tip = 1, "ТЯГА · starting" // TBPF_INDETERMINATE
+			default:
+				state, value, tip = 2, p, "ТЯГА · "+strconv.Itoa(p)+"%" // TBPF_NORMAL
+			}
+			if j.Wait > 0 && p > 0 {
+				state = 8
+			}
+			break
+		}
+		mu.Unlock()
+		now := fmt.Sprint(state, value)
+		if now == last {
+			continue
+		}
+		last = now
+		tray.SetTooltip(tip)
+		if tb != nil {
+			hwnd := uintptr(win.NativeWindow())
+			application.InvokeSync(func() { tb.set(hwnd, state, value) })
+		}
+	}
+}
+
+// taskbarList is Windows' ITaskbarList3, just the two calls for the progress bar.
+type taskbarList struct{ vtbl *[21]uintptr }
+
+func newTaskbarList() *taskbarList {
+	clsid := syscall.GUID{Data1: 0x56FDF344, Data2: 0xFD6D, Data3: 0x11D0, Data4: [8]byte{0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90}}
+	iid := syscall.GUID{Data1: 0xEA1AFB91, Data2: 0x9E28, Data3: 0x4B86, Data4: [8]byte{0x90, 0xE9, 0x9E, 0x9F, 0x8A, 0x5E, 0xEF, 0xAF}}
+	var t *taskbarList
+	const inprocServer = 0x1
+	if hr := w32.CoCreateInstance(&clsid, inprocServer, &iid, uintptr(unsafe.Pointer(&t))); hr != 0 || t == nil {
+		return nil
+	}
+	if r, _, _ := syscall.SyscallN(t.vtbl[3], uintptr(unsafe.Pointer(t))); r != 0 { // HrInit
+		return nil
+	}
+	return t
+}
+
+// set: state 0 = no bar, 1 = moving (no number), 2 = value of 100, 8 = paused (yellow).
+func (t *taskbarList) set(hwnd uintptr, state, value int) {
+	self := uintptr(unsafe.Pointer(t))
+	syscall.SyscallN(t.vtbl[10], self, hwnd, uintptr(state)) // SetProgressState
+	if state == 2 || state == 8 {
+		syscall.SyscallN(t.vtbl[9], self, hwnd, uintptr(value), 100) // SetProgressValue
 	}
 }

@@ -4,7 +4,10 @@
 <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"%3E %3Crect width="256" height="256" rx="58" fill="%23161616"/%3E %3Cpath d="M176 0 V22" stroke="%238a96a3" stroke-width="6"/%3E %3Ccircle cx="176" cy="36" r="12" fill="none" stroke="%23fff" stroke-width="9"/%3E %3Cpath d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="%23fff" stroke-width="18"/%3E %3Cpath d="M85 42 L96 10 L107 42 Z" fill="%23fff"/%3E %3Cpath d="M103 36 L119 54" stroke="%23fff" stroke-width="9.9" stroke-linecap="round"/%3E %3Cg fill="%23161616" stroke="%23161616" stroke-width="12" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cg fill="%23ff6b2c" stroke="%23ff6b2c" stroke-width="2" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cpath d="M83.143 108.208 L83.143 139.792 L111.76599999999999 124 Z" fill="%23fff" stroke="%23fff" stroke-width="5.922" stroke-linejoin="round"/%3E %3Ccircle cx="131.32" cy="109.9" r="6" fill="%23161616"/%3E %3C/svg%3E'>
 <style>
 :root{color-scheme:light dark;--bg:#f6f5f2;--card:rgba(255,255,255,.93);--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--acc:#e8590c;--acc2:#ff922b;--ok:#2b8a3e;--err:#c92a2a;--glow:rgba(232,89,12,.28)}
-@media (prefers-color-scheme:dark){:root{--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
+/* The theme follows Windows until the theme button picks one (data-theme, remembered). */
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 /* The scrollbar's place is kept even without one, so the page doesn't shift sideways when the list gets long. */
@@ -15,9 +18,8 @@ body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.
 body{-webkit-user-select:none;user-select:none}
 textarea,.name,.sub,.log{-webkit-user-select:text;user-select:text}
 
-/* Background: notes and play signs slowly falling (canvas, drawn in the script), a faint glow at the top. */
+/* Background: a faint glow at the top (the browser page; ТЯГА's window has it in its first card). */
 .bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 80% 50% at 50% -10%,var(--glow),transparent 70%)}
-.bg canvas{width:100%;height:100%;display:block}
 /* A download finished: the fish jumps on the hook. */
 body.caught .logo .catch{animation:jump .9s cubic-bezier(.3,1.5,.5,1)}
 @keyframes jump{0%{transform:none}35%{transform:translateY(-18px) rotate(-10deg)}70%{transform:translateY(3px) rotate(4deg)}100%{transform:none}}
@@ -28,17 +30,13 @@ main{max-width:760px;margin:0 auto;padding:56px 18px 40px}
 header{display:flex;align-items:center;gap:16px;margin:0 0 26px;animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .logo{width:58px;height:58px;flex:none;border-radius:15px;box-shadow:0 10px 30px -8px var(--glow),0 0 0 1px var(--line);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
 .logo:hover{transform:rotate(-6deg) scale(1.06)}
-.logo .catch{transform-origin:176px 0;animation:bob 3.2s ease-in-out infinite}
+/* Nothing in the window moves by itself while nothing happens: in a transparent window every
+   moving pixel makes Windows redraw what's under it (DWM), which cost 5–17 % of the CPU idle. */
+.logo .catch{transform-origin:176px 0}
 .logo .fish{transform-origin:100px 124px}
-body.busy .logo .catch{animation:reel 1.1s ease-in-out infinite}
-body.busy .logo .fish{animation:wiggle .35s ease-in-out infinite alternate}
-@keyframes bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(5px) rotate(1.5deg)}}
-@keyframes reel{0%,100%{transform:translateY(4px) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
-@keyframes wiggle{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
-h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;background:linear-gradient(90deg,var(--fg) 30%,var(--acc) 50%,var(--fg) 70%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 7s linear infinite}
-@keyframes shine{from{background-position:100% 0}to{background-position:-200% 0}}
-.tag{font-size:13px;color:var(--dim);margin-top:4px}
-.tag small{display:inline-block;margin-left:8px;padding:1px 8px;border:1px solid var(--line);border-radius:99px;font-size:11px}
+h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;color:var(--fg)}
+.title{display:flex;align-items:center;gap:10px}
+.title small{display:inline-block;padding:1px 8px;border:1px solid var(--line);border-radius:99px;font-size:11px;color:var(--dim);letter-spacing:0}
 
 .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 50px -30px rgba(0,0,0,.6);animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .card+.card{margin-top:16px}
@@ -55,11 +53,10 @@ textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--glow);backgrou
 .seg button{border:0;background:transparent;color:inherit;padding:5px 12px;cursor:pointer;font:inherit;font-size:13.5px;transition:background .15s ease,color .15s ease,transform .1s ease}
 .seg button:hover:not(.on){background:rgba(127,127,127,.12)}
 .seg button:active{transform:scale(.97)}
-.seg button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;font-weight:600;box-shadow:none}
+/* Selected: a tonal orange (Material 3's secondary container), so only Download is solid orange. */
+.seg button.on{background:color-mix(in srgb,var(--acc) 22%,transparent);color:var(--acc);font-weight:600;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent)}
 label{color:var(--dim);cursor:pointer;user-select:none;transition:color .2s}
 label:hover{color:var(--fg)}
-input[type=checkbox]{accent-color:var(--acc);transition:transform .15s}
-input[type=checkbox]:active{transform:scale(.8)}
 /* Options: switches on one line (pushed to both edges), checkboxes as chips that fill the width. */
 /* Both switches stretch to fill the line, every button the same width (grow = number of buttons). */
 /* Fixed columns, so nothing moves when a switch flips: Video/Audio always takes a third,
@@ -71,6 +68,13 @@ input[type=checkbox]:active{transform:scale(.8)}
 @media (max-width:560px){.opts{grid-template-columns:1fr}.chips{grid-auto-flow:row;grid-template-columns:1fr 1fr}}
 .chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.05);font-size:13.5px;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
 .chip:hover{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.1)}
+/* Filter chips like Material 3: no checkbox square, a check mark when on. Its place is always
+   kept (and balanced on the right), so the words never move when it's ticked. */
+.chip{position:relative;padding-right:30px}
+.chip input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.chip::before{content:"";flex:none;width:14px;height:14px;background:var(--acc);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.4);transition:opacity .15s ease,transform .2s cubic-bezier(.2,.8,.2,1)}
+.chip:has(input:checked)::before{opacity:1;transform:none}
+.chip:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:2px}
 .chip:active{transform:scale(.97)}
 .chip:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent);color:var(--fg)}
 .chip:has(input:disabled){opacity:.38;cursor:default;border-color:var(--line);background:transparent;color:var(--dim)}
@@ -87,68 +91,53 @@ input[type=checkbox]:active{transform:scale(.8)}
 .msg{color:var(--err);margin-top:8px;font-size:14px}
 .msg:empty{margin:0}
 
-.job{padding:13px 0;border-bottom:1px solid var(--line)}
+/* One download = one compact row, the way mature downloaders do it (Seal, 4K Video
+   Downloader): the picture, then two lines. The title with its state on the right; under it
+   what it is, or while it downloads the bar and the numbers. Its buttons sit at the right of
+   the second line. No log: what's happening right now is said in the numbers' place. */
+.job{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);border-radius:10px}
 .job:last-child{border-bottom:0}
-.job.new{animation:slide .45s cubic-bezier(.2,.8,.2,1) both}
-@keyframes slide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
-/* A row: the cover of the finished file on the left (only once it's done: while downloading
-   the video's thumbnail isn't what ends up in the file), then title, what it is, and state. */
-.job{display:flex;gap:14px;align-items:center;border-radius:10px}
-.job .body{flex:1;min-width:0}
-.cover{flex:none;width:58px;height:58px;border-radius:9px;object-fit:cover;background:var(--line);box-shadow:0 0 0 1px var(--line);opacity:0;transform:scale(.9);transition:opacity .4s,transform .4s cubic-bezier(.3,1.5,.5,1)}
-.cover.wide{width:96px;height:54px}
+.job.grow{overflow:hidden;transition:height .32s cubic-bezier(.2,.8,.2,1),padding .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
+.job .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+/* The picture: the cover that's really in the finished file; before that an icon of what it is
+   (no video thumbnail: it's not what ends up in the file). Always the same square, so the
+   text never moves; what's in it cross-fades. */
+.side{flex:none;position:relative;width:44px;height:44px}
+.side>*{position:absolute;inset:0;width:100%;height:100%;transition:opacity .25s ease}
+.side>.gone{opacity:0!important}
+.cover{border-radius:8px;object-fit:cover;background:var(--line);box-shadow:0 0 0 1px var(--line);opacity:0;transform:scale(.92);transition:opacity .35s,transform .35s cubic-bezier(.3,1.5,.5,1)}
 .cover.ok{opacity:1;transform:none}
-/* Same place as the cover, for rows that have none: queued, failed, cancelled, or a file
-   without a picture. Keeps every row's text in one column. */
-.ph{animation:fadein .25s ease both;flex:none;width:58px;height:58px;border-radius:9px;display:grid;place-items:center;background:rgba(127,127,127,.08);box-shadow:0 0 0 1px var(--line);color:var(--dim)}
-.ph svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ph{animation:fadein .25s ease both;border-radius:8px;display:grid;place-items:center;background:rgba(127,127,127,.08);box-shadow:0 0 0 1px var(--line);color:var(--dim)}
+.ph svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.job.running .ph{color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}
 .job.error .ph{color:var(--err);background:color-mix(in srgb,var(--err) 9%,transparent)}
+.top{display:flex;gap:10px;align-items:center;min-height:24px}
+.name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14.5px}
 .name.link{color:var(--dim)}
-.top{display:flex;gap:10px;align-items:baseline}
-.kind{font-size:12.5px;color:var(--dim);margin-top:1px}
-.name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.st{font-size:12.5px;color:var(--dim);white-space:nowrap;font-weight:500}
-.st.running{color:var(--acc)}.st.waiting{color:var(--dim)}
-/* While downloading (like Morphe): the state in colour under the title, and the track and
-   percent as pills on the right. The pills have a fixed width so they don't jiggle. */
-.kind .now{color:var(--acc);font-weight:500}
-.kind .now.waiting{color:var(--dim)}
-.pills{display:flex;gap:6px;flex:none}
-.pill{min-width:54px;text-align:center;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,transparent)}
-.pill.all{min-width:96px}
-.st.done{color:var(--ok)}.st.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}.st.error{color:var(--err)}
+.st{flex:none;font-size:12.5px;color:var(--dim);white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums}
+.st.running{color:var(--acc)}.st.waiting{color:var(--dim)}.st.done{color:var(--ok)}.st.error{color:var(--err)}
+.st.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
 @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
-/* Progress: a sine wave that runs faster the faster the download goes (drawn in the script). */
-.wave{display:block;width:100%;height:18px;margin-top:6px}
-/* The steps, as a small vertical timeline on a quiet panel: done steps get a tick in a
-   circle, the current one an orange dot that breathes, joined by a thin line. The live
-   numbers of the current step (part 17 of 80 · 8 MB so far) are little pills, like the counters
-   above. New steps slide in, old ones fold away at the top. */
-/* Fixed height (four steps), the newest step always on the bottom line: the panel never
-   grows or shrinks while steps come and go, so nothing below it moves. Older steps leave
-   over the top edge. */
-.log{margin-top:8px;padding:8px 12px 8px 10px;height:112px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;border-radius:12px;background:rgba(127,127,127,.06);box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.5;color:var(--dim)}
-.log div{flex:none;position:relative;display:flex;align-items:center;gap:6px;min-height:24px;padding-left:24px;white-space:nowrap;overflow:hidden;max-height:24px;transition:opacity .35s,max-height .35s,min-height .35s}
-.log div > span:first-child{overflow:hidden;text-overflow:ellipsis}
-.log div::before{content:"";position:absolute;left:4px;top:7px;width:10px;height:10px;border-radius:50%;box-sizing:border-box}
-.log div:not(:last-child)::after{content:"";position:absolute;left:8.5px;top:19px;height:12px;width:1px;background:var(--line)}
-.log .done::before{background:color-mix(in srgb,var(--ok) 22%,transparent);border:1px solid color-mix(in srgb,var(--ok) 55%,transparent)}
-.log .done{opacity:.7}
-.log .done > span:first-child::after{content:" ✓";color:var(--ok);font-size:11px}
-.log .cur{color:var(--fg)}
-.log .cur::before{background:var(--acc);animation:breathe 1.6s ease-in-out infinite}
-@keyframes breathe{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 45%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--acc) 0%,transparent)}}
-.log .tag{flex:none;padding:0 8px;border-radius:999px;font-size:11.5px;line-height:18px;font-variant-numeric:tabular-nums;color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent)}
-.log .in{animation:stepin .35s cubic-bezier(.2,.8,.2,1)}
-@keyframes stepin{from{opacity:0;max-height:0;min-height:0}to{opacity:1;max-height:24px;min-height:24px}}
-.log .out{opacity:0;max-height:0;min-height:0}
-.sub{font-size:12px;color:var(--dim);margin-top:4px;word-break:break-word}
-/* The speed line under the wave stays one line, whatever the width. */
-.live .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Small icon buttons in a row: cancel, copy the file. */
+.ibtn{flex:none;width:28px;height:28px;margin:-2px -4px -2px 0;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s,transform .1s}
+.ibtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ibtn:hover{background:color-mix(in srgb,var(--fg) 11%,transparent);color:var(--fg)}
+.ibtn:active{transform:scale(.92);background:color-mix(in srgb,var(--fg) 17%,transparent)}
+.ibtn.x:hover{color:var(--err);background:color-mix(in srgb,var(--err) 12%,transparent)}
+.ibtn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.line2{display:flex;align-items:center;gap:8px 10px;min-height:28px;flex-wrap:wrap}
+.kind{flex:1;min-width:0;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kind,.live{animation:fadein .2s ease backwards}
+.live{flex:1;min-width:0;display:flex;align-items:center;gap:12px}
+.wave{flex:1;min-width:60px;height:12px;display:block}
+.nums{flex:none;max-width:62%;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.acts{flex:none;display:flex;gap:6px;margin-left:auto}
+.acts .btn{padding:4px 10px;font-size:12.5px}
+.acts .ibtn{margin:0}
+.sub{font-size:12px;color:var(--dim);word-break:break-word}
 .sub.err{color:var(--err)}
-.sub a{color:var(--acc);display:block;margin-top:2px}
+@media (max-width:560px){.live{flex-wrap:wrap;gap:2px 12px}.wave{flex:1 1 100%}.nums{max-width:none}}
 .foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.foot .play{margin-left:auto;min-width:150px;justify-content:center}
 /* Buttons: soft pills with an icon; the accent one is for the thing you most likely want. */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.07);color:var(--fg);font:inherit;font-size:13px;line-height:1.2;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
 .btn svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
@@ -158,30 +147,28 @@ input[type=checkbox]:active{transform:scale(.8)}
 .btn.acc:hover{background:color-mix(in srgb,var(--acc) 22%,transparent);border-color:var(--acc)}
 .btn.ghost{color:var(--dim)}
 .btn.ghost:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}
-.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 
 .empty{color:var(--dim);text-align:center;padding:26px 0 18px}
-.empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35;animation:bob 3.2s ease-in-out infinite}
+.empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35}
 .times{color:var(--dim);display:inline-flex;gap:6px;align-items:center;animation:rise .3s both}
 .times input{width:58px;background:rgba(127,127,127,.06);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 4px 5px 8px;font:inherit;font-variant-numeric:tabular-nums;outline:none;transition:border-color .2s,box-shadow .2s}
 .times input:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--glow)}
 .times b{font-weight:400;margin:0 -3px}
-/* Hints: anything with data-tip shows a bubble on hover (the page turns title="" into data-tip). */
 .form{z-index:2}
-[data-tip]{position:relative}
-[data-tip]::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 8px);z-index:10;width:max-content;max-width:280px;padding:8px 11px;border-radius:9px;background:#232325;color:#eee;border:1px solid rgba(255,255,255,.1);box-shadow:0 12px 30px -10px rgba(0,0,0,.6);font:12.5px/1.45 system-ui,sans-serif;letter-spacing:0;text-align:left;white-space:normal;pointer-events:none;opacity:0;transform:translateY(-4px);transition:opacity .15s,transform .15s;transition-delay:0s}
-[data-tip]:hover::after{opacity:1;transform:none;transition-delay:.25s}
-.seg button[data-tip]::after{left:50%;transform:translate(-50%,-4px)}
-.seg button[data-tip]:hover::after{transform:translate(-50%,0)}
+/* Hints, only where the label doesn't say it all (the page turns title="" into data-tip): one
+   bubble for the whole page (#tip), placed by the script below or above the thing so it always
+   fits in the window, a solid plate like Material 3's plain tooltip. */
+#tip{position:fixed;left:0;top:0;z-index:60;max-width:280px;padding:7px 10px;border-radius:8px;background:#2b2b2e;color:#f1f1f1;box-shadow:0 8px 24px -8px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);font:12.5px/1.45 system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .15s ease,transform .15s cubic-bezier(.2,.8,.2,1);will-change:transform,opacity}
+#tip.on{opacity:1}
+:root[data-theme=light] #tip{background:#2f2f33}
 .seg{overflow:visible}.seg button:first-child{border-radius:9px 0 0 9px}.seg button:last-child{border-radius:0 9px 9px 0}
-[data-tip].tip-left::after{left:auto;right:0}
-.foot [data-tip]::after{top:auto;bottom:calc(100% + 8px)}
 
 /* Signing in to YouTube (ТЯГА's own window on Windows): one button on the right of the header.
    It keeps one width whatever it says, so nothing next to it moves. */
 header{position:relative;z-index:3}
 .acct{margin-left:auto;flex:none;min-width:196px;justify-content:center;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
-.acct.in{color:var(--ok)}
+.acct.in{color:var(--dim);background:transparent}
+.acct.in svg{color:var(--ok);opacity:1}
 .acct.in:hover{color:var(--fg)}
 .acct.arm{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}
 .acct.wait{color:var(--dim);cursor:default}
@@ -196,8 +183,9 @@ header{position:relative;z-index:3}
    grows. The falling notes live in the list card, the glow in the first one. */
 .wbtns{display:none}
 html.app,html.app body{background:transparent}
-html.app{--card:#1a1a1c}
-@media (prefers-color-scheme:light){html.app{--card:#fff}}
+html.app{--card:#fff}
+html.app[data-theme=dark]{--card:#1a1a1c}
+@media (prefers-color-scheme:dark){html.app:not([data-theme=light]){--card:#1a1a1c}}
 html.app body{position:fixed;inset:0;min-height:0;overflow:hidden;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
 html.app main{max-width:none;height:100%;margin:0;padding:12px 14px 16px;display:flex;flex-direction:column}
 html.app .card{flex:none;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;box-shadow:0 6px 18px -8px rgba(0,0,0,.55)}
@@ -208,16 +196,32 @@ html.app header .logo{width:46px;height:46px;border-radius:12px;app-region:no-dr
 html.app header h1{font-size:22px}
 html.app .wbtns{display:flex;gap:2px;margin-left:auto;align-self:flex-start}
 html.app .acct{align-self:flex-start;margin-top:2px}
-html.app .acct:not([hidden])+.wbtns{margin-left:8px}
+/* The theme button: a sun that turns into a moon (its bite slides in, the rays draw in). */
+.tbtn{flex:none;align-self:flex-start;margin-left:8px;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s,transform .1s;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
+.acct[hidden]+.tbtn{margin-left:auto}
+.tbtn:hover{background:var(--line);color:var(--fg)}
+.tbtn:active{transform:scale(.92)}
+.tbtn svg{width:18px;height:18px;overflow:visible}
+.tbtn .body{fill:currentColor;transform-origin:12px 12px;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.tbtn .bite{transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.tbtn .rays{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;transform-origin:12px 12px;transition:transform .5s cubic-bezier(.3,1.4,.5,1),opacity .3s}
+.tbtn.moon .body{transform:scale(1.35)}
+.tbtn.moon .bite{transform:translate(-5px,5px)}
+.tbtn.moon .rays{transform:rotate(-90deg) scale(.4);opacity:0}
+html.app .tbtn+.wbtns{margin-left:2px}
+/* Switching the theme: the new one spreads in a circle from the button (the View Transitions
+   API: one snapshot, then the graphics card animates it). */
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){animation:themein .55s cubic-bezier(.4,0,.2,1)}
+@keyframes themein{from{clip-path:circle(0 at var(--tx,90%) var(--ty,40px))}to{clip-path:circle(var(--tr,150%) at var(--tx,90%) var(--ty,40px))}}
 .wbtns button{app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:default;transition:background .15s,color .15s}
 .wbtns button:hover{background:var(--line);color:var(--fg)}
 .wbtns button.x:hover{background:#c42b1c;color:#fff}
 .wbtns svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3}
 html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
-html.app #jobsCard.gaming{flex:1}
 html.app #jobsCard>*{position:relative;z-index:1}
 html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;margin-right:-10px;scrollbar-gutter:stable}
-html.app #jobsCard>.bg{position:absolute;inset:0;z-index:0;background:none;border-radius:inherit;overflow:hidden}
+html.app .bg{display:none}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
 .lhead{display:none}
@@ -228,8 +232,8 @@ html.app .lhead:hover{color:var(--fg)}
 .lhead svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
 html.app #jobsCard.folded .lhead svg{transform:rotate(180deg)}
 html.app #jobsCard.folded{flex:none}
-html.app #jobsCard #list,html.app #jobsCard #game,html.app #jobsCard .foot{transition:opacity .2s}
-html.app #jobsCard.folded #list,html.app #jobsCard.folded #game,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+html.app #jobsCard #list,html.app #jobsCard .foot{transition:opacity .2s}
+html.app #jobsCard.folded #list,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
 html.app #jobsCard.anim{transition:height .25s cubic-bezier(.2,.8,.2,1)}
 html.app #jobsCard.come{animation:rise .3s cubic-bezier(.2,.8,.2,1) both}
 /* Going away: the card folds up to nothing and fades (the window follows once it's gone). */
@@ -237,23 +241,41 @@ html.app #jobsCard.leave{height:0!important;padding-top:0;padding-bottom:0;margi
 /* A row that leaves the list (Clear finished) folds up and fades, the rows below slide up. */
 .job.bye{overflow:hidden;opacity:0;transition:height .26s cubic-bezier(.4,0,.2,1),padding .26s cubic-bezier(.4,0,.2,1),margin .26s cubic-bezier(.4,0,.2,1),opacity .18s ease;height:0!important;padding-top:0!important;padding-bottom:0!important;margin-top:0!important;margin-bottom:0!important;border-width:0!important}
 html.app #list{margin-top:10px}
-/* The game takes the list's place, same size, so nothing around it moves. */
-html.app #game{flex:1;min-height:0;margin-top:10px;position:relative;border-radius:12px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;animation:fadein .2s ease both}
-#game canvas{display:block;width:100%;height:100%}
-#game.playing canvas{cursor:none}
 html.app .fadeout{opacity:0!important;transition:opacity .14s ease}
 html.app #list.fadein{animation:fadein .22s ease both}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
 /* Things that appear because a switch changed (a chip, the format buttons, the Play button,
    a row's buttons or message) fade in instead of popping up. */
-.chips .chip,.opts .seg,.foot .play,.acts .btn,.job .body>.sub,.msg:not(:empty){animation:fadein .2s ease both}
-/* A row's live part (wave, numbers, steps) unfolds when the download starts and folds away
-   when it ends (see reveal()). */
-.live.slide{overflow:hidden;transition:height .3s cubic-bezier(.4,0,.2,1),opacity .25s ease}
+.chips .chip,.opts .seg,.acts .btn,.acts .ibtn,.job .body>.sub,.msg:not(:empty){animation:fadein .2s ease backwards}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
 html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
-</style></head><body><div class="bg"><canvas id="fall"></canvas></div><main>
+/* States: every control clearly shows that it's under the mouse, pressed (it sinks a little
+   and a ripple spreads from where you pressed, like Material 3) or focused from the keyboard
+   (an orange ring). Colours mix in the text colour, so it works in both themes. */
+.seg button,.chip,.btn,.go,.tbtn,.wbtns button,.lhead{position:relative;overflow:hidden}
+.seg button:hover:not(.on){background:color-mix(in srgb,var(--fg) 10%,transparent);color:var(--fg)}
+.seg button:active:not(.on){background:color-mix(in srgb,var(--fg) 16%,transparent)}
+.seg button.on:hover{background:color-mix(in srgb,var(--acc) 30%,transparent)}
+.chip:hover{border-color:color-mix(in srgb,var(--fg) 30%,transparent);background:color-mix(in srgb,var(--fg) 9%,transparent);color:var(--fg)}
+.chip:active{background:color-mix(in srgb,var(--fg) 15%,transparent)}
+.chip:has(input:checked):hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 22%,transparent)}
+.btn:hover{border-color:color-mix(in srgb,var(--fg) 32%,transparent);background:color-mix(in srgb,var(--fg) 11%,transparent)}
+.btn:active{background:color-mix(in srgb,var(--fg) 17%,transparent)}
+.go:hover{filter:brightness(1.1);box-shadow:0 10px 28px -6px var(--glow)}
+.go:active{filter:brightness(.92);transform:scale(.97)}
+.tbtn:hover,.wbtns button:hover{background:color-mix(in srgb,var(--fg) 12%,transparent);color:var(--fg)}
+.tbtn:active,.wbtns button:active{background:color-mix(in srgb,var(--fg) 19%,transparent)}
+.wbtns button.x:hover{background:#c42b1c;color:#fff}
+.wbtns button.x:active{background:#a32317}
+html.app .lhead:hover{background:color-mix(in srgb,var(--fg) 7%,transparent)}
+html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
+.seg button:focus-visible,.btn:focus-visible,.go:focus-visible,.tbtn:focus-visible,.wbtns button:focus-visible,.lhead:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.seg button:focus-visible{outline-offset:-2px}
+.rip{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;background:currentColor;opacity:.22;transform:scale(0);animation:rip .55s cubic-bezier(.2,.8,.2,1) forwards}
+.go .rip{background:#fff;opacity:.45}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+</style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
   <svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
     <rect width="256" height="256" rx="58" fill="#161616"/>
@@ -271,8 +293,9 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
       </g>
     </g>
   </svg>
-  <div><h1>ТЯГА</h1><div class="tag">pulls video &amp; music off YouTube<small id="ver"></small></div></div>
+  <div class="title"><h1>ТЯГА</h1><small id="ver"></small></div>
   <button class="btn acct" id="acct" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.3 3.9-5 7-5s5.8 1.7 7 5"/></svg><span id="acctT">Sign in to YouTube</span></button>
+  <button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Hide to the tray (downloads go on)" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
 </header>
 
@@ -284,22 +307,22 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
     <button class="go" id="go">Download</button>
   </div>
   <div class="row opts">
-    <div class="seg" id="mode"><button data-v="video" class="on" title="Video with sound, MP4">Video</button><button data-v="audio" title="Only the sound: music, podcasts. With a cover and clean tags">Audio</button></div>
-    <div class="seg" id="format" data-for="audio" hidden>
+    <div class="seg" id="mode"><button data-v="audio" class="on">Audio</button><button data-v="video">Video</button></div>
+    <div class="seg" id="format" data-for="audio">
       <button data-v="m4a" class="on" title="The original YouTube audio track, no re-encoding">M4A</button>
       <button data-v="mp3" title="Re-encoded at the highest quality, plays on anything">MP3</button>
     </div>
-    <div class="seg" id="quality" data-for="video" title="Maximum video quality. Best — the highest there is">
+    <div class="seg" id="quality" data-for="video" hidden>
       <button data-v="0" class="on">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
     </div>
   </div>
   <div class="row chips">
-    <label class="chip" title="If the link is a video inside a playlist, download the whole playlist, not just this video"><input type="checkbox" id="playlist"> whole playlist</label>
+    <label class="chip" id="playlistBox" title="For a link to a video inside a playlist: download the whole playlist, not just this video"><input type="checkbox" id="playlist"> whole playlist</label>
     <label class="chip" id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"> as one file</label>
-    <label class="chip" id="cutBox" title="Download only a piece of the video"><input type="checkbox" id="cut"> fragment</label>
-    <label class="chip" data-for="audio" id="splitBox" hidden title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked> split by chapters</label>
-    <label class="chip" data-for="video" title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"> for editing</label>
-    <label class="chip" title="Cut sponsor ads, self-promo and &quot;subscribe!&quot; bits (SponsorBlock). For music also the non-music parts of a clip."><input type="checkbox" id="sponsors" checked> no sponsors</label>
+    <label class="chip" id="cutBox"><input type="checkbox" id="cut"> fragment</label>
+    <label class="chip" data-for="audio" id="splitBox" title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked> split by chapters</label>
+    <label class="chip" data-for="video" hidden title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"> for editing</label>
+    <label class="chip"><input type="checkbox" id="sponsors" checked> no sponsors</label>
   </div>
   <div class="row cutrow">
     <span class="times" id="cutTimes" hidden title="Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty &quot;to&quot; — to the end.">
@@ -313,16 +336,17 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 <div class="card" id="jobsCard">
   <button class="lhead" id="lhead" aria-label="Show or hide the downloads"><span id="lsum"></span><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>
   <div id="list"></div>
-  <div id="game" hidden><canvas id="gameCv"></canvas></div>
   <div class="foot">
-    <button class="btn" id="open" title="The folder where everything is saved"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
-    <button class="btn" id="clear" title="Remove finished, failed and cancelled downloads from the list (the files stay)"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>Clear finished</button>
-    <button class="btn play" id="play" hidden title="A little game while it downloads. It doesn't stop when the download ends: finish it, or come back to it later"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="5" height="3" rx="1"/><rect x="10" y="5" width="5" height="3" rx="1"/><rect x="16" y="5" width="4" height="3" rx="1"/><circle cx="13" cy="14" r="2"/><path d="M8 20h8"/></svg><span id="playT">Play while you wait</span></button>
+    <button class="btn" id="open"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
+    <button class="btn" id="clear" title="Takes them off the list; the files stay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>Clear finished</button>
   </div>
 </div>
 
 </main><script>
 var TOKEN = new URLSearchParams(location.search).get('t');
+// The theme: Windows' own until the theme button picks one; that choice is remembered (the
+// tray menu reads it too).
+try { var t0 = localStorage.getItem('tyaga-theme'); if (t0 === 'light' || t0 === 'dark') document.documentElement.dataset.theme = t0; } catch (e) {}
 // In ТЯГА's own window (see html.app in the styles): the logo goes into the first card,
 // the falling notes into the list card, and the window buttons work.
 if (new URLSearchParams(location.search).get('w')) {
@@ -331,12 +355,11 @@ if (new URLSearchParams(location.search).get('w')) {
   form.insertBefore(document.querySelector('header'), form.firstChild);
   var jobsCard = document.getElementById('jobsCard');
   jobsCard.classList.add('folded'); // until the list is known: no flash of a big empty card
-  jobsCard.insertBefore(document.querySelector('.bg'), jobsCard.firstChild);
   ['Min', 'Close'].forEach(function (b) {
     document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
   });
 }
-var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'error', cancelled: 'cancelled' };
+var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'failed', cancelled: 'cancelled' };
 var state = {}, OFFLINE = 'ТЯГА is not responding. Start the program again.';
 
 function $(id) { return document.getElementById(id); }
@@ -382,11 +405,56 @@ function segmented(id, onChange) {
 document.querySelectorAll('main [title]').forEach(function (e) {
   e.dataset.tip = e.title;
   e.removeAttribute('title');
-  // Near the right edge of the window the bubble opens to the left instead.
-  e.addEventListener('mouseenter', function () {
-    e.classList.toggle('tip-left', e.getBoundingClientRect().left + 300 > innerWidth);
-  });
 });
+
+// The ripple from where a control is pressed (transform and opacity only; gone in 0.6 s).
+var PRESS = '.seg button,.chip,.btn,.go,.tbtn,.wbtns button,.lhead';
+addEventListener('pointerdown', function (e) {
+  var c = e.target.closest && e.target.closest(PRESS);
+  if (!c || e.button !== 0 || c.disabled || c.querySelector('input:disabled') || still()) return;
+  var r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  var d = 2 * Math.hypot(Math.max(x, r.width - x), Math.max(y, r.height - y));
+  var w = el('span', 'rip');
+  w.style.width = w.style.height = d + 'px';
+  w.style.left = x - d / 2 + 'px'; w.style.top = y - d / 2 + 'px';
+  c.append(w);
+  setTimeout(function () { w.remove(); }, 600);
+});
+
+// Hints: one bubble (#tip). It shows half a second after the mouse stops on something with a
+// hint, below it, or above when there's no room below (the window ends right under the first
+// card when the list is empty), and never past the window's edges. A click hides it.
+(function () {
+  var tip = $('tip'), on = null, timer = 0;
+  function hide() { clearTimeout(timer); on = null; tip.classList.remove('on'); }
+  function show(t) {
+    var text = t.dataset.tip;
+    if (!text || !t.isConnected) return;
+    tip.textContent = text;
+    var r = t.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight, gap = 8;
+    var below = r.bottom + gap + h <= innerHeight - 4;
+    var x = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+    var y = below ? r.bottom + gap : Math.max(4, r.top - gap - h);
+    tip.style.transition = 'none';
+    tip.style.transform = 'translate(' + x + 'px,' + (y + (below ? -4 : 4)) + 'px)';
+    void tip.offsetWidth;
+    tip.style.transition = '';
+    tip.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    tip.classList.add('on');
+  }
+  addEventListener('mouseover', function (e) {
+    var t = e.target.closest && e.target.closest('[data-tip]');
+    if (t === on) return;
+    hide();
+    if (!t) return;
+    on = t;
+    timer = setTimeout(function () { if (on === t) show(t); }, 500);
+  });
+  addEventListener('pointerdown', hide, true);
+  addEventListener('keydown', hide, true);
+  addEventListener('wheel', hide, { passive: true });
+  document.documentElement.addEventListener('mouseleave', hide);
+})();
 
 // Elements with data-for="audio" / "video" are visible only in their mode.
 var mode = segmented('mode', function (m) {
@@ -418,14 +486,23 @@ BOXES.forEach(function (id) { $(id).addEventListener('change', save); });
 
 // "As one file" only makes sense for a playlist; and then splitting by chapters doesn't.
 // A fragment is for one video, not a playlist.
+// "Whole playlist" only counts for a link to a video inside a playlist (…&list=…): greyed out
+// otherwise, in its place, so nothing moves when you paste. A playlist link is a list anyway.
+function isList() {
+  var v = $('links').value;
+  if (/youtube\.com\/(playlist\?|@|channel\/|c\/|user\/)/.test(v)) return true;
+  return /[?&]list=/.test(v) && $('playlist').checked;
+}
 function syncBoxes() {
-  var list = $('playlist').checked, cut = !list && $('cut').checked;
+  $('playlist').disabled = !/[?&]list=/.test($('links').value) || /youtube\.com\/(playlist\?|@|channel\/|c\/|user\/)/.test($('links').value);
+  var list = isList(), cut = !list && $('cut').checked;
   $('mergeBox').hidden = !list;
   $('cutBox').hidden = list;
   $('cutTimes').hidden = !cut;
   $('split').disabled = (list && $('merge').checked) || cut;
 }
 $('playlist').onchange = $('merge').onchange = $('cut').onchange = syncBoxes;
+$('links').addEventListener('input', syncBoxes);
 restore();
 syncBoxes();
 
@@ -461,10 +538,10 @@ function timeOf(m, s) {
 
 // The switches as they are now, for /api/add.
 function options(text) {
-  var list = $('playlist').checked, cut = !list && $('cut').checked;
+  var list = isList(), cut = !list && $('cut').checked;
   return {
     text: text, mode: mode(), format: format(),
-    quality: +quality(), playlist: list, split: $('split').checked, edit: $('edit').checked,
+    quality: +quality(), playlist: !$('playlist').disabled && $('playlist').checked, split: $('split').checked, edit: $('edit').checked,
     merge: list && $('merge').checked, sponsors: $('sponsors').checked,
     from: cut ? timeOf('fromM', 'fromS') : '', to: cut ? timeOf('toM', 'toS') : '',
   };
@@ -479,13 +556,43 @@ function add() {
       $('links').value = '';
       TIMES.forEach(function (id) { $(id).value = ''; });
       $('cut').checked = false;
-      syncBoxes();
+      syncBoxes(); // (the room readyWindow made stays until the row is in: setGone)
     }
     refresh();
   }, function () { $('msg').textContent = OFFLINE; });
 }
 
 $('go').onclick = function () { askNotify(); add(); };
+function isDark() {
+  var t = document.documentElement.dataset.theme;
+  return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+}
+var themeHooks = []; // what has to pick up the new colours (canvases draw with them)
+function syncThemeBtn() {
+  var b = $('theme'), dark = isDark();
+  b.classList.toggle('moon', dark);
+  b.dataset.tip = dark ? 'Light theme' : 'Dark theme';
+}
+$('theme').onclick = function () {
+  var want = isDark() ? 'light' : 'dark', b = $('theme').getBoundingClientRect(), root = document.documentElement;
+  var apply = function () {
+    root.dataset.theme = want;
+    try { localStorage.setItem('tyaga-theme', want); } catch (e) {}
+    syncThemeBtn();
+    themeHooks.forEach(function (f) { f(); });
+  };
+  if (!document.startViewTransition || still()) return apply();
+  // The circle grows from the button's middle to the farthest corner.
+  var x = b.left + b.width / 2, y = b.top + b.height / 2;
+  root.style.setProperty('--tx', x + 'px'); root.style.setProperty('--ty', y + 'px');
+  root.style.setProperty('--tr', Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 'px');
+  document.startViewTransition(apply);
+};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+  syncThemeBtn(); themeHooks.forEach(function (f) { f(); });
+});
+syncThemeBtn();
+// The fish is cast as soon as a link goes in (add() checks it's not empty).
 
 // Ctrl+A anywhere outside a text field selects the links, not the whole page.
 addEventListener('keydown', function (e) {
@@ -510,12 +617,15 @@ addEventListener('drop', function (e) {
   var box = $('links');
   box.value = box.value.trim() ? box.value.trim() + '\n' + t : t;
   box.focus();
+  syncBoxes();
+  readyWindow();
 });
 // In ТЯГА's own window (WebView2) a right-click gives only what an app needs: copy and paste
 // in text, not the browser's Back / Reload / Print.
 if (window.chrome && window.chrome.webview) addEventListener('contextmenu', function (e) {
   if (!e.target.closest('textarea,input,.name,.sub,.log') && !String(getSelection())) e.preventDefault();
 });
+$('links').addEventListener('input', function () { readyWindow(); });
 $('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askNotify(); add(); } };
 $('open').onclick = function () { api('/api/open', {}); };
 $('clear').onclick = function () { api('/api/clear', {}).then(refresh); };
@@ -530,10 +640,6 @@ addEventListener('pagehide', function () {
 // In a playlist: "video" or "track", and how far the current one is (the progress counts the
 // whole playlist: video 3 of 12 half done is 21 %).
 function itemWord(j) { return j.mode === 'audio' ? 'track' : 'video'; }
-function itemPct(j) {
-  if (!(j.of > 1 && j.pos)) return null;
-  return Math.max(0, Math.min(100, Math.floor((j.progress / 100 * j.of - (j.pos - 1)) * 100)));
-}
 
 // What the download is: "Audio · MP3", "Video · MP4 · 1080p", plus fragment / one file.
 function kindText(j) {
@@ -564,8 +670,6 @@ function ping(jobs) {
     lastStatus[j.id] = j.status;
     if (was !== 'running' || (j.status !== 'done' && j.status !== 'error')) return;
     if (j.status === 'done') caught.push(j.id);
-    // While the game is open, the list's top line says it for a few seconds.
-    if (game.open) headNote = { t: (j.status === 'done' ? '✓ Downloaded: ' : 'Failed: ') + (j.title || 'a download').replace(/^\[\d+\/\d+\] /, ''), bad: j.status !== 'done', until: Date.now() + 5000 };
     if (!document.hidden || !window.Notification || Notification.permission !== 'granted') return;
     try {
       var n = new Notification(j.status === 'done' ? 'Done ✓' : 'Failed', {
@@ -581,37 +685,42 @@ function askNotify() {
 
 var rows = {}; // job id → its row and the parts of it
 // In ТЯГА's window the window follows the rows' height (see windowFit).
-var rowWatch = window.ResizeObserver ? new ResizeObserver(function () { fitLater(); }) : null;
+// Not while a row is opening or folding away: the window gets their final height at the start
+// (openHeight) and is fitted again at their end, instead of being resized every frame.
+var rowWatch = window.ResizeObserver ? new ResizeObserver(function (en) {
+  if (en.some(function (e) { return !/\b(grow|bye)\b/.test(e.target.className); })) fitLater();
+}) : null;
 
 function button(cls, label, title, onclick) {
   var b = el('button', 'btn ' + cls);
   b.innerHTML = label;
-  if (title) b.title = title;
+  if (title) b.dataset.tip = title;
   b.onclick = onclick;
   return b;
 }
 
 function makeRow(j) {
-  var r = { row: el('div', 'job new'), body: el('div', 'body'), top: el('div', 'top') };
+  var r = { row: el('div', 'job'), body: el('div', 'body'), top: el('div', 'top'), line2: el('div', 'line2') };
   r.row.dataset.id = j.id;
   r.name = el('span', 'name');
-  r.st = el('span', 'st');
-  r.pills = el('span', 'pills');
-  r.pillTrack = el('span', 'pill');
-  r.pillPct = el('span', 'pill tip-left');
-  r.pills.append(r.pillTrack, r.pillPct);
-  r.top.append(r.name, r.st, r.pills);
-  r.kind = el('div', 'kind');                // Audio · MP3 · one file
-  r.live = el('div', 'live');                // wave + numbers + log, only while downloading
+  r.st = el('span', 'st');                   // ✓ Done, 42 %, queued, error
+  r.x = el('button', 'ibtn x');              // cancel, while queued or downloading
+  r.x.innerHTML = ICON.cancel;
+  r.x.dataset.tip = 'Cancel';
+  r.x.onclick = function () { api('/api/cancel', { id: j.id }).then(refresh); };
+  r.top.append(r.name, r.st, r.x);
+  r.kind = el('div', 'kind');                // Pilotredsky · Audio · MP3
+  r.live = el('div', 'live');                // while downloading: the bar and the numbers
   r.wave = el('canvas', 'wave');
   r.wave.dataset.id = j.id;
-  r.nums = el('div', 'sub');
-  r.log = el('div', 'log');
-  r.live.append(r.wave, r.nums, r.log);
-  r.msg = el('div', 'sub');
+  r.nums = el('span', 'nums');
+  r.live.append(r.wave, r.nums);
   r.acts = el('div', 'acts');
-  r.body.append(r.top, r.kind, r.live, r.msg, r.acts);
-  r.row.append(r.body);
+  r.line2.append(r.kind, r.live, r.acts);
+  r.msg = el('div', 'sub');                  // a note, or what went wrong
+  r.body.append(r.top, r.line2, r.msg);
+  r.sideBox = el('div', 'side');
+  r.row.append(r.sideBox, r.body);
   if (APP && rowWatch) rowWatch.observe(r.row);
   return r;
 }
@@ -631,105 +740,77 @@ var ICON = {
 };
 
 function updateRow(r, j) {
-  // Left of the text: the cover of the finished file (the real album art or the thumbnail,
-  // exactly what's inside it; square for music, 16:9 for video), or an icon for queued /
-  // failed / cancelled. Nothing while downloading: the video's thumbnail isn't what ends up
-  // in the file, and the row is tall then, so a picture would leave a hole under it.
-  var side = j.status === 'running' ? '' : j.status === 'done' && j.cover ? 'cover' + j.cover
-    : j.status === 'done' ? (j.mode === 'audio' ? 'audio' : 'video') : j.status;
+  // The picture: the cover that's really inside the finished file, else an icon of what it is
+  // (or of what went wrong). One square in every state, cross-faded, so the text never moves.
+  var side = j.status === 'done' && j.cover ? 'cover' + j.cover
+    : j.status === 'done' || j.status === 'running' ? (j.mode === 'audio' ? 'audio' : 'video') : j.status;
   if (r.side !== side) {
     r.side = side;
-    var pic = null;
+    var pic;
     if (side.indexOf('cover') === 0) {
-      pic = el('img', 'cover' + (j.mode === 'audio' ? '' : ' wide'));
+      pic = el('img', 'cover');
       pic.alt = '';
       pic.onload = function () { pic.classList.add('ok'); };
-      pic.onerror = function () { var ph = el('div', 'ph'); ph.innerHTML = ICON[j.mode === 'audio' ? 'audio' : 'video']; pic.replaceWith(ph); r.img = ph; };
+      pic.onerror = function () { var ph = el('div', 'ph'); ph.innerHTML = ICON[j.mode === 'audio' ? 'audio' : 'video']; pic.replaceWith(ph); if (r.img === pic) r.img = ph; };
       pic.src = '/api/cover?id=' + j.id + '&v=' + j.cover + '&t=' + encodeURIComponent(TOKEN);
-    } else if (side) {
+    } else {
       pic = el('div', 'ph');
       pic.innerHTML = ICON[side] || '';
     }
-    if (r.img) r.img.remove();
-    if (pic) r.row.prepend(pic);
+    var old = r.img;
+    if (old) { old.classList.add('gone'); setTimeout(function () { old.remove(); }, 260); }
+    r.sideBox.append(pic);
     r.img = pic;
   }
 
-  var waiting = j.status === 'running' && j.wait > 0;
+  var running = j.status === 'running', waiting = running && j.wait > 0;
   var st = j.status + (waiting ? ' waiting' : '');
   if (r.st0 !== st) {
-    r.row.className = 'job ' + j.status + (r.status ? '' : ' new');
+    r.row.className = 'job ' + j.status + (r.row.classList.contains('grow') ? ' grow' : '');
     r.st.className = 'st ' + st + (r.status && r.status !== 'done' && j.status === 'done' ? ' pop' : '');
     r.st0 = st;
   }
-  // "[2/12] Song" → "Song"; the "track 2 of 12" goes into the numbers line.
-  // No title yet (queued, or it failed before yt-dlp got one): the link, quieter and shorter.
+  // "[2/12] Song" → "Song". No title yet (queued, or it failed before yt-dlp got one): the
+  // link, quieter and shorter.
   setText(r.name, j.title ? j.title.replace(/^\[\d+\/\d+\] /, '') : j.url.replace(/^https?:\/\/(www\.)?/, ''));
   r.name.classList.toggle('link', !j.title);
-  var running0 = j.status === 'running';
-  r.st.hidden = running0;          // while downloading the state goes under the title,
-  r.pills.hidden = !running0;      // and the pills take its place on the right
-  setText(r.st, statusText(j));
-  if (running0) {
-    var nowCls = 'now' + (j.wait > 0 ? ' waiting' : '');
-    var kindKey = statusText(j) + '|' + kindText(j) + '|' + nowCls;
-    if (r.kindKey !== kindKey) {
-      r.kindKey = kindKey;
-      r.kind.innerHTML = '';
-      r.kind.append(el('span', nowCls, statusText(j)), ' · ' + kindText(j));
-    }
-    // Numbers always say what they count: "video 3 of 12", "40% of all" (the whole playlist).
-    var list = j.of > 1 && j.pos;
-    r.pillTrack.hidden = !list;
-    setText(r.pillTrack, itemWord(j) + ' ' + j.pos + ' of ' + j.of);
-    setText(r.pillPct, Math.floor(j.progress) + '%' + (list ? ' of all' : ''));
-    r.pillPct.classList.toggle('all', !!list);
-    var tip = list ? 'How far the whole playlist is' : 'How far the download is';
-    if (r.pillPct.dataset.tip !== tip) r.pillPct.dataset.tip = tip;
-  } else if (r.kindKey !== '') {
-    r.kindKey = '';
-    r.kind.textContent = kindText(j);
-  } else setText(r.kind, kindText(j));
+  // On the right of the title: how far it is (a playlist: which track, and of all of it), or the state.
+  var list = j.of > 1 && j.pos;
+  setText(r.st, running && waiting && j.progress <= 0 ? 'waiting'
+    : running ? (list ? itemWord(j) + ' ' + j.pos + ' of ' + j.of + ' · ' : '') + Math.floor(j.progress) + '%' : statusText(j));
+  r.x.hidden = !(running || j.status === 'queued');
 
-  // While downloading: the wave, the numbers and the log.
-  var running = j.status === 'running';
+  // The second line: what it is; while downloading, the bar and the numbers instead.
+  r.kind.hidden = running;
+  r.live.hidden = !running;
+  setText(r.kind, kindText(j));
   if (running) {
-    waveTarget[j.id] = { p: j.progress, wait: waiting };
-    // Track and percent are in the pills; here: speed and time left, or why it's waiting.
-    var now = statusText(j);
-    var nums = waiting ? ['Paused']
-      : now === 'converting' ? ['Converting and adding the cover']
-      : j.progress >= 100 ? ['Finishing up']
-      : [j.speed || 'Starting…', j.eta && (j.eta + ' left'), itemPct(j) != null && 'this ' + itemWord(j) + ' ' + itemPct(j) + '%'];
-    setText(r.nums, nums.filter(Boolean).join(' · '));
-    renderSteps(r, j);
+    // Nothing to count yet (starting, YouTube's pause): a piece of wave runs along the bar
+    // instead of a flat line, until the real bar is long enough to show.
+    waveTarget[j.id] = { p: j.progress, wait: waiting, ind: j.progress < 3 };
+    setText(r.nums, numsText(j));
   }
-  reveal(r.live, running, !!r.status); // after its content is in, so it unfolds to the right height
 
-  // A note, an error, or skipped videos of a merged playlist.
-  var msg = j.status === 'error' ? j.error : j.status === 'done' ? j.error : j.note;
+  // A note, an error, or videos of a playlist that were skipped.
+  var msg = j.status === 'error' || j.status === 'done' ? j.error : j.note;
   setText(r.msg, msg || '');
   r.msg.className = 'sub' + (j.status === 'error' ? ' err' : '');
   r.msg.hidden = !msg;
 
-  // Buttons: rebuilt only when the status changes.
+  // Buttons, at the right of the second line: rebuilt only when the state changes.
   var L = state.login || {}, needIn = j.status === 'error' && L.can && !L.in && /^YouTube wants you to sign in/.test(j.error || '');
-  var acts = j.status + '|' + j.files.length + '|' + needIn;
+  var acts = j.status + '|' + j.files.length + '|' + needIn + '|' + !!j.error;
   if (r.actsKey !== acts) {
     r.actsKey = acts;
     r.acts.innerHTML = '';
-    if (j.status === 'queued' || j.status === 'running') {
-      r.acts.append(button('ghost', ICON.cancel + 'Cancel', 'Stop it; the unfinished file resumes if you add the link again',
-        function () { api('/api/cancel', { id: j.id }).then(refresh); }));
-    }
     // Failed or cancelled: back into the queue. What's already downloaded is skipped.
     if (j.status === 'error' || j.status === 'cancelled') {
-      if (needIn) r.acts.append(button('acc', ICON.user + 'Sign in', 'Takes your YouTube sign-in from your browser, or opens the sign-in page; ТЯГА notices by itself. Then Retry', signIn));
-      r.acts.append(button(needIn ? '' : 'acc', ICON.retry + 'Retry', 'Try again; whatever already downloaded is skipped',
+      if (needIn) r.acts.append(button('acc', ICON.user + 'Sign in', null, signIn));
+      r.acts.append(button(needIn ? '' : 'acc', ICON.retry + 'Retry', null,
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
       // The full technical error, to send to someone (the page shows the plain-words version).
       if (j.status === 'error') {
-        var copy = button('', ICON.copy + 'Copy error', 'Copies the link, the ТЯГА version and yt-dlp\'s own error message', function () {
+        var copy = button('', ICON.copy + 'Copy error', null, function () {
           var text = 'ТЯГА ' + (state.version || '') + '\nLink: ' + j.url + '\n' + (j.errorRaw || j.error || '');
           var done = function (ok) {
             copy.innerHTML = ok ? ICON.check + 'Copied' : ICON.copy + 'Couldn\'t copy';
@@ -741,84 +822,41 @@ function updateRow(r, j) {
         r.acts.append(copy);
       }
     }
+    // A playlist with skipped videos: try just those again.
+    if (j.status === 'done' && j.error) {
+      r.acts.append(button('', ICON.retry + 'Retry', null,
+        function () { api('/api/retry', { id: j.id }).then(refresh); }));
+    }
     if (j.status === 'done' && j.files.length) {
-      r.acts.append(button('', ICON.folder + 'Show in folder', null,
+      r.acts.append(button('', ICON.folder + 'Show file', null,
         function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); }));
+      // The file itself onto the clipboard: Ctrl+V in a chat attaches it.
+      var cp = el('button', 'ibtn');
+      cp.innerHTML = ICON.copy;
+      cp.dataset.tip = 'Copy the file, to paste it into a chat with Ctrl+V';
+      cp.onclick = function () {
+        api('/api/copyfile', { id: j.id, n: j.files.length - 1 }).then(function (x) {
+          cp.innerHTML = x.ok ? ICON.check : ICON.copy;
+          cp.dataset.tip = x.ok ? 'Copied: paste it with Ctrl+V' : 'Couldn\'t copy the file';
+          setTimeout(function () { cp.innerHTML = ICON.copy; cp.dataset.tip = 'Copy the file, to paste it into a chat with Ctrl+V'; }, 1800);
+        });
+      };
+      r.acts.append(cp);
     }
     r.acts.hidden = !r.acts.children.length;
   }
   r.status = j.status;
 }
 
-// reveal shows or hides a part by folding it open or shut (animate: not for a row's first look).
-function reveal(e, show, animate) {
-  if (e._shown === show) return;
-  e._shown = show;
-  clearTimeout(e._t);
-  e.classList.remove('slide'); e.style.height = e.style.opacity = '';
-  if (!animate || matchMedia('(prefers-reduced-motion: reduce)').matches) { e.hidden = !show; return; }
-  var from = e.hidden ? 0 : e.offsetHeight;
-  e.hidden = false;
-  var to = show ? e.offsetHeight : 0;
-  e.style.height = from + 'px'; e.style.opacity = show ? 0 : 1;
-  void e.offsetHeight;
-  e.classList.add('slide');
-  e.style.height = to + 'px'; e.style.opacity = show ? 1 : 0;
-  e._t = setTimeout(function () {
-    e.classList.remove('slide'); e.style.height = e.style.opacity = '';
-    if (!show) e.hidden = true;
-  }, 320);
-}
-
-// The step feed under the wave: done steps with a tick, the current one live. Updated
-// line by line, so a new step slides in and nothing that stayed the same is redrawn.
-function renderSteps(r, j) {
-  var steps = (j.log || []).slice();
-  var cur = j.now;
-  // The live line replaces the plain "Downloading Song.webm" of the same step.
-  if (cur && steps.length && /^Downloading /.test(steps[steps.length - 1])) steps.pop();
-  if (!cur) cur = steps.pop() || '';
-  var want = steps.map(function (t) { return { t: t, c: 'done' }; });
-  if (cur) want.push({ t: cur, c: 'cur' });
-  want = want.slice(-4);
-
-  var have = r.stepEls || (r.stepEls = []);
-  // Steps that left the top fold away; matching ones stay; the rest come in at the bottom.
-  var k = 0;
-  while (k < have.length && !startsWith(want, have.slice(k))) k++;
-  have.splice(0, k).forEach(function (e) {
-    e.classList.add('out');
-    setTimeout(function () { e.remove(); }, 360);
-  });
-  want.forEach(function (w, i) {
-    var e = have[i];
-    if (!e) {
-      e = el('div', 'in');
-      have.push(e);
-      r.log.append(e);
-    }
-    if (e.dataset.t !== w.t) {
-      e.dataset.t = w.t;
-      // "Downloading the picture · part 17 of 80 · 8 MB of 20 MB" → the words, then the numbers as pills.
-      var parts = w.c === 'cur' ? w.t.split(' · ') : [w.t];
-      e.innerHTML = '';
-      e.append(el('span', null, parts[0]));
-      parts.slice(1).forEach(function (p) { e.append(el('span', 'tag', p)); });
-    }
-    e.classList.toggle('done', w.c === 'done');
-    e.classList.toggle('cur', w.c === 'cur');
-  });
-  have.splice(want.length).forEach(function (e) { e.remove(); });
-}
-// Do the steps on screen match the start of the new list? (The current one may have
-// become done, or its live numbers changed: only the text of a step counts if it's done.)
-function startsWith(want, have) {
-  if (have.length > want.length) return false;
-  for (var i = 0; i < have.length; i++) {
-    var same = have[i].dataset.t === want[i].t || (have[i].classList.contains('cur') && i === have.length - 1);
-    if (!same) return false;
-  }
-  return true;
+// The numbers under the title while it downloads, or in words what it's doing right now:
+// "3 MB of 5 MB · 1.2 MB/s · 0:02 left", "Waiting for YouTube · a 5 s pause", "Converting to MP3".
+function numsText(j) {
+  var log = j.log || [], step = log[log.length - 1] || '';
+  if (j.wait > 0) return 'Waiting for YouTube · a ' + j.wait + ' s pause';
+  if (!j.speed && /^(Converting|Joining|Adding the cover|Cutting out)/.test(step)) return step;
+  if (j.progress >= 100) return 'Finishing up';
+  if (j.speed) return [j.size, j.speed, j.eta && j.eta + ' left'].filter(Boolean).join(' · ');
+  return step && !/^Downloading the /.test(step) ? step : 'Starting…';
 }
 
 // The YouTube sign-in button (login.go). Signed in: the first click asks "Sign out?",
@@ -839,7 +877,6 @@ function renderAcct() {
   b.className = 'btn acct' + (cls ? ' ' + cls : '');
   setText($('acctT'), text);
   if (b.dataset.tip !== tip) b.dataset.tip = tip;
-  b.classList.add('tip-left');
   // What came of signing in goes in the message line under the options; it goes away by itself
   // with the next try (a message about something else is left alone).
   if (L.msg !== lastLoginMsg) {
@@ -861,6 +898,7 @@ $('acct').onclick = function () {
 function setText(e, t) { if (e.textContent !== t) e.textContent = t; }
 
 function render() {
+  anim.kick();
   renderAcct();
   $('ver').textContent = state.version || '';
   $('ver').hidden = !state.version;
@@ -872,7 +910,6 @@ function render() {
   $('setup').classList.toggle('err', !state.setup && !!state.problem);
 
   var list = $('list'), jobs = state.jobs || [];
-  if (APP) { syncFold(jobs); syncPlay(); fitLater(); }
   // While something downloads, the fish in the logo gets reeled in.
   var run = jobs.filter(function (j) { return j.status === 'running'; })[0];
   document.body.classList.toggle('busy', !!run);
@@ -883,6 +920,7 @@ function render() {
   if (!jobs.length && APP) { // the list card folds away (setGone); its rows fold up meanwhile
     Object.keys(rows).forEach(function (id) { bye(rows[id].row); });
     rows = {};
+    syncFold(jobs);
     return;
   }
   if (!jobs.length) {
@@ -901,16 +939,22 @@ function render() {
 
   // Every download has its own row that stays on the page and is only updated, so nothing
   // blinks or starts its animation over. A part is rebuilt only when it really changes.
-  var alive = {};
+  var alive = {}, fresh = [];
   jobs.slice().reverse().forEach(function (j, i) { // newest first
     alive[j.id] = true;
-    var r = rows[j.id] || (rows[j.id] = makeRow(j));
+    var r = rows[j.id];
+    if (!r) { r = rows[j.id] = makeRow(j); fresh.push(r.row); }
     updateRow(r, j);
     if (list.children[i] !== r.row) list.insertBefore(r.row, list.children[i] || null);
   });
+  if (booted) fresh.forEach(grow);
   Object.keys(rows).forEach(function (id) {
     if (!alive[id]) { bye(rows[id].row); delete rows[id]; }
   });
+  // The window is fitted after the rows are in, so it grows once, straight to the height it
+  // needs (fitting it first made it too short and then grow again frame by frame).
+  if (APP) { syncFold(jobs); fitLater(); }
+  booted = true;
 
   // Just finished: the row glows green for a moment and the fish on the hook jumps.
   caught.splice(0).forEach(function (id) {
@@ -927,10 +971,7 @@ function render() {
 // The list card's fold (ТЯГА's window only, see .lhead in the styles).
 var APP = document.documentElement.classList.contains('app');
 var fold = { on: false, gone: false, count: -1 };
-var headNote = null;
 function foldSummary(jobs) {
-  if (headNote && Date.now() < headNote.until)
-    return '<span class="' + (headNote.bad ? 'bad' : 'good') + '">' + headNote.t.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>';
   if (!jobs.length) return APP ? $('lsum').innerHTML : 'Nothing on the hook yet'; // app: the card is leaving, keep its line
   var n = { running: 0, queued: 0, done: 0, error: 0 }, run = null;
   jobs.forEach(function (j) { if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
@@ -946,14 +987,26 @@ function foldSummary(jobs) {
 }
 // Nothing in the list: no list card at all, the window is just the first card. The first link
 // that goes in brings the card in, open; clearing the list takes it away again (not while the
-// game is open: that waits until you close it).
+// ).
 // A row leaves: it folds up and fades, then it's gone. With "reduce motion": at once.
 function bye(row) {
   if (!APP || matchMedia('(prefers-reduced-motion: reduce)').matches || !row.offsetHeight) return row.remove();
   row.style.height = row.offsetHeight + 'px';
   void row.offsetHeight;
   row.classList.add('bye');
-  setTimeout(function () { row.remove(); }, 280);
+  setTimeout(function () { row.remove(); fitLater(); }, 280);
+}
+// A new row opens up from nothing; the rows below glide down with it.
+var booted = false;
+function still() { return matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function grow(row) {
+  var h = row.offsetHeight;
+  if (still() || !h) return;
+  row.style.height = '0px'; row.style.paddingTop = row.style.paddingBottom = '0px'; row.style.opacity = '0';
+  void row.offsetHeight;
+  row.classList.add('grow');
+  row.style.height = h + 'px'; row.style.paddingTop = row.style.paddingBottom = row.style.opacity = '';
+  setTimeout(function () { row.classList.remove('grow'); row.style.height = ''; fitLater(); }, 340);
 }
 function syncFold(jobs) {
   var html = foldSummary(jobs);
@@ -961,7 +1014,7 @@ function syncFold(jobs) {
   if (fold.count < 0) { if (jobs.length) setFold(false, false); else setGone(true, false); }  // first look
   else if (jobs.length && fold.gone) setGone(false, true);                // the first link went in
   else if (jobs.length > fold.count && fold.on) setFold(false, true);     // another one, while folded
-  else if (!jobs.length && !fold.gone && !game.open) setGone(true, true); // the list was cleared
+  else if (!jobs.length && !fold.gone) setGone(true, true); // the list was cleared
   fold.count = jobs.length;
 }
 // The list card goes away (fades, then the window shrinks to the first card) or comes in (the
@@ -985,6 +1038,8 @@ function setGone(on, animate) {
     return;
   }
   fold.on = false;
+  readyH = 0;
+  comeAt = Date.now();
   card.classList.remove('folded', 'anim', 'leave');
   card.style.height = '';
   var show = function () {
@@ -992,7 +1047,10 @@ function setGone(on, animate) {
     card.hidden = false;
     if (animate) { card.classList.remove('come'); void card.offsetWidth; card.classList.add('come'); }
   };
-  api('/api/window', { text: 'height', n: openHeight() }).catch(function () {}).then(function () {
+  var need = openHeight();
+  // Grown already (a link was in the box, see readyWindow): the card comes in right away.
+  if (innerHeight >= need - 2) { lastFit = need; return show(); }
+  api('/api/window', { text: 'height', n: need }).catch(function () {}).then(function () {
     if (!animate) return show();
     return new Promise(function (ok) { var t = setTimeout(ok, 300); addEventListener('resize', function f() { removeEventListener('resize', f); clearTimeout(t); setTimeout(ok, 30); }); }).then(show);
   });
@@ -1006,29 +1064,57 @@ function foldedHeight() {
 }
 // The window fits what's in it, no empty space under the list: it grows when a download is
 // added (up to the full height, then the list scrolls) and shrinks when rows get shorter or go.
-// The game gets the full height. Sent only when the height really changes.
+// Sent only when the height really changes.
 function mainPad() { return parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom); }
 function openHeight() { // the open list card's natural height, measured without painting
   var card = $('jobsCard'), list = $('list');
   var was = [card.hidden, card.className, card.style.height];
   card.hidden = false; card.classList.remove('folded', 'leave', 'come', 'anim'); card.style.height = '';
+  // Parts that are opening or folding right now count at the height they're going to.
+  var moving = [];
+  list.querySelectorAll('.job.grow').forEach(function (e) {
+    moving.push([e, e.style.height, e.style.paddingTop, e.style.paddingBottom, e.hidden]);
+    e.style.height = e.style.paddingTop = e.style.paddingBottom = '';
+  });
   var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + mainPad();
+  moving.forEach(function (m) { m[0].style.height = m[1]; m[0].style.paddingTop = m[2]; m[0].style.paddingBottom = m[3]; m[0].hidden = m[4]; });
   card.hidden = was[0]; card.className = was[1]; card.style.height = was[2];
   return Math.ceil(n);
 }
 var lastFit = 0;
+// A link in the box while the list is empty: the window grows now, to about the height the
+// list will need (it's transparent below the cards, so nothing shows), so that Download
+// doesn't have to wait for Windows to resize the window: that wait, and the resizing during
+// the animation, was the stutter. An empty box gives the room back.
+var ROW_GUESS = 160; // the first row (74 px) and the list card around it (measured on the stand)
+var readyH = 0, comeAt = 0;
+function readyWindow() {
+  if (!APP || !fold.gone) return;
+  var want = $('links').value.trim() ? openHeight() + ROW_GUESS : 0;
+  if (want === readyH) return;
+  readyH = want;
+  windowFit();
+}
 function windowFit() {
   if (!APP) return;
   if ($('jobsCard').classList.contains('leave')) return; // folding away: the window follows at the end
-  if (game.open) { if (lastFit !== -1) { lastFit = -1; api('/api/window', { text: 'full' }).catch(function () {}); } return; }
   var n;
   if (fold.gone || fold.on) {
     // From the layout, not getBoundingClientRect: at start the cards are still rising into place
     // (a 14 px slide), and measuring then made the window that much too tall.
     var card = fold.gone ? document.querySelector('.card.form') : $('jobsCard');
     n = Math.ceil(card.offsetTop + card.offsetHeight + mainPad());
+    if (fold.gone && readyH) n = Math.max(n, readyH);
   } else if ($('jobsCard').classList.contains('anim')) return; // sliding open: it fits at the end
   else n = openHeight();
+  // While something in the list opens or folds, the window may grow at once (it's transparent
+  // below the cards, so that's invisible) but shrinks only once it's all settled (each part
+  // fits it again at its end): resizing the window every frame is what made it stutter.
+  // (Also not while the list card is coming in: the room made ahead is given back after.)
+  if (n < innerHeight - 1 && ($('list').querySelector('.job.grow,.job.bye') || Date.now() - comeAt < 600)) {
+    if (Date.now() - comeAt < 600) setTimeout(fitLater, 650);
+    return;
+  }
   // Asked already and the window has it (or as much as fits): nothing to do. If Windows didn't
   // apply it (it happens when a few come at once), ask again.
   if (n === lastFit && (Math.abs(innerHeight - n) <= 1 || innerHeight >= 800)) return;
@@ -1077,240 +1163,8 @@ if (APP) {
   if (window.ResizeObserver) new ResizeObserver(fitLater).observe(document.querySelector('.card.form'));
 }
 
-// A little game while it downloads (ТЯГА's window only): knock out the bricks with a ball.
-// It takes the list's place in the list card, so the line on top keeps saying how the downloads
-// go. It is never cut off: a finished download is said in that top line for a few seconds
-// (not in the game itself), and the game stays until you close it (the button again, or Esc). Closed, hidden or folded,
-// it pauses and keeps where you were; a click goes on. The bricks are a soft rainbow (the
-// owner asked for colour), the ball and paddle the text colour.
-var game = { open: false };
-(function () {
-  if (!APP) return;
-  var box = $('game'), cv = $('gameCv'), cx = cv.getContext('2d');
-  var W = 0, H = 0, dpr = 1, fg = '#eee', dim = '#888', ok = '#51cf66', err = '#ff6b6b';
-  var COLS = 10, ROWS = 5, GAP = 6, SIDE = 14, TOP = 34, BH = 16;
-  var pad = { x: 0, w: 88, h: 10 }, ball = { x: 0, y: 0, vx: 0, vy: 0, r: 6, stuck: true };
-  var bricks = [], lives = 3, score = 0, level = 1, mode = 'ready', keys = {}, raf = 0, last = 0;
-
-  function colors() {
-    var css = getComputedStyle(document.documentElement);
-    fg = css.getPropertyValue('--fg').trim(); dim = css.getPropertyValue('--dim').trim();
-    ok = css.getPropertyValue('--ok').trim(); err = css.getPropertyValue('--err').trim();
-  }
-  function speed() { return Math.min(460, 250 * (1 + 0.07 * (level - 1))); } // px/s: calm at first, a bit faster each level
-  function layout() {
-    var r = box.getBoundingClientRect();
-    if (!r.width) return false;
-    var oldW = W;
-    W = r.width; H = r.height; dpr = window.devicePixelRatio || 1;
-    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-    var bw = (W - 2 * SIDE - GAP * (COLS - 1)) / COLS;
-    bricks.forEach(function (b, i) {
-      b.x = SIDE + (i % COLS) * (bw + GAP); b.y = TOP + Math.floor(i / COLS) * (BH + GAP); b.w = bw; b.h = BH;
-    });
-    pad.w = Math.max(70, Math.min(110, W / 8));
-    pad.y = H - 26;
-    if (oldW) pad.x = pad.x / oldW * W; else pad.x = (W - pad.w) / 2;
-    pad.x = Math.max(0, Math.min(W - pad.w, pad.x));
-    if (ball.stuck) stick();
-    return true;
-  }
-  function newBricks() {
-    bricks = [];
-    for (var i = 0; i < COLS * ROWS; i++) bricks.push({ alive: true, fade: 0 });
-    layout();
-  }
-  function stick() { ball.stuck = true; ball.x = pad.x + pad.w / 2; ball.y = pad.y - ball.r - 1; }
-  function launch() {
-    var a = (Math.random() - 0.5) * 0.6; // a little to the side, never straight up
-    ball.stuck = false; ball.vx = speed() * Math.sin(a); ball.vy = -speed() * Math.cos(a);
-  }
-  function restart() { lives = 3; score = 0; level = 1; newBricks(); stick(); }
-  function click() {
-    if (mode === 'over') { restart(); mode = 'ready'; return; }
-    if (mode === 'ready' || mode === 'paused') { mode = 'play'; if (ball.stuck) launch(); }
-    else if (mode === 'play' && ball.stuck) launch();
-  }
-  function pause() { if (mode === 'play') mode = 'paused'; }
-
-  function step(dt) {
-    var kv = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0);
-    if (kv) { pad.x = Math.max(0, Math.min(W - pad.w, pad.x + kv * 560 * dt)); aim = null; }
-    else if (aim != null) pad.x += (aim - pad.x) * Math.min(1, dt * 22);
-    bricks.forEach(function (b) { if (b.fade > 0) b.fade = Math.max(0, b.fade - dt / 0.18); });
-    if (mode !== 'play') { if (ball.stuck) stick(); return; }
-    if (ball.stuck) { stick(); return; }
-    var n = Math.ceil(speed() * dt / 3), h = dt / n;
-    for (var k = 0; k < n; k++) {
-      ball.x += ball.vx * h; ball.y += ball.vy * h;
-      if (ball.x < ball.r) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
-      if (ball.x > W - ball.r) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
-      if (ball.y < ball.r) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
-      // The paddle: where it hits says where it goes (the middle up, the edges to the side).
-      if (ball.vy > 0 && ball.y + ball.r >= pad.y && ball.y - ball.r <= pad.y + pad.h &&
-          ball.x >= pad.x - ball.r && ball.x <= pad.x + pad.w + ball.r) {
-        var off = Math.max(-1, Math.min(1, (ball.x - (pad.x + pad.w / 2)) / (pad.w / 2))), a = off * 1.05;
-        ball.vx = speed() * Math.sin(a); ball.vy = -speed() * Math.cos(a);
-        ball.y = pad.y - ball.r;
-      }
-      if (ball.y - ball.r > H) { // missed
-        if (--lives <= 0) { mode = 'over'; lives = 0; }
-        stick();
-        if (mode === 'play') mode = 'ready';
-        return;
-      }
-      for (var i = 0; i < bricks.length; i++) {
-        var b = bricks[i];
-        if (!b.alive) continue;
-        var nx = Math.max(b.x, Math.min(ball.x, b.x + b.w)), ny = Math.max(b.y, Math.min(ball.y, b.y + b.h));
-        var dx = ball.x - nx, dy = ball.y - ny;
-        if (dx * dx + dy * dy > ball.r * ball.r) continue;
-        b.alive = false; b.fade = 1;
-        score += 10 * (ROWS - Math.floor(i / COLS));
-        // Off the side it went into less deeply.
-        var px = Math.min(ball.x + ball.r - b.x, b.x + b.w - (ball.x - ball.r));
-        var py = Math.min(ball.y + ball.r - b.y, b.y + b.h - (ball.y - ball.r));
-        if (px < py) ball.vx = -ball.vx; else ball.vy = -ball.vy;
-        break;
-      }
-      if (!bricks.some(function (b) { return b.alive; })) { level++; newBricks(); stick(); mode = 'ready'; return; }
-    }
-  }
-
-  function text(t, x, y, size, color, align) {
-    cx.font = size + 'px system-ui,sans-serif'; cx.fillStyle = color; cx.textAlign = align || 'center';
-    cx.fillText(t, x, y);
-  }
-  function rrect(x, y, w, h, r) { cx.beginPath(); cx.roundRect ? cx.roundRect(x, y, w, h, r) : cx.rect(x, y, w, h); cx.fill(); }
-  function draw() {
-    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cx.clearRect(0, 0, W, H);
-    cx.textBaseline = 'middle';
-    // A soft rainbow, one colour a row (pastel in the dark theme, deeper in the light one).
-    var light = matchMedia('(prefers-color-scheme: light)').matches;
-    var ROW = light ? ['#e57373', '#ffa726', '#f9c22e', '#66bb6a', '#42a5f5'] : ['#ff8a80', '#ffb74d', '#ffe082', '#a5d6a7', '#90caf9'];
-    bricks.forEach(function (b, i) {
-      if (!b.alive && !b.fade) return;
-      var f = b.alive ? 1 : b.fade, s = b.alive ? 0 : (1 - f) * 3;
-      cx.globalAlpha = 0.9 * f; cx.fillStyle = ROW[Math.floor(i / COLS)];
-      rrect(b.x + s, b.y + s / 2, b.w - 2 * s, b.h - s, 4);
-    });
-    cx.globalAlpha = 0.85; cx.fillStyle = fg; rrect(pad.x, pad.y, pad.w, pad.h, 5);
-    cx.globalAlpha = 1; cx.beginPath(); cx.arc(ball.x, ball.y, ball.r, 0, 7); cx.fill();
-    text('Level ' + level + '   Score ' + score, SIDE, 17, 12.5, dim, 'left');
-    text('Balls left ' + lives, W - SIDE, 17, 12.5, dim, 'right');
-    var msg = mode === 'ready' ? (ball.stuck && level > 1 && score && bricks.every(function (b) { return b.alive; }) ? 'Level ' + level + '. ' : '') + 'Click to launch the ball'
-      : mode === 'paused' ? 'Paused. Click to go on'
-      : mode === 'over' ? 'Game over, score ' + score + '. Click to play again' : '';
-    if (msg) {
-      var y = Math.min(H - 64, TOP + ROWS * (BH + GAP) + (pad.y - TOP - ROWS * (BH + GAP)) / 2);
-      text(msg, W / 2, y, 15, fg);
-      if (mode !== 'over') text('Move with the mouse or ← →. Esc closes the game, it stays where you left it', W / 2, y + 24, 12.5, dim);
-    }
-    box.classList.toggle('playing', mode === 'play');
-  }
-  function frame(now) {
-    raf = 0;
-    if (!game.open) return;
-    if (document.hidden || $('jobsCard').classList.contains('folded')) pause();
-    var dt = Math.min(0.033, (now - last) / 1000); last = now;
-    if (!W && !layout()) { raf = requestAnimationFrame(frame); return; }
-    step(dt); draw();
-    raf = requestAnimationFrame(frame);
-  }
-  function run() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
-
-  // The paddle glides to the mouse (quickly, but never jumps), and follows it over the whole
-  // window, so coming back into the game doesn't snap it across.
-  var aim = null;
-  addEventListener('mousemove', function (e) {
-    if (!game.open) return;
-    var r = cv.getBoundingClientRect();
-    aim = Math.max(0, Math.min(W - pad.w, e.clientX - r.left - pad.w / 2));
-  });
-  cv.addEventListener('mousedown', function (e) { e.preventDefault(); click(); });
-  cv.addEventListener('mouseleave', pause); // reaching for something else: the ball waits
-  addEventListener('blur', pause);
-  addEventListener('keydown', function (e) {
-    if (!game.open || /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName)) return;
-    if (e.key === 'Escape') { e.preventDefault(); game.toggle(false); return; }
-    if (e.key === ' ') { e.preventDefault(); click(); return; }
-    if (/^(ArrowLeft|ArrowRight|a|d)$/.test(e.key)) { keys[e.key] = true; e.preventDefault(); }
-  });
-  addEventListener('keyup', function (e) { delete keys[e.key]; });
-  if (window.ResizeObserver) new ResizeObserver(function () { if (game.open) layout(); }).observe(box);
-
-  // Switching: the window grows first if it must (it's transparent, so that's invisible); the
-  // list fades out, the card glides to its new height and the game fades in; back the same way.
-  var still = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
-  var switchN = 0; // a newer switch cancels the steps of an older one
-  function glide(card, from, done) {
-    var to = card.offsetHeight;
-    if (still() || Math.abs(to - from) < 2) return done();
-    card.style.height = from + 'px';
-    void card.offsetHeight;
-    card.classList.add('anim');
-    card.style.height = to + 'px';
-    setTimeout(function () { card.classList.remove('anim'); card.style.height = ''; done(); }, 270);
-  }
-  function fadeOut(e, then) {
-    if (still()) return then();
-    e.classList.add('fadeout');
-    setTimeout(function () { e.classList.remove('fadeout'); then(); }, 140);
-  }
-  game.toggle = function (on) {
-    var card = $('jobsCard'), list = $('list'), my = ++switchN;
-    game.open = on;
-    keys = {}; aim = null;
-    syncPlay();
-    if (on) {
-      colors();
-      if (!bricks.length) restart();
-      pause();
-      var from = card.offsetHeight;
-      lastFit = -1;
-      api('/api/window', { text: 'full' }).catch(function () {}).then(function () {
-        return new Promise(function (ok) { var t = setTimeout(ok, 250); addEventListener('resize', function f() { removeEventListener('resize', f); clearTimeout(t); setTimeout(ok, 30); }); });
-      }).then(function () {
-        if (my !== switchN) return;
-        fadeOut(list, function () {
-          if (my !== switchN) return;
-          list.hidden = true;
-          card.classList.add('gaming');
-          box.hidden = false;
-          W = 0; layout();
-          run();
-          glide(card, from, function () { if (my === switchN) layout(); });
-        });
-      });
-    } else {
-      pause();
-      fadeOut(box, function () {
-        if (my !== switchN) return;
-        var from = card.offsetHeight;
-        box.hidden = true;
-        card.classList.remove('gaming');
-        list.hidden = false;
-        list.classList.remove('fadein'); void list.offsetWidth; list.classList.add('fadein');
-        if (!(state.jobs || []).length) return setGone(true, true); // the list was cleared meanwhile
-        glide(card, from, function () { if (my === switchN) windowFit(); });
-      });
-    }
-  };
-  $('play').onclick = function () { game.toggle(!game.open); };
-})();
-// The button shows while something downloads, and while the game is open.
-function syncPlay() {
-  if (!APP) return;
-  var busy = (state.jobs || []).some(function (j) { return j.status === 'queued' || j.status === 'running'; });
-  $('play').hidden = !(busy || game.open);
-  setText($('playT'), game.open ? 'Back to the list' : 'Play while you wait');
-  var tip = game.open ? 'The game waits where you left it (Esc does the same)' : 'A little game while it downloads. It doesn\'t stop when the download ends: finish it, or come back to it later';
-  if ($('play').dataset.tip !== tip) $('play').dataset.tip = tip;
-}
-
 function refresh() {
-  api('/api/state')
+  return api('/api/state')
     .then(function (s) {
       state = s;
       if ($('msg').textContent === OFFLINE) $('msg').textContent = '';
@@ -1319,8 +1173,14 @@ function refresh() {
     .catch(function () { if ($('msg')) $('msg').textContent = OFFLINE; });
 }
 
-refresh();
-setInterval(refresh, 700);
+// Asking for the state: every 0.7 s while something is going on, every 2 s when nothing is
+// (a click asks at once anyway), every 3 s while the window is in the tray.
+function pollDelay() {
+  var L = state.login || {};
+  var busy = state.setup || L.open || (state.jobs || []).some(function (j) { return j.status === 'queued' || j.status === 'running'; });
+  return state.hidden ? 3000 : busy ? 700 : 2000;
+}
+(function poll() { refresh().then(function () { setTimeout(poll, pollDelay()); }); })();
 
 // Progress wave, done the way Material 3's LinearWavyProgressIndicator does it (the Morphe
 // app uses that one as is):
@@ -1331,23 +1191,37 @@ setInterval(refresh, 700);
 //   keeps its speed when the target moves again, so it glides instead of lurching each time.
 // At 100 % (converting, the cover, merging) the line is full and flat, still rolling gently.
 // Each running download has a canvas; its state lives here by job id.
+// The animations sleep while the window is in the tray (state.hidden) and when there's
+// nothing to draw; render() wakes them.
+var anim = { loops: [], kick: function () { anim.loops.forEach(function (f) { f(); }); } };
 var waveTarget = {}, waveState = {};
 (function () {
   var css = getComputedStyle(document.documentElement);
   var acc = css.getPropertyValue('--acc').trim();
+  themeHooks.push(function () { acc = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(); });
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
-  var THICK = 4, AMP = 4, LEN = 30, GAP = 7;   // px: line, wave height (half), wavelength, gap
-  var PACE = 2 * Math.PI;                       // rad/s: one wavelength per second
-  var K = 4, C = 2 * Math.sqrt(K);              // the spring: very soft (progress comes in big steps every
-                                                // 0.7 s; stiffer ones lurched in a simulation), critically damped
+  // A thin bar in a compact row: it shows progress, it isn't a show.
+  var THICK = 3, AMP = 2.5, LEN = 22, GAP = 6;  // px: line, wave height (half), wavelength, gap
+  var PACE = 1.2 * 2 * Math.PI;                 // rad/s: 1.2 wavelengths a second
+  // The spring: very soft (progress comes in big steps every 0.7 s; stiffer ones lurched in a
+  // simulation), critically damped. Only when the bar is far behind (a small file that's
+  // already done) does it get stiffer, so it doesn't crawl towards 100 % after the fact.
+  function spring(gap) { var k = 4 + Math.min(60, Math.max(0, gap - 12) * 1.2); return [k, 2 * Math.sqrt(k)]; }
+  var dim = css.getPropertyValue('--dim').trim();
+  themeHooks.push(function () { dim = getComputedStyle(document.documentElement).getPropertyValue('--dim').trim(); });
+  function easeIO(u) { return u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; }
+  var raf = 0, drawn = 0;
   function frame(now) {
+    raf = 0;
     var dt = Math.min(0.05, (now - last) / 1000), most = 0;
     last = now;
+    drawn = 0;
     document.querySelectorAll('canvas.wave').forEach(function (cv) {
       var id = cv.dataset.id, t = waveTarget[id] || { p: 0 };
-      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, vel: 0, amp: 0 });
+      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, vel: 0, amp: 0, k: t.ind ? 1 : 0, run: 0 });
       var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
       if (!w) return; // hidden
+      drawn++;
       if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
       var cx = cv.getContext('2d');
       cx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1356,19 +1230,47 @@ var waveTarget = {}, waveState = {};
       if (t.p < st.shown - 5) { st.shown = t.p; st.vel = 0; }    // started over (retry): no slide back
       if (still) st.shown = t.p;
       else {
-        st.vel += (K * (t.p - st.shown) - C * st.vel) * dt;
+        var sp = spring(t.p - st.shown);
+        st.vel += (sp[0] * (t.p - st.shown) - sp[1] * st.vel) * dt;
         st.shown = Math.max(st.shown, Math.min(100, st.shown + st.vel * dt)); // never back
         st.phase += dt * PACE;
       }
       var f = st.shown / 100;
-      var ampWant = f > 0.1 && f < 0.95 && !still ? AMP : 0;
-      st.amp += (ampWant - st.amp) * Math.min(1, dt * 3);
+      // Waves as soon as the bar is a couple of bends long (not from 10 %), settles flat at the end.
+      var len = (w - THICK) * f;
+      var ampWant = still || f >= 0.97 ? 0 : AMP * Math.max(0, Math.min(1, (len - 10) / 30));
+      st.amp += (ampWant - st.amp) * Math.min(1, dt * 4);
       most = Math.max(most, f);
 
       var pad = THICK / 2, mid = h / 2, end = w - pad;
       var head = Math.max(pad + THICK, pad + (end - pad) * f);
       cx.lineCap = 'round';
       cx.lineWidth = THICK;
+      // Indeterminate ↔ determinate: one cross-fades into the other (k: how indeterminate).
+      st.k += ((t.ind && !still ? 1 : 0) - st.k) * Math.min(1, dt * 5);
+      if (st.k > .01) {
+        // A piece of wave running along the track, again and again; slower and grey while
+        // YouTube makes it wait, orange while it's getting going.
+        st.run += dt / (t.wait ? 2.4 : 1.5);
+        var u = st.run % 1, L = .34;
+        var a1 = pad + (end - pad) * Math.max(0, Math.min(1, easeIO(u) * (1 + L) - L));
+        var b1 = pad + (end - pad) * Math.max(0, Math.min(1, easeIO(Math.min(1, u * 1.15)) * (1 + L * .4)));
+        cx.globalAlpha = st.k;
+        cx.strokeStyle = 'rgba(127,127,127,.28)';
+        cx.beginPath(); cx.moveTo(pad, mid); cx.lineTo(end, mid); cx.stroke();
+        if (b1 - a1 > 1) {
+          cx.strokeStyle = t.wait ? dim : acc;
+          cx.beginPath();
+          for (var x1 = a1; ; x1 += 1) {
+            var x2 = Math.min(x1, b1), y1 = mid + Math.sin((x2 / LEN) * 2 * Math.PI - st.phase) * AMP;
+            x1 === a1 ? cx.moveTo(x2, y1) : cx.lineTo(x2, y1);
+            if (x2 >= b1) break;
+          }
+          cx.stroke();
+        }
+        cx.globalAlpha = 1 - st.k;
+        if (st.k > .99) { cx.globalAlpha = 1; return; }
+      }
       if (head + GAP < end) {                                     // the track: what's left
         cx.strokeStyle = 'rgba(127,127,127,.28)';
         cx.beginPath(); cx.moveTo(head + GAP + THICK, mid); cx.lineTo(end, mid); cx.stroke();
@@ -1382,96 +1284,12 @@ var waveTarget = {}, waveState = {};
         if (xx >= head) break;
       }
       cx.stroke();
-    });
-    // The background speeds up with the progress, smoothed (like Morphe's patcher screen).
-    fx.energy += (most - fx.energy) * Math.min(1, dt * 0.8);
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-})();
-
-// Background: notes and play signs falling slowly and swaying. Far ones are small, faint and slow,
-// near ones bigger and faster. They shy away from the mouse, and fall faster while something
-// downloads (fx.energy comes from the progress wave). No bursts or confetti: calm, not a show.
-// With "reduce motion" on in the system nothing moves.
-var fx = { energy: 0 };
-(function () {
-  var cv = $('fall'), cx = cv.getContext('2d');
-  var W, H, ox = 0, oy = 0, dpr, items = [], color, mx = -999, my = -999;
-  var GLYPHS = ['♪', '♫', '♩', '▶', '▶', '•'];
-  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function size() {
-    dpr = 1; // a soft background doesn't need sharp pixels; on a 2× screen this is 4× less work
-    // The notes fill their box: the whole page in the browser, the list card in ТЯГА's window.
-    var r = cv.getBoundingClientRect();
-    W = Math.round(r.width) || innerWidth; H = Math.round(r.height) || innerHeight; ox = r.left; oy = r.top;
-    cv.width = W * dpr; cv.height = H * dpr;
-    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var css = getComputedStyle(document.documentElement);
-    color = css.getPropertyValue('--acc').trim() || '#ff6b2c';
-    sprites = {};
-    var want = Math.round(W * H / 38000);
-    while (items.length < want) items.push(spawn(true));
-    items.length = want;
-  }
-  // Each note is drawn once into a little picture (per glyph and size) and then only stamped:
-  // stamping a picture is far cheaper than laying out text every frame, and looks the same.
-  var sprites = {};
-  function sprite(g, s) {
-    var k = g + s, sp = sprites[k];
-    if (sp) return sp;
-    sp = sprites[k] = document.createElement('canvas');
-    sp.width = sp.height = Math.ceil(s * 1.6);
-    var c = sp.getContext('2d');
-    c.fillStyle = color; c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.font = s + 'px system-ui,sans-serif';
-    c.fillText(g, sp.width / 2, sp.height / 2);
-    return sp;
-  }
-  function spawn(anywhere) {
-    var z = Math.random(); // 0 = far, 1 = near
-    return {
-      g: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
-      x: Math.random() * W, y: anywhere ? Math.random() * H : -40, ox: 0,
-      z: z, s: 10 + Math.round(z * 9) * 2, v: 12 + z * 34, // size px (even: fewer pictures), fall speed px/s
-      a: 0.07 + z * 0.2, sway: 10 + Math.random() * 25, f: 0.3 + Math.random() * 0.5,
-      ph: Math.random() * 6.28, r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.6,
-    };
-  }
-  addEventListener('mousemove', function (e) { mx = e.clientX - ox; my = e.clientY - oy; });
-  addEventListener('mouseout', function (e) { if (!e.relatedTarget) mx = my = -999; });
-  var last = performance.now();
-  function frame(now) {
-    var dt = Math.min(0.05, (now - last) / 1000), t = now / 1000;
-    last = now;
-    var boost = 1 + fx.energy * 2; // 1× at rest, up to 3× as a download nears its end
-    cx.setTransform(1, 0, 0, 1, 0, 0);
-    cx.clearRect(0, 0, W, H);
-    if (game.open) { // the game covers the list card: nothing to see
       cx.globalAlpha = 1;
-      if (!still) requestAnimationFrame(frame);
-      return;
-    }
-    items.forEach(function (p, i) {
-      if (!still) {
-        p.y += p.v * boost * dt; p.r += p.vr * boost * dt;
-        // Shy of the cursor: pushed sideways, then drift back to their line.
-        var x = p.x + p.ox, dx = x - mx, dy = p.y - my, d2 = dx * dx + dy * dy;
-        if (d2 < 140 * 140) p.ox += (dx >= 0 ? 1 : -1) * (1 - Math.sqrt(d2) / 140) * 260 * dt;
-        p.ox *= Math.pow(0.4, dt);
-      }
-      if (p.y > H + 40) p = items[i] = spawn(false);
-      var sp = sprite(p.g, p.s), c = Math.cos(p.r), s = Math.sin(p.r);
-      cx.globalAlpha = p.a;
-      cx.setTransform(c, s, -s, c, p.x + p.ox + Math.sin(t * p.f + p.ph) * p.sway, p.y);
-      cx.drawImage(sp, -sp.width / 2, -sp.height / 2);
     });
-
-    if (!still) requestAnimationFrame(frame);
+    // Nothing to draw, or the window is hidden: sleep (render() wakes it).
+    if (drawn && !state.hidden) raf = requestAnimationFrame(frame);
   }
-  addEventListener('resize', size);
-  if (window.ResizeObserver) new ResizeObserver(size).observe(cv.parentNode);
-  size();
-  requestAnimationFrame(frame);
+  anim.loops.push(function () { if (!raf && !state.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } });
 })();
+
 </script></body></html>

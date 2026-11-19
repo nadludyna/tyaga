@@ -15,8 +15,8 @@ he has to guess what's going on or wait without knowing why, is a bug to fix bef
 
 **1. Nothing jumps.** The layout is stable and predictable. Things don't grow, shrink or move
 by themselves while you look at them, and nothing moves when you click.
-- A part that shows changing content has a fixed size: the step feed under a download is
-  always four lines tall, the newest step on the bottom line, old ones leave over the top.
+- A part that shows changing content has a fixed size: a download's row is two lines in
+  every state, and what it's doing right now replaces the numbers in place.
 - Numbers that change (percent, track, speed) sit in fixed-width places.
 - The scrollbar's place is always kept, so a long list doesn't push the page sideways.
 - What appears because you asked for it (the fragment times, an error under the box) may

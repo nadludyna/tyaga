@@ -108,16 +108,27 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
   any control (fixed columns, not widths that depend on how many options are next to it).
 - **An app, not a document.** Buttons and labels don't get selected by Ctrl+A or a stray
   click; only what's worth copying is selectable (the links box, titles, errors, the log).
-- **Orange is for the main thing only**: the Download button, the selected switches, the
-  progress wave. Not frames, not glows around every item.
+- **Orange is for the main thing only**: solid orange only for the Download button and the
+  progress wave; selected switches and chips get a tonal orange (a light tint and orange text,
+  like Material 3's secondary container). Not frames, not glows around every item.
 - **Plain words for people.** No file paths, video ids, `[youtube]`-style tags or stack traces
   on the page. Errors say what happened and what to do.
-- **Motion is alive but calm.** The progress wave works like Material 3's
-  `LinearWavyProgressIndicator` (what Morphe uses as is): one steady pace (one wavelength a
-  second), flat up to 10 % and from 95 %. The bar follows progress with a very soft,
-  critically damped spring: progress arrives in big steps every 0.7 s, and stiffer springs or
-  "go to the new value" made it lurch (measured in a simulation). The background speeds up
-  with the progress, 1× → 3×, like Morphe's patcher screen. Respect "reduce motion".
+- **A downloader, not a show.** The window answers four questions and nothing else: where to
+  paste, what I'll get, is it coming and how long, where is it. One compact row per download
+  (picture, title and state; the bar and "3 MB of 5 MB · 1.2 MB/s · 0:02 left", or in words
+  what it's doing), no log of steps, no decorations. Rejected after trying: falling notes, a
+  link flying into its row, a game, a step-by-step log (noise, and the window got as tall as
+  the screen).
+- **Nothing moves by itself while nothing happens.** The window is transparent, so anything
+  that moves makes Windows redraw what's under it (DWM): idle animations cost 5–17 % of the
+  CPU on the owner's PC. Motion only while something downloads (the bar) and as the answer to
+  a click (hover, press, a row opening).
+- **The progress bar** is a thin Material 3 wavy line: 3 px, a gentle wave, waving once the
+  bar is a couple of bends long, flat at the end. Before there's a number (starting, YouTube's
+  pause) a piece of wave runs along the track. The bar follows the progress with a soft,
+  critically damped spring (stiffer only when far behind): progress arrives in big steps every
+  0.7 s, and stiff springs or "go to the new value" made it lurch (measured in a simulation).
+  Respect "reduce motion".
 - **Light on weak laptops.** No `backdrop-filter` over the animated background; check with the
   CPU slowed down (Chrome devtools, 6×). The download list is updated in place, never rebuilt
   (rebuilding restarts animations and makes pictures blink).
