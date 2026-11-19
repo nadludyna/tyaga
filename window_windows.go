@@ -158,11 +158,18 @@ func runWindow(token string) bool {
 			place()
 		case "height":
 			want := max(120, min(n, full))
+			t0, y0 := time.Now(), win.Bounds().Y
 			win.SetSize(winWidth, want)
 			onScreen()
 			place()
-			if b := win.Bounds(); b.Height != want {
+			b := win.Bounds()
+			if b.Height != want {
 				logf("Window: the page asked for %d (limit %d) and got %d", n, full, b.Height)
+			}
+			// How long Windows takes and whether the window had to move up: to see what a
+			// stutter on his PC is made of (the stand can't show real window resizing).
+			if took := time.Since(t0); took > 30*time.Millisecond || b.Y != y0 {
+				logf("Window: resized to %d in %d ms, moved by %d", want, took.Milliseconds(), b.Y-y0)
 			}
 		}
 	}

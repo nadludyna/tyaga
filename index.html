@@ -606,8 +606,8 @@ function add() {
     if (!r.error) { // a fragment is a one-off: the next link is whole again
       var links = text.split(/\s+/);
       if (!still()) { // the hint stays away while the link lifts out of the box
-        $('links').classList.add('flying');
-        setTimeout(function () { $('links').classList.remove('flying'); }, 300);
+        $('links').classList.add('flying'); // back when the link dives out (fly), or after 4 s
+        setTimeout(function () { $('links').classList.remove('flying'); }, 4000);
       }
       flyNext = lift(links[0].replace(/^https?:\/\/(www\.)?/, '') + (links.length > 1 ? '  +' + (links.length - 1) : ''),
         box.left + parseFloat(cs.paddingLeft) + 1, box.top + parseFloat(cs.paddingTop), box.width - 26);
@@ -675,12 +675,14 @@ addEventListener('drop', function (e) {
   var box = $('links');
   box.value = box.value.trim() ? box.value.trim() + '\n' + t : t;
   box.focus();
+  readyWindow();
 });
 // In ТЯГА's own window (WebView2) a right-click gives only what an app needs: copy and paste
 // in text, not the browser's Back / Reload / Print.
 if (window.chrome && window.chrome.webview) addEventListener('contextmenu', function (e) {
   if (!e.target.closest('textarea,input,.name,.sub,.log') && !String(getSelection())) e.preventDefault();
 });
+$('links').addEventListener('input', function () { readyWindow(); });
 $('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askNotify(); add(); } };
 $('open').onclick = function () { api('/api/open', {}); };
 $('clear').onclick = function () { api('/api/clear', {}).then(refresh); };
@@ -869,7 +871,9 @@ function updateRow(r, j) {
   if (running) {
     // Nothing to count yet (starting, YouTube's pause before the first video): the wave runs
     // without a number (Material 3's indeterminate one) instead of lying flat as if stuck.
-    waveTarget[j.id] = { p: j.progress, wait: waiting, ind: j.progress <= 0 };
+    // It keeps running until the real bar is long enough to show, so there's no flat moment
+    // between the two.
+    waveTarget[j.id] = { p: j.progress, wait: waiting, ind: j.progress < 3 };
     // Track and percent are in the pills; here: speed and time left, or why it's waiting.
     var now = statusText(j);
     var nums = waiting ? ['Paused']
@@ -1177,11 +1181,12 @@ function lift(text, x, y, w) {
   inner.style.maxWidth = Math.max(120, w) + 'px';
   g.append(inner);
   document.body.append(g);
-  var up = y - 16;
+  var up = y - 10;
   g.animate([{ transform: 'translate(' + x + 'px,' + y + 'px)' }, { transform: 'translate(' + x + 'px,' + up + 'px) scale(1.04)' }],
     { duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
-  var bob = inner.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-4px)' }],
-    { duration: 520, delay: 260, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' });
+  // Only if its row is slow to come does it hover, gently, after the lift.
+  var bob = inner.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-3px)' }],
+    { duration: 520, delay: 420, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' });
   var f = { g: g, inner: inner, bob: bob, x: x, y: up, until: Date.now() + 4000 };
   // No row ever came (the server didn't answer in time): it just fades away.
   f.drop = setTimeout(function () { if (!f.gone) { f.gone = true; g.animate([{ opacity: 1 }, { opacity: 0 }], 200).onfinish = function () { g.remove(); }; } }, 4000);
@@ -1198,11 +1203,21 @@ function fly(row, f) {
   f.gone = true; clearTimeout(f.drop);
   var name = row.querySelector('.name'), card = $('jobsCard'), waited = 0;
   row.classList.add('landing');
-  (function wait() { // until the bucket is there: the card shown, the row open (at most 1.6 s)
-    var ready = !card.hidden && !row.classList.contains('grow') && !card.classList.contains('anim');
-    if (!ready && (waited += 16) < 1600) return requestAnimationFrame(wait);
+  (function wait() { // until the bucket is there: the card shown, the row open
+    var ready = !card.hidden && !row.classList.contains('grow') && !card.classList.contains('anim') && row.isConnected;
+    var r = ready && name.getBoundingClientRect();
+    if (!r || !r.width) {
+      // Never dive towards nothing: a hidden title says it's at 0,0, the window's top corner
+      // (that's where the link flew when Windows was slow to grow the window). Keep hovering;
+      // if the row never shows (4 s), fade out where it is.
+      if ((waited += 16) < 4000) return requestAnimationFrame(wait);
+      row.classList.remove('landing');
+      $('links').classList.remove('flying');
+      f.g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }).onfinish = function () { f.g.remove(); };
+      return;
+    }
     // The card may still be rising into place (a short slide): aim where it's going to be.
-    var r = name.getBoundingClientRect(), m = new DOMMatrix(getComputedStyle(card).transform);
+    var m = new DOMMatrix(getComputedStyle(card).transform);
     dive({ left: r.left - m.m41, top: r.top - m.m42 });
   })();
   function dive(r) {
@@ -1222,6 +1237,7 @@ function fly(row, f) {
     }
     f.bob.cancel();
     f.g.getAnimations().forEach(function (a) { a.cancel(); });
+    setTimeout(function () { $('links').classList.remove('flying'); }, D * .45);
     f.g.animate(frames, { duration: D, fill: 'forwards' }).onfinish = function () { f.g.remove(); };
     // A few big notes left behind on the way, drifting up as they fade.
     [.22, .42, .62, .8].forEach(function (u, k) {
@@ -1234,6 +1250,7 @@ function fly(row, f) {
     // Splash: the title shows, a ring spreads on the water.
     setTimeout(function () {
       row.classList.remove('landing');
+      setTimeout(fitLater, 400); // the window gives back what it grew too much, once it's calm
       puff('ripple', null, [{ transform: 'translate(' + (tx + 26) + 'px,' + (ty + 10) + 'px) scale(.3)', opacity: .7 },
         { transform: 'translate(' + (tx + 26) + 'px,' + (ty + 10) + 'px) scale(3.2)', opacity: 0 }], 650);
     }, D * .86);
@@ -1269,6 +1286,7 @@ function setGone(on, animate) {
     return;
   }
   fold.on = false;
+  readyH = 0;
   card.classList.remove('folded', 'anim', 'leave');
   card.style.height = '';
   var show = function () {
@@ -1276,7 +1294,10 @@ function setGone(on, animate) {
     card.hidden = false;
     if (animate) { card.classList.remove('come'); void card.offsetWidth; card.classList.add('come'); }
   };
-  api('/api/window', { text: 'height', n: openHeight() }).catch(function () {}).then(function () {
+  var need = openHeight();
+  // Grown already (a link was in the box, see readyWindow): the card comes in right away.
+  if (innerHeight >= need - 2) { lastFit = need; return show(); }
+  api('/api/window', { text: 'height', n: need }).catch(function () {}).then(function () {
     if (!animate) return show();
     return new Promise(function (ok) { var t = setTimeout(ok, 300); addEventListener('resize', function f() { removeEventListener('resize', f); clearTimeout(t); setTimeout(ok, 30); }); }).then(show);
   });
@@ -1309,6 +1330,19 @@ function openHeight() { // the open list card's natural height, measured without
   return Math.ceil(n);
 }
 var lastFit = 0;
+// A link in the box while the list is empty: the window grows now, to about the height the
+// list will need (it's transparent below the cards, so nothing shows), so that Download
+// doesn't have to wait for Windows to resize the window: that wait, and the resizing during
+// the animation, was the stutter. An empty box gives the room back.
+var ROW_GUESS = 380; // a downloading row (measured on the stand: ~360) and a little to spare
+var readyH = 0;
+function readyWindow() {
+  if (!APP || !fold.gone || game.open) return;
+  var want = $('links').value.trim() ? openHeight() + ROW_GUESS : 0;
+  if (want === readyH) return;
+  readyH = want;
+  windowFit();
+}
 function windowFit() {
   if (!APP) return;
   if ($('jobsCard').classList.contains('leave')) return; // folding away: the window follows at the end
@@ -1319,12 +1353,14 @@ function windowFit() {
     // (a 14 px slide), and measuring then made the window that much too tall.
     var card = fold.gone ? document.querySelector('.card.form') : $('jobsCard');
     n = Math.ceil(card.offsetTop + card.offsetHeight + mainPad());
+    if (fold.gone && readyH) n = Math.max(n, readyH);
   } else if ($('jobsCard').classList.contains('anim')) return; // sliding open: it fits at the end
   else n = openHeight();
   // While something in the list opens or folds, the window may grow at once (it's transparent
   // below the cards, so that's invisible) but shrinks only once it's all settled (each part
   // fits it again at its end): resizing the window every frame is what made it stutter.
-  if (n < innerHeight - 1 && $('list').querySelector('.job.grow,.job.bye,.live.slide')) return;
+  // A link in the air counts too (its row is .landing): a resize mid-flight was a stutter.
+  if (n < innerHeight - 1 && $('list').querySelector('.job.grow,.job.bye,.job.landing,.live.slide')) return;
   // Asked already and the window has it (or as much as fits): nothing to do. If Windows didn't
   // apply it (it happens when a few come at once), ask again.
   if (n === lastFit && (Math.abs(innerHeight - n) <= 1 || innerHeight >= 800)) return;
@@ -1641,8 +1677,9 @@ var waveTarget = {}, waveState = {};
   var acc = css.getPropertyValue('--acc').trim();
   themeHooks.push(function () { acc = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(); });
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
-  var THICK = 4, AMP = 4, LEN = 30, GAP = 7;   // px: line, wave height (half), wavelength, gap
-  var PACE = 2 * Math.PI;                       // rad/s: one wavelength per second
+  // Livelier than Material 3's default (the owner asked): a little higher, 1.6 wavelengths a second.
+  var THICK = 4, AMP = 5, LEN = 30, GAP = 7;   // px: line, wave height (half), wavelength, gap
+  var PACE = 1.6 * 2 * Math.PI;                 // rad/s
   // The spring: very soft (progress comes in big steps every 0.7 s; stiffer ones lurched in a
   // simulation), critically damped. Only when the bar is far behind (a small file that's
   // already done) does it get stiffer, so it doesn't crawl towards 100 % after the fact.
@@ -1676,8 +1713,10 @@ var waveTarget = {}, waveState = {};
         st.phase += dt * PACE;
       }
       var f = st.shown / 100;
-      var ampWant = f > 0.1 && f < 0.95 && !still ? AMP : 0;
-      st.amp += (ampWant - st.amp) * Math.min(1, dt * 3);
+      // Waves as soon as the bar is a couple of bends long (not from 10 %), settles flat at the end.
+      var len = (w - THICK) * f;
+      var ampWant = still || f >= 0.97 ? 0 : AMP * Math.max(0, Math.min(1, (len - 14) / 40));
+      st.amp += (ampWant - st.amp) * Math.min(1, dt * 4);
       most = Math.max(most, f);
 
       var pad = THICK / 2, mid = h / 2, end = w - pad;

@@ -115,13 +115,15 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
   on the page. Errors say what happened and what to do.
 - **Playful only as an answer to the owner's own action**, and short (under a second): sending
   a link casts the fish, the link flies into its row with a trail of notes and a ripple. What
-  happens by itself (progress, the background) stays calm. Only transform and opacity, no layout.
-- **Motion is alive but calm.** The progress wave works like Material 3's
-  `LinearWavyProgressIndicator` (what Morphe uses as is): one steady pace (one wavelength a
-  second), flat up to 10 % and from 95 %. The bar follows progress with a very soft,
-  critically damped spring: progress arrives in big steps every 0.7 s, and stiffer springs or
-  "go to the new value" made it lurch (measured in a simulation). The background speeds up
-  with the progress, 1× → 3×, like Morphe's patcher screen. Respect "reduce motion".
+  happens by itself (the background) stays calm. Only transform and opacity, no layout.
+- **The progress wave is lively** (the owner wants it energetic, not Material 3's calm default):
+  a wave 5 px high rolling 1.6 bends a second, waving as soon as the bar is a couple of bends
+  long, flat only at the very end. Before there's a number (starting, YouTube's pause) a piece
+  of wave runs along the track instead of a flat line. The bar follows the progress with a
+  soft, critically damped spring (stiffer only when it's far behind): progress arrives in big
+  steps every 0.7 s, and stiff springs or "go to the new value" made it lurch (measured in a
+  simulation). The background speeds up with the progress, 1× → 3×, like Morphe's patcher
+  screen. Respect "reduce motion".
 - **Light on weak laptops.** No `backdrop-filter` over the animated background; check with the
   CPU slowed down (Chrome devtools, 6×). The download list is updated in place, never rebuilt
   (rebuilding restarts animations and makes pictures blink).
