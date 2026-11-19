@@ -108,10 +108,14 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
   any control (fixed columns, not widths that depend on how many options are next to it).
 - **An app, not a document.** Buttons and labels don't get selected by Ctrl+A or a stray
   click; only what's worth copying is selectable (the links box, titles, errors, the log).
-- **Orange is for the main thing only**: the Download button, the selected switches, the
-  progress wave. Not frames, not glows around every item.
+- **Orange is for the main thing only**: solid orange only for the Download button and the
+  progress wave; selected switches and chips get a tonal orange (a light tint and orange text,
+  like Material 3's secondary container). Not frames, not glows around every item.
 - **Plain words for people.** No file paths, video ids, `[youtube]`-style tags or stack traces
   on the page. Errors say what happened and what to do.
+- **Playful only as an answer to the owner's own action**, and short (under a second): sending
+  a link casts the fish, the link flies into its row with a trail of notes and a ripple. What
+  happens by itself (progress, the background) stays calm. Only transform and opacity, no layout.
 - **Motion is alive but calm.** The progress wave works like Material 3's
   `LinearWavyProgressIndicator` (what Morphe uses as is): one steady pace (one wavelength a
   second), flat up to 10 % and from 95 %. The bar follows progress with a very soft,

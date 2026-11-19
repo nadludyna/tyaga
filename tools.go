@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -25,6 +26,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 )
 
 type toolSet struct {
@@ -179,6 +181,37 @@ func setupTools() {
 	pump() // in case links were added during setup
 }
 
+// fetch downloads yt-dlp, ffmpeg and Deno. No overall time limit (ffmpeg is big and the
+// internet may be slow), but a server that stops answering is given up on instead of leaving
+// "Downloading…" on the page forever: no connection in 30 s, no answer in 30 s, or (see
+// stallReader) nothing arriving for a minute.
+var fetch = &http.Client{Transport: &http.Transport{
+	Proxy:                 http.ProxyFromEnvironment,
+	DialContext:           (&net.Dialer{Timeout: 30 * time.Second}).DialContext,
+	TLSHandshakeTimeout:   30 * time.Second,
+	ResponseHeaderTimeout: 30 * time.Second,
+}}
+
+// stallReader fails a download when nothing has arrived for a while.
+type stallReader struct {
+	r     io.ReadCloser
+	t     *time.Timer
+	quiet time.Duration
+}
+
+func newStallReader(r io.ReadCloser, quiet time.Duration) *stallReader {
+	// When it fires, closing the body makes the waiting Read return an error.
+	return &stallReader{r: r, quiet: quiet, t: time.AfterFunc(quiet, func() { r.Close() })}
+}
+
+func (s *stallReader) Read(b []byte) (int, error) {
+	n, err := s.r.Read(b)
+	if n > 0 {
+		s.t.Reset(s.quiet)
+	}
+	return n, err
+}
+
 // download downloads a program into bin.
 func download(name string, a asset) error {
 	if err := os.MkdirAll(binDir, 0o755); err != nil {
@@ -190,7 +223,7 @@ func download(name string, a asset) error {
 	}
 	defer os.Remove(tmp.Name())
 
-	resp, err := http.Get(a.url)
+	resp, err := fetch.Get(a.url)
 	if err != nil {
 		tmp.Close()
 		return err
@@ -201,7 +234,9 @@ func download(name string, a asset) error {
 		return fmt.Errorf("server replied %s", resp.Status)
 	}
 	hash := sha256.New()
-	_, err = io.Copy(io.MultiWriter(tmp, hash), &progressReader{r: resp.Body, total: resp.ContentLength, name: name})
+	body := newStallReader(resp.Body, time.Minute)
+	defer body.t.Stop()
+	_, err = io.Copy(io.MultiWriter(tmp, hash), &progressReader{r: body, total: resp.ContentLength, name: name})
 	tmp.Close()
 	if err != nil {
 		return err
@@ -229,7 +264,7 @@ func verify(a asset, got string) error {
 	if a.sums == "" {
 		return nil
 	}
-	resp, err := http.Get(a.sums)
+	resp, err := fetch.Get(a.sums)
 	if err != nil {
 		return fmt.Errorf("could not get the checksum: %w", err)
 	}

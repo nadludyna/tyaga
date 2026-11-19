@@ -122,14 +122,16 @@ type Job struct {
 	ErrorRaw string   `json:"errorRaw"` // yt-dlp's own error line, for "Copy error"
 	Files    []string `json:"files"`    // names of finished files
 
-	mix    bool            // a YouTube Mix: only the first mixLimit videos
-	part   int             // video: 0 = the picture is downloading, 1 = the sound (a separate file)
-	lastB  float64         // bytes downloaded at the last progress line, to notice a new file starting
-	paths  []string        // full paths of finished files
-	songs  map[string]song // audio: artist / title / album of each finished file, by path
-	cover  []byte          // the picture inside the finished file
-	splits []splitInfo     // videos that were split by chapters
-	tracks []track         // playlist items to glue into one file (Merge)
+	mix      bool            // a YouTube Mix: only the first mixLimit videos
+	listName string          // the playlist's own name, for the finished row
+	failed   int             // how many errors yt-dlp reported (in a playlist: videos it skipped)
+	part     int             // video: 0 = the picture is downloading, 1 = the sound (a separate file)
+	lastB    float64         // bytes downloaded at the last progress line, to notice a new file starting
+	paths    []string        // full paths of finished files
+	songs    map[string]song // audio: artist / title / album of each finished file, by path
+	cover    []byte          // the picture inside the finished file
+	splits   []splitInfo     // videos that were split by chapters
+	tracks   []track         // playlist items to glue into one file (Merge)
 }
 
 // splitInfo is what yt-dlp reports about a video that was split by chapters.
@@ -367,11 +369,17 @@ var (
 	signInRe  = regexp.MustCompile(`(?i)sign in|not a bot|login required`)
 	tooManyRe = regexp.MustCompile(`(?i)HTTP Error 429|too many requests`)
 	sponsorRe = regexp.MustCompile(`(?i)sponsorblock`)
+	privateRe = regexp.MustCompile(`(?i)private video`)
+	goneRe    = regexp.MustCompile(`(?i)video unavailable|has been removed|account .* terminated`)
 )
 
 // explain turns the most common yt-dlp errors into plain language.
 func explain(line string) string {
 	switch {
+	case privateRe.MatchString(line):
+		return "The video is private."
+	case goneRe.MatchString(line):
+		return "The video was removed or isn't available."
 	case sponsorRe.MatchString(line):
 		return "SponsorBlock didn't answer. Untick \"no sponsors\" and add the link again."
 	case signInRe.MatchString(line):
@@ -566,6 +574,10 @@ func onLine(j *Job, line string) {
 		}
 	case strings.HasPrefix(line, "ERROR"):
 		j.Error, j.ErrorRaw = explain(line), line
+		j.failed++
+		j.addLog(line)
+	case strings.HasPrefix(line, "[download] Downloading playlist: "):
+		j.listName = strings.TrimSpace(strings.TrimPrefix(line, "[download] Downloading playlist: "))
 		j.addLog(line)
 	case strings.HasPrefix(line, "[download] Downloading item "):
 		// The next video of a playlist starts: the counter moves now, its title comes a bit later.
@@ -826,7 +838,7 @@ func pump() {
 				j.Title = strings.TrimSuffix(filepath.Base(out), filepath.Ext(out)) // the playlist name, no ".mp3"
 				j.Progress = 100
 				if err != nil && j.Error != "" {
-					j.Error = "Some videos were skipped: " + j.Error
+					j.Error = skippedText(j.Mode, j.failed) + " " + j.Error
 				}
 				err = nil
 			}
@@ -835,6 +847,13 @@ func pump() {
 
 		// The cover that's really inside the finished file, for the page to show.
 		mu.Lock()
+		// A playlist where some videos failed (deleted, private) while the rest downloaded:
+		// yt-dlp goes on past them and only says so in its exit code. That's done, with a note
+		// and Retry, not a failure: the files are there.
+		if j.Status == "running" && err != nil && j.List && len(j.paths) > 0 && j.Error != "" {
+			j.Error = skippedText(j.Mode, j.failed) + " " + j.Error
+			err = nil
+		}
 		var last string
 		if n := len(j.paths); n > 0 && err == nil && j.Status == "running" {
 			last = j.paths[n-1]
@@ -848,6 +867,9 @@ func pump() {
 		}
 		if j.Status == "running" { // if the download was cancelled, the status is already "cancelled"
 			if err == nil {
+				if j.List && j.listName != "" && len(j.paths) > 1 {
+					j.Title = j.listName // a finished playlist is the playlist, not its last video
+				}
 				j.Status = "done"
 			} else {
 				j.Status = "error"
@@ -860,6 +882,18 @@ func pump() {
 		mu.Unlock()
 		pump()
 	}()
+}
+
+// skippedText: "1 video was skipped.", "3 tracks were skipped."
+func skippedText(mode string, n int) string {
+	w := "video"
+	if mode == "audio" {
+		w = "track"
+	}
+	if n == 1 {
+		return "1 " + w + " was skipped."
+	}
+	return strconv.Itoa(n) + " " + w + "s were skipped."
 }
 
 // jobCover returns the cover of a finished download, if it has one.
@@ -889,17 +923,20 @@ func cancelJob(id int) {
 	}
 }
 
-// retryJob puts a failed or cancelled download back into the queue. Files that are
+// retryJob puts a failed or cancelled download (or a playlist with skipped videos) back into the queue. Files that are
 // already there are skipped by yt-dlp (--no-overwrites), unfinished ones resume.
 func retryJob(id int) {
 	mu.Lock()
 	for _, j := range jobs {
 		// current == j: a cancelled download whose yt-dlp is still being stopped.
-		if j.ID == id && (j.Status == "error" || j.Status == "cancelled") && current != j {
+		// Done with skipped videos counts too: Retry fetches only what's missing.
+		again := j.Status == "error" || j.Status == "cancelled" || (j.Status == "done" && j.Error != "")
+		if j.ID == id && again && current != j {
 			j.Status, j.Error, j.ErrorRaw, j.Now = "queued", "", "", ""
-			j.Progress, j.Speed, j.ETA = 0, "", ""
+			j.Progress, j.Speed, j.ETA, j.Wait = 0, "", "", 0
+			j.Thumb, j.cover = "", nil // Cover (the counter) stays: the page asks for a new picture by it
 			j.Files, j.paths, j.tracks, j.splits = []string{}, nil, nil, nil
-			j.Pos, j.Of, j.part, j.lastB = 0, 0, 0, 0
+			j.Pos, j.Of, j.part, j.lastB, j.failed = 0, 0, 0, 0, 0
 			j.songs = nil
 			j.Log = nil
 		}

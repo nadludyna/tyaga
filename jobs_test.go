@@ -309,8 +309,24 @@ func TestExplain(t *testing.T) {
 	if got := explain("ERROR: [youtube] FAILabcdefg: unable to download video data: HTTP Error 403: Forbidden"); !strings.HasPrefix(got, "YouTube refused") {
 		t.Errorf("403: %q", got)
 	}
-	if got := explain("ERROR: [youtube] dQw4w9WgXcQ: Video unavailable"); got != "Video unavailable" {
+	if got := explain("ERROR: [youtube] dQw4w9WgXcQ: Video unavailable"); got != "The video was removed or isn't available." {
+		t.Errorf("unavailable: %q", got)
+	}
+	// "Private video. Sign in if you've been granted access": private, not "sign in".
+	if got := explain("ERROR: [youtube] dQw4w9WgXcQ: Private video. Sign in if you've been granted access to this video"); got != "The video is private." {
+		t.Errorf("private: %q", got)
+	}
+	if got := explain("ERROR: [generic] dQw4w9WgXcQ: Unsupported URL here"); got != "Unsupported URL here" {
 		t.Errorf("other error: %q", got)
+	}
+}
+
+func TestSkippedText(t *testing.T) {
+	if got := skippedText("audio", 1); got != "1 track was skipped." {
+		t.Errorf("%q", got)
+	}
+	if got := skippedText("video", 3); got != "3 videos were skipped." {
+		t.Errorf("%q", got)
 	}
 }
 

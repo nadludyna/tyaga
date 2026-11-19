@@ -25,7 +25,8 @@ by themselves while you look at them, and nothing moves when you click.
 **1a. Every change of state moves, briefly.** Nothing pops in or vanishes: what appears fades
 or slides in, what goes away folds up or fades out, a switch between two views cross-fades,
 and the neighbours glide to their new place. Short (0.15–0.35 s), the same easing everywhere,
-never a bounce or a show. A missing or abrupt transition is a bug, the same as a wrong number.
+never a bounce or a show (the one exception: the short answer to sending a link, see CLAUDE.md).
+A missing or abrupt transition is a bug, the same as a wrong number.
 Before a build, list every state change the work touches (appear, disappear, expand,
 collapse, switch views, clear, hover, press, the mouse leaving and coming back) and watch each
 one frame by frame on the stand (screenshots every ~100 ms). The owner should never have to

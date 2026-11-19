@@ -78,15 +78,12 @@ func revealFile(path string) {
 	}
 }
 
-// unlockForeground: Windows doesn't let a program you aren't clicking in (the click was in
-// the browser) bring a window to the front, so Explorer opened behind and only blinked on
-// the taskbar. A tap of Alt sent from here lifts that lock, and AllowSetForegroundWindow
-// hands the right on to Explorer.
+// unlockForeground lets Explorer come to the front: Windows only lets the program you're
+// working in hand the front on, and that's ТЯГА (the click was in its window), so it says
+// any program may take it. No synthetic Alt tap: that was a trick from when the page lived in
+// a browser tab, and in ТЯГА's own window a lone Alt opens the window menu, which swallowed
+// the next keys and broke Alt+Tab.
 func unlockForeground() {
-	const vkMenu, keyUp = 0x12, 0x2
-	key := user32.NewProc("keybd_event")
-	key.Call(vkMenu, 0, 0, 0)
-	key.Call(vkMenu, 0, keyUp, 0)
 	const anyProcess = ^uint32(0) // ASFW_ANY
 	user32.NewProc("AllowSetForegroundWindow").Call(uintptr(anyProcess))
 }

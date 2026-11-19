@@ -38,6 +38,10 @@ var page []byte
 //go:embed menu.html
 var menuPage []byte
 
+// windowHidden: ТЯГА's window is in the tray or minimised (Windows). A hidden WebView2 page
+// isn't told it's hidden, so the page asks, and stops its animations meanwhile.
+var windowHidden = func() bool { return false }
+
 // trayAction is what the tray menu's buttons do (Windows only).
 var trayAction = func(string) any { return nil }
 
@@ -182,11 +186,12 @@ func handler(token string) http.Handler {
 			case "/api/state":
 				pageSeen()
 				status, problem, ready := tools.state()
+				hidden := windowHidden() // before mu: it asks the window's thread
 				mu.Lock()
 				defer mu.Unlock()
 				writeJSON(w, map[string]any{
 					"version": version, "ready": ready, "setup": status, "problem": problem,
-					"out": outDir, "jobs": jobs, "login": loginState(),
+					"out": outDir, "jobs": jobs, "login": loginState(), "hidden": hidden,
 				})
 			case "/api/cover":
 				id, _ := strconv.Atoi(r.URL.Query().Get("id"))

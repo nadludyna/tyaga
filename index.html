@@ -55,11 +55,10 @@ textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--glow);backgrou
 .seg button{border:0;background:transparent;color:inherit;padding:5px 12px;cursor:pointer;font:inherit;font-size:13.5px;transition:background .15s ease,color .15s ease,transform .1s ease}
 .seg button:hover:not(.on){background:rgba(127,127,127,.12)}
 .seg button:active{transform:scale(.97)}
-.seg button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;font-weight:600;box-shadow:none}
+/* Selected: a tonal orange (Material 3's secondary container), so only Download is solid orange. */
+.seg button.on{background:color-mix(in srgb,var(--acc) 22%,transparent);color:var(--acc);font-weight:600;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent)}
 label{color:var(--dim);cursor:pointer;user-select:none;transition:color .2s}
 label:hover{color:var(--fg)}
-input[type=checkbox]{accent-color:var(--acc);transition:transform .15s}
-input[type=checkbox]:active{transform:scale(.8)}
 /* Options: switches on one line (pushed to both edges), checkboxes as chips that fill the width. */
 /* Both switches stretch to fill the line, every button the same width (grow = number of buttons). */
 /* Fixed columns, so nothing moves when a switch flips: Video/Audio always takes a third,
@@ -71,6 +70,13 @@ input[type=checkbox]:active{transform:scale(.8)}
 @media (max-width:560px){.opts{grid-template-columns:1fr}.chips{grid-auto-flow:row;grid-template-columns:1fr 1fr}}
 .chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.05);font-size:13.5px;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
 .chip:hover{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.1)}
+/* Filter chips like Material 3: no checkbox square, a check mark when on. Its place is always
+   kept (and balanced on the right), so the words never move when it's ticked. */
+.chip{position:relative;padding-right:30px}
+.chip input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.chip::before{content:"";flex:none;width:14px;height:14px;background:var(--acc);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.4);transition:opacity .15s ease,transform .2s cubic-bezier(.2,.8,.2,1)}
+.chip:has(input:checked)::before{opacity:1;transform:none}
+.chip:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:2px}
 .chip:active{transform:scale(.97)}
 .chip:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent);color:var(--fg)}
 .chip:has(input:disabled){opacity:.38;cursor:default;border-color:var(--line);background:transparent;color:var(--dim)}
@@ -89,12 +95,33 @@ input[type=checkbox]:active{transform:scale(.8)}
 
 .job{padding:13px 0;border-bottom:1px solid var(--line)}
 .job:last-child{border-bottom:0}
-.job.new{animation:slide .45s cubic-bezier(.2,.8,.2,1) both}
-@keyframes slide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+.job.grow{overflow:hidden;transition:height .32s cubic-bezier(.2,.8,.2,1),padding .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
+.job .body{transition:opacity .2s ease}
+.job.landing .body{opacity:0}
+/* The link that flies from the box down into its row: only transform and opacity change,
+   which the graphics card does by itself, so it costs next to nothing. */
+.fly{position:fixed;left:0;top:0;z-index:50;pointer-events:none;margin:-3px 0 0 -8px;padding:2px 8px;border-radius:8px;max-width:560px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fg);background:color-mix(in srgb,var(--acc) 14%,var(--card));box-shadow:0 6px 18px -8px rgba(0,0,0,.5);will-change:transform,opacity}
+.spark{position:fixed;left:0;top:0;z-index:51;pointer-events:none;color:var(--acc2);font-size:18px;font-weight:700;text-shadow:0 0 8px var(--glow);line-height:1;will-change:transform,opacity}
+.ripple{position:fixed;left:0;top:0;z-index:49;pointer-events:none;width:44px;height:16px;margin:-8px 0 0 -22px;border-radius:50%;border:1.5px solid var(--acc);will-change:transform,opacity}
+/* Download pressed: the fish on the hook is cast (it dips and swings back). */
+body.cast .logo .catch{animation:cast .7s cubic-bezier(.3,1.4,.5,1)}
+@keyframes cast{0%{transform:none}30%{transform:translateY(14px) rotate(7deg)}65%{transform:translateY(-5px) rotate(-3deg)}100%{transform:none}}
+/* While the link flies out, the box's hint stays away, so the two texts never overlap. */
+textarea.flying::placeholder{color:transparent;transition:none}
+textarea::placeholder{transition:color .3s ease}
 /* A row: the cover of the finished file on the left (only once it's done: while downloading
    the video's thumbnail isn't what ends up in the file), then title, what it is, and state. */
 .job{display:flex;gap:14px;align-items:center;border-radius:10px}
 .job .body{flex:1;min-width:0}
+/* The slot on the left keeps the text in one column. While downloading it folds to nothing
+   (the row is tall then, a picture would leave a hole under it) and opens again when it's done:
+   the text glides instead of jumping 72 px. What's in it cross-fades. */
+.side{flex:none;position:relative;width:58px;height:58px;transition:width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1),margin .3s cubic-bezier(.4,0,.2,1),opacity .25s ease}
+.side.wide{width:96px;height:54px}
+.side.none{width:0;margin-right:-14px;opacity:0}
+.side.still{transition:none}
+.side>*{position:absolute;inset:0;width:100%!important;height:100%!important;transition:opacity .25s ease}
+.side>.gone{opacity:0!important}
 .cover{flex:none;width:58px;height:58px;border-radius:9px;object-fit:cover;background:var(--line);box-shadow:0 0 0 1px var(--line);opacity:0;transform:scale(.9);transition:opacity .4s,transform .4s cubic-bezier(.3,1.5,.5,1)}
 .cover.wide{width:96px;height:54px}
 .cover.ok{opacity:1;transform:none}
@@ -181,7 +208,8 @@ input[type=checkbox]:active{transform:scale(.8)}
    It keeps one width whatever it says, so nothing next to it moves. */
 header{position:relative;z-index:3}
 .acct{margin-left:auto;flex:none;min-width:196px;justify-content:center;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
-.acct.in{color:var(--ok)}
+.acct.in{color:var(--dim);background:transparent}
+.acct.in svg{color:var(--ok);opacity:1}
 .acct.in:hover{color:var(--fg)}
 .acct.arm{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}
 .acct.wait{color:var(--dim);cursor:default}
@@ -217,7 +245,9 @@ html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column
 html.app #jobsCard.gaming{flex:1}
 html.app #jobsCard>*{position:relative;z-index:1}
 html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;margin-right:-10px;scrollbar-gutter:stable}
-html.app #jobsCard>.bg{position:absolute;inset:0;z-index:0;background:none;border-radius:inherit;overflow:hidden}
+html.app #jobsCard>.bg,html.app .card.form>.bg{position:absolute;inset:0;z-index:0;background:none;border-radius:inherit;overflow:hidden}
+html.app .card.form>:not(.bg){position:relative;z-index:1}
+html.app .card.form>header{z-index:3}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
 .lhead{display:none}
@@ -332,6 +362,8 @@ if (new URLSearchParams(location.search).get('w')) {
   var jobsCard = document.getElementById('jobsCard');
   jobsCard.classList.add('folded'); // until the list is known: no flash of a big empty card
   jobsCard.insertBefore(document.querySelector('.bg'), jobsCard.firstChild);
+  var bg2 = el('div', 'bg'); bg2.append(el('canvas'));
+  form.insertBefore(bg2, form.firstChild);
   ['Min', 'Close'].forEach(function (b) {
     document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
   });
@@ -473,9 +505,18 @@ function options(text) {
 function add() {
   var text = $('links').value.trim();
   if (!text) return;
+  var box = $('links').getBoundingClientRect(), cs = getComputedStyle($('links'));
+  cast();
   api('/api/add', options(text)).then(function (r) {
     $('msg').textContent = r.error || '';
     if (!r.error) { // a fragment is a one-off: the next link is whole again
+      var links = text.split(/\s+/);
+      if (!still()) { // the hint stays away until the link has flown out (fly())
+        $('links').classList.add('flying');
+        setTimeout(function () { if (!flyNext || Date.now() > flyNext.until) $('links').classList.remove('flying'); }, 1500);
+      }
+      flyNext = { text: links[0].replace(/^https?:\/\/(www\.)?/, '') + (links.length > 1 ? '  +' + (links.length - 1) : ''),
+        x: box.left + parseFloat(cs.paddingLeft) + 1, y: box.top + parseFloat(cs.paddingTop), w: box.width - 26, until: Date.now() + 4000 };
       $('links').value = '';
       TIMES.forEach(function (id) { $(id).value = ''; });
       $('cut').checked = false;
@@ -486,6 +527,7 @@ function add() {
 }
 
 $('go').onclick = function () { askNotify(); add(); };
+// The fish is cast as soon as a link goes in (add() checks it's not empty).
 
 // Ctrl+A anywhere outside a text field selects the links, not the whole page.
 addEventListener('keydown', function (e) {
@@ -611,7 +653,8 @@ function makeRow(j) {
   r.msg = el('div', 'sub');
   r.acts = el('div', 'acts');
   r.body.append(r.top, r.kind, r.live, r.msg, r.acts);
-  r.row.append(r.body);
+  r.sideBox = el('div', 'side none still');
+  r.row.append(r.sideBox, r.body);
   if (APP && rowWatch) rowWatch.observe(r.row);
   return r;
 }
@@ -639,26 +682,31 @@ function updateRow(r, j) {
     : j.status === 'done' ? (j.mode === 'audio' ? 'audio' : 'video') : j.status;
   if (r.side !== side) {
     r.side = side;
-    var pic = null;
+    var pic = null, box = r.sideBox;
     if (side.indexOf('cover') === 0) {
-      pic = el('img', 'cover' + (j.mode === 'audio' ? '' : ' wide'));
+      pic = el('img', 'cover');
       pic.alt = '';
       pic.onload = function () { pic.classList.add('ok'); };
-      pic.onerror = function () { var ph = el('div', 'ph'); ph.innerHTML = ICON[j.mode === 'audio' ? 'audio' : 'video']; pic.replaceWith(ph); r.img = ph; };
+      pic.onerror = function () { var ph = el('div', 'ph'); ph.innerHTML = ICON[j.mode === 'audio' ? 'audio' : 'video']; pic.replaceWith(ph); if (r.img === pic) r.img = ph; };
       pic.src = '/api/cover?id=' + j.id + '&v=' + j.cover + '&t=' + encodeURIComponent(TOKEN);
     } else if (side) {
       pic = el('div', 'ph');
       pic.innerHTML = ICON[side] || '';
     }
-    if (r.img) r.img.remove();
-    if (pic) r.row.prepend(pic);
+    var old = r.img;
+    if (old) { old.classList.add('gone'); setTimeout(function () { old.remove(); }, 260); }
+    if (pic) box.append(pic);
     r.img = pic;
+    box.classList.toggle('none', !pic);
+    box.classList.toggle('wide', !!pic && side.indexOf('cover') === 0 && j.mode !== 'audio');
+    if (!r.status) { void box.offsetWidth; } // the row's first look: in place at once
   }
+  if (r.status) r.sideBox.classList.remove('still');
 
   var waiting = j.status === 'running' && j.wait > 0;
   var st = j.status + (waiting ? ' waiting' : '');
   if (r.st0 !== st) {
-    r.row.className = 'job ' + j.status + (r.status ? '' : ' new');
+    r.row.className = 'job ' + j.status + (r.row.classList.contains('grow') ? ' grow' : '') + (r.row.classList.contains('landing') ? ' landing' : '');
     r.st.className = 'st ' + st + (r.status && r.status !== 'done' && j.status === 'done' ? ' pop' : '');
     r.st0 = st;
   }
@@ -714,7 +762,7 @@ function updateRow(r, j) {
 
   // Buttons: rebuilt only when the status changes.
   var L = state.login || {}, needIn = j.status === 'error' && L.can && !L.in && /^YouTube wants you to sign in/.test(j.error || '');
-  var acts = j.status + '|' + j.files.length + '|' + needIn;
+  var acts = j.status + '|' + j.files.length + '|' + needIn + '|' + !!j.error;
   if (r.actsKey !== acts) {
     r.actsKey = acts;
     r.acts.innerHTML = '';
@@ -742,8 +790,13 @@ function updateRow(r, j) {
       }
     }
     if (j.status === 'done' && j.files.length) {
-      r.acts.append(button('', ICON.folder + 'Show in folder', null,
+      r.acts.append(button('', ICON.folder + 'Show file', 'Opens its folder with the file selected',
         function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); }));
+    }
+    // A playlist with skipped videos: try just those again.
+    if (j.status === 'done' && j.error) {
+      r.acts.append(button('', ICON.retry + 'Retry', 'Try the skipped ones again; what\'s already downloaded is skipped',
+        function () { api('/api/retry', { id: j.id }).then(refresh); }));
     }
     r.acts.hidden = !r.acts.children.length;
   }
@@ -861,6 +914,7 @@ $('acct').onclick = function () {
 function setText(e, t) { if (e.textContent !== t) e.textContent = t; }
 
 function render() {
+  anim.kick();
   renderAcct();
   $('ver').textContent = state.version || '';
   $('ver').hidden = !state.version;
@@ -901,13 +955,18 @@ function render() {
 
   // Every download has its own row that stays on the page and is only updated, so nothing
   // blinks or starts its animation over. A part is rebuilt only when it really changes.
-  var alive = {};
+  var alive = {}, fresh = [];
   jobs.slice().reverse().forEach(function (j, i) { // newest first
     alive[j.id] = true;
-    var r = rows[j.id] || (rows[j.id] = makeRow(j));
+    var r = rows[j.id];
+    if (!r) { r = rows[j.id] = makeRow(j); fresh.push(r.row); }
     updateRow(r, j);
     if (list.children[i] !== r.row) list.insertBefore(r.row, list.children[i] || null);
   });
+  if (booted) fresh.forEach(grow);
+  if (fresh.length && flyNext && Date.now() < flyNext.until) fly(fresh[0], flyNext);
+  flyNext = null;
+  booted = true;
   Object.keys(rows).forEach(function (id) {
     if (!alive[id]) { bye(rows[id].row); delete rows[id]; }
   });
@@ -954,6 +1013,91 @@ function bye(row) {
   void row.offsetHeight;
   row.classList.add('bye');
   setTimeout(function () { row.remove(); }, 280);
+}
+// A new row opens up from nothing; the rows below glide down with it.
+var booted = false, flyNext = null;
+function still() { return matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function grow(row) {
+  var h = row.offsetHeight;
+  if (still() || !h) return;
+  row._growTo = h;
+  row.style.height = '0px'; row.style.paddingTop = row.style.paddingBottom = '0px'; row.style.opacity = '0';
+  void row.offsetHeight;
+  row.classList.add('grow');
+  row.style.height = h + 'px'; row.style.paddingTop = row.style.paddingBottom = row.style.opacity = '';
+  setTimeout(function () { row.classList.remove('grow'); row.style.height = ''; row._growTo = 0; fitLater(); }, 340);
+}
+// The link lifts out of the box and flies down into its row's title, which shows as it lands.
+// One element, moved with transform each frame towards where the title is right now (the row
+// is still opening, the list card may still be coming in), so it lands exactly.
+// Sending a link is the one moment that may play a little (it answers your own action, and
+// lasts under a second): the fish is cast, the link leaves a trail of notes and lands with a
+// ripple. Everything is transform and opacity only, done by the graphics card: a few dozen
+// tiny elements for less than a second, no layout work.
+function cast() {
+  if (still()) return;
+  document.body.classList.remove('cast'); void document.body.offsetWidth; document.body.classList.add('cast');
+  setTimeout(function () { document.body.classList.remove('cast'); }, 720);
+}
+// One short-lived thing on the page: from → to (transform and opacity), then it's gone.
+function puff(cls, text, from, to, ms) {
+  var e = el('div', cls, text);
+  document.body.append(e);
+  var a = e.animate([from, to], { duration: ms, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+  a.onfinish = function () { e.remove(); };
+}
+var NOTES = ['♪', '♫', '♩', '♪'];
+function trail(x, y) {
+  // Left behind the link: it goes down, so the notes stay above and drift up as they fade.
+  var dx = (Math.random() - .5) * 24, dy = -8 - Math.random() * 16, r = (Math.random() - .5) * 70;
+  puff('spark', NOTES[Math.floor(Math.random() * NOTES.length)],
+    { transform: 'translate(' + x + 'px,' + y + 'px) scale(.5) rotate(0deg)', opacity: .9 },
+    { transform: 'translate(' + (x + dx) + 'px,' + (y + dy) + 'px) scale(1.15) rotate(' + r + 'deg)', opacity: 0 }, 650);
+}
+function splash(x, y) {
+  puff('ripple', null, { transform: 'translate(' + x + 'px,' + y + 'px) scale(.3)', opacity: .7 },
+    { transform: 'translate(' + x + 'px,' + y + 'px) scale(3.2)', opacity: 0 }, 650);
+  for (var i = 0; i < 6; i++) {
+    var a = Math.PI * (1.1 + i * .16) + (Math.random() - .5) * .2, d = 24 + Math.random() * 20;
+    puff('spark', NOTES[i % NOTES.length], { transform: 'translate(' + x + 'px,' + y + 'px) scale(.4)', opacity: 1 },
+      { transform: 'translate(' + (x + Math.cos(a) * d * 1.6) + 'px,' + (y + Math.sin(a) * d) + 'px) scale(1) rotate(' + ((Math.random() - .5) * 80) + 'deg)', opacity: 0 }, 600 + i * 30);
+  }
+}
+// The link lifts out of the box and flies down into its row's title, which shows as it lands.
+// Moved each frame towards where the title is right now (the row is still opening, the list
+// card may still be coming in), so it lands exactly.
+function fly(row, f) {
+  if (still()) return;
+  var name = row.querySelector('.name'), g = el('div', 'fly', f.text), box = $('links');
+  g.style.maxWidth = Math.max(120, f.w) + 'px';
+  document.body.append(g);
+  var gw = Math.min(g.offsetWidth, 260) - 10;
+  row.classList.add('landing');
+  box.classList.add('flying');
+  var t0 = 0, D = 640, py = f.y, rot = 0, lastNote = 0, landed = false;
+  function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function step(now) {
+    if (!t0) t0 = now;
+    var t = Math.min(1, (now - t0) / D), e = ease(t);
+    // Where the title is right now. Its card may not be there yet (it comes in with the first
+    // link): then just below the first card, where it will be.
+    var r = name.getBoundingClientRect();
+    if (!r.width || $('jobsCard').hidden) {
+      var fb = document.querySelector('.card.form').getBoundingClientRect();
+      r = { left: f.x + 4, top: fb.bottom + 50 };
+    }
+    var x = f.x + (r.left - f.x) * e, y = f.y + (r.top - f.y) * e - Math.sin(Math.PI * e) * 22; // an arc
+    // It leans the way it goes: up on the way out, down into the dive, level when it lands.
+    rot += (Math.max(-7, Math.min(7, (y - py) * .9)) * (1 - t) - rot) * .35; py = y;
+    g.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rot + 'deg) scale(' + (1 + Math.sin(Math.PI * e) * .05) + ')';
+    g.style.opacity = t < .85 ? 1 : 1 - (t - .85) / .15;
+    if (t > .06 && t < .82 && now - lastNote > 40) { lastNote = now; trail(x + Math.random() * gw, y - 10); }
+    if (t > .85 && !landed) { landed = true; row.classList.remove('landing'); splash(r.left + 26, r.top + 10); }
+    if (t > .3) box.classList.remove('flying');
+    if (t < 1) requestAnimationFrame(step); else g.remove();
+  }
+  g.style.transform = 'translate(' + f.x + 'px,' + f.y + 'px)';
+  requestAnimationFrame(step);
 }
 function syncFold(jobs) {
   var html = foldSummary(jobs);
@@ -1012,7 +1156,9 @@ function openHeight() { // the open list card's natural height, measured without
   var card = $('jobsCard'), list = $('list');
   var was = [card.hidden, card.className, card.style.height];
   card.hidden = false; card.classList.remove('folded', 'leave', 'come', 'anim'); card.style.height = '';
-  var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + mainPad();
+  var extra = 0; // rows still opening: at the height they're opening to
+  list.querySelectorAll('.job.grow').forEach(function (r) { if (r._growTo) extra += r._growTo - r.offsetHeight; });
+  var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + extra + mainPad();
   card.hidden = was[0]; card.className = was[1]; card.style.height = was[2];
   return Math.ceil(n);
 }
@@ -1310,7 +1456,7 @@ function syncPlay() {
 }
 
 function refresh() {
-  api('/api/state')
+  return api('/api/state')
     .then(function (s) {
       state = s;
       if ($('msg').textContent === OFFLINE) $('msg').textContent = '';
@@ -1319,8 +1465,14 @@ function refresh() {
     .catch(function () { if ($('msg')) $('msg').textContent = OFFLINE; });
 }
 
-refresh();
-setInterval(refresh, 700);
+// Asking for the state: every 0.7 s while something is going on, every 2 s when nothing is
+// (a click asks at once anyway), every 3 s while the window is in the tray.
+function pollDelay() {
+  var L = state.login || {};
+  var busy = state.setup || L.open || (state.jobs || []).some(function (j) { return j.status === 'queued' || j.status === 'running'; });
+  return state.hidden ? 3000 : busy ? 700 : 2000;
+}
+(function poll() { refresh().then(function () { setTimeout(poll, pollDelay()); }); })();
 
 // Progress wave, done the way Material 3's LinearWavyProgressIndicator does it (the Morphe
 // app uses that one as is):
@@ -1331,6 +1483,9 @@ setInterval(refresh, 700);
 //   keeps its speed when the target moves again, so it glides instead of lurching each time.
 // At 100 % (converting, the cover, merging) the line is full and flat, still rolling gently.
 // Each running download has a canvas; its state lives here by job id.
+// The animations sleep while the window is in the tray (state.hidden) and when there's
+// nothing to draw; render() wakes them.
+var anim = { loops: [], kick: function () { anim.loops.forEach(function (f) { f(); }); } };
 var waveTarget = {}, waveState = {};
 (function () {
   var css = getComputedStyle(document.documentElement);
@@ -1340,14 +1495,18 @@ var waveTarget = {}, waveState = {};
   var PACE = 2 * Math.PI;                       // rad/s: one wavelength per second
   var K = 4, C = 2 * Math.sqrt(K);              // the spring: very soft (progress comes in big steps every
                                                 // 0.7 s; stiffer ones lurched in a simulation), critically damped
+  var raf = 0, drawn = 0;
   function frame(now) {
+    raf = 0;
     var dt = Math.min(0.05, (now - last) / 1000), most = 0;
     last = now;
+    drawn = 0;
     document.querySelectorAll('canvas.wave').forEach(function (cv) {
       var id = cv.dataset.id, t = waveTarget[id] || { p: 0 };
       var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, vel: 0, amp: 0 });
       var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
       if (!w) return; // hidden
+      drawn++;
       if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
       var cx = cv.getContext('2d');
       cx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1385,9 +1544,11 @@ var waveTarget = {}, waveState = {};
     });
     // The background speeds up with the progress, smoothed (like Morphe's patcher screen).
     fx.energy += (most - fx.energy) * Math.min(1, dt * 0.8);
-    requestAnimationFrame(frame);
+    // Nothing to draw and the background has calmed down, or the window is hidden: sleep.
+    if ((drawn || fx.energy > 0.005) && !state.hidden) raf = requestAnimationFrame(frame);
+    else if (!drawn) fx.energy = 0;
   }
-  requestAnimationFrame(frame);
+  anim.loops.push(function () { if (!raf && !state.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } });
 })();
 
 // Background: notes and play signs falling slowly and swaying. Far ones are small, faint and slow,
@@ -1395,8 +1556,10 @@ var waveTarget = {}, waveState = {};
 // downloads (fx.energy comes from the progress wave). No bursts or confetti: calm, not a show.
 // With "reduce motion" on in the system nothing moves.
 var fx = { energy: 0 };
-(function () {
-  var cv = $('fall'), cx = cv.getContext('2d');
+// quiet: the first card, where you type: fewer notes, fainter, and fainter still over the
+// box and the buttons, so they never get in the way of reading.
+function falling(cv, quiet) {
+  var cx = cv.getContext('2d'), calm = [];
   var W, H, ox = 0, oy = 0, dpr, items = [], color, mx = -999, my = -999;
   var GLYPHS = ['♪', '♫', '♩', '▶', '▶', '•'];
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1410,7 +1573,10 @@ var fx = { energy: 0 };
     var css = getComputedStyle(document.documentElement);
     color = css.getPropertyValue('--acc').trim() || '#ff6b2c';
     sprites = {};
-    var want = Math.round(W * H / 38000);
+    var want = Math.round(W * H / (quiet ? 70000 : 38000));
+    if (quiet) calm = Array.prototype.map.call(cv.parentNode.parentNode.querySelectorAll('.input,.opts,.chips,header>div,.acct'), function (e) {
+      var q = e.getBoundingClientRect(); return [q.left - ox - 10, q.top - oy - 10, q.right - ox + 10, q.bottom - oy + 10];
+    });
     while (items.length < want) items.push(spawn(true));
     items.length = want;
   }
@@ -1440,16 +1606,24 @@ var fx = { energy: 0 };
   }
   addEventListener('mousemove', function (e) { mx = e.clientX - ox; my = e.clientY - oy; });
   addEventListener('mouseout', function (e) { if (!e.relatedTarget) mx = my = -999; });
-  var last = performance.now();
+  var last = performance.now(), raf = 0;
   function frame(now) {
+    raf = 0;
+    // At rest the notes fall at most ~46 px a second: 30 pictures a second look the same as
+    // 60 and cost half. Full rate while something downloads (they speed up then).
+    if (fx.energy < 0.05 && now - last < 30 && !still) { raf = requestAnimationFrame(frame); return; }
     var dt = Math.min(0.05, (now - last) / 1000), t = now / 1000;
     last = now;
     var boost = 1 + fx.energy * 2; // 1× at rest, up to 3× as a download nears its end
     cx.setTransform(1, 0, 0, 1, 0, 0);
     cx.clearRect(0, 0, W, H);
-    if (game.open) { // the game covers the list card: nothing to see
+    if (state.hidden) return; // in the tray: sleep until render() wakes it
+    // Its card isn't on screen (the list card when the list is empty): don't draw, look again
+    // in a quarter of a second. It used to draw a whole window of notes nobody could see.
+    if (!cv.offsetParent) { cx.clearRect(0, 0, W, H); raf = -1; setTimeout(function () { if (raf === -1) { last = performance.now(); raf = requestAnimationFrame(frame); } }, 250); return; }
+    if (game.open && !quiet) { // the game covers the list card: nothing to see
       cx.globalAlpha = 1;
-      if (!still) requestAnimationFrame(frame);
+      if (!still) raf = requestAnimationFrame(frame);
       return;
     }
     items.forEach(function (p, i) {
@@ -1462,16 +1636,24 @@ var fx = { energy: 0 };
       }
       if (p.y > H + 40) p = items[i] = spawn(false);
       var sp = sprite(p.g, p.s), c = Math.cos(p.r), s = Math.sin(p.r);
-      cx.globalAlpha = p.a;
+      var px = p.x + p.ox, a = p.a;
+      if (quiet) {
+        a *= 0.75;
+        for (var q = 0; q < calm.length; q++) if (px > calm[q][0] && px < calm[q][2] && p.y > calm[q][1] && p.y < calm[q][3]) { a *= 0.3; break; }
+      }
+      cx.globalAlpha = a;
       cx.setTransform(c, s, -s, c, p.x + p.ox + Math.sin(t * p.f + p.ph) * p.sway, p.y);
       cx.drawImage(sp, -sp.width / 2, -sp.height / 2);
     });
 
-    if (!still) requestAnimationFrame(frame);
+    if (!still) raf = requestAnimationFrame(frame);
   }
   addEventListener('resize', size);
   if (window.ResizeObserver) new ResizeObserver(size).observe(cv.parentNode);
   size();
-  requestAnimationFrame(frame);
-})();
+  raf = requestAnimationFrame(frame);
+  anim.loops.push(function () { if (!raf && !still && !state.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } });
+}
+falling($('fall'));
+if (APP) falling(document.querySelector('.card.form>.bg>canvas'), true);
 </script></body></html>

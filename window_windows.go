@@ -116,6 +116,7 @@ func runWindow(token string) bool {
 	// At start the window stays hidden until the page has told it how tall it is (the list
 	// folds when it's empty), then it appears in the middle of the screen. Centring it at its
 	// first size and then shrinking it left it high up. If the page never asks, it shows anyway.
+	windowHidden = func() bool { return !win.IsVisible() || win.IsMinimised() }
 	var placed atomic.Bool
 	place = func() {
 		if placed.CompareAndSwap(false, true) {
