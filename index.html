@@ -196,16 +196,14 @@ textarea::placeholder{transition:color .3s ease}
 .times input{width:58px;background:rgba(127,127,127,.06);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 4px 5px 8px;font:inherit;font-variant-numeric:tabular-nums;outline:none;transition:border-color .2s,box-shadow .2s}
 .times input:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--glow)}
 .times b{font-weight:400;margin:0 -3px}
-/* Hints: anything with data-tip shows a bubble on hover (the page turns title="" into data-tip). */
 .form{z-index:2}
-[data-tip]{position:relative}
-[data-tip]::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 8px);z-index:10;width:max-content;max-width:280px;padding:8px 11px;border-radius:9px;background:#232325;color:#eee;border:1px solid rgba(255,255,255,.1);box-shadow:0 12px 30px -10px rgba(0,0,0,.6);font:12.5px/1.45 system-ui,sans-serif;letter-spacing:0;text-align:left;white-space:normal;pointer-events:none;opacity:0;transform:translateY(-4px);transition:opacity .15s,transform .15s;transition-delay:0s}
-[data-tip]:hover::after{opacity:1;transform:none;transition-delay:.25s}
-.seg button[data-tip]::after{left:50%;transform:translate(-50%,-4px)}
-.seg button[data-tip]:hover::after{transform:translate(-50%,0)}
+/* Hints, only where the label doesn't say it all (the page turns title="" into data-tip): one
+   bubble for the whole page (#tip), placed by the script below or above the thing so it always
+   fits in the window, a solid plate like Material 3's plain tooltip. */
+#tip{position:fixed;left:0;top:0;z-index:60;max-width:280px;padding:7px 10px;border-radius:8px;background:#2b2b2e;color:#f1f1f1;box-shadow:0 8px 24px -8px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);font:12.5px/1.45 system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .15s ease,transform .15s cubic-bezier(.2,.8,.2,1);will-change:transform,opacity}
+#tip.on{opacity:1}
+:root[data-theme=light] #tip{background:#2f2f33}
 .seg{overflow:visible}.seg button:first-child{border-radius:9px 0 0 9px}.seg button:last-child{border-radius:0 9px 9px 0}
-[data-tip].tip-left::after{left:auto;right:0}
-.foot [data-tip]::after{top:auto;bottom:calc(100% + 8px)}
 
 /* Signing in to YouTube (ТЯГА's own window on Windows): one button on the right of the header.
    It keeps one width whatever it says, so nothing next to it moves. */
@@ -304,7 +302,32 @@ html.app #list.fadein{animation:fadein .22s ease both}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
 html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
-</style></head><body><div class="bg"><canvas id="fall"></canvas></div><main>
+/* States: every control clearly shows that it's under the mouse, pressed (it sinks a little
+   and a ripple spreads from where you pressed, like Material 3) or focused from the keyboard
+   (an orange ring). Colours mix in the text colour, so it works in both themes. */
+.seg button,.chip,.btn,.go,.tbtn,.wbtns button,.lhead{position:relative;overflow:hidden}
+.seg button:hover:not(.on){background:color-mix(in srgb,var(--fg) 10%,transparent);color:var(--fg)}
+.seg button:active:not(.on){background:color-mix(in srgb,var(--fg) 16%,transparent)}
+.seg button.on:hover{background:color-mix(in srgb,var(--acc) 30%,transparent)}
+.chip:hover{border-color:color-mix(in srgb,var(--fg) 30%,transparent);background:color-mix(in srgb,var(--fg) 9%,transparent);color:var(--fg)}
+.chip:active{background:color-mix(in srgb,var(--fg) 15%,transparent)}
+.chip:has(input:checked):hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 22%,transparent)}
+.btn:hover{border-color:color-mix(in srgb,var(--fg) 32%,transparent);background:color-mix(in srgb,var(--fg) 11%,transparent)}
+.btn:active{background:color-mix(in srgb,var(--fg) 17%,transparent)}
+.go:hover{filter:brightness(1.1);box-shadow:0 10px 28px -6px var(--glow)}
+.go:active{filter:brightness(.92);transform:scale(.97)}
+.tbtn:hover,.wbtns button:hover{background:color-mix(in srgb,var(--fg) 12%,transparent);color:var(--fg)}
+.tbtn:active,.wbtns button:active{background:color-mix(in srgb,var(--fg) 19%,transparent)}
+.wbtns button.x:hover{background:#c42b1c;color:#fff}
+.wbtns button.x:active{background:#a32317}
+html.app .lhead:hover{background:color-mix(in srgb,var(--fg) 7%,transparent)}
+html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
+.seg button:focus-visible,.btn:focus-visible,.go:focus-visible,.tbtn:focus-visible,.wbtns button:focus-visible,.lhead:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.seg button:focus-visible{outline-offset:-2px}
+.rip{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;background:currentColor;opacity:.22;transform:scale(0);animation:rip .55s cubic-bezier(.2,.8,.2,1) forwards}
+.go .rip{background:#fff;opacity:.45}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+</style></head><body><div class="bg"><canvas id="fall"></canvas></div><div id="tip" role="tooltip"></div><main>
 <header>
   <svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
     <rect width="256" height="256" rx="58" fill="#161616"/>
@@ -336,22 +359,22 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
     <button class="go" id="go">Download</button>
   </div>
   <div class="row opts">
-    <div class="seg" id="mode"><button data-v="video" class="on" title="Video with sound, MP4">Video</button><button data-v="audio" title="Only the sound: music, podcasts. With a cover and clean tags">Audio</button></div>
+    <div class="seg" id="mode"><button data-v="video" class="on">Video</button><button data-v="audio">Audio</button></div>
     <div class="seg" id="format" data-for="audio" hidden>
       <button data-v="m4a" class="on" title="The original YouTube audio track, no re-encoding">M4A</button>
       <button data-v="mp3" title="Re-encoded at the highest quality, plays on anything">MP3</button>
     </div>
-    <div class="seg" id="quality" data-for="video" title="Maximum video quality. Best — the highest there is">
+    <div class="seg" id="quality" data-for="video">
       <button data-v="0" class="on">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
     </div>
   </div>
   <div class="row chips">
-    <label class="chip" title="If the link is a video inside a playlist, download the whole playlist, not just this video"><input type="checkbox" id="playlist"> whole playlist</label>
+    <label class="chip"><input type="checkbox" id="playlist"> whole playlist</label>
     <label class="chip" id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"> as one file</label>
-    <label class="chip" id="cutBox" title="Download only a piece of the video"><input type="checkbox" id="cut"> fragment</label>
+    <label class="chip" id="cutBox"><input type="checkbox" id="cut"> fragment</label>
     <label class="chip" data-for="audio" id="splitBox" hidden title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked> split by chapters</label>
     <label class="chip" data-for="video" title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"> for editing</label>
-    <label class="chip" title="Cut sponsor ads, self-promo and &quot;subscribe!&quot; bits (SponsorBlock). For music also the non-music parts of a clip."><input type="checkbox" id="sponsors" checked> no sponsors</label>
+    <label class="chip"><input type="checkbox" id="sponsors" checked> no sponsors</label>
   </div>
   <div class="row cutrow">
     <span class="times" id="cutTimes" hidden title="Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty &quot;to&quot; — to the end.">
@@ -367,9 +390,9 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
   <div id="list"></div>
   <div id="game" hidden><canvas id="gameCv"></canvas></div>
   <div class="foot">
-    <button class="btn" id="open" title="The folder where everything is saved"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
-    <button class="btn" id="clear" title="Remove finished, failed and cancelled downloads from the list (the files stay)"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>Clear finished</button>
-    <button class="btn play" id="play" hidden title="A little game while it downloads. It doesn't stop when the download ends: finish it, or come back to it later"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="5" height="3" rx="1"/><rect x="10" y="5" width="5" height="3" rx="1"/><rect x="16" y="5" width="4" height="3" rx="1"/><circle cx="13" cy="14" r="2"/><path d="M8 20h8"/></svg><span id="playT">Play while you wait</span></button>
+    <button class="btn" id="open"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
+    <button class="btn" id="clear" title="Takes them off the list; the files stay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>Clear finished</button>
+    <button class="btn play" id="play" hidden><svg viewBox="0 0 24 24"><rect x="4" y="5" width="5" height="3" rx="1"/><rect x="10" y="5" width="5" height="3" rx="1"/><rect x="16" y="5" width="4" height="3" rx="1"/><circle cx="13" cy="14" r="2"/><path d="M8 20h8"/></svg><span id="playT">Play while you wait</span></button>
   </div>
 </div>
 
@@ -439,11 +462,56 @@ function segmented(id, onChange) {
 document.querySelectorAll('main [title]').forEach(function (e) {
   e.dataset.tip = e.title;
   e.removeAttribute('title');
-  // Near the right edge of the window the bubble opens to the left instead.
-  e.addEventListener('mouseenter', function () {
-    e.classList.toggle('tip-left', e.getBoundingClientRect().left + 300 > innerWidth);
-  });
 });
+
+// The ripple from where a control is pressed (transform and opacity only; gone in 0.6 s).
+var PRESS = '.seg button,.chip,.btn,.go,.tbtn,.wbtns button,.lhead';
+addEventListener('pointerdown', function (e) {
+  var c = e.target.closest && e.target.closest(PRESS);
+  if (!c || e.button !== 0 || c.disabled || c.querySelector('input:disabled') || still()) return;
+  var r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  var d = 2 * Math.hypot(Math.max(x, r.width - x), Math.max(y, r.height - y));
+  var w = el('span', 'rip');
+  w.style.width = w.style.height = d + 'px';
+  w.style.left = x - d / 2 + 'px'; w.style.top = y - d / 2 + 'px';
+  c.append(w);
+  setTimeout(function () { w.remove(); }, 600);
+});
+
+// Hints: one bubble (#tip). It shows half a second after the mouse stops on something with a
+// hint, below it, or above when there's no room below (the window ends right under the first
+// card when the list is empty), and never past the window's edges. A click hides it.
+(function () {
+  var tip = $('tip'), on = null, timer = 0;
+  function hide() { clearTimeout(timer); on = null; tip.classList.remove('on'); }
+  function show(t) {
+    var text = t.dataset.tip;
+    if (!text || !t.isConnected) return;
+    tip.textContent = text;
+    var r = t.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight, gap = 8;
+    var below = r.bottom + gap + h <= innerHeight - 4;
+    var x = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+    var y = below ? r.bottom + gap : Math.max(4, r.top - gap - h);
+    tip.style.transition = 'none';
+    tip.style.transform = 'translate(' + x + 'px,' + (y + (below ? -4 : 4)) + 'px)';
+    void tip.offsetWidth;
+    tip.style.transition = '';
+    tip.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    tip.classList.add('on');
+  }
+  addEventListener('mouseover', function (e) {
+    var t = e.target.closest && e.target.closest('[data-tip]');
+    if (t === on) return;
+    hide();
+    if (!t) return;
+    on = t;
+    timer = setTimeout(function () { if (on === t) show(t); }, 500);
+  });
+  addEventListener('pointerdown', hide, true);
+  addEventListener('keydown', hide, true);
+  addEventListener('wheel', hide, { passive: true });
+  document.documentElement.addEventListener('mouseleave', hide);
+})();
 
 // Elements with data-for="audio" / "video" are visible only in their mode.
 var mode = segmented('mode', function (m) {
@@ -561,7 +629,6 @@ function syncThemeBtn() {
   var b = $('theme'), dark = isDark();
   b.classList.toggle('moon', dark);
   b.dataset.tip = dark ? 'Light theme' : 'Dark theme';
-  b.classList.add('tip-left');
 }
 $('theme').onclick = function () {
   var want = isDark() ? 'light' : 'dark', b = $('theme').getBoundingClientRect(), root = document.documentElement;
@@ -683,7 +750,7 @@ var rowWatch = window.ResizeObserver ? new ResizeObserver(function () { fitLater
 function button(cls, label, title, onclick) {
   var b = el('button', 'btn ' + cls);
   b.innerHTML = label;
-  if (title) b.title = title;
+  if (title) b.dataset.tip = title;
   b.onclick = onclick;
   return b;
 }
@@ -695,7 +762,7 @@ function makeRow(j) {
   r.st = el('span', 'st');
   r.pills = el('span', 'pills');
   r.pillTrack = el('span', 'pill');
-  r.pillPct = el('span', 'pill tip-left');
+  r.pillPct = el('span', 'pill');
   r.pills.append(r.pillTrack, r.pillPct);
   r.top.append(r.name, r.st, r.pills);
   r.kind = el('div', 'kind');                // Audio · MP3 · one file
@@ -787,8 +854,6 @@ function updateRow(r, j) {
     setText(r.pillTrack, itemWord(j) + ' ' + j.pos + ' of ' + j.of);
     setText(r.pillPct, Math.floor(j.progress) + '%' + (list ? ' of all' : ''));
     r.pillPct.classList.toggle('all', !!list);
-    var tip = list ? 'How far the whole playlist is' : 'How far the download is';
-    if (r.pillPct.dataset.tip !== tip) r.pillPct.dataset.tip = tip;
   } else if (r.kindKey !== '') {
     r.kindKey = '';
     r.kind.textContent = kindText(j);
@@ -822,17 +887,17 @@ function updateRow(r, j) {
     r.actsKey = acts;
     r.acts.innerHTML = '';
     if (j.status === 'queued' || j.status === 'running') {
-      r.acts.append(button('ghost', ICON.cancel + 'Cancel', 'Stop it; the unfinished file resumes if you add the link again',
+      r.acts.append(button('ghost', ICON.cancel + 'Cancel', null,
         function () { api('/api/cancel', { id: j.id }).then(refresh); }));
     }
     // Failed or cancelled: back into the queue. What's already downloaded is skipped.
     if (j.status === 'error' || j.status === 'cancelled') {
-      if (needIn) r.acts.append(button('acc', ICON.user + 'Sign in', 'Takes your YouTube sign-in from your browser, or opens the sign-in page; ТЯГА notices by itself. Then Retry', signIn));
-      r.acts.append(button(needIn ? '' : 'acc', ICON.retry + 'Retry', 'Try again; whatever already downloaded is skipped',
+      if (needIn) r.acts.append(button('acc', ICON.user + 'Sign in', null, signIn));
+      r.acts.append(button(needIn ? '' : 'acc', ICON.retry + 'Retry', null,
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
       // The full technical error, to send to someone (the page shows the plain-words version).
       if (j.status === 'error') {
-        var copy = button('', ICON.copy + 'Copy error', 'Copies the link, the ТЯГА version and yt-dlp\'s own error message', function () {
+        var copy = button('', ICON.copy + 'Copy error', null, function () {
           var text = 'ТЯГА ' + (state.version || '') + '\nLink: ' + j.url + '\n' + (j.errorRaw || j.error || '');
           var done = function (ok) {
             copy.innerHTML = ok ? ICON.check + 'Copied' : ICON.copy + 'Couldn\'t copy';
@@ -845,12 +910,12 @@ function updateRow(r, j) {
       }
     }
     if (j.status === 'done' && j.files.length) {
-      r.acts.append(button('', ICON.folder + 'Show file', 'Opens its folder with the file selected',
+      r.acts.append(button('', ICON.folder + 'Show file', null,
         function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); }));
     }
     // A playlist with skipped videos: try just those again.
     if (j.status === 'done' && j.error) {
-      r.acts.append(button('', ICON.retry + 'Retry', 'Try the skipped ones again; what\'s already downloaded is skipped',
+      r.acts.append(button('', ICON.retry + 'Retry', null,
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
     }
     r.acts.hidden = !r.acts.children.length;
@@ -947,7 +1012,6 @@ function renderAcct() {
   b.className = 'btn acct' + (cls ? ' ' + cls : '');
   setText($('acctT'), text);
   if (b.dataset.tip !== tip) b.dataset.tip = tip;
-  b.classList.add('tip-left');
   // What came of signing in goes in the message line under the options; it goes away by itself
   // with the next try (a message about something else is left alone).
   if (L.msg !== lastLoginMsg) {
@@ -1507,8 +1571,6 @@ function syncPlay() {
   var busy = (state.jobs || []).some(function (j) { return j.status === 'queued' || j.status === 'running'; });
   $('play').hidden = !(busy || game.open);
   setText($('playT'), game.open ? 'Back to the list' : 'Play while you wait');
-  var tip = game.open ? 'The game waits where you left it (Esc does the same)' : 'A little game while it downloads. It doesn\'t stop when the download ends: finish it, or come back to it later';
-  if ($('play').dataset.tip !== tip) $('play').dataset.tip = tip;
 }
 
 function refresh() {
