@@ -3,6 +3,8 @@
 # taken from real runs: a playlist, YouTube's 5-second pauses, thumbnail lines, two-file
 # videos, a jumpy speed. Makes real little files with covers. A link with FAIL in it fails with 403;
 # a playlist link with SKIP in it has a private video in the middle (the rest downloads, exit code 1).
+# Sizes: a link with TINY in it is a short clip (done in a second or two), with LONG a long video
+# in many pieces; anything else is the usual few-minutes size.
 import sys, os, time, json, random, subprocess
 a = sys.argv[1:]
 if '-U' in a or '--version' in a:
@@ -50,14 +52,16 @@ for i, (artist, title, vid) in enumerate(items, 1):
     say(f'THUMB|Youtube|{vid}|https://i.ytimg.com/vi_webp/{vid}/maxresdefault.webp')
     say(f'CHAN|{artist} - Topic')
     say('[download] Sleeping 5.00 seconds as required by the site...'); time.sleep(5)
-    parts = [('webm', 4_000_000)] if audio else [('f299.mp4', 40_000_000), ('f140.m4a', 3_000_000)]
+    scale = 0.06 if any('TINY' in x for x in a) else 5 if any('LONG' in x for x in a) else 1
+    parts = [('webm', int(4_000_000 * scale))] if audio else [('f299.mp4', int(40_000_000 * scale)), ('f140.m4a', int(3_000_000 * scale))]
+    frags = 400 if scale > 1 else 80
     for part_no, (ext, total) in enumerate(parts):
         # A video's picture comes in pieces (HLS) with only a size guess that starts far too
         # low, like real YouTube; everything else has an exact size.
         pieces = not audio and part_no == 0
         if pieces:
             say('[hlsnative] Downloading m3u8 manifest')
-            say('[hlsnative] Total fragments: 80')
+            say(f'[hlsnative] Total fragments: {frags}')
         say(f'[download] Destination: {base}.{ext}')
         done, v = 0, 3e6
         while done < total:
@@ -66,9 +70,9 @@ for i, (artist, title, vid) in enumerate(items, 1):
             done = min(total, done + v * 0.5)
             eta = int((total - done) / v)
             if pieces:
-                frag = int(done / total * 80)
+                frag = int(done / total * frags)
                 guess = int(done * 1.05 + 200000)  # "almost done" all the time
-                say(f'PROG|{int(done)}|NA|{guess}|{v}|{eta}|{frag}|80')
+                say(f'PROG|{int(done)}|NA|{guess}|{v}|{eta}|{frag}|{frags}')
             else:
                 say(f'PROG|{int(done)}|{total}|NA|{v}|{eta}|NA|NA')
             time.sleep(0.5 if r >= 0.06 else 1.5)

@@ -99,12 +99,13 @@ label:hover{color:var(--fg)}
 .job{padding:13px 0;border-bottom:1px solid var(--line)}
 .job:last-child{border-bottom:0}
 .job.grow{overflow:hidden;transition:height .32s cubic-bezier(.2,.8,.2,1),padding .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
-.job .body{transition:opacity .2s ease}
-.job.landing .body{opacity:0}
+.job .name{transition:opacity .2s ease}
+.job.landing .name{opacity:0}
 /* The link that flies from the box down into its row: only transform and opacity change,
    which the graphics card does by itself, so it costs next to nothing. */
-.fly{position:fixed;left:0;top:0;z-index:50;pointer-events:none;margin:-3px 0 0 -8px;padding:2px 8px;border-radius:8px;max-width:560px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fg);background:color-mix(in srgb,var(--acc) 14%,var(--card));box-shadow:0 6px 18px -8px rgba(0,0,0,.5);will-change:transform,opacity}
-.spark{position:fixed;left:0;top:0;z-index:51;pointer-events:none;color:var(--acc2);font-size:18px;font-weight:700;text-shadow:0 0 8px var(--glow);line-height:1;will-change:transform,opacity}
+.fly{position:fixed;left:0;top:0;z-index:50;pointer-events:none}
+.fly>div{margin:-3px 0 0 -8px;padding:2px 8px;border-radius:8px;max-width:560px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fg);background:color-mix(in srgb,var(--acc) 14%,var(--card));box-shadow:0 6px 18px -8px rgba(0,0,0,.5);will-change:transform,opacity}
+.spark{position:fixed;left:0;top:0;z-index:51;pointer-events:none;color:var(--acc2);font-size:24px;font-weight:700;text-shadow:0 0 10px var(--glow);opacity:0;line-height:1;will-change:transform,opacity}
 .ripple{position:fixed;left:0;top:0;z-index:49;pointer-events:none;width:44px;height:16px;margin:-8px 0 0 -22px;border-radius:50%;border:1.5px solid var(--acc);will-change:transform,opacity}
 /* Download pressed: the fish on the hook is cast (it dips and swings back). */
 body.cast .logo .catch{animation:cast .7s cubic-bezier(.3,1.4,.5,1)}
@@ -604,12 +605,12 @@ function add() {
     $('msg').textContent = r.error || '';
     if (!r.error) { // a fragment is a one-off: the next link is whole again
       var links = text.split(/\s+/);
-      if (!still()) { // the hint stays away until the link has flown out (fly())
+      if (!still()) { // the hint stays away while the link lifts out of the box
         $('links').classList.add('flying');
-        setTimeout(function () { if (!flyNext || Date.now() > flyNext.until) $('links').classList.remove('flying'); }, 1500);
+        setTimeout(function () { $('links').classList.remove('flying'); }, 300);
       }
-      flyNext = { text: links[0].replace(/^https?:\/\/(www\.)?/, '') + (links.length > 1 ? '  +' + (links.length - 1) : ''),
-        x: box.left + parseFloat(cs.paddingLeft) + 1, y: box.top + parseFloat(cs.paddingTop), w: box.width - 26, until: Date.now() + 4000 };
+      flyNext = lift(links[0].replace(/^https?:\/\/(www\.)?/, '') + (links.length > 1 ? '  +' + (links.length - 1) : ''),
+        box.left + parseFloat(cs.paddingLeft) + 1, box.top + parseFloat(cs.paddingTop), box.width - 26);
       $('links').value = '';
       TIMES.forEach(function (id) { $(id).value = ''; });
       $('cut').checked = false;
@@ -745,7 +746,11 @@ function askNotify() {
 
 var rows = {}; // job id → its row and the parts of it
 // In ТЯГА's window the window follows the rows' height (see windowFit).
-var rowWatch = window.ResizeObserver ? new ResizeObserver(function () { fitLater(); }) : null;
+// Not while a row is opening or folding away: the window gets their final height at the start
+// (openHeight) and is fitted again at their end, instead of being resized every frame.
+var rowWatch = window.ResizeObserver ? new ResizeObserver(function (en) {
+  if (en.some(function (e) { return !/\b(grow|bye)\b/.test(e.target.className) && !e.target.querySelector('.live.slide'); })) fitLater();
+}) : null;
 
 function button(cls, label, title, onclick) {
   var b = el('button', 'btn ' + cls);
@@ -862,7 +867,9 @@ function updateRow(r, j) {
   // While downloading: the wave, the numbers and the log.
   var running = j.status === 'running';
   if (running) {
-    waveTarget[j.id] = { p: j.progress, wait: waiting };
+    // Nothing to count yet (starting, YouTube's pause before the first video): the wave runs
+    // without a number (Material 3's indeterminate one) instead of lying flat as if stuck.
+    waveTarget[j.id] = { p: j.progress, wait: waiting, ind: j.progress <= 0 };
     // Track and percent are in the pills; here: speed and time left, or why it's waiting.
     var now = statusText(j);
     var nums = waiting ? ['Paused']
@@ -937,9 +944,11 @@ function reveal(e, show, animate) {
   void e.offsetHeight;
   e.classList.add('slide');
   e.style.height = to + 'px'; e.style.opacity = show ? 1 : 0;
+  fitLater();
   e._t = setTimeout(function () {
     e.classList.remove('slide'); e.style.height = e.style.opacity = '';
     if (!show) e.hidden = true;
+    fitLater();
   }, 320);
 }
 
@@ -1045,7 +1054,6 @@ function render() {
   $('setup').classList.toggle('err', !state.setup && !!state.problem);
 
   var list = $('list'), jobs = state.jobs || [];
-  if (APP) { syncFold(jobs); syncPlay(); fitLater(); }
   // While something downloads, the fish in the logo gets reeled in.
   var run = jobs.filter(function (j) { return j.status === 'running'; })[0];
   document.body.classList.toggle('busy', !!run);
@@ -1056,6 +1064,7 @@ function render() {
   if (!jobs.length && APP) { // the list card folds away (setGone); its rows fold up meanwhile
     Object.keys(rows).forEach(function (id) { bye(rows[id].row); });
     rows = {};
+    syncFold(jobs); syncPlay();
     return;
   }
   if (!jobs.length) {
@@ -1083,12 +1092,15 @@ function render() {
     if (list.children[i] !== r.row) list.insertBefore(r.row, list.children[i] || null);
   });
   if (booted) fresh.forEach(grow);
-  if (fresh.length && flyNext && Date.now() < flyNext.until) fly(fresh[0], flyNext);
-  flyNext = null;
-  booted = true;
   Object.keys(rows).forEach(function (id) {
     if (!alive[id]) { bye(rows[id].row); delete rows[id]; }
   });
+  // The window is fitted after the rows are in, so it grows once, straight to the height it
+  // needs (fitting it first made it too short and then grow again frame by frame).
+  if (APP) { syncFold(jobs); syncPlay(); fitLater(); }
+  if (fresh.length && flyNext && Date.now() < flyNext.until) fly(fresh[0], flyNext);
+  flyNext = null;
+  booted = true;
 
   // Just finished: the row glows green for a moment and the fish on the hook jumps.
   caught.splice(0).forEach(function (id) {
@@ -1131,7 +1143,7 @@ function bye(row) {
   row.style.height = row.offsetHeight + 'px';
   void row.offsetHeight;
   row.classList.add('bye');
-  setTimeout(function () { row.remove(); }, 280);
+  setTimeout(function () { row.remove(); fitLater(); }, 280);
 }
 // A new row opens up from nothing; the rows below glide down with it.
 var booted = false, flyNext = null;
@@ -1139,84 +1151,93 @@ function still() { return matchMedia('(prefers-reduced-motion: reduce)').matches
 function grow(row) {
   var h = row.offsetHeight;
   if (still() || !h) return;
-  row._growTo = h;
   row.style.height = '0px'; row.style.paddingTop = row.style.paddingBottom = '0px'; row.style.opacity = '0';
   void row.offsetHeight;
   row.classList.add('grow');
   row.style.height = h + 'px'; row.style.paddingTop = row.style.paddingBottom = row.style.opacity = '';
-  setTimeout(function () { row.classList.remove('grow'); row.style.height = ''; row._growTo = 0; fitLater(); }, 340);
+  setTimeout(function () { row.classList.remove('grow'); row.style.height = ''; fitLater(); }, 340);
 }
-// The link lifts out of the box and flies down into its row's title, which shows as it lands.
-// One element, moved with transform each frame towards where the title is right now (the row
-// is still opening, the list card may still be coming in), so it lands exactly.
 // Sending a link is the one moment that may play a little (it answers your own action, and
-// lasts under a second): the fish is cast, the link leaves a trail of notes and lands with a
-// ripple. Everything is transform and opacity only, done by the graphics card: a few dozen
-// tiny elements for less than a second, no layout work.
+// lasts about a second): the fish is cast, the link flies into its row with a few notes behind
+// it and lands with a ripple. Transform and opacity only, done by the graphics card.
 function cast() {
   if (still()) return;
   document.body.classList.remove('cast'); void document.body.offsetWidth; document.body.classList.add('cast');
   setTimeout(function () { document.body.classList.remove('cast'); }, 720);
 }
-// One short-lived thing on the page: from → to (transform and opacity), then it's gone.
-function puff(cls, text, from, to, ms) {
+// The link's flight, in two parts, like a fish going into a bucket: the bucket first, then the
+// fish. lift(): at once, the link rises out of the box and hovers. fly(): once its row is in
+// place (the window has grown, the list card has come in, the row has opened), it dives in
+// along an arc. The dive is worked out in advance and handed to the graphics card as one
+// animation (transform and opacity only): nothing is measured or laid out while it moves.
+var NOTES = ['♪', '♫', '♪', '♬'];
+function lift(text, x, y, w) {
+  if (still()) return null;
+  var g = el('div', 'fly'), inner = el('div', null, text);
+  inner.style.maxWidth = Math.max(120, w) + 'px';
+  g.append(inner);
+  document.body.append(g);
+  var up = y - 16;
+  g.animate([{ transform: 'translate(' + x + 'px,' + y + 'px)' }, { transform: 'translate(' + x + 'px,' + up + 'px) scale(1.04)' }],
+    { duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+  var bob = inner.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-4px)' }],
+    { duration: 520, delay: 260, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' });
+  var f = { g: g, inner: inner, bob: bob, x: x, y: up, until: Date.now() + 4000 };
+  // No row ever came (the server didn't answer in time): it just fades away.
+  f.drop = setTimeout(function () { if (!f.gone) { f.gone = true; g.animate([{ opacity: 1 }, { opacity: 0 }], 200).onfinish = function () { g.remove(); }; } }, 4000);
+  return f;
+}
+// One short-lived thing on the page, animated by the graphics card, then gone.
+function puff(cls, text, frames, ms, delay) {
   var e = el('div', cls, text);
   document.body.append(e);
-  var a = e.animate([from, to], { duration: ms, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
-  a.onfinish = function () { e.remove(); };
+  e.animate(frames, { duration: ms, delay: delay || 0, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' }).onfinish = function () { e.remove(); };
 }
-var NOTES = ['♪', '♫', '♩', '♪'];
-function trail(x, y) {
-  // Left behind the link: it goes down, so the notes stay above and drift up as they fade.
-  var dx = (Math.random() - .5) * 24, dy = -8 - Math.random() * 16, r = (Math.random() - .5) * 70;
-  puff('spark', NOTES[Math.floor(Math.random() * NOTES.length)],
-    { transform: 'translate(' + x + 'px,' + y + 'px) scale(.5) rotate(0deg)', opacity: .9 },
-    { transform: 'translate(' + (x + dx) + 'px,' + (y + dy) + 'px) scale(1.15) rotate(' + r + 'deg)', opacity: 0 }, 650);
-}
-function splash(x, y) {
-  puff('ripple', null, { transform: 'translate(' + x + 'px,' + y + 'px) scale(.3)', opacity: .7 },
-    { transform: 'translate(' + x + 'px,' + y + 'px) scale(3.2)', opacity: 0 }, 650);
-  for (var i = 0; i < 6; i++) {
-    var a = Math.PI * (1.1 + i * .16) + (Math.random() - .5) * .2, d = 24 + Math.random() * 20;
-    puff('spark', NOTES[i % NOTES.length], { transform: 'translate(' + x + 'px,' + y + 'px) scale(.4)', opacity: 1 },
-      { transform: 'translate(' + (x + Math.cos(a) * d * 1.6) + 'px,' + (y + Math.sin(a) * d) + 'px) scale(1) rotate(' + ((Math.random() - .5) * 80) + 'deg)', opacity: 0 }, 600 + i * 30);
-  }
-}
-// The link lifts out of the box and flies down into its row's title, which shows as it lands.
-// Moved each frame towards where the title is right now (the row is still opening, the list
-// card may still be coming in), so it lands exactly.
 function fly(row, f) {
-  if (still()) return;
-  var name = row.querySelector('.name'), g = el('div', 'fly', f.text), box = $('links');
-  g.style.maxWidth = Math.max(120, f.w) + 'px';
-  document.body.append(g);
-  var gw = Math.min(g.offsetWidth, 260) - 10;
+  if (!f || f.gone) return;
+  f.gone = true; clearTimeout(f.drop);
+  var name = row.querySelector('.name'), card = $('jobsCard'), waited = 0;
   row.classList.add('landing');
-  box.classList.add('flying');
-  var t0 = 0, D = 640, py = f.y, rot = 0, lastNote = 0, landed = false;
-  function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-  function step(now) {
-    if (!t0) t0 = now;
-    var t = Math.min(1, (now - t0) / D), e = ease(t);
-    // Where the title is right now. Its card may not be there yet (it comes in with the first
-    // link): then just below the first card, where it will be.
-    var r = name.getBoundingClientRect();
-    if (!r.width || $('jobsCard').hidden) {
-      var fb = document.querySelector('.card.form').getBoundingClientRect();
-      r = { left: f.x + 4, top: fb.bottom + 50 };
+  (function wait() { // until the bucket is there: the card shown, the row open (at most 1.6 s)
+    var ready = !card.hidden && !row.classList.contains('grow') && !card.classList.contains('anim');
+    if (!ready && (waited += 16) < 1600) return requestAnimationFrame(wait);
+    // The card may still be rising into place (a short slide): aim where it's going to be.
+    var r = name.getBoundingClientRect(), m = new DOMMatrix(getComputedStyle(card).transform);
+    dive({ left: r.left - m.m41, top: r.top - m.m42 });
+  })();
+  function dive(r) {
+    var D = 560, N = 16, frames = [], tx = r.left, ty = r.top;
+    // The arc: a curve from where it hovers, up a little, down into the title.
+    var cx = f.x + (tx - f.x) * .35, cy = Math.min(f.y, ty) - 34;
+    function at(u) {
+      var e = u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2, a = 1 - e;
+      return { x: a * a * f.x + 2 * a * e * cx + e * e * tx, y: a * a * f.y + 2 * a * e * cy + e * e * ty, e: e };
     }
-    var x = f.x + (r.left - f.x) * e, y = f.y + (r.top - f.y) * e - Math.sin(Math.PI * e) * 22; // an arc
-    // It leans the way it goes: up on the way out, down into the dive, level when it lands.
-    rot += (Math.max(-7, Math.min(7, (y - py) * .9)) * (1 - t) - rot) * .35; py = y;
-    g.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rot + 'deg) scale(' + (1 + Math.sin(Math.PI * e) * .05) + ')';
-    g.style.opacity = t < .85 ? 1 : 1 - (t - .85) / .15;
-    if (t > .06 && t < .82 && now - lastNote > 40) { lastNote = now; trail(x + Math.random() * gw, y - 10); }
-    if (t > .85 && !landed) { landed = true; row.classList.remove('landing'); splash(r.left + 26, r.top + 10); }
-    if (t > .3) box.classList.remove('flying');
-    if (t < 1) requestAnimationFrame(step); else g.remove();
+    var prev = at(0);
+    for (var i = 0; i <= N; i++) {
+      var u = i / N, p = at(u), nx = at(Math.min(1, u + .04));
+      var lean = i === N ? 0 : Math.max(-9, Math.min(9, (nx.y - p.y) * 1.2)) * (1 - u); // leans the way it goes
+      frames.push({ offset: u, transform: 'translate(' + p.x + 'px,' + p.y + 'px) rotate(' + lean + 'deg) scale(' + (1.04 - .04 * p.e) + ')', opacity: u < .86 ? 1 : 1 - (u - .86) / .14 });
+      prev = p;
+    }
+    f.bob.cancel();
+    f.g.getAnimations().forEach(function (a) { a.cancel(); });
+    f.g.animate(frames, { duration: D, fill: 'forwards' }).onfinish = function () { f.g.remove(); };
+    // A few big notes left behind on the way, drifting up as they fade.
+    [.22, .42, .62, .8].forEach(function (u, k) {
+      var p = at(u), x = p.x + 20 + k * 22, y = p.y - 12, r0 = (k % 2 ? -1 : 1) * (12 + k * 6);
+      puff('spark', NOTES[k], [
+        { transform: 'translate(' + x + 'px,' + y + 'px) scale(.4) rotate(0deg)', opacity: 0 },
+        { transform: 'translate(' + x + 'px,' + (y - 6) + 'px) scale(1) rotate(' + r0 / 2 + 'deg)', opacity: .95, offset: .25 },
+        { transform: 'translate(' + (x + (k % 2 ? -10 : 10)) + 'px,' + (y - 30) + 'px) scale(1.1) rotate(' + r0 + 'deg)', opacity: 0 }], 750, D * u);
+    });
+    // Splash: the title shows, a ring spreads on the water.
+    setTimeout(function () {
+      row.classList.remove('landing');
+      puff('ripple', null, [{ transform: 'translate(' + (tx + 26) + 'px,' + (ty + 10) + 'px) scale(.3)', opacity: .7 },
+        { transform: 'translate(' + (tx + 26) + 'px,' + (ty + 10) + 'px) scale(3.2)', opacity: 0 }], 650);
+    }, D * .86);
   }
-  g.style.transform = 'translate(' + f.x + 'px,' + f.y + 'px)';
-  requestAnimationFrame(step);
 }
 function syncFold(jobs) {
   var html = foldSummary(jobs);
@@ -1275,9 +1296,15 @@ function openHeight() { // the open list card's natural height, measured without
   var card = $('jobsCard'), list = $('list');
   var was = [card.hidden, card.className, card.style.height];
   card.hidden = false; card.classList.remove('folded', 'leave', 'come', 'anim'); card.style.height = '';
-  var extra = 0; // rows still opening: at the height they're opening to
-  list.querySelectorAll('.job.grow').forEach(function (r) { if (r._growTo) extra += r._growTo - r.offsetHeight; });
-  var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + extra + mainPad();
+  // Parts that are opening or folding right now count at the height they're going to.
+  var moving = [];
+  list.querySelectorAll('.job.grow,.live.slide').forEach(function (e) {
+    moving.push([e, e.style.height, e.style.paddingTop, e.style.paddingBottom, e.hidden]);
+    e.style.height = e.style.paddingTop = e.style.paddingBottom = '';
+    if (e.classList.contains('live')) e.hidden = !e._shown;
+  });
+  var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + mainPad();
+  moving.forEach(function (m) { m[0].style.height = m[1]; m[0].style.paddingTop = m[2]; m[0].style.paddingBottom = m[3]; m[0].hidden = m[4]; });
   card.hidden = was[0]; card.className = was[1]; card.style.height = was[2];
   return Math.ceil(n);
 }
@@ -1294,6 +1321,10 @@ function windowFit() {
     n = Math.ceil(card.offsetTop + card.offsetHeight + mainPad());
   } else if ($('jobsCard').classList.contains('anim')) return; // sliding open: it fits at the end
   else n = openHeight();
+  // While something in the list opens or folds, the window may grow at once (it's transparent
+  // below the cards, so that's invisible) but shrinks only once it's all settled (each part
+  // fits it again at its end): resizing the window every frame is what made it stutter.
+  if (n < innerHeight - 1 && $('list').querySelector('.job.grow,.job.bye,.live.slide')) return;
   // Asked already and the window has it (or as much as fits): nothing to do. If Windows didn't
   // apply it (it happens when a few come at once), ask again.
   if (n === lastFit && (Math.abs(innerHeight - n) <= 1 || innerHeight >= 800)) return;
@@ -1612,8 +1643,13 @@ var waveTarget = {}, waveState = {};
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
   var THICK = 4, AMP = 4, LEN = 30, GAP = 7;   // px: line, wave height (half), wavelength, gap
   var PACE = 2 * Math.PI;                       // rad/s: one wavelength per second
-  var K = 4, C = 2 * Math.sqrt(K);              // the spring: very soft (progress comes in big steps every
-                                                // 0.7 s; stiffer ones lurched in a simulation), critically damped
+  // The spring: very soft (progress comes in big steps every 0.7 s; stiffer ones lurched in a
+  // simulation), critically damped. Only when the bar is far behind (a small file that's
+  // already done) does it get stiffer, so it doesn't crawl towards 100 % after the fact.
+  function spring(gap) { var k = 4 + Math.min(20, Math.max(0, gap - 15) * .4); return [k, 2 * Math.sqrt(k)]; }
+  var dim = css.getPropertyValue('--dim').trim();
+  themeHooks.push(function () { dim = getComputedStyle(document.documentElement).getPropertyValue('--dim').trim(); });
+  function easeIO(u) { return u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; }
   var raf = 0, drawn = 0;
   function frame(now) {
     raf = 0;
@@ -1622,7 +1658,7 @@ var waveTarget = {}, waveState = {};
     drawn = 0;
     document.querySelectorAll('canvas.wave').forEach(function (cv) {
       var id = cv.dataset.id, t = waveTarget[id] || { p: 0 };
-      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, vel: 0, amp: 0 });
+      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, vel: 0, amp: 0, k: t.ind ? 1 : 0, run: 0 });
       var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
       if (!w) return; // hidden
       drawn++;
@@ -1634,7 +1670,8 @@ var waveTarget = {}, waveState = {};
       if (t.p < st.shown - 5) { st.shown = t.p; st.vel = 0; }    // started over (retry): no slide back
       if (still) st.shown = t.p;
       else {
-        st.vel += (K * (t.p - st.shown) - C * st.vel) * dt;
+        var sp = spring(t.p - st.shown);
+        st.vel += (sp[0] * (t.p - st.shown) - sp[1] * st.vel) * dt;
         st.shown = Math.max(st.shown, Math.min(100, st.shown + st.vel * dt)); // never back
         st.phase += dt * PACE;
       }
@@ -1647,6 +1684,31 @@ var waveTarget = {}, waveState = {};
       var head = Math.max(pad + THICK, pad + (end - pad) * f);
       cx.lineCap = 'round';
       cx.lineWidth = THICK;
+      // Indeterminate ↔ determinate: one cross-fades into the other (k: how indeterminate).
+      st.k += ((t.ind && !still ? 1 : 0) - st.k) * Math.min(1, dt * 5);
+      if (st.k > .01) {
+        // A piece of wave running along the track, again and again; slower and grey while
+        // YouTube makes it wait, orange while it's getting going.
+        st.run += dt / (t.wait ? 2.4 : 1.5);
+        var u = st.run % 1, L = .34;
+        var a1 = pad + (end - pad) * Math.max(0, Math.min(1, easeIO(u) * (1 + L) - L));
+        var b1 = pad + (end - pad) * Math.max(0, Math.min(1, easeIO(Math.min(1, u * 1.15)) * (1 + L * .4)));
+        cx.globalAlpha = st.k;
+        cx.strokeStyle = 'rgba(127,127,127,.28)';
+        cx.beginPath(); cx.moveTo(pad, mid); cx.lineTo(end, mid); cx.stroke();
+        if (b1 - a1 > 1) {
+          cx.strokeStyle = t.wait ? dim : acc;
+          cx.beginPath();
+          for (var x1 = a1; ; x1 += 1) {
+            var x2 = Math.min(x1, b1), y1 = mid + Math.sin((x2 / LEN) * 2 * Math.PI - st.phase) * AMP;
+            x1 === a1 ? cx.moveTo(x2, y1) : cx.lineTo(x2, y1);
+            if (x2 >= b1) break;
+          }
+          cx.stroke();
+        }
+        cx.globalAlpha = 1 - st.k;
+        if (st.k > .99) { cx.globalAlpha = 1; return; }
+      }
       if (head + GAP < end) {                                     // the track: what's left
         cx.strokeStyle = 'rgba(127,127,127,.28)';
         cx.beginPath(); cx.moveTo(head + GAP + THICK, mid); cx.lineTo(end, mid); cx.stroke();
@@ -1660,6 +1722,7 @@ var waveTarget = {}, waveState = {};
         if (xx >= head) break;
       }
       cx.stroke();
+      cx.globalAlpha = 1;
     });
     // The background speeds up with the progress, smoothed (like Morphe's patcher screen).
     fx.energy += (most - fx.energy) * Math.min(1, dt * 0.8);
