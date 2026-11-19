@@ -278,6 +278,10 @@ func handler(token string) http.Handler {
 			if path, ok := jobFile(body.ID, body.N); ok && fileExists(path) {
 				revealFile(path)
 			}
+		case "/api/copyfile": // the finished file onto the clipboard, to paste into a chat
+			path, ok := jobFile(body.ID, body.N)
+			writeJSON(w, map[string]bool{"ok": ok && fileExists(path) && copyFile(path)})
+			return
 		default:
 			http.NotFound(w, r)
 			return

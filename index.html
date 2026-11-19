@@ -18,9 +18,8 @@ body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.
 body{-webkit-user-select:none;user-select:none}
 textarea,.name,.sub,.log{-webkit-user-select:text;user-select:text}
 
-/* Background: notes and play signs slowly falling (canvas, drawn in the script), a faint glow at the top. */
+/* Background: a faint glow at the top (the browser page; ТЯГА's window has it in its first card). */
 .bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 80% 50% at 50% -10%,var(--glow),transparent 70%)}
-.bg canvas{width:100%;height:100%;display:block}
 /* A download finished: the fish jumps on the hook. */
 body.caught .logo .catch{animation:jump .9s cubic-bezier(.3,1.5,.5,1)}
 @keyframes jump{0%{transform:none}35%{transform:translateY(-18px) rotate(-10deg)}70%{transform:translateY(3px) rotate(4deg)}100%{transform:none}}
@@ -31,17 +30,13 @@ main{max-width:760px;margin:0 auto;padding:56px 18px 40px}
 header{display:flex;align-items:center;gap:16px;margin:0 0 26px;animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .logo{width:58px;height:58px;flex:none;border-radius:15px;box-shadow:0 10px 30px -8px var(--glow),0 0 0 1px var(--line);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
 .logo:hover{transform:rotate(-6deg) scale(1.06)}
-.logo .catch{transform-origin:176px 0;animation:bob 3.2s ease-in-out infinite}
+/* Nothing in the window moves by itself while nothing happens: in a transparent window every
+   moving pixel makes Windows redraw what's under it (DWM), which cost 5–17 % of the CPU idle. */
+.logo .catch{transform-origin:176px 0}
 .logo .fish{transform-origin:100px 124px}
-body.busy .logo .catch{animation:reel 1.1s ease-in-out infinite}
-body.busy .logo .fish{animation:wiggle .35s ease-in-out infinite alternate}
-@keyframes bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(5px) rotate(1.5deg)}}
-@keyframes reel{0%,100%{transform:translateY(4px) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
-@keyframes wiggle{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
-h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;background:linear-gradient(90deg,var(--fg) 30%,var(--acc) 50%,var(--fg) 70%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 7s linear infinite}
-@keyframes shine{from{background-position:100% 0}to{background-position:-200% 0}}
-.tag{font-size:13px;color:var(--dim);margin-top:4px}
-.tag small{display:inline-block;margin-left:8px;padding:1px 8px;border:1px solid var(--line);border-radius:99px;font-size:11px}
+h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;color:var(--fg)}
+.title{display:flex;align-items:center;gap:10px}
+.title small{display:inline-block;padding:1px 8px;border:1px solid var(--line);border-radius:99px;font-size:11px;color:var(--dim);letter-spacing:0}
 
 .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 50px -30px rgba(0,0,0,.6);animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .card+.card{margin-top:16px}
@@ -96,90 +91,53 @@ label:hover{color:var(--fg)}
 .msg{color:var(--err);margin-top:8px;font-size:14px}
 .msg:empty{margin:0}
 
-.job{padding:13px 0;border-bottom:1px solid var(--line)}
+/* One download = one compact row, the way mature downloaders do it (Seal, 4K Video
+   Downloader): the picture, then two lines. The title with its state on the right; under it
+   what it is, or while it downloads the bar and the numbers. Its buttons sit at the right of
+   the second line. No log: what's happening right now is said in the numbers' place. */
+.job{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);border-radius:10px}
 .job:last-child{border-bottom:0}
 .job.grow{overflow:hidden;transition:height .32s cubic-bezier(.2,.8,.2,1),padding .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
-.job .name{transition:opacity .2s ease}
-.job.landing .name{opacity:0}
-/* The link that flies from the box down into its row: only transform and opacity change,
-   which the graphics card does by itself, so it costs next to nothing. */
-.fly{position:fixed;left:0;top:0;z-index:50;pointer-events:none}
-.fly>div{margin:-3px 0 0 -8px;padding:2px 8px;border-radius:8px;max-width:560px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fg);background:color-mix(in srgb,var(--acc) 14%,var(--card));box-shadow:0 6px 18px -8px rgba(0,0,0,.5);will-change:transform,opacity}
-.spark{position:fixed;left:0;top:0;z-index:51;pointer-events:none;color:var(--acc2);font-size:24px;font-weight:700;text-shadow:0 0 10px var(--glow);opacity:0;line-height:1;will-change:transform,opacity}
-.ripple{position:fixed;left:0;top:0;z-index:49;pointer-events:none;width:44px;height:16px;margin:-8px 0 0 -22px;border-radius:50%;border:1.5px solid var(--acc);will-change:transform,opacity}
-/* Download pressed: the fish on the hook is cast (it dips and swings back). */
-body.cast .logo .catch{animation:cast .7s cubic-bezier(.3,1.4,.5,1)}
-@keyframes cast{0%{transform:none}30%{transform:translateY(14px) rotate(7deg)}65%{transform:translateY(-5px) rotate(-3deg)}100%{transform:none}}
-/* While the link flies out, the box's hint stays away, so the two texts never overlap. */
-textarea.flying::placeholder{color:transparent;transition:none}
-textarea::placeholder{transition:color .3s ease}
-/* A row: the cover of the finished file on the left (only once it's done: while downloading
-   the video's thumbnail isn't what ends up in the file), then title, what it is, and state. */
-.job{display:flex;gap:14px;align-items:center;border-radius:10px}
-.job .body{flex:1;min-width:0}
-/* The slot on the left keeps the text in one column. While downloading it folds to nothing
-   (the row is tall then, a picture would leave a hole under it) and opens again when it's done:
-   the text glides instead of jumping 72 px. What's in it cross-fades. */
-.side{flex:none;position:relative;width:58px;height:58px;transition:width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1),margin .3s cubic-bezier(.4,0,.2,1),opacity .25s ease}
-.side.wide{width:96px;height:54px}
-.side.none{width:0;margin-right:-14px;opacity:0}
-.side.still{transition:none}
-.side>*{position:absolute;inset:0;width:100%!important;height:100%!important;transition:opacity .25s ease}
+.job .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+/* The picture: the cover that's really in the finished file; before that an icon of what it is
+   (no video thumbnail: it's not what ends up in the file). Always the same square, so the
+   text never moves; what's in it cross-fades. */
+.side{flex:none;position:relative;width:44px;height:44px}
+.side>*{position:absolute;inset:0;width:100%;height:100%;transition:opacity .25s ease}
 .side>.gone{opacity:0!important}
-.cover{flex:none;width:58px;height:58px;border-radius:9px;object-fit:cover;background:var(--line);box-shadow:0 0 0 1px var(--line);opacity:0;transform:scale(.9);transition:opacity .4s,transform .4s cubic-bezier(.3,1.5,.5,1)}
-.cover.wide{width:96px;height:54px}
+.cover{border-radius:8px;object-fit:cover;background:var(--line);box-shadow:0 0 0 1px var(--line);opacity:0;transform:scale(.92);transition:opacity .35s,transform .35s cubic-bezier(.3,1.5,.5,1)}
 .cover.ok{opacity:1;transform:none}
-/* Same place as the cover, for rows that have none: queued, failed, cancelled, or a file
-   without a picture. Keeps every row's text in one column. */
-.ph{animation:fadein .25s ease both;flex:none;width:58px;height:58px;border-radius:9px;display:grid;place-items:center;background:rgba(127,127,127,.08);box-shadow:0 0 0 1px var(--line);color:var(--dim)}
-.ph svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ph{animation:fadein .25s ease both;border-radius:8px;display:grid;place-items:center;background:rgba(127,127,127,.08);box-shadow:0 0 0 1px var(--line);color:var(--dim)}
+.ph svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.job.running .ph{color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}
 .job.error .ph{color:var(--err);background:color-mix(in srgb,var(--err) 9%,transparent)}
+.top{display:flex;gap:10px;align-items:center;min-height:24px}
+.name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14.5px}
 .name.link{color:var(--dim)}
-.top{display:flex;gap:10px;align-items:baseline}
-.kind{font-size:12.5px;color:var(--dim);margin-top:1px}
-.name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.st{font-size:12.5px;color:var(--dim);white-space:nowrap;font-weight:500}
-.st.running{color:var(--acc)}.st.waiting{color:var(--dim)}
-/* While downloading (like Morphe): the state in colour under the title, and the track and
-   percent as pills on the right. The pills have a fixed width so they don't jiggle. */
-.kind .now{color:var(--acc);font-weight:500}
-.kind .now.waiting{color:var(--dim)}
-.pills{display:flex;gap:6px;flex:none}
-.pill{min-width:54px;text-align:center;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,transparent)}
-.pill.all{min-width:96px}
-.st.done{color:var(--ok)}.st.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}.st.error{color:var(--err)}
+.st{flex:none;font-size:12.5px;color:var(--dim);white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums}
+.st.running{color:var(--acc)}.st.waiting{color:var(--dim)}.st.done{color:var(--ok)}.st.error{color:var(--err)}
+.st.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
 @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
-/* Progress: a sine wave that runs faster the faster the download goes (drawn in the script). */
-.wave{display:block;width:100%;height:18px;margin-top:6px}
-/* The steps, as a small vertical timeline on a quiet panel: done steps get a tick in a
-   circle, the current one an orange dot that breathes, joined by a thin line. The live
-   numbers of the current step (part 17 of 80 · 8 MB so far) are little pills, like the counters
-   above. New steps slide in, old ones fold away at the top. */
-/* Fixed height (four steps), the newest step always on the bottom line: the panel never
-   grows or shrinks while steps come and go, so nothing below it moves. Older steps leave
-   over the top edge. */
-.log{margin-top:8px;padding:8px 12px 8px 10px;height:112px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;border-radius:12px;background:rgba(127,127,127,.06);box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.5;color:var(--dim)}
-.log div{flex:none;position:relative;display:flex;align-items:center;gap:6px;min-height:24px;padding-left:24px;white-space:nowrap;overflow:hidden;max-height:24px;transition:opacity .35s,max-height .35s,min-height .35s}
-.log div > span:first-child{overflow:hidden;text-overflow:ellipsis}
-.log div::before{content:"";position:absolute;left:4px;top:7px;width:10px;height:10px;border-radius:50%;box-sizing:border-box}
-.log div:not(:last-child)::after{content:"";position:absolute;left:8.5px;top:19px;height:12px;width:1px;background:var(--line)}
-.log .done::before{background:color-mix(in srgb,var(--ok) 22%,transparent);border:1px solid color-mix(in srgb,var(--ok) 55%,transparent)}
-.log .done{opacity:.7}
-.log .done > span:first-child::after{content:" ✓";color:var(--ok);font-size:11px}
-.log .cur{color:var(--fg)}
-.log .cur::before{background:var(--acc);animation:breathe 1.6s ease-in-out infinite}
-@keyframes breathe{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 45%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--acc) 0%,transparent)}}
-.log .tag{flex:none;padding:0 8px;border-radius:999px;font-size:11.5px;line-height:18px;font-variant-numeric:tabular-nums;color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent)}
-.log .in{animation:stepin .35s cubic-bezier(.2,.8,.2,1)}
-@keyframes stepin{from{opacity:0;max-height:0;min-height:0}to{opacity:1;max-height:24px;min-height:24px}}
-.log .out{opacity:0;max-height:0;min-height:0}
-.sub{font-size:12px;color:var(--dim);margin-top:4px;word-break:break-word}
-/* The speed line under the wave stays one line, whatever the width. */
-.live .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Small icon buttons in a row: cancel, copy the file. */
+.ibtn{flex:none;width:28px;height:28px;margin:-2px -4px -2px 0;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s,transform .1s}
+.ibtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ibtn:hover{background:color-mix(in srgb,var(--fg) 11%,transparent);color:var(--fg)}
+.ibtn:active{transform:scale(.92);background:color-mix(in srgb,var(--fg) 17%,transparent)}
+.ibtn.x:hover{color:var(--err);background:color-mix(in srgb,var(--err) 12%,transparent)}
+.ibtn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.line2{display:flex;align-items:center;gap:8px 10px;min-height:28px;flex-wrap:wrap}
+.kind{flex:1;min-width:0;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kind,.live{animation:fadein .2s ease backwards}
+.live{flex:1;min-width:0;display:flex;align-items:center;gap:12px}
+.wave{flex:1;min-width:60px;height:12px;display:block}
+.nums{flex:none;max-width:62%;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.acts{flex:none;display:flex;gap:6px;margin-left:auto}
+.acts .btn{padding:4px 10px;font-size:12.5px}
+.acts .ibtn{margin:0}
+.sub{font-size:12px;color:var(--dim);word-break:break-word}
 .sub.err{color:var(--err)}
-.sub a{color:var(--acc);display:block;margin-top:2px}
+@media (max-width:560px){.live{flex-wrap:wrap;gap:2px 12px}.wave{flex:1 1 100%}.nums{max-width:none}}
 .foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.foot .play{margin-left:auto;min-width:150px;justify-content:center}
 /* Buttons: soft pills with an icon; the accent one is for the thing you most likely want. */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.07);color:var(--fg);font:inherit;font-size:13px;line-height:1.2;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
 .btn svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
@@ -189,10 +147,9 @@ textarea::placeholder{transition:color .3s ease}
 .btn.acc:hover{background:color-mix(in srgb,var(--acc) 22%,transparent);border-color:var(--acc)}
 .btn.ghost{color:var(--dim)}
 .btn.ghost:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}
-.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 
 .empty{color:var(--dim);text-align:center;padding:26px 0 18px}
-.empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35;animation:bob 3.2s ease-in-out infinite}
+.empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35}
 .times{color:var(--dim);display:inline-flex;gap:6px;align-items:center;animation:rise .3s both}
 .times input{width:58px;background:rgba(127,127,127,.06);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 4px 5px 8px;font:inherit;font-variant-numeric:tabular-nums;outline:none;transition:border-color .2s,box-shadow .2s}
 .times input:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--glow)}
@@ -262,12 +219,9 @@ html.app .tbtn+.wbtns{margin-left:2px}
 .wbtns button.x:hover{background:#c42b1c;color:#fff}
 .wbtns svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3}
 html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
-html.app #jobsCard.gaming{flex:1}
 html.app #jobsCard>*{position:relative;z-index:1}
 html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;margin-right:-10px;scrollbar-gutter:stable}
-html.app #jobsCard>.bg,html.app .card.form>.bg{position:absolute;inset:0;z-index:0;background:none;border-radius:inherit;overflow:hidden}
-html.app .card.form>:not(.bg){position:relative;z-index:1}
-html.app .card.form>header{z-index:3}
+html.app .bg{display:none}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
 .lhead{display:none}
@@ -278,8 +232,8 @@ html.app .lhead:hover{color:var(--fg)}
 .lhead svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
 html.app #jobsCard.folded .lhead svg{transform:rotate(180deg)}
 html.app #jobsCard.folded{flex:none}
-html.app #jobsCard #list,html.app #jobsCard #game,html.app #jobsCard .foot{transition:opacity .2s}
-html.app #jobsCard.folded #list,html.app #jobsCard.folded #game,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+html.app #jobsCard #list,html.app #jobsCard .foot{transition:opacity .2s}
+html.app #jobsCard.folded #list,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
 html.app #jobsCard.anim{transition:height .25s cubic-bezier(.2,.8,.2,1)}
 html.app #jobsCard.come{animation:rise .3s cubic-bezier(.2,.8,.2,1) both}
 /* Going away: the card folds up to nothing and fades (the window follows once it's gone). */
@@ -287,19 +241,12 @@ html.app #jobsCard.leave{height:0!important;padding-top:0;padding-bottom:0;margi
 /* A row that leaves the list (Clear finished) folds up and fades, the rows below slide up. */
 .job.bye{overflow:hidden;opacity:0;transition:height .26s cubic-bezier(.4,0,.2,1),padding .26s cubic-bezier(.4,0,.2,1),margin .26s cubic-bezier(.4,0,.2,1),opacity .18s ease;height:0!important;padding-top:0!important;padding-bottom:0!important;margin-top:0!important;margin-bottom:0!important;border-width:0!important}
 html.app #list{margin-top:10px}
-/* The game takes the list's place, same size, so nothing around it moves. */
-html.app #game{flex:1;min-height:0;margin-top:10px;position:relative;border-radius:12px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;animation:fadein .2s ease both}
-#game canvas{display:block;width:100%;height:100%}
-#game.playing canvas{cursor:none}
 html.app .fadeout{opacity:0!important;transition:opacity .14s ease}
 html.app #list.fadein{animation:fadein .22s ease both}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
 /* Things that appear because a switch changed (a chip, the format buttons, the Play button,
    a row's buttons or message) fade in instead of popping up. */
-.chips .chip,.opts .seg,.foot .play,.acts .btn,.job .body>.sub,.msg:not(:empty){animation:fadein .2s ease both}
-/* A row's live part (wave, numbers, steps) unfolds when the download starts and folds away
-   when it ends (see reveal()). */
-.live.slide{overflow:hidden;transition:height .3s cubic-bezier(.4,0,.2,1),opacity .25s ease}
+.chips .chip,.opts .seg,.acts .btn,.acts .ibtn,.job .body>.sub,.msg:not(:empty){animation:fadein .2s ease backwards}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
 html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
@@ -328,7 +275,7 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
 .rip{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;background:currentColor;opacity:.22;transform:scale(0);animation:rip .55s cubic-bezier(.2,.8,.2,1) forwards}
 .go .rip{background:#fff;opacity:.45}
 @keyframes rip{to{transform:scale(1);opacity:0}}
-</style></head><body><div class="bg"><canvas id="fall"></canvas></div><div id="tip" role="tooltip"></div><main>
+</style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
   <svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
     <rect width="256" height="256" rx="58" fill="#161616"/>
@@ -346,7 +293,7 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
       </g>
     </g>
   </svg>
-  <div><h1>ТЯГА</h1><div class="tag">pulls video &amp; music off YouTube<small id="ver"></small></div></div>
+  <div class="title"><h1>ТЯГА</h1><small id="ver"></small></div>
   <button class="btn acct" id="acct" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.3 3.9-5 7-5s5.8 1.7 7 5"/></svg><span id="acctT">Sign in to YouTube</span></button>
   <button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Hide to the tray (downloads go on)" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
@@ -360,21 +307,21 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
     <button class="go" id="go">Download</button>
   </div>
   <div class="row opts">
-    <div class="seg" id="mode"><button data-v="video" class="on">Video</button><button data-v="audio">Audio</button></div>
-    <div class="seg" id="format" data-for="audio" hidden>
+    <div class="seg" id="mode"><button data-v="audio" class="on">Audio</button><button data-v="video">Video</button></div>
+    <div class="seg" id="format" data-for="audio">
       <button data-v="m4a" class="on" title="The original YouTube audio track, no re-encoding">M4A</button>
       <button data-v="mp3" title="Re-encoded at the highest quality, plays on anything">MP3</button>
     </div>
-    <div class="seg" id="quality" data-for="video">
+    <div class="seg" id="quality" data-for="video" hidden>
       <button data-v="0" class="on">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
     </div>
   </div>
   <div class="row chips">
-    <label class="chip"><input type="checkbox" id="playlist"> whole playlist</label>
+    <label class="chip" id="playlistBox" title="For a link to a video inside a playlist: download the whole playlist, not just this video"><input type="checkbox" id="playlist"> whole playlist</label>
     <label class="chip" id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"> as one file</label>
     <label class="chip" id="cutBox"><input type="checkbox" id="cut"> fragment</label>
-    <label class="chip" data-for="audio" id="splitBox" hidden title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked> split by chapters</label>
-    <label class="chip" data-for="video" title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"> for editing</label>
+    <label class="chip" data-for="audio" id="splitBox" title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked> split by chapters</label>
+    <label class="chip" data-for="video" hidden title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"> for editing</label>
     <label class="chip"><input type="checkbox" id="sponsors" checked> no sponsors</label>
   </div>
   <div class="row cutrow">
@@ -389,11 +336,9 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
 <div class="card" id="jobsCard">
   <button class="lhead" id="lhead" aria-label="Show or hide the downloads"><span id="lsum"></span><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>
   <div id="list"></div>
-  <div id="game" hidden><canvas id="gameCv"></canvas></div>
   <div class="foot">
     <button class="btn" id="open"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
     <button class="btn" id="clear" title="Takes them off the list; the files stay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>Clear finished</button>
-    <button class="btn play" id="play" hidden><svg viewBox="0 0 24 24"><rect x="4" y="5" width="5" height="3" rx="1"/><rect x="10" y="5" width="5" height="3" rx="1"/><rect x="16" y="5" width="4" height="3" rx="1"/><circle cx="13" cy="14" r="2"/><path d="M8 20h8"/></svg><span id="playT">Play while you wait</span></button>
   </div>
 </div>
 
@@ -410,14 +355,11 @@ if (new URLSearchParams(location.search).get('w')) {
   form.insertBefore(document.querySelector('header'), form.firstChild);
   var jobsCard = document.getElementById('jobsCard');
   jobsCard.classList.add('folded'); // until the list is known: no flash of a big empty card
-  jobsCard.insertBefore(document.querySelector('.bg'), jobsCard.firstChild);
-  var bg2 = el('div', 'bg'); bg2.append(el('canvas'));
-  form.insertBefore(bg2, form.firstChild);
   ['Min', 'Close'].forEach(function (b) {
     document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
   });
 }
-var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'error', cancelled: 'cancelled' };
+var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'failed', cancelled: 'cancelled' };
 var state = {}, OFFLINE = 'ТЯГА is not responding. Start the program again.';
 
 function $(id) { return document.getElementById(id); }
@@ -544,14 +486,23 @@ BOXES.forEach(function (id) { $(id).addEventListener('change', save); });
 
 // "As one file" only makes sense for a playlist; and then splitting by chapters doesn't.
 // A fragment is for one video, not a playlist.
+// "Whole playlist" only counts for a link to a video inside a playlist (…&list=…): greyed out
+// otherwise, in its place, so nothing moves when you paste. A playlist link is a list anyway.
+function isList() {
+  var v = $('links').value;
+  if (/youtube\.com\/(playlist\?|@|channel\/|c\/|user\/)/.test(v)) return true;
+  return /[?&]list=/.test(v) && $('playlist').checked;
+}
 function syncBoxes() {
-  var list = $('playlist').checked, cut = !list && $('cut').checked;
+  $('playlist').disabled = !/[?&]list=/.test($('links').value) || /youtube\.com\/(playlist\?|@|channel\/|c\/|user\/)/.test($('links').value);
+  var list = isList(), cut = !list && $('cut').checked;
   $('mergeBox').hidden = !list;
   $('cutBox').hidden = list;
   $('cutTimes').hidden = !cut;
   $('split').disabled = (list && $('merge').checked) || cut;
 }
 $('playlist').onchange = $('merge').onchange = $('cut').onchange = syncBoxes;
+$('links').addEventListener('input', syncBoxes);
 restore();
 syncBoxes();
 
@@ -587,10 +538,10 @@ function timeOf(m, s) {
 
 // The switches as they are now, for /api/add.
 function options(text) {
-  var list = $('playlist').checked, cut = !list && $('cut').checked;
+  var list = isList(), cut = !list && $('cut').checked;
   return {
     text: text, mode: mode(), format: format(),
-    quality: +quality(), playlist: list, split: $('split').checked, edit: $('edit').checked,
+    quality: +quality(), playlist: !$('playlist').disabled && $('playlist').checked, split: $('split').checked, edit: $('edit').checked,
     merge: list && $('merge').checked, sponsors: $('sponsors').checked,
     from: cut ? timeOf('fromM', 'fromS') : '', to: cut ? timeOf('toM', 'toS') : '',
   };
@@ -599,22 +550,13 @@ function options(text) {
 function add() {
   var text = $('links').value.trim();
   if (!text) return;
-  var box = $('links').getBoundingClientRect(), cs = getComputedStyle($('links'));
-  cast();
   api('/api/add', options(text)).then(function (r) {
     $('msg').textContent = r.error || '';
     if (!r.error) { // a fragment is a one-off: the next link is whole again
-      var links = text.split(/\s+/);
-      if (!still()) { // the hint stays away while the link lifts out of the box
-        $('links').classList.add('flying'); // back when the link dives out (fly), or after 4 s
-        setTimeout(function () { $('links').classList.remove('flying'); }, 4000);
-      }
-      flyNext = lift(links[0].replace(/^https?:\/\/(www\.)?/, '') + (links.length > 1 ? '  +' + (links.length - 1) : ''),
-        box.left + parseFloat(cs.paddingLeft) + 1, box.top + parseFloat(cs.paddingTop), box.width - 26);
       $('links').value = '';
       TIMES.forEach(function (id) { $(id).value = ''; });
       $('cut').checked = false;
-      syncBoxes();
+      syncBoxes(); // (the room readyWindow made stays until the row is in: setGone)
     }
     refresh();
   }, function () { $('msg').textContent = OFFLINE; });
@@ -675,6 +617,7 @@ addEventListener('drop', function (e) {
   var box = $('links');
   box.value = box.value.trim() ? box.value.trim() + '\n' + t : t;
   box.focus();
+  syncBoxes();
   readyWindow();
 });
 // In ТЯГА's own window (WebView2) a right-click gives only what an app needs: copy and paste
@@ -697,10 +640,6 @@ addEventListener('pagehide', function () {
 // In a playlist: "video" or "track", and how far the current one is (the progress counts the
 // whole playlist: video 3 of 12 half done is 21 %).
 function itemWord(j) { return j.mode === 'audio' ? 'track' : 'video'; }
-function itemPct(j) {
-  if (!(j.of > 1 && j.pos)) return null;
-  return Math.max(0, Math.min(100, Math.floor((j.progress / 100 * j.of - (j.pos - 1)) * 100)));
-}
 
 // What the download is: "Audio · MP3", "Video · MP4 · 1080p", plus fragment / one file.
 function kindText(j) {
@@ -731,8 +670,6 @@ function ping(jobs) {
     lastStatus[j.id] = j.status;
     if (was !== 'running' || (j.status !== 'done' && j.status !== 'error')) return;
     if (j.status === 'done') caught.push(j.id);
-    // While the game is open, the list's top line says it for a few seconds.
-    if (game.open) headNote = { t: (j.status === 'done' ? '✓ Downloaded: ' : 'Failed: ') + (j.title || 'a download').replace(/^\[\d+\/\d+\] /, ''), bad: j.status !== 'done', until: Date.now() + 5000 };
     if (!document.hidden || !window.Notification || Notification.permission !== 'granted') return;
     try {
       var n = new Notification(j.status === 'done' ? 'Done ✓' : 'Failed', {
@@ -751,7 +688,7 @@ var rows = {}; // job id → its row and the parts of it
 // Not while a row is opening or folding away: the window gets their final height at the start
 // (openHeight) and is fitted again at their end, instead of being resized every frame.
 var rowWatch = window.ResizeObserver ? new ResizeObserver(function (en) {
-  if (en.some(function (e) { return !/\b(grow|bye)\b/.test(e.target.className) && !e.target.querySelector('.live.slide'); })) fitLater();
+  if (en.some(function (e) { return !/\b(grow|bye)\b/.test(e.target.className); })) fitLater();
 }) : null;
 
 function button(cls, label, title, onclick) {
@@ -763,26 +700,26 @@ function button(cls, label, title, onclick) {
 }
 
 function makeRow(j) {
-  var r = { row: el('div', 'job new'), body: el('div', 'body'), top: el('div', 'top') };
+  var r = { row: el('div', 'job'), body: el('div', 'body'), top: el('div', 'top'), line2: el('div', 'line2') };
   r.row.dataset.id = j.id;
   r.name = el('span', 'name');
-  r.st = el('span', 'st');
-  r.pills = el('span', 'pills');
-  r.pillTrack = el('span', 'pill');
-  r.pillPct = el('span', 'pill');
-  r.pills.append(r.pillTrack, r.pillPct);
-  r.top.append(r.name, r.st, r.pills);
-  r.kind = el('div', 'kind');                // Audio · MP3 · one file
-  r.live = el('div', 'live');                // wave + numbers + log, only while downloading
+  r.st = el('span', 'st');                   // ✓ Done, 42 %, queued, error
+  r.x = el('button', 'ibtn x');              // cancel, while queued or downloading
+  r.x.innerHTML = ICON.cancel;
+  r.x.dataset.tip = 'Cancel';
+  r.x.onclick = function () { api('/api/cancel', { id: j.id }).then(refresh); };
+  r.top.append(r.name, r.st, r.x);
+  r.kind = el('div', 'kind');                // Pilotredsky · Audio · MP3
+  r.live = el('div', 'live');                // while downloading: the bar and the numbers
   r.wave = el('canvas', 'wave');
   r.wave.dataset.id = j.id;
-  r.nums = el('div', 'sub');
-  r.log = el('div', 'log');
-  r.live.append(r.wave, r.nums, r.log);
-  r.msg = el('div', 'sub');
+  r.nums = el('span', 'nums');
+  r.live.append(r.wave, r.nums);
   r.acts = el('div', 'acts');
-  r.body.append(r.top, r.kind, r.live, r.msg, r.acts);
-  r.sideBox = el('div', 'side none still');
+  r.line2.append(r.kind, r.live, r.acts);
+  r.msg = el('div', 'sub');                  // a note, or what went wrong
+  r.body.append(r.top, r.line2, r.msg);
+  r.sideBox = el('div', 'side');
   r.row.append(r.sideBox, r.body);
   if (APP && rowWatch) rowWatch.observe(r.row);
   return r;
@@ -803,104 +740,69 @@ var ICON = {
 };
 
 function updateRow(r, j) {
-  // Left of the text: the cover of the finished file (the real album art or the thumbnail,
-  // exactly what's inside it; square for music, 16:9 for video), or an icon for queued /
-  // failed / cancelled. Nothing while downloading: the video's thumbnail isn't what ends up
-  // in the file, and the row is tall then, so a picture would leave a hole under it.
-  var side = j.status === 'running' ? '' : j.status === 'done' && j.cover ? 'cover' + j.cover
-    : j.status === 'done' ? (j.mode === 'audio' ? 'audio' : 'video') : j.status;
+  // The picture: the cover that's really inside the finished file, else an icon of what it is
+  // (or of what went wrong). One square in every state, cross-faded, so the text never moves.
+  var side = j.status === 'done' && j.cover ? 'cover' + j.cover
+    : j.status === 'done' || j.status === 'running' ? (j.mode === 'audio' ? 'audio' : 'video') : j.status;
   if (r.side !== side) {
     r.side = side;
-    var pic = null, box = r.sideBox;
+    var pic;
     if (side.indexOf('cover') === 0) {
       pic = el('img', 'cover');
       pic.alt = '';
       pic.onload = function () { pic.classList.add('ok'); };
       pic.onerror = function () { var ph = el('div', 'ph'); ph.innerHTML = ICON[j.mode === 'audio' ? 'audio' : 'video']; pic.replaceWith(ph); if (r.img === pic) r.img = ph; };
       pic.src = '/api/cover?id=' + j.id + '&v=' + j.cover + '&t=' + encodeURIComponent(TOKEN);
-    } else if (side) {
+    } else {
       pic = el('div', 'ph');
       pic.innerHTML = ICON[side] || '';
     }
     var old = r.img;
     if (old) { old.classList.add('gone'); setTimeout(function () { old.remove(); }, 260); }
-    if (pic) box.append(pic);
+    r.sideBox.append(pic);
     r.img = pic;
-    box.classList.toggle('none', !pic);
-    box.classList.toggle('wide', !!pic && side.indexOf('cover') === 0 && j.mode !== 'audio');
-    if (!r.status) { void box.offsetWidth; } // the row's first look: in place at once
   }
-  if (r.status) r.sideBox.classList.remove('still');
 
-  var waiting = j.status === 'running' && j.wait > 0;
+  var running = j.status === 'running', waiting = running && j.wait > 0;
   var st = j.status + (waiting ? ' waiting' : '');
   if (r.st0 !== st) {
-    r.row.className = 'job ' + j.status + (r.row.classList.contains('grow') ? ' grow' : '') + (r.row.classList.contains('landing') ? ' landing' : '');
+    r.row.className = 'job ' + j.status + (r.row.classList.contains('grow') ? ' grow' : '');
     r.st.className = 'st ' + st + (r.status && r.status !== 'done' && j.status === 'done' ? ' pop' : '');
     r.st0 = st;
   }
-  // "[2/12] Song" → "Song"; the "track 2 of 12" goes into the numbers line.
-  // No title yet (queued, or it failed before yt-dlp got one): the link, quieter and shorter.
+  // "[2/12] Song" → "Song". No title yet (queued, or it failed before yt-dlp got one): the
+  // link, quieter and shorter.
   setText(r.name, j.title ? j.title.replace(/^\[\d+\/\d+\] /, '') : j.url.replace(/^https?:\/\/(www\.)?/, ''));
   r.name.classList.toggle('link', !j.title);
-  var running0 = j.status === 'running';
-  r.st.hidden = running0;          // while downloading the state goes under the title,
-  r.pills.hidden = !running0;      // and the pills take its place on the right
-  setText(r.st, statusText(j));
-  if (running0) {
-    var nowCls = 'now' + (j.wait > 0 ? ' waiting' : '');
-    var kindKey = statusText(j) + '|' + kindText(j) + '|' + nowCls;
-    if (r.kindKey !== kindKey) {
-      r.kindKey = kindKey;
-      r.kind.innerHTML = '';
-      r.kind.append(el('span', nowCls, statusText(j)), ' · ' + kindText(j));
-    }
-    // Numbers always say what they count: "video 3 of 12", "40% of all" (the whole playlist).
-    var list = j.of > 1 && j.pos;
-    r.pillTrack.hidden = !list;
-    setText(r.pillTrack, itemWord(j) + ' ' + j.pos + ' of ' + j.of);
-    setText(r.pillPct, Math.floor(j.progress) + '%' + (list ? ' of all' : ''));
-    r.pillPct.classList.toggle('all', !!list);
-  } else if (r.kindKey !== '') {
-    r.kindKey = '';
-    r.kind.textContent = kindText(j);
-  } else setText(r.kind, kindText(j));
+  // On the right of the title: how far it is (a playlist: which track, and of all of it), or the state.
+  var list = j.of > 1 && j.pos;
+  setText(r.st, running && waiting && j.progress <= 0 ? 'waiting'
+    : running ? (list ? itemWord(j) + ' ' + j.pos + ' of ' + j.of + ' · ' : '') + Math.floor(j.progress) + '%' : statusText(j));
+  r.x.hidden = !(running || j.status === 'queued');
 
-  // While downloading: the wave, the numbers and the log.
-  var running = j.status === 'running';
+  // The second line: what it is; while downloading, the bar and the numbers instead.
+  r.kind.hidden = running;
+  r.live.hidden = !running;
+  setText(r.kind, kindText(j));
   if (running) {
-    // Nothing to count yet (starting, YouTube's pause before the first video): the wave runs
-    // without a number (Material 3's indeterminate one) instead of lying flat as if stuck.
-    // It keeps running until the real bar is long enough to show, so there's no flat moment
-    // between the two.
+    // Nothing to count yet (starting, YouTube's pause): a piece of wave runs along the bar
+    // instead of a flat line, until the real bar is long enough to show.
     waveTarget[j.id] = { p: j.progress, wait: waiting, ind: j.progress < 3 };
-    // Track and percent are in the pills; here: speed and time left, or why it's waiting.
-    var now = statusText(j);
-    var nums = waiting ? ['Paused']
-      : now === 'converting' ? ['Converting and adding the cover']
-      : j.progress >= 100 ? ['Finishing up']
-      : [j.speed || 'Starting…', j.eta && (j.eta + ' left'), itemPct(j) != null && 'this ' + itemWord(j) + ' ' + itemPct(j) + '%'];
-    setText(r.nums, nums.filter(Boolean).join(' · '));
-    renderSteps(r, j);
+    setText(r.nums, numsText(j));
   }
-  reveal(r.live, running, !!r.status); // after its content is in, so it unfolds to the right height
 
-  // A note, an error, or skipped videos of a merged playlist.
-  var msg = j.status === 'error' ? j.error : j.status === 'done' ? j.error : j.note;
+  // A note, an error, or videos of a playlist that were skipped.
+  var msg = j.status === 'error' || j.status === 'done' ? j.error : j.note;
   setText(r.msg, msg || '');
   r.msg.className = 'sub' + (j.status === 'error' ? ' err' : '');
   r.msg.hidden = !msg;
 
-  // Buttons: rebuilt only when the status changes.
+  // Buttons, at the right of the second line: rebuilt only when the state changes.
   var L = state.login || {}, needIn = j.status === 'error' && L.can && !L.in && /^YouTube wants you to sign in/.test(j.error || '');
   var acts = j.status + '|' + j.files.length + '|' + needIn + '|' + !!j.error;
   if (r.actsKey !== acts) {
     r.actsKey = acts;
     r.acts.innerHTML = '';
-    if (j.status === 'queued' || j.status === 'running') {
-      r.acts.append(button('ghost', ICON.cancel + 'Cancel', null,
-        function () { api('/api/cancel', { id: j.id }).then(refresh); }));
-    }
     // Failed or cancelled: back into the queue. What's already downloaded is skipped.
     if (j.status === 'error' || j.status === 'cancelled') {
       if (needIn) r.acts.append(button('acc', ICON.user + 'Sign in', null, signIn));
@@ -920,91 +822,41 @@ function updateRow(r, j) {
         r.acts.append(copy);
       }
     }
-    if (j.status === 'done' && j.files.length) {
-      r.acts.append(button('', ICON.folder + 'Show file', null,
-        function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); }));
-    }
     // A playlist with skipped videos: try just those again.
     if (j.status === 'done' && j.error) {
       r.acts.append(button('', ICON.retry + 'Retry', null,
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
+    }
+    if (j.status === 'done' && j.files.length) {
+      r.acts.append(button('', ICON.folder + 'Show file', null,
+        function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); }));
+      // The file itself onto the clipboard: Ctrl+V in a chat attaches it.
+      var cp = el('button', 'ibtn');
+      cp.innerHTML = ICON.copy;
+      cp.dataset.tip = 'Copy the file, to paste it into a chat with Ctrl+V';
+      cp.onclick = function () {
+        api('/api/copyfile', { id: j.id, n: j.files.length - 1 }).then(function (x) {
+          cp.innerHTML = x.ok ? ICON.check : ICON.copy;
+          cp.dataset.tip = x.ok ? 'Copied: paste it with Ctrl+V' : 'Couldn\'t copy the file';
+          setTimeout(function () { cp.innerHTML = ICON.copy; cp.dataset.tip = 'Copy the file, to paste it into a chat with Ctrl+V'; }, 1800);
+        });
+      };
+      r.acts.append(cp);
     }
     r.acts.hidden = !r.acts.children.length;
   }
   r.status = j.status;
 }
 
-// reveal shows or hides a part by folding it open or shut (animate: not for a row's first look).
-function reveal(e, show, animate) {
-  if (e._shown === show) return;
-  e._shown = show;
-  clearTimeout(e._t);
-  e.classList.remove('slide'); e.style.height = e.style.opacity = '';
-  if (!animate || matchMedia('(prefers-reduced-motion: reduce)').matches) { e.hidden = !show; return; }
-  var from = e.hidden ? 0 : e.offsetHeight;
-  e.hidden = false;
-  var to = show ? e.offsetHeight : 0;
-  e.style.height = from + 'px'; e.style.opacity = show ? 0 : 1;
-  void e.offsetHeight;
-  e.classList.add('slide');
-  e.style.height = to + 'px'; e.style.opacity = show ? 1 : 0;
-  fitLater();
-  e._t = setTimeout(function () {
-    e.classList.remove('slide'); e.style.height = e.style.opacity = '';
-    if (!show) e.hidden = true;
-    fitLater();
-  }, 320);
-}
-
-// The step feed under the wave: done steps with a tick, the current one live. Updated
-// line by line, so a new step slides in and nothing that stayed the same is redrawn.
-function renderSteps(r, j) {
-  var steps = (j.log || []).slice();
-  var cur = j.now;
-  // The live line replaces the plain "Downloading Song.webm" of the same step.
-  if (cur && steps.length && /^Downloading /.test(steps[steps.length - 1])) steps.pop();
-  if (!cur) cur = steps.pop() || '';
-  var want = steps.map(function (t) { return { t: t, c: 'done' }; });
-  if (cur) want.push({ t: cur, c: 'cur' });
-  want = want.slice(-4);
-
-  var have = r.stepEls || (r.stepEls = []);
-  // Steps that left the top fold away; matching ones stay; the rest come in at the bottom.
-  var k = 0;
-  while (k < have.length && !startsWith(want, have.slice(k))) k++;
-  have.splice(0, k).forEach(function (e) {
-    e.classList.add('out');
-    setTimeout(function () { e.remove(); }, 360);
-  });
-  want.forEach(function (w, i) {
-    var e = have[i];
-    if (!e) {
-      e = el('div', 'in');
-      have.push(e);
-      r.log.append(e);
-    }
-    if (e.dataset.t !== w.t) {
-      e.dataset.t = w.t;
-      // "Downloading the picture · part 17 of 80 · 8 MB of 20 MB" → the words, then the numbers as pills.
-      var parts = w.c === 'cur' ? w.t.split(' · ') : [w.t];
-      e.innerHTML = '';
-      e.append(el('span', null, parts[0]));
-      parts.slice(1).forEach(function (p) { e.append(el('span', 'tag', p)); });
-    }
-    e.classList.toggle('done', w.c === 'done');
-    e.classList.toggle('cur', w.c === 'cur');
-  });
-  have.splice(want.length).forEach(function (e) { e.remove(); });
-}
-// Do the steps on screen match the start of the new list? (The current one may have
-// become done, or its live numbers changed: only the text of a step counts if it's done.)
-function startsWith(want, have) {
-  if (have.length > want.length) return false;
-  for (var i = 0; i < have.length; i++) {
-    var same = have[i].dataset.t === want[i].t || (have[i].classList.contains('cur') && i === have.length - 1);
-    if (!same) return false;
-  }
-  return true;
+// The numbers under the title while it downloads, or in words what it's doing right now:
+// "3 MB of 5 MB · 1.2 MB/s · 0:02 left", "Waiting for YouTube · a 5 s pause", "Converting to MP3".
+function numsText(j) {
+  var log = j.log || [], step = log[log.length - 1] || '';
+  if (j.wait > 0) return 'Waiting for YouTube · a ' + j.wait + ' s pause';
+  if (!j.speed && /^(Converting|Joining|Adding the cover|Cutting out)/.test(step)) return step;
+  if (j.progress >= 100) return 'Finishing up';
+  if (j.speed) return [j.size, j.speed, j.eta && j.eta + ' left'].filter(Boolean).join(' · ');
+  return step && !/^Downloading the /.test(step) ? step : 'Starting…';
 }
 
 // The YouTube sign-in button (login.go). Signed in: the first click asks "Sign out?",
@@ -1068,7 +920,7 @@ function render() {
   if (!jobs.length && APP) { // the list card folds away (setGone); its rows fold up meanwhile
     Object.keys(rows).forEach(function (id) { bye(rows[id].row); });
     rows = {};
-    syncFold(jobs); syncPlay();
+    syncFold(jobs);
     return;
   }
   if (!jobs.length) {
@@ -1101,9 +953,7 @@ function render() {
   });
   // The window is fitted after the rows are in, so it grows once, straight to the height it
   // needs (fitting it first made it too short and then grow again frame by frame).
-  if (APP) { syncFold(jobs); syncPlay(); fitLater(); }
-  if (fresh.length && flyNext && Date.now() < flyNext.until) fly(fresh[0], flyNext);
-  flyNext = null;
+  if (APP) { syncFold(jobs); fitLater(); }
   booted = true;
 
   // Just finished: the row glows green for a moment and the fish on the hook jumps.
@@ -1121,10 +971,7 @@ function render() {
 // The list card's fold (ТЯГА's window only, see .lhead in the styles).
 var APP = document.documentElement.classList.contains('app');
 var fold = { on: false, gone: false, count: -1 };
-var headNote = null;
 function foldSummary(jobs) {
-  if (headNote && Date.now() < headNote.until)
-    return '<span class="' + (headNote.bad ? 'bad' : 'good') + '">' + headNote.t.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>';
   if (!jobs.length) return APP ? $('lsum').innerHTML : 'Nothing on the hook yet'; // app: the card is leaving, keep its line
   var n = { running: 0, queued: 0, done: 0, error: 0 }, run = null;
   jobs.forEach(function (j) { if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
@@ -1140,7 +987,7 @@ function foldSummary(jobs) {
 }
 // Nothing in the list: no list card at all, the window is just the first card. The first link
 // that goes in brings the card in, open; clearing the list takes it away again (not while the
-// game is open: that waits until you close it).
+// ).
 // A row leaves: it folds up and fades, then it's gone. With "reduce motion": at once.
 function bye(row) {
   if (!APP || matchMedia('(prefers-reduced-motion: reduce)').matches || !row.offsetHeight) return row.remove();
@@ -1150,7 +997,7 @@ function bye(row) {
   setTimeout(function () { row.remove(); fitLater(); }, 280);
 }
 // A new row opens up from nothing; the rows below glide down with it.
-var booted = false, flyNext = null;
+var booted = false;
 function still() { return matchMedia('(prefers-reduced-motion: reduce)').matches; }
 function grow(row) {
   var h = row.offsetHeight;
@@ -1161,108 +1008,13 @@ function grow(row) {
   row.style.height = h + 'px'; row.style.paddingTop = row.style.paddingBottom = row.style.opacity = '';
   setTimeout(function () { row.classList.remove('grow'); row.style.height = ''; fitLater(); }, 340);
 }
-// Sending a link is the one moment that may play a little (it answers your own action, and
-// lasts about a second): the fish is cast, the link flies into its row with a few notes behind
-// it and lands with a ripple. Transform and opacity only, done by the graphics card.
-function cast() {
-  if (still()) return;
-  document.body.classList.remove('cast'); void document.body.offsetWidth; document.body.classList.add('cast');
-  setTimeout(function () { document.body.classList.remove('cast'); }, 720);
-}
-// The link's flight, in two parts, like a fish going into a bucket: the bucket first, then the
-// fish. lift(): at once, the link rises out of the box and hovers. fly(): once its row is in
-// place (the window has grown, the list card has come in, the row has opened), it dives in
-// along an arc. The dive is worked out in advance and handed to the graphics card as one
-// animation (transform and opacity only): nothing is measured or laid out while it moves.
-var NOTES = ['♪', '♫', '♪', '♬'];
-function lift(text, x, y, w) {
-  if (still()) return null;
-  var g = el('div', 'fly'), inner = el('div', null, text);
-  inner.style.maxWidth = Math.max(120, w) + 'px';
-  g.append(inner);
-  document.body.append(g);
-  var up = y - 10;
-  g.animate([{ transform: 'translate(' + x + 'px,' + y + 'px)' }, { transform: 'translate(' + x + 'px,' + up + 'px) scale(1.04)' }],
-    { duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
-  // Only if its row is slow to come does it hover, gently, after the lift.
-  var bob = inner.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-3px)' }],
-    { duration: 520, delay: 420, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' });
-  var f = { g: g, inner: inner, bob: bob, x: x, y: up, until: Date.now() + 4000 };
-  // No row ever came (the server didn't answer in time): it just fades away.
-  f.drop = setTimeout(function () { if (!f.gone) { f.gone = true; g.animate([{ opacity: 1 }, { opacity: 0 }], 200).onfinish = function () { g.remove(); }; } }, 4000);
-  return f;
-}
-// One short-lived thing on the page, animated by the graphics card, then gone.
-function puff(cls, text, frames, ms, delay) {
-  var e = el('div', cls, text);
-  document.body.append(e);
-  e.animate(frames, { duration: ms, delay: delay || 0, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' }).onfinish = function () { e.remove(); };
-}
-function fly(row, f) {
-  if (!f || f.gone) return;
-  f.gone = true; clearTimeout(f.drop);
-  var name = row.querySelector('.name'), card = $('jobsCard'), waited = 0;
-  row.classList.add('landing');
-  (function wait() { // until the bucket is there: the card shown, the row open
-    var ready = !card.hidden && !row.classList.contains('grow') && !card.classList.contains('anim') && row.isConnected;
-    var r = ready && name.getBoundingClientRect();
-    if (!r || !r.width) {
-      // Never dive towards nothing: a hidden title says it's at 0,0, the window's top corner
-      // (that's where the link flew when Windows was slow to grow the window). Keep hovering;
-      // if the row never shows (4 s), fade out where it is.
-      if ((waited += 16) < 4000) return requestAnimationFrame(wait);
-      row.classList.remove('landing');
-      $('links').classList.remove('flying');
-      f.g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }).onfinish = function () { f.g.remove(); };
-      return;
-    }
-    // The card may still be rising into place (a short slide): aim where it's going to be.
-    var m = new DOMMatrix(getComputedStyle(card).transform);
-    dive({ left: r.left - m.m41, top: r.top - m.m42 });
-  })();
-  function dive(r) {
-    var D = 560, N = 16, frames = [], tx = r.left, ty = r.top;
-    // The arc: a curve from where it hovers, up a little, down into the title.
-    var cx = f.x + (tx - f.x) * .35, cy = Math.min(f.y, ty) - 34;
-    function at(u) {
-      var e = u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2, a = 1 - e;
-      return { x: a * a * f.x + 2 * a * e * cx + e * e * tx, y: a * a * f.y + 2 * a * e * cy + e * e * ty, e: e };
-    }
-    var prev = at(0);
-    for (var i = 0; i <= N; i++) {
-      var u = i / N, p = at(u), nx = at(Math.min(1, u + .04));
-      var lean = i === N ? 0 : Math.max(-9, Math.min(9, (nx.y - p.y) * 1.2)) * (1 - u); // leans the way it goes
-      frames.push({ offset: u, transform: 'translate(' + p.x + 'px,' + p.y + 'px) rotate(' + lean + 'deg) scale(' + (1.04 - .04 * p.e) + ')', opacity: u < .86 ? 1 : 1 - (u - .86) / .14 });
-      prev = p;
-    }
-    f.bob.cancel();
-    f.g.getAnimations().forEach(function (a) { a.cancel(); });
-    setTimeout(function () { $('links').classList.remove('flying'); }, D * .45);
-    f.g.animate(frames, { duration: D, fill: 'forwards' }).onfinish = function () { f.g.remove(); };
-    // A few big notes left behind on the way, drifting up as they fade.
-    [.22, .42, .62, .8].forEach(function (u, k) {
-      var p = at(u), x = p.x + 20 + k * 22, y = p.y - 12, r0 = (k % 2 ? -1 : 1) * (12 + k * 6);
-      puff('spark', NOTES[k], [
-        { transform: 'translate(' + x + 'px,' + y + 'px) scale(.4) rotate(0deg)', opacity: 0 },
-        { transform: 'translate(' + x + 'px,' + (y - 6) + 'px) scale(1) rotate(' + r0 / 2 + 'deg)', opacity: .95, offset: .25 },
-        { transform: 'translate(' + (x + (k % 2 ? -10 : 10)) + 'px,' + (y - 30) + 'px) scale(1.1) rotate(' + r0 + 'deg)', opacity: 0 }], 750, D * u);
-    });
-    // Splash: the title shows, a ring spreads on the water.
-    setTimeout(function () {
-      row.classList.remove('landing');
-      setTimeout(fitLater, 400); // the window gives back what it grew too much, once it's calm
-      puff('ripple', null, [{ transform: 'translate(' + (tx + 26) + 'px,' + (ty + 10) + 'px) scale(.3)', opacity: .7 },
-        { transform: 'translate(' + (tx + 26) + 'px,' + (ty + 10) + 'px) scale(3.2)', opacity: 0 }], 650);
-    }, D * .86);
-  }
-}
 function syncFold(jobs) {
   var html = foldSummary(jobs);
   if ($('lsum').innerHTML !== html) $('lsum').innerHTML = html;
   if (fold.count < 0) { if (jobs.length) setFold(false, false); else setGone(true, false); }  // first look
   else if (jobs.length && fold.gone) setGone(false, true);                // the first link went in
   else if (jobs.length > fold.count && fold.on) setFold(false, true);     // another one, while folded
-  else if (!jobs.length && !fold.gone && !game.open) setGone(true, true); // the list was cleared
+  else if (!jobs.length && !fold.gone) setGone(true, true); // the list was cleared
   fold.count = jobs.length;
 }
 // The list card goes away (fades, then the window shrinks to the first card) or comes in (the
@@ -1287,6 +1039,7 @@ function setGone(on, animate) {
   }
   fold.on = false;
   readyH = 0;
+  comeAt = Date.now();
   card.classList.remove('folded', 'anim', 'leave');
   card.style.height = '';
   var show = function () {
@@ -1311,7 +1064,7 @@ function foldedHeight() {
 }
 // The window fits what's in it, no empty space under the list: it grows when a download is
 // added (up to the full height, then the list scrolls) and shrinks when rows get shorter or go.
-// The game gets the full height. Sent only when the height really changes.
+// Sent only when the height really changes.
 function mainPad() { return parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom); }
 function openHeight() { // the open list card's natural height, measured without painting
   var card = $('jobsCard'), list = $('list');
@@ -1319,10 +1072,9 @@ function openHeight() { // the open list card's natural height, measured without
   card.hidden = false; card.classList.remove('folded', 'leave', 'come', 'anim'); card.style.height = '';
   // Parts that are opening or folding right now count at the height they're going to.
   var moving = [];
-  list.querySelectorAll('.job.grow,.live.slide').forEach(function (e) {
+  list.querySelectorAll('.job.grow').forEach(function (e) {
     moving.push([e, e.style.height, e.style.paddingTop, e.style.paddingBottom, e.hidden]);
     e.style.height = e.style.paddingTop = e.style.paddingBottom = '';
-    if (e.classList.contains('live')) e.hidden = !e._shown;
   });
   var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + mainPad();
   moving.forEach(function (m) { m[0].style.height = m[1]; m[0].style.paddingTop = m[2]; m[0].style.paddingBottom = m[3]; m[0].hidden = m[4]; });
@@ -1334,10 +1086,10 @@ var lastFit = 0;
 // list will need (it's transparent below the cards, so nothing shows), so that Download
 // doesn't have to wait for Windows to resize the window: that wait, and the resizing during
 // the animation, was the stutter. An empty box gives the room back.
-var ROW_GUESS = 380; // a downloading row (measured on the stand: ~360) and a little to spare
-var readyH = 0;
+var ROW_GUESS = 160; // the first row (74 px) and the list card around it (measured on the stand)
+var readyH = 0, comeAt = 0;
 function readyWindow() {
-  if (!APP || !fold.gone || game.open) return;
+  if (!APP || !fold.gone) return;
   var want = $('links').value.trim() ? openHeight() + ROW_GUESS : 0;
   if (want === readyH) return;
   readyH = want;
@@ -1346,7 +1098,6 @@ function readyWindow() {
 function windowFit() {
   if (!APP) return;
   if ($('jobsCard').classList.contains('leave')) return; // folding away: the window follows at the end
-  if (game.open) { if (lastFit !== -1) { lastFit = -1; api('/api/window', { text: 'full' }).catch(function () {}); } return; }
   var n;
   if (fold.gone || fold.on) {
     // From the layout, not getBoundingClientRect: at start the cards are still rising into place
@@ -1359,8 +1110,11 @@ function windowFit() {
   // While something in the list opens or folds, the window may grow at once (it's transparent
   // below the cards, so that's invisible) but shrinks only once it's all settled (each part
   // fits it again at its end): resizing the window every frame is what made it stutter.
-  // A link in the air counts too (its row is .landing): a resize mid-flight was a stutter.
-  if (n < innerHeight - 1 && $('list').querySelector('.job.grow,.job.bye,.job.landing,.live.slide')) return;
+  // (Also not while the list card is coming in: the room made ahead is given back after.)
+  if (n < innerHeight - 1 && ($('list').querySelector('.job.grow,.job.bye') || Date.now() - comeAt < 600)) {
+    if (Date.now() - comeAt < 600) setTimeout(fitLater, 650);
+    return;
+  }
   // Asked already and the window has it (or as much as fits): nothing to do. If Windows didn't
   // apply it (it happens when a few come at once), ask again.
   if (n === lastFit && (Math.abs(innerHeight - n) <= 1 || innerHeight >= 800)) return;
@@ -1409,237 +1163,6 @@ if (APP) {
   if (window.ResizeObserver) new ResizeObserver(fitLater).observe(document.querySelector('.card.form'));
 }
 
-// A little game while it downloads (ТЯГА's window only): knock out the bricks with a ball.
-// It takes the list's place in the list card, so the line on top keeps saying how the downloads
-// go. It is never cut off: a finished download is said in that top line for a few seconds
-// (not in the game itself), and the game stays until you close it (the button again, or Esc). Closed, hidden or folded,
-// it pauses and keeps where you were; a click goes on. The bricks are a soft rainbow (the
-// owner asked for colour), the ball and paddle the text colour.
-var game = { open: false };
-(function () {
-  if (!APP) return;
-  var box = $('game'), cv = $('gameCv'), cx = cv.getContext('2d');
-  var W = 0, H = 0, dpr = 1, fg = '#eee', dim = '#888', ok = '#51cf66', err = '#ff6b6b';
-  var COLS = 10, ROWS = 5, GAP = 6, SIDE = 14, TOP = 34, BH = 16;
-  var pad = { x: 0, w: 88, h: 10 }, ball = { x: 0, y: 0, vx: 0, vy: 0, r: 6, stuck: true };
-  var bricks = [], lives = 3, score = 0, level = 1, mode = 'ready', keys = {}, raf = 0, last = 0;
-
-  function colors() {
-    var css = getComputedStyle(document.documentElement);
-    fg = css.getPropertyValue('--fg').trim(); dim = css.getPropertyValue('--dim').trim();
-    ok = css.getPropertyValue('--ok').trim(); err = css.getPropertyValue('--err').trim();
-  }
-  themeHooks.push(colors);
-  function speed() { return Math.min(460, 250 * (1 + 0.07 * (level - 1))); } // px/s: calm at first, a bit faster each level
-  function layout() {
-    var r = box.getBoundingClientRect();
-    if (!r.width) return false;
-    var oldW = W;
-    W = r.width; H = r.height; dpr = window.devicePixelRatio || 1;
-    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-    var bw = (W - 2 * SIDE - GAP * (COLS - 1)) / COLS;
-    bricks.forEach(function (b, i) {
-      b.x = SIDE + (i % COLS) * (bw + GAP); b.y = TOP + Math.floor(i / COLS) * (BH + GAP); b.w = bw; b.h = BH;
-    });
-    pad.w = Math.max(70, Math.min(110, W / 8));
-    pad.y = H - 26;
-    if (oldW) pad.x = pad.x / oldW * W; else pad.x = (W - pad.w) / 2;
-    pad.x = Math.max(0, Math.min(W - pad.w, pad.x));
-    if (ball.stuck) stick();
-    return true;
-  }
-  function newBricks() {
-    bricks = [];
-    for (var i = 0; i < COLS * ROWS; i++) bricks.push({ alive: true, fade: 0 });
-    layout();
-  }
-  function stick() { ball.stuck = true; ball.x = pad.x + pad.w / 2; ball.y = pad.y - ball.r - 1; }
-  function launch() {
-    var a = (Math.random() - 0.5) * 0.6; // a little to the side, never straight up
-    ball.stuck = false; ball.vx = speed() * Math.sin(a); ball.vy = -speed() * Math.cos(a);
-  }
-  function restart() { lives = 3; score = 0; level = 1; newBricks(); stick(); }
-  function click() {
-    if (mode === 'over') { restart(); mode = 'ready'; return; }
-    if (mode === 'ready' || mode === 'paused') { mode = 'play'; if (ball.stuck) launch(); }
-    else if (mode === 'play' && ball.stuck) launch();
-  }
-  function pause() { if (mode === 'play') mode = 'paused'; }
-
-  function step(dt) {
-    var kv = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0);
-    if (kv) { pad.x = Math.max(0, Math.min(W - pad.w, pad.x + kv * 560 * dt)); aim = null; }
-    else if (aim != null) pad.x += (aim - pad.x) * Math.min(1, dt * 22);
-    bricks.forEach(function (b) { if (b.fade > 0) b.fade = Math.max(0, b.fade - dt / 0.18); });
-    if (mode !== 'play') { if (ball.stuck) stick(); return; }
-    if (ball.stuck) { stick(); return; }
-    var n = Math.ceil(speed() * dt / 3), h = dt / n;
-    for (var k = 0; k < n; k++) {
-      ball.x += ball.vx * h; ball.y += ball.vy * h;
-      if (ball.x < ball.r) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
-      if (ball.x > W - ball.r) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
-      if (ball.y < ball.r) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
-      // The paddle: where it hits says where it goes (the middle up, the edges to the side).
-      if (ball.vy > 0 && ball.y + ball.r >= pad.y && ball.y - ball.r <= pad.y + pad.h &&
-          ball.x >= pad.x - ball.r && ball.x <= pad.x + pad.w + ball.r) {
-        var off = Math.max(-1, Math.min(1, (ball.x - (pad.x + pad.w / 2)) / (pad.w / 2))), a = off * 1.05;
-        ball.vx = speed() * Math.sin(a); ball.vy = -speed() * Math.cos(a);
-        ball.y = pad.y - ball.r;
-      }
-      if (ball.y - ball.r > H) { // missed
-        if (--lives <= 0) { mode = 'over'; lives = 0; }
-        stick();
-        if (mode === 'play') mode = 'ready';
-        return;
-      }
-      for (var i = 0; i < bricks.length; i++) {
-        var b = bricks[i];
-        if (!b.alive) continue;
-        var nx = Math.max(b.x, Math.min(ball.x, b.x + b.w)), ny = Math.max(b.y, Math.min(ball.y, b.y + b.h));
-        var dx = ball.x - nx, dy = ball.y - ny;
-        if (dx * dx + dy * dy > ball.r * ball.r) continue;
-        b.alive = false; b.fade = 1;
-        score += 10 * (ROWS - Math.floor(i / COLS));
-        // Off the side it went into less deeply.
-        var px = Math.min(ball.x + ball.r - b.x, b.x + b.w - (ball.x - ball.r));
-        var py = Math.min(ball.y + ball.r - b.y, b.y + b.h - (ball.y - ball.r));
-        if (px < py) ball.vx = -ball.vx; else ball.vy = -ball.vy;
-        break;
-      }
-      if (!bricks.some(function (b) { return b.alive; })) { level++; newBricks(); stick(); mode = 'ready'; return; }
-    }
-  }
-
-  function text(t, x, y, size, color, align) {
-    cx.font = size + 'px system-ui,sans-serif'; cx.fillStyle = color; cx.textAlign = align || 'center';
-    cx.fillText(t, x, y);
-  }
-  function rrect(x, y, w, h, r) { cx.beginPath(); cx.roundRect ? cx.roundRect(x, y, w, h, r) : cx.rect(x, y, w, h); cx.fill(); }
-  function draw() {
-    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cx.clearRect(0, 0, W, H);
-    cx.textBaseline = 'middle';
-    // A soft rainbow, one colour a row (pastel in the dark theme, deeper in the light one).
-    var light = !isDark();
-    var ROW = light ? ['#e57373', '#ffa726', '#f9c22e', '#66bb6a', '#42a5f5'] : ['#ff8a80', '#ffb74d', '#ffe082', '#a5d6a7', '#90caf9'];
-    bricks.forEach(function (b, i) {
-      if (!b.alive && !b.fade) return;
-      var f = b.alive ? 1 : b.fade, s = b.alive ? 0 : (1 - f) * 3;
-      cx.globalAlpha = 0.9 * f; cx.fillStyle = ROW[Math.floor(i / COLS)];
-      rrect(b.x + s, b.y + s / 2, b.w - 2 * s, b.h - s, 4);
-    });
-    cx.globalAlpha = 0.85; cx.fillStyle = fg; rrect(pad.x, pad.y, pad.w, pad.h, 5);
-    cx.globalAlpha = 1; cx.beginPath(); cx.arc(ball.x, ball.y, ball.r, 0, 7); cx.fill();
-    text('Level ' + level + '   Score ' + score, SIDE, 17, 12.5, dim, 'left');
-    text('Balls left ' + lives, W - SIDE, 17, 12.5, dim, 'right');
-    var msg = mode === 'ready' ? (ball.stuck && level > 1 && score && bricks.every(function (b) { return b.alive; }) ? 'Level ' + level + '. ' : '') + 'Click to launch the ball'
-      : mode === 'paused' ? 'Paused. Click to go on'
-      : mode === 'over' ? 'Game over, score ' + score + '. Click to play again' : '';
-    if (msg) {
-      var y = Math.min(H - 64, TOP + ROWS * (BH + GAP) + (pad.y - TOP - ROWS * (BH + GAP)) / 2);
-      text(msg, W / 2, y, 15, fg);
-      if (mode !== 'over') text('Move with the mouse or ← →. Esc closes the game, it stays where you left it', W / 2, y + 24, 12.5, dim);
-    }
-    box.classList.toggle('playing', mode === 'play');
-  }
-  function frame(now) {
-    raf = 0;
-    if (!game.open) return;
-    if (document.hidden || $('jobsCard').classList.contains('folded')) pause();
-    var dt = Math.min(0.033, (now - last) / 1000); last = now;
-    if (!W && !layout()) { raf = requestAnimationFrame(frame); return; }
-    step(dt); draw();
-    raf = requestAnimationFrame(frame);
-  }
-  function run() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } }
-
-  // The paddle glides to the mouse (quickly, but never jumps), and follows it over the whole
-  // window, so coming back into the game doesn't snap it across.
-  var aim = null;
-  addEventListener('mousemove', function (e) {
-    if (!game.open) return;
-    var r = cv.getBoundingClientRect();
-    aim = Math.max(0, Math.min(W - pad.w, e.clientX - r.left - pad.w / 2));
-  });
-  cv.addEventListener('mousedown', function (e) { e.preventDefault(); click(); });
-  cv.addEventListener('mouseleave', pause); // reaching for something else: the ball waits
-  addEventListener('blur', pause);
-  addEventListener('keydown', function (e) {
-    if (!game.open || /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName)) return;
-    if (e.key === 'Escape') { e.preventDefault(); game.toggle(false); return; }
-    if (e.key === ' ') { e.preventDefault(); click(); return; }
-    if (/^(ArrowLeft|ArrowRight|a|d)$/.test(e.key)) { keys[e.key] = true; e.preventDefault(); }
-  });
-  addEventListener('keyup', function (e) { delete keys[e.key]; });
-  if (window.ResizeObserver) new ResizeObserver(function () { if (game.open) layout(); }).observe(box);
-
-  // Switching: the window grows first if it must (it's transparent, so that's invisible); the
-  // list fades out, the card glides to its new height and the game fades in; back the same way.
-  var still = function () { return matchMedia('(prefers-reduced-motion: reduce)').matches; };
-  var switchN = 0; // a newer switch cancels the steps of an older one
-  function glide(card, from, done) {
-    var to = card.offsetHeight;
-    if (still() || Math.abs(to - from) < 2) return done();
-    card.style.height = from + 'px';
-    void card.offsetHeight;
-    card.classList.add('anim');
-    card.style.height = to + 'px';
-    setTimeout(function () { card.classList.remove('anim'); card.style.height = ''; done(); }, 270);
-  }
-  function fadeOut(e, then) {
-    if (still()) return then();
-    e.classList.add('fadeout');
-    setTimeout(function () { e.classList.remove('fadeout'); then(); }, 140);
-  }
-  game.toggle = function (on) {
-    var card = $('jobsCard'), list = $('list'), my = ++switchN;
-    game.open = on;
-    keys = {}; aim = null;
-    syncPlay();
-    if (on) {
-      colors();
-      if (!bricks.length) restart();
-      pause();
-      var from = card.offsetHeight;
-      lastFit = -1;
-      api('/api/window', { text: 'full' }).catch(function () {}).then(function () {
-        return new Promise(function (ok) { var t = setTimeout(ok, 250); addEventListener('resize', function f() { removeEventListener('resize', f); clearTimeout(t); setTimeout(ok, 30); }); });
-      }).then(function () {
-        if (my !== switchN) return;
-        fadeOut(list, function () {
-          if (my !== switchN) return;
-          list.hidden = true;
-          card.classList.add('gaming');
-          box.hidden = false;
-          W = 0; layout();
-          run();
-          glide(card, from, function () { if (my === switchN) layout(); });
-        });
-      });
-    } else {
-      pause();
-      fadeOut(box, function () {
-        if (my !== switchN) return;
-        var from = card.offsetHeight;
-        box.hidden = true;
-        card.classList.remove('gaming');
-        list.hidden = false;
-        list.classList.remove('fadein'); void list.offsetWidth; list.classList.add('fadein');
-        if (!(state.jobs || []).length) return setGone(true, true); // the list was cleared meanwhile
-        glide(card, from, function () { if (my === switchN) windowFit(); });
-      });
-    }
-  };
-  $('play').onclick = function () { game.toggle(!game.open); };
-})();
-// The button shows while something downloads, and while the game is open.
-function syncPlay() {
-  if (!APP) return;
-  var busy = (state.jobs || []).some(function (j) { return j.status === 'queued' || j.status === 'running'; });
-  $('play').hidden = !(busy || game.open);
-  setText($('playT'), game.open ? 'Back to the list' : 'Play while you wait');
-}
-
 function refresh() {
   return api('/api/state')
     .then(function (s) {
@@ -1677,13 +1200,13 @@ var waveTarget = {}, waveState = {};
   var acc = css.getPropertyValue('--acc').trim();
   themeHooks.push(function () { acc = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(); });
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
-  // Livelier than Material 3's default (the owner asked): a little higher, 1.6 wavelengths a second.
-  var THICK = 4, AMP = 5, LEN = 30, GAP = 7;   // px: line, wave height (half), wavelength, gap
-  var PACE = 1.6 * 2 * Math.PI;                 // rad/s
+  // A thin bar in a compact row: it shows progress, it isn't a show.
+  var THICK = 3, AMP = 2.5, LEN = 22, GAP = 6;  // px: line, wave height (half), wavelength, gap
+  var PACE = 1.2 * 2 * Math.PI;                 // rad/s: 1.2 wavelengths a second
   // The spring: very soft (progress comes in big steps every 0.7 s; stiffer ones lurched in a
   // simulation), critically damped. Only when the bar is far behind (a small file that's
   // already done) does it get stiffer, so it doesn't crawl towards 100 % after the fact.
-  function spring(gap) { var k = 4 + Math.min(20, Math.max(0, gap - 15) * .4); return [k, 2 * Math.sqrt(k)]; }
+  function spring(gap) { var k = 4 + Math.min(60, Math.max(0, gap - 12) * 1.2); return [k, 2 * Math.sqrt(k)]; }
   var dim = css.getPropertyValue('--dim').trim();
   themeHooks.push(function () { dim = getComputedStyle(document.documentElement).getPropertyValue('--dim').trim(); });
   function easeIO(u) { return u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; }
@@ -1715,7 +1238,7 @@ var waveTarget = {}, waveState = {};
       var f = st.shown / 100;
       // Waves as soon as the bar is a couple of bends long (not from 10 %), settles flat at the end.
       var len = (w - THICK) * f;
-      var ampWant = still || f >= 0.97 ? 0 : AMP * Math.max(0, Math.min(1, (len - 14) / 40));
+      var ampWant = still || f >= 0.97 ? 0 : AMP * Math.max(0, Math.min(1, (len - 10) / 30));
       st.amp += (ampWant - st.amp) * Math.min(1, dt * 4);
       most = Math.max(most, f);
 
@@ -1763,119 +1286,10 @@ var waveTarget = {}, waveState = {};
       cx.stroke();
       cx.globalAlpha = 1;
     });
-    // The background speeds up with the progress, smoothed (like Morphe's patcher screen).
-    fx.energy += (most - fx.energy) * Math.min(1, dt * 0.8);
-    // Nothing to draw and the background has calmed down, or the window is hidden: sleep.
-    if ((drawn || fx.energy > 0.005) && !state.hidden) raf = requestAnimationFrame(frame);
-    else if (!drawn) fx.energy = 0;
+    // Nothing to draw, or the window is hidden: sleep (render() wakes it).
+    if (drawn && !state.hidden) raf = requestAnimationFrame(frame);
   }
   anim.loops.push(function () { if (!raf && !state.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } });
 })();
 
-// Background: notes and play signs falling slowly and swaying. Far ones are small, faint and slow,
-// near ones bigger and faster. They shy away from the mouse, and fall faster while something
-// downloads (fx.energy comes from the progress wave). No bursts or confetti: calm, not a show.
-// With "reduce motion" on in the system nothing moves.
-var fx = { energy: 0 };
-// quiet: the first card, where you type: fewer notes, fainter, and fainter still over the
-// box and the buttons, so they never get in the way of reading.
-function falling(cv, quiet) {
-  var cx = cv.getContext('2d'), calm = [];
-  var W, H, ox = 0, oy = 0, dpr, items = [], color, mx = -999, my = -999;
-  var GLYPHS = ['♪', '♫', '♩', '▶', '▶', '•'];
-  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function size() {
-    dpr = 1; // a soft background doesn't need sharp pixels; on a 2× screen this is 4× less work
-    // The notes fill their box: the whole page in the browser, the list card in ТЯГА's window.
-    var r = cv.getBoundingClientRect();
-    W = Math.round(r.width) || innerWidth; H = Math.round(r.height) || innerHeight; ox = r.left; oy = r.top;
-    cv.width = W * dpr; cv.height = H * dpr;
-    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var css = getComputedStyle(document.documentElement);
-    color = css.getPropertyValue('--acc').trim() || '#ff6b2c';
-    sprites = {};
-    var want = Math.round(W * H / (quiet ? 70000 : 38000));
-    if (quiet) calm = Array.prototype.map.call(cv.parentNode.parentNode.querySelectorAll('.input,.opts,.chips,header>div,.acct'), function (e) {
-      var q = e.getBoundingClientRect(); return [q.left - ox - 10, q.top - oy - 10, q.right - ox + 10, q.bottom - oy + 10];
-    });
-    while (items.length < want) items.push(spawn(true));
-    items.length = want;
-  }
-  // Each note is drawn once into a little picture (per glyph and size) and then only stamped:
-  // stamping a picture is far cheaper than laying out text every frame, and looks the same.
-  var sprites = {};
-  function sprite(g, s) {
-    var k = g + s, sp = sprites[k];
-    if (sp) return sp;
-    sp = sprites[k] = document.createElement('canvas');
-    sp.width = sp.height = Math.ceil(s * 1.6);
-    var c = sp.getContext('2d');
-    c.fillStyle = color; c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.font = s + 'px system-ui,sans-serif';
-    c.fillText(g, sp.width / 2, sp.height / 2);
-    return sp;
-  }
-  function spawn(anywhere) {
-    var z = Math.random(); // 0 = far, 1 = near
-    return {
-      g: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
-      x: Math.random() * W, y: anywhere ? Math.random() * H : -40, ox: 0,
-      z: z, s: 10 + Math.round(z * 9) * 2, v: 12 + z * 34, // size px (even: fewer pictures), fall speed px/s
-      a: 0.07 + z * 0.2, sway: 10 + Math.random() * 25, f: 0.3 + Math.random() * 0.5,
-      ph: Math.random() * 6.28, r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.6,
-    };
-  }
-  addEventListener('mousemove', function (e) { mx = e.clientX - ox; my = e.clientY - oy; });
-  addEventListener('mouseout', function (e) { if (!e.relatedTarget) mx = my = -999; });
-  var last = performance.now(), raf = 0;
-  function frame(now) {
-    raf = 0;
-    // At rest the notes fall at most ~46 px a second: 30 pictures a second look the same as
-    // 60 and cost half. Full rate while something downloads (they speed up then).
-    if (fx.energy < 0.05 && now - last < 30 && !still) { raf = requestAnimationFrame(frame); return; }
-    var dt = Math.min(0.05, (now - last) / 1000), t = now / 1000;
-    last = now;
-    var boost = 1 + fx.energy * 2; // 1× at rest, up to 3× as a download nears its end
-    cx.setTransform(1, 0, 0, 1, 0, 0);
-    cx.clearRect(0, 0, W, H);
-    if (state.hidden) return; // in the tray: sleep until render() wakes it
-    // Its card isn't on screen (the list card when the list is empty): don't draw, look again
-    // in a quarter of a second. It used to draw a whole window of notes nobody could see.
-    if (!cv.offsetParent) { cx.clearRect(0, 0, W, H); raf = -1; setTimeout(function () { if (raf === -1) { last = performance.now(); raf = requestAnimationFrame(frame); } }, 250); return; }
-    if (game.open && !quiet) { // the game covers the list card: nothing to see
-      cx.globalAlpha = 1;
-      if (!still) raf = requestAnimationFrame(frame);
-      return;
-    }
-    items.forEach(function (p, i) {
-      if (!still) {
-        p.y += p.v * boost * dt; p.r += p.vr * boost * dt;
-        // Shy of the cursor: pushed sideways, then drift back to their line.
-        var x = p.x + p.ox, dx = x - mx, dy = p.y - my, d2 = dx * dx + dy * dy;
-        if (d2 < 140 * 140) p.ox += (dx >= 0 ? 1 : -1) * (1 - Math.sqrt(d2) / 140) * 260 * dt;
-        p.ox *= Math.pow(0.4, dt);
-      }
-      if (p.y > H + 40) p = items[i] = spawn(false);
-      var sp = sprite(p.g, p.s), c = Math.cos(p.r), s = Math.sin(p.r);
-      var px = p.x + p.ox, a = p.a;
-      if (quiet) {
-        a *= 0.75;
-        for (var q = 0; q < calm.length; q++) if (px > calm[q][0] && px < calm[q][2] && p.y > calm[q][1] && p.y < calm[q][3]) { a *= 0.3; break; }
-      }
-      cx.globalAlpha = a;
-      cx.setTransform(c, s, -s, c, p.x + p.ox + Math.sin(t * p.f + p.ph) * p.sway, p.y);
-      cx.drawImage(sp, -sp.width / 2, -sp.height / 2);
-    });
-
-    if (!still) raf = requestAnimationFrame(frame);
-  }
-  addEventListener('resize', size);
-  themeHooks.push(size);
-  if (window.ResizeObserver) new ResizeObserver(size).observe(cv.parentNode);
-  size();
-  raf = requestAnimationFrame(frame);
-  anim.loops.push(function () { if (!raf && !still && !state.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } });
-}
-falling($('fall'));
-if (APP) falling(document.querySelector('.card.form>.bg>canvas'), true);
 </script></body></html>

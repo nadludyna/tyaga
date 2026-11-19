@@ -113,17 +113,22 @@ Also: `gofmt -l .` (CI fails on it, import order included), `go vet ./...` for l
   like Material 3's secondary container). Not frames, not glows around every item.
 - **Plain words for people.** No file paths, video ids, `[youtube]`-style tags or stack traces
   on the page. Errors say what happened and what to do.
-- **Playful only as an answer to the owner's own action**, and short (under a second): sending
-  a link casts the fish, the link flies into its row with a trail of notes and a ripple. What
-  happens by itself (the background) stays calm. Only transform and opacity, no layout.
-- **The progress wave is lively** (the owner wants it energetic, not Material 3's calm default):
-  a wave 5 px high rolling 1.6 bends a second, waving as soon as the bar is a couple of bends
-  long, flat only at the very end. Before there's a number (starting, YouTube's pause) a piece
-  of wave runs along the track instead of a flat line. The bar follows the progress with a
-  soft, critically damped spring (stiffer only when it's far behind): progress arrives in big
-  steps every 0.7 s, and stiff springs or "go to the new value" made it lurch (measured in a
-  simulation). The background speeds up with the progress, 1× → 3×, like Morphe's patcher
-  screen. Respect "reduce motion".
+- **A downloader, not a show.** The window answers four questions and nothing else: where to
+  paste, what I'll get, is it coming and how long, where is it. One compact row per download
+  (picture, title and state; the bar and "3 MB of 5 MB · 1.2 MB/s · 0:02 left", or in words
+  what it's doing), no log of steps, no decorations. Rejected after trying: falling notes, a
+  link flying into its row, a game, a step-by-step log (noise, and the window got as tall as
+  the screen).
+- **Nothing moves by itself while nothing happens.** The window is transparent, so anything
+  that moves makes Windows redraw what's under it (DWM): idle animations cost 5–17 % of the
+  CPU on the owner's PC. Motion only while something downloads (the bar) and as the answer to
+  a click (hover, press, a row opening).
+- **The progress bar** is a thin Material 3 wavy line: 3 px, a gentle wave, waving once the
+  bar is a couple of bends long, flat at the end. Before there's a number (starting, YouTube's
+  pause) a piece of wave runs along the track. The bar follows the progress with a soft,
+  critically damped spring (stiffer only when far behind): progress arrives in big steps every
+  0.7 s, and stiff springs or "go to the new value" made it lurch (measured in a simulation).
+  Respect "reduce motion".
 - **Light on weak laptops.** No `backdrop-filter` over the animated background; check with the
   CPU slowed down (Chrome devtools, 6×). The download list is updated in place, never rebuilt
   (rebuilding restarts animations and makes pictures blink).

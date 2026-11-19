@@ -353,6 +353,18 @@ func TestProgressFragments(t *testing.T) {
 	}
 }
 
+func TestNoRepeatedStep(t *testing.T) {
+	j := &Job{Options: Options{Mode: "audio"}}
+	j.addLog("[youtube] dQw4w9WgXcQ: Downloading tv client config")
+	j.addLog("[youtube] [jsc:deno] Solving JS challenges using deno")
+	j.addLog("[youtube] dQw4w9WgXcQ: Downloading tv player API JSON")
+	j.addLog(`[VideoRemuxer] Not remuxing media file "C:\\x\\Song.mp4"; already is in target format mp4`)
+	want := []string{"Asking YouTube for the formats", "Passing YouTube's check"}
+	if !slices.Equal(j.Log, want) {
+		t.Errorf("%q", j.Log)
+	}
+}
+
 func TestFormatNumberHidden(t *testing.T) {
 	j := &Job{Options: Options{Mode: "video"}}
 	j.addLog(`[download] Destination: C:\\x\\Song.f299.mp4`)

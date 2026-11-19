@@ -113,6 +113,7 @@ type Job struct {
 	Log      []string `json:"log"`      // the last few things yt-dlp said it's doing
 	Progress float64  `json:"progress"` // 0–100 for the whole download (a playlist counts as one)
 	Speed    string   `json:"speed"`
+	Size     string   `json:"size"`  // how much of the current file: "3 MB of 5 MB", "8 MB so far" (pieces)
 	Cover    int      `json:"cover"` // > 0: the finished file has a cover (/api/cover); changes when it does
 	Wait     int      `json:"wait"`  // seconds YouTube asked yt-dlp to wait before downloading; 0 = not waiting
 	Pos      int      `json:"pos"`   // in a playlist: which video this is (1…Of) and how many there are,
@@ -490,7 +491,7 @@ func onLine(j *Job, line string) {
 	case strings.HasPrefix(line, "THUMB|"):
 		j.Thumb = thumbURL(line[6:])
 	case strings.HasPrefix(line, "[ExtractAudio]") || strings.HasPrefix(line, "[Merger]"):
-		j.Speed, j.ETA = "", "" // downloading is over for this one, converting now
+		j.Speed, j.ETA, j.Size = "", "", "" // downloading is over for this one, converting now
 		j.addLog(line)
 	case strings.HasPrefix(line, "PROG|"):
 		j.Wait = 0
@@ -529,11 +530,15 @@ func onLine(j *Job, line string) {
 		if frags > 0 && frag >= 0 {
 			now = append(now, fmt.Sprintf("part %s of %s", thousands(frag), thousands(frags)))
 		}
+		j.Size = ""
 		switch {
 		case done > 0 && total > 0:
-			now = append(now, sizeText(done)+" of "+sizeText(total))
+			j.Size = sizeText(done) + " of " + sizeText(total)
 		case done > 0: // in parts the full size isn't known yet
-			now = append(now, sizeText(done)+" so far")
+			j.Size = sizeText(done) + " so far"
+		}
+		if j.Size != "" {
+			now = append(now, j.Size)
 		}
 		j.Now = strings.Join(now, " · ")
 		if !math.IsNaN(f) {
@@ -584,13 +589,13 @@ func onLine(j *Job, line string) {
 		var n, of int
 		if _, err := fmt.Sscanf(line, "[download] Downloading item %d of %d", &n, &of); err == nil {
 			j.Pos, j.Of = n, of
-			j.Speed, j.ETA, j.Wait = "", "", 0
+			j.Speed, j.ETA, j.Size, j.Wait = "", "", "", 0
 			j.part, j.lastB = 0, 0
 			j.Progress = math.Max(j.Progress, j.overall(0))
 		}
 	case strings.HasPrefix(line, "[") || strings.HasPrefix(line, "WARNING:"):
 		if m := sleepRe.FindStringSubmatch(line); m != nil && strings.HasPrefix(line, "[download]") {
-			j.Wait, j.Speed, j.ETA = int(num(m[1])+0.5), "", "" // nothing is downloading during the pause
+			j.Wait, j.Speed, j.ETA, j.Size = int(num(m[1])+0.5), "", "", "" // nothing is downloading during the pause
 			j.addLog(line)
 			j.Now = fmt.Sprintf("Waiting: YouTube asks for a %d s pause", j.Wait)
 			return
@@ -657,6 +662,13 @@ func logLine(line string) string {
 		return "" // shown as "waiting" with the seconds, not as a log line
 	case tag == "ExtractAudio" && strings.HasPrefix(line, "Destination: "):
 		return "Converting to " + strings.ToUpper(strings.TrimPrefix(filepath.Ext(line), "."))
+	case tag == "VideoRemuxer" && strings.HasPrefix(line, "Not remuxing"), strings.HasPrefix(tag, "Fixup"),
+		tag == "MoveFiles", tag == "VideoConvertor" && strings.HasPrefix(line, "Not converting"):
+		return "" // yt-dlp's housekeeping: "already in the right format", fixing up a container
+	case tag == "VideoRemuxer" || tag == "VideoConvertor":
+		return "Converting to MP4"
+	case tag == "SponsorBlock" || tag == "ModifyChapters":
+		return "Cutting out the sponsors"
 	case tag == "Merger":
 		return "Joining the picture and the sound"
 	case tag == "EmbedThumbnail":
@@ -696,8 +708,12 @@ func (j *Job) addLog(line string) {
 	if r := []rune(line); len(r) > 140 {
 		line = string(r[:139]) + "…"
 	}
-	if n := len(j.Log); n > 0 && j.Log[n-1] == line {
-		return
+	// yt-dlp asks YouTube for the formats twice (before and after its check): a step that was
+	// just there isn't listed again. (Further back it's a new round: the next video of a playlist.)
+	for i := max(0, len(j.Log)-2); i < len(j.Log); i++ {
+		if j.Log[i] == line {
+			return
+		}
 	}
 	j.Log = append(j.Log, line)
 	if len(j.Log) > logSize {
@@ -933,7 +949,7 @@ func retryJob(id int) {
 		again := j.Status == "error" || j.Status == "cancelled" || (j.Status == "done" && j.Error != "")
 		if j.ID == id && again && current != j {
 			j.Status, j.Error, j.ErrorRaw, j.Now = "queued", "", "", ""
-			j.Progress, j.Speed, j.ETA, j.Wait = 0, "", "", 0
+			j.Progress, j.Speed, j.ETA, j.Size, j.Wait = 0, "", "", "", 0
 			j.Thumb, j.cover = "", nil // Cover (the counter) stays: the page asks for a new picture by it
 			j.Files, j.paths, j.tracks, j.splits = []string{}, nil, nil, nil
 			j.Pos, j.Of, j.part, j.lastB, j.failed = 0, 0, 0, 0, 0
