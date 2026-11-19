@@ -36,3 +36,38 @@ Updated at the end of every work session.
 - **Every state change moves, briefly** (docs/ui-principles.md, rule 1a), checked frame by
   frame before every build.
 - **One work session = one branch = one PR.** Fewer PRs, one place per session.
+
+## 2026-11-19
+
+- **A downloader, not a show.** The window answers four things: where to paste, what I'll
+  get, is it coming and how long, where is it. One compact two-line row per download, the way
+  Seal and 4K Video Downloader do it. Rejected after trying them this session: falling notes
+  (everywhere), the link flying into its row (with notes and a ripple), the game, the step
+  log. Each was fine alone; together they were noise and the window got as tall as the screen
+  (feature creep). The owner's verdict, and he was right.
+- **Nothing moves while nothing happens.** The window is transparent, so every moving pixel
+  makes Windows redraw under it (DWM): 5–17 % CPU idle on the owner's PC. Motion only while
+  downloading and in answer to a click.
+- **Progress on the taskbar button** (ITaskbarList3) and in the tray tooltip: watch it with
+  the window out of the way. Rejected: an always-on-top mini window (it covers the view).
+- **Copy the file to the clipboard** (CF_HDROP) next to Show file: the owner sends most files
+  to Telegram, Ctrl+V attaches it. Not a "Send to Telegram" button: he doesn't always.
+- **Audio first**, M4A/MP3 next to it: he downloads music more often.
+- **Fragment and "for editing" stay**, shown only where they apply. Options stay visible, not
+  under a gear or in a dropdown: seen, not remembered.
+- **"Whole playlist" greyed out** unless the link is a video inside a playlist, in its place,
+  so nothing moves when you paste.
+- **A playlist with skipped videos is done**, with a note and Retry for what's missing, and is
+  named after the playlist. Rejected: failing the whole thing over one private video.
+- **Hover, press and keyboard focus are clearly visible** on every control (a tint, a ripple
+  from the click, an orange ring).
+- **Hints only where the label doesn't say it all**, as one solid bubble placed to fit the
+  window. Rejected: a hint on everything (they repeated the labels and were cut off).
+- **A sun/moon theme button**, Windows' theme until clicked. One snapshot and a growing
+  circle (View Transitions), cheap.
+- **Selected switches are tonal**, solid orange only for Download and the bar.
+- **Show file opens Explorer without a fake Alt key** (it broke Alt+Tab; confirmed fixed).
+- **The window grows ahead** when a link is in the box, and never resizes during an animation:
+  resizing a transparent window on Windows is slow and was the stutter the stand didn't show.
+- **Test builds by one PowerShell line** that clones the branch fresh and builds into the
+  owner's builds folder: building from his own clone picked up `main` by mistake.

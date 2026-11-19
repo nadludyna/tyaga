@@ -14,7 +14,7 @@
 ТЯГА downloads video and music from YouTube: paste a link, pick video or audio, get a clean file with proper tags and a real cover. One small program for Windows, nothing to install, nothing left behind. The heavy lifting is done by [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
 <p align="center">
-  <img src="docs/screenshot.png" width="680" alt="ТЯГА's window: a link box, video/audio switches and a download with a progress wave and a live step list">
+  <img src="docs/screenshot.png" width="680" alt="ТЯГА's window: a link box, audio/video switches, one download in progress and one done with its cover">
 </p>
 
 ## Run it
@@ -33,14 +33,16 @@ On the first run ТЯГА fetches yt-dlp, ffmpeg and Deno (about 250 MB, once, e
 - **Playlists and channels** go into a numbered folder, or "as one file" with a chapter per video.
 - **No sponsors:** SponsorBlock cuts the ads and "don't forget to subscribe".
 - **Fragment:** download only a piece, cut exactly at the minutes and seconds you set.
-- **Clear progress:** a wavy bar, "video 2 of 12 · 40% of all", speed, time left and a live list of steps. When something fails: what happened in plain words, Retry and Copy error.
+- **Clear progress, compact:** one row per download, with a thin bar and "8 MB of 19 MB · 1.2 MB/s · 0:59 left" (or in words what it's doing: waiting for YouTube, converting). The same progress shows on ТЯГА's taskbar button, so you can follow it with the window out of the way. When something fails: what happened in plain words, Retry and Copy error.
+- **Into a chat in one go:** a finished file can be copied with one click and pasted into Telegram (or any chat) with Ctrl+V.
+- **Playlists with gaps:** a deleted or private video in a playlist is skipped, the rest is downloaded, and Retry fetches only what's missing.
 - **Sign in to YouTube** for videos that need it: one click, the sign-in comes from the browser you use.
-- **A little game** (bricks and a ball) while you wait. A finished download doesn't interrupt it.
 
 ## Good to know
 
 - **Portable.** Everything ТЯГА keeps (the tools, settings, sign-in, log) is in one hidden `tyaga-data` folder next to the exe. Nothing goes to AppData. Delete the folder and ТЯГА is gone.
 - **Closing.** × hides it to the tray, downloads go on. Quit is in the tray icon's menu.
+- **Light and dark.** It follows Windows until you pick one with the sun/moon button.
 - **Your cookies by hand** still work: save them as `youtube-cookies.txt` next to the program. They are the keys to your account: never send or commit them.
 - Something went wrong? `tyaga-data\tyaga.log` says what happened.
 
