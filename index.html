@@ -531,7 +531,10 @@ html.app .card.form:has(+#jobsCard:not([hidden])):has(.fly:not([hidden])){clip-p
 .flist small,.frow small{font-size:12px;color:var(--dim);font-weight:400}
 .flist button.on small{color:inherit;opacity:.8}
 .fh{font-size:12px;color:var(--dim);padding:4px 6px 8px}
-.fly .times{display:flex;align-items:center;gap:4px;padding:0 6px;color:var(--dim)}
+/* Inside the flyout nothing moves on its own: it comes in as one piece, like the other menus
+   (the old fields rose by themselves and the focused field's ring faded in). */
+.fly .times{display:flex;align-items:center;gap:4px;padding:0 6px;color:var(--dim);animation:none}
+.fly .times input{transition:none}
 .fly .times input{width:52px;height:32px;padding:0 6px;text-align:center;-moz-appearance:textfield;appearance:textfield}
 .fly .times input::-webkit-inner-spin-button,.fly .times input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .fly .times i{font-style:normal;margin:0 6px}

@@ -158,6 +158,12 @@
       // the open drop-down is really on top: nothing covers or clips any of its corners
       var f = document.querySelector('.fly:not([hidden])');
       if (f) {
+        // it comes in as one piece: nothing inside it moves or fades by itself (the owner saw the
+        // fragment's fields rise inside it)
+        document.getAnimations().forEach(function (a) {
+          var t = a.effect && a.effect.target;
+          if (t && t !== f && f.contains(t) && a.playState === 'running') bad.push(name(b) + ' open: something inside it animates: ' + name(t) + ' (' + (a.animationName || a.transitionProperty) + ')');
+        });
         var fr = f.getBoundingClientRect();
         [[fr.left + 6, fr.top + 6], [fr.right - 6, fr.top + 6], [fr.left + 6, fr.bottom - 6], [fr.right - 6, fr.bottom - 6]].forEach(function (p) {
           var at = document.elementFromPoint(p[0], p[1]);
