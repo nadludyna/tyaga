@@ -155,10 +155,33 @@
       if (!seen(b)) return;
       b.click();
       var h = document.querySelector('main').scrollHeight;
+      // the open drop-down is really on top: nothing covers or clips any of its corners
+      var f = document.querySelector('.fly:not([hidden])');
+      if (f) {
+        var fr = f.getBoundingClientRect();
+        [[fr.left + 6, fr.top + 6], [fr.right - 6, fr.top + 6], [fr.left + 6, fr.bottom - 6], [fr.right - 6, fr.bottom - 6]].forEach(function (p) {
+          var at = document.elementFromPoint(p[0], p[1]);
+          if (!at || !f.contains(at)) bad.push(name(b) + ' open: its drop-down is covered or cut at ' + p.map(Math.round) + ' by ' + (at ? name(at) : 'nothing'));
+        });
+      }
       if (Math.abs(h - h0) > 1) bad.push('opening ' + name(b) + ' changed the height by ' + (h - h0) + ' px');
       window.tyagaCheck().forEach(function (x) { bad.push(name(b) + ' open: ' + x); });
       document.body.click();
     });
     return bad;
+  };
+  // Switching video/audio moves nothing in the options row.
+  window.tyagaModeCheck = function () {
+    var at = function () { return [].map.call(document.querySelectorAll('.opts>*'), function (e) { return e.hidden ? 'h' : Math.round(e.getBoundingClientRect().right); }); };
+    var btn = document.querySelectorAll('#mode button'), was = document.querySelector('#mode .on'), out = [];
+    var a = null;
+    [].forEach.call(btn, function (b) {
+      b.click();
+      var r = at().filter(function (x) { return x !== 'h'; }).join(',');
+      if (a !== null && r !== a) out.push('switching to ' + b.dataset.v + ' moved the row: ' + a + ' → ' + r);
+      a = r;
+    });
+    was.click();
+    return out;
   };
 })();
