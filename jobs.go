@@ -18,6 +18,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 // Options are the switches on the page, the same for every link added together.
@@ -137,6 +138,8 @@ type Job struct {
 	splits   []splitInfo     // videos that were split by chapters
 	tracks   []track         // playlist items to glue into one file (Merge)
 	had, got bool            // yt-dlp found a file already there / downloaded something itself
+	avgV     float64         // the speed, averaged over the last several seconds (bytes/s)
+	avgAt    time.Time       // when avgV was last updated
 }
 
 // splitInfo is what yt-dlp reports about a video that was split by chapters.
@@ -511,6 +514,7 @@ func onLine(j *Job, line string) {
 		// fills the bar to 90% and the sound does the rest, instead of 0→100% twice.
 		if j.Mode == "video" && j.part == 0 && j.lastB > 0 && done < j.lastB/4 {
 			j.part = 1
+			j.avgV = 0 // another file, another speed
 		}
 		if done > 0 {
 			j.lastB = done
@@ -553,11 +557,25 @@ func onLine(j *Job, line string) {
 			}
 			j.Progress = math.Max(j.Progress, j.overall(f)) // never backwards within one video
 		}
+		// yt-dlp's speed is this second's: it jumps (3 MB/s, 127 KB/s, 3 MB/s), and the time
+		// left with it (0:22, 17:56, 0:29). Both are shown averaged over the last ~8 s.
+		if speed > 0 {
+			at := time.Now()
+			if dt := at.Sub(j.avgAt).Seconds(); j.avgV == 0 || dt > 15 {
+				j.avgV = speed
+			} else {
+				j.avgV += (speed - j.avgV) * dt / (8 + dt)
+			}
+			j.avgAt = at
+		}
 		j.Speed, j.ETA = "", ""
 		if speed > 0 {
-			j.Speed = speedText(speed)
+			j.Speed = speedText(j.avgV)
 		}
 		if eta > 0 && j.Of <= 1 { // in a playlist it's only this video's time left: misleading
+			if speed > 0 && j.avgV > 0 {
+				eta = eta * speed / j.avgV // what's left, at the average speed
+			}
 			j.ETA = clock(eta)
 		}
 	case strings.HasPrefix(line, "FILE|"):
@@ -595,7 +613,7 @@ func onLine(j *Job, line string) {
 		if _, err := fmt.Sscanf(line, "[download] Downloading item %d of %d", &n, &of); err == nil {
 			j.Pos, j.Of = n, of
 			j.Speed, j.ETA, j.Size, j.Wait = "", "", "", 0
-			j.part, j.lastB = 0, 0
+			j.part, j.lastB, j.avgV = 0, 0, 0
 			j.Progress = math.Max(j.Progress, j.overall(0))
 		}
 	case strings.HasPrefix(line, "[download] ") && strings.HasSuffix(line, "has already been downloaded"):
@@ -684,7 +702,7 @@ func logLine(line string) string {
 	case tag == "EmbedThumbnail":
 		return "Adding the cover"
 	case strings.HasPrefix(line, "WARNING: "):
-		return "⚠ " + strings.TrimPrefix(line, "WARNING: ")
+		return "" // yt-dlp's warnings are for developers ("[youtube] id: Some web_embedded client…"); real trouble comes as ERROR
 	}
 	return line
 }

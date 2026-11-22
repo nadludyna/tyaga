@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestClassify(t *testing.T) {
@@ -236,11 +237,10 @@ func TestLog(t *testing.T) {
 		onLine(j, l)
 	}
 	want := []string{
-		"⚠ something odd",
 		"Converting to MP3",
 		"Adding the cover",
 	}
-	if !slices.Equal(j.Log[1:], want) || j.Log[0] != "Downloading the sound" {
+	if !slices.Equal(j.Log[len(j.Log)-2:], want) || j.Log[len(j.Log)-3] != "Downloading the sound" || slices.ContainsFunc(j.Log, func(l string) bool { return strings.Contains(l, "odd") }) {
 		t.Errorf("log = %q", j.Log)
 	}
 	for _, l := range j.Log {
@@ -453,5 +453,18 @@ func TestFolderName(t *testing.T) {
 	}
 	if got := folderName(sep + "Music"); got != "Music" {
 		t.Errorf("folderName = %q", got)
+	}
+}
+
+func TestSmoothSpeed(t *testing.T) {
+	j := &Job{Options: Options{Mode: "audio"}, Status: "running"}
+	onLine(j, "PROG|100|1000|NA|3000000|10|NA|NA")
+	j.avgAt = j.avgAt.Add(-time.Second) // a second later, a dip to 100 KB/s
+	onLine(j, "PROG|200|1000|NA|100000|300|NA|NA")
+	if j.avgV < 2000000 {
+		t.Errorf("one slow second pulled the average down to %.0f", j.avgV)
+	}
+	if j.ETA != "0:11" {
+		t.Errorf("time left %q: should follow the average speed, not the dip", j.ETA)
 	}
 }
