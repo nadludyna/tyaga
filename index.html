@@ -493,6 +493,7 @@ textarea{resize:none;min-height:68px;height:68px;max-height:150px;padding:10px 1
 .dd[aria-expanded=true] .chev{transform:rotate(180deg);color:inherit}
 .dd:hover{border-color:color-mix(in srgb,var(--fg) 32%,transparent);background:color-mix(in srgb,var(--fg) 7%,transparent)}
 .dd:active{transform:scale(.97)}
+.dd[aria-disabled=true]{opacity:.4;cursor:default;pointer-events:auto;background:transparent;border-color:var(--line2);transform:none}
 .dd:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .dd.on{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 .dd.on .chev{color:inherit}
@@ -706,6 +707,7 @@ var RU = {
   "Original YouTube audio, no conversion": "Оригинальный звук YouTube, без конвертации",
   "Converted to MP3. Plays anywhere": "В MP3. Играет везде",
   "Download only part of the video": "Скачать только часть видео",
+  "A fragment is for one video at a time": "Фрагмент — только для одного видео",
   "Only a part of it": "Скачать только кусок",
   "Empty “to”: to the end": "Пустое «до» — до конца",
   "Reset": "Сбросить",
@@ -1039,7 +1041,10 @@ function topHeight() {
 function syncBoxes() {
   var links = linksIn($('links').value), one = links.length === 1 ? plan(links[0]) : null;
   var canCut = !links.length || !!(one && !one.whole);
-  $('cutW').hidden = !canCut;
+  // Several links: Fragment stays where it is, greyed out (it vanishing made the buttons after it jump).
+  $('cutB').setAttribute('aria-disabled', !canCut); // (not disabled: its hint still shows under the mouse)
+  $('cutB').dataset.tip = canCut ? 'Download only part of the video' : 'A fragment is for one video at a time';
+  if (!canCut && flyOpen && flyOpen.btn === $('cutB')) closeFly();
   if (!canCut && cutOn()) TIMES.forEach(function (id) { $(id).value = ''; });
   var top = topHeight();
   document.querySelectorAll('#quality button').forEach(function (b) {
@@ -1085,6 +1090,7 @@ function openFly(btn, fly) {
 [['qualB', 'qualFly'], ['fmtB', 'fmtFly'], ['cutB', 'cutFly'], ['moreB', 'moreFly'], ['dest', 'destMenu']].forEach(function (p) {
   $(p[0]).onclick = function (e) {
     e.stopPropagation();
+    if (this.getAttribute('aria-disabled') === 'true') return;
     if (flyOpen && flyOpen.btn === $(p[0])) closeFly(); else openFly($(p[0]), $(p[1]));
   };
 });
