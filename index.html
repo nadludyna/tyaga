@@ -3,16 +3,21 @@
 <title>ТЯГА</title>
 <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"%3E %3Crect width="256" height="256" rx="58" fill="%23161616"/%3E %3Cpath d="M176 0 V22" stroke="%238a96a3" stroke-width="6"/%3E %3Ccircle cx="176" cy="36" r="12" fill="none" stroke="%23fff" stroke-width="9"/%3E %3Cpath d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="%23fff" stroke-width="18"/%3E %3Cpath d="M85 42 L96 10 L107 42 Z" fill="%23fff"/%3E %3Cpath d="M103 36 L119 54" stroke="%23fff" stroke-width="9.9" stroke-linecap="round"/%3E %3Cg fill="%23161616" stroke="%23161616" stroke-width="12" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cg fill="%23ff6b2c" stroke="%23ff6b2c" stroke-width="2" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cpath d="M83.143 108.208 L83.143 139.792 L111.76599999999999 124 Z" fill="%23fff" stroke="%23fff" stroke-width="5.922" stroke-linejoin="round"/%3E %3Ccircle cx="131.32" cy="109.9" r="6" fill="%23161616"/%3E %3C/svg%3E'>
 <style>
-:root{color-scheme:light dark;--bg:#f6f5f2;--card:rgba(255,255,255,.93);--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--acc:#e8590c;--acc2:#ff922b;--ok:#2b8a3e;--err:#c92a2a;--glow:rgba(232,89,12,.28)}
+/* The font: Onest, inside the program (fonts/, SIL OFL), so it needs no internet. */
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:block;src:url(/fonts/onest-cyrillic-ext.woff2) format('woff2');unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:block;src:url(/fonts/onest-cyrillic.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:block;src:url(/fonts/onest-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:block;src:url(/fonts/onest-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{color-scheme:light dark;--bg:#f6f5f2;--card:rgba(255,255,255,.93);--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--acc:#e8590c;--acc2:#ff922b;--ok:#2b8a3e;--err:#c92a2a;--glow:rgba(232,89,12,.28);--line2:color-mix(in srgb,var(--fg) 17%,transparent);--folder:#c48412;--info:#2f6fd1;--tonal:color-mix(in srgb,var(--acc) 72%,var(--fg))}
 /* The theme follows Windows until the theme button picks one (data-theme, remembered). */
 :root[data-theme=light]{color-scheme:light}
-:root[data-theme=dark]{color-scheme:dark;--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
+:root[data-theme=dark]{color-scheme:dark;--folder:#f0b44c;--info:#79b0ff;--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--folder:#f0b44c;--info:#79b0ff;--bg:#0f0f10;--card:rgba(26,26,28,.94);--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--acc:#ff6b2c;--acc2:#ffa94d;--ok:#51cf66;--err:#ff6b6b;--glow:rgba(255,107,44,.35)}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 /* The scrollbar's place is kept even without one, so the page doesn't shift sideways when the list gets long. */
 html{min-height:100%;scrollbar-gutter:stable}
-body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif;overflow-x:hidden}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.45 Onest,system-ui,sans-serif;overflow-x:hidden}
 /* An app, not a document: Ctrl+A or a stray click doesn't paint the buttons and labels blue.
    What's worth copying stays selectable: the links box, download titles, errors and the log. */
 body{-webkit-user-select:none;user-select:none}
@@ -39,8 +44,11 @@ header{display:flex;align-items:center;gap:16px;margin:0 0 26px;animation:rise .
 .logo .catch{transform-origin:176px 0}
 .logo .fish{transform-origin:100px 124px}
 h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;color:var(--fg)}
-.title{display:flex;align-items:center;gap:10px}
-.title small{display:inline-block;padding:1px 8px;border:1px solid var(--line);border-radius:99px;font-size:11px;color:var(--dim);letter-spacing:0}
+/* The name with its version above it and the motto beside it. */
+.title{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0}
+.title small{font-size:11px;line-height:1.1;color:var(--dim);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.brand{display:flex;align-items:baseline;gap:14px;min-width:0}
+.motto{font-size:14px;font-weight:500;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 50px -30px rgba(0,0,0,.6);animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .card+.card{margin-top:16px}
@@ -53,12 +61,12 @@ textarea{width:100%;min-height:90px;resize:vertical;background:rgba(127,127,127,
 body.drop textarea{border-color:var(--acc);border-style:dashed;box-shadow:0 0 0 4px var(--glow)}
 textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--glow);background:transparent}
 .row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:14px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:rgba(127,127,127,.05)}
-.seg button{border:0;background:transparent;color:inherit;padding:5px 12px;cursor:pointer;font:inherit;font-size:13.5px;transition:background .15s ease,color .15s ease,transform .1s ease}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;background:transparent}
+.seg button{border:0;background:transparent;color:inherit;height:32px;padding:0 12px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:500;transition:background .15s ease,color .15s ease,transform .1s ease}
 .seg button:hover:not(.on){background:rgba(127,127,127,.12)}
 .seg button:active{transform:scale(.97)}
 /* Selected: a tonal orange (Material 3's secondary container), so only Download is solid orange. */
-.seg button.on{background:color-mix(in srgb,var(--acc) 22%,transparent);color:var(--acc);font-weight:600;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent)}
+.seg button.on{background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal);font-weight:600}
 label{color:var(--dim);cursor:pointer;user-select:none;transition:color .2s}
 label:hover{color:var(--fg)}
 /* Options: switches on one line (pushed to both edges), checkboxes as chips that fill the width. */
@@ -69,18 +77,18 @@ label:hover{color:var(--fg)}
 .opts .seg{display:flex}
 .opts .seg button{flex:1;padding-left:6px;padding-right:6px}
 .chips{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
-@media (max-width:560px){.opts{grid-template-columns:1fr}.chips{grid-auto-flow:row;grid-template-columns:1fr 1fr}}
-.chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.05);font-size:13.5px;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
+@media (max-width:560px){.motto,#acctT{display:none}.acct{min-width:0!important;padding:0 9px}.opts{grid-template-columns:1fr}.chips{grid-auto-flow:row;grid-template-columns:1fr 1fr}}
+.chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 28px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
 .chip:hover{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.1)}
 /* Filter chips like Material 3: no checkbox square, a check mark when on. Its place is always
    kept (and balanced on the right), so the words never move when it's ticked. */
-.chip{position:relative;padding-right:30px}
+.chip{position:relative}
 .chip input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
-.chip::before{content:"";flex:none;width:14px;height:14px;background:var(--acc);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.4);transition:opacity .15s ease,transform .2s cubic-bezier(.2,.8,.2,1)}
+.chip::before{content:"";position:absolute;left:9px;top:50%;margin-top:-9px;width:18px;height:18px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.4);transition:opacity .15s ease,transform .2s cubic-bezier(.2,.8,.2,1)}
 .chip:has(input:checked)::before{opacity:1;transform:none}
 .chip:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:2px}
 .chip:active{transform:scale(.97)}
-.chip:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 13%,transparent);color:var(--fg)}
+.chip:has(input:checked){border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 .chip:has(input:disabled){opacity:.38;cursor:default;border-color:var(--line);background:transparent;color:var(--dim)}
 .cutrow:has(.times[hidden]){display:none}
 .cutrow{justify-content:center}
@@ -89,7 +97,7 @@ label:hover{color:var(--fg)}
 @media (max-width:560px){.input{flex-direction:column}.input .go{padding:12px}}
 /* Every button answers the same calm way: a little lighter under the mouse, a little smaller
    while pressed. No jumps, no flashes. */
-.go{flex:none;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:filter .15s ease,transform .1s ease}
+.go{flex:none;min-width:132px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:filter .15s ease,transform .1s ease}
 .go:hover{filter:brightness(1.08)}
 .go:active{transform:scale(.97);filter:brightness(.95)}
 .msg{color:var(--err);margin-top:8px;font-size:14px}
@@ -99,23 +107,28 @@ label:hover{color:var(--fg)}
 .notice{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13.5px;color:var(--dim);animation:fadein .2s ease both;transition:opacity .2s ease}
 .notice.out{opacity:0}
 .notice span{flex:1;min-width:0}
-.notice .btn{padding:4px 12px}
+.notice .btn{height:28px;padding:0 12px}
 
 /* One download = one compact row, the way mature downloaders do it (Seal, 4K Video
    Downloader): the picture, then two lines. The title with its state on the right; under it
    what it is, or while it downloads the bar and the numbers. Its buttons sit at the right of
    the second line. No log: what's happening right now is said in the numbers' place. */
-.job{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);border-radius:10px}
+.job{display:flex;flex-wrap:wrap;column-gap:12px;row-gap:0;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);border-radius:10px}
 .job:last-child{border-bottom:0}
 .job.grow{overflow:hidden;transition:height .32s cubic-bezier(.2,.8,.2,1),padding .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
 .job .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 /* The picture: the cover that's really in the finished file; before that an icon of what it is
    (no video thumbnail: it's not what ends up in the file). Always the same square, so the
    text never moves; what's in it cross-fades. */
-.side{flex:none;position:relative;width:44px;height:44px}
+.side{flex:none;position:relative;width:72px;height:40.5px} /* 16:9 */
 .side>*{position:absolute;inset:0;width:100%;height:100%;transition:opacity .25s ease}
 .side>.gone{opacity:0!important}
-.cover{border-radius:8px;object-fit:cover;background:var(--line);box-shadow:0 0 0 1px var(--line);opacity:0;transform:scale(.92);transition:opacity .35s,transform .35s cubic-bezier(.3,1.5,.5,1)}
+/* A cover: 16:9 as it is; a square album cover in the middle, over a blurred copy of itself
+   (no black bars). */
+.cover{border-radius:8px;overflow:hidden;background:var(--line);box-shadow:0 0 0 1px var(--line);opacity:0;transform:scale(.94);transition:opacity .35s,transform .35s cubic-bezier(.3,1.5,.5,1)}
+.cover img{position:absolute;inset:0;width:100%;height:100%}
+.cover .bg{object-fit:cover;filter:blur(7px) brightness(.75);transform:scale(1.25)}
+.cover .fg{object-fit:contain}
 .cover.ok{opacity:1;transform:none}
 .ph{animation:fadein .25s ease both;border-radius:8px;display:grid;place-items:center;background:rgba(127,127,127,.08);box-shadow:0 0 0 1px var(--line);color:var(--dim)}
 .ph svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -124,8 +137,9 @@ label:hover{color:var(--fg)}
 .top{display:flex;gap:10px;align-items:center;min-height:24px}
 .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14.5px}
 .name.link{color:var(--dim)}
-.st{flex:none;font-size:12.5px;color:var(--dim);white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums}
-.st.running{color:var(--acc)}.st.waiting{color:var(--dim)}.st.done{color:var(--ok)}.st.error{color:var(--err)}
+.st{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dim);white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums}
+.st svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.st.running{color:var(--acc)}.st.waiting{color:var(--dim)}.st.done{color:var(--ok)}.st.error{color:var(--err)}.st.cancelled,.st.queued{color:var(--dim)}
 .st.pop{animation:pop .35s ease}
 @keyframes pop{0%{opacity:0}100%{opacity:1}}
 /* Small icon buttons in a row: cancel, copy the file. */
@@ -139,23 +153,31 @@ label:hover{color:var(--fg)}
 .ibtn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .line2{display:flex;align-items:center;gap:8px 10px;min-height:28px;flex-wrap:wrap}
 .kind{flex:1;min-width:0;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kind,.live{animation:fadein .2s ease backwards}
-.live{flex:1;min-width:0;display:flex;align-items:center;gap:12px}
-/* The numbers take a fixed share of the line, so the fishing line never changes length when
-   the words do. The fishing line: taller than its place (negative margins), so the fish can jump without
-   the row growing; it never takes the mouse. */
-.wave{flex:1;min-width:60px;height:40px;margin:-14px 0;display:block;pointer-events:none}
-.nums{flex:0 0 42%;min-width:0;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.kind.err{color:var(--err)}
+/* While it downloads: what's happening ("3 MB of 5 MB · 1.2 MB/s · 0:02 left") and, on the
+   right, how far it is all together; the fishing line full width under the row. */
+.nums{flex:1;min-width:0;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.ovr{flex:none;font-size:12.5px;font-weight:600;color:var(--acc);white-space:nowrap;font-variant-numeric:tabular-nums}
+.kind,.nums,.ovr{animation:fadein .2s ease backwards}
+/* The lane opens when the download starts and folds after its last moment (the catch, the
+   snapped line); the canvas is taller than the lane, so the fish can jump without the row
+   growing, and never takes the mouse. */
+.lane{flex:0 0 100%;position:relative;height:24px;transition:height .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
+.lane.shut{height:0;opacity:0;overflow:hidden}
+.wave{position:absolute;left:0;top:-8px;width:100%;height:40px;display:block;pointer-events:none}
 .acts{flex:none;display:flex;gap:6px;margin-left:auto}
-.acts .btn{padding:4px 10px;font-size:12.5px}
+.acts .btn{height:28px;padding:0 10px 0 8px;font-size:12.5px;gap:6px}
+.acts .btn svg{width:15px;height:15px}
 .acts .ibtn{margin:0}
 .sub{font-size:12px;color:var(--dim);word-break:break-word}
 .sub.err{color:var(--err)}
-@media (max-width:560px){.live{flex-wrap:wrap;gap:2px 12px}.wave{flex:1 1 100%}.nums{flex:1 1 100%}}
 .foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 /* Buttons: soft pills with an icon; the accent one is for the thing you most likely want. */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.07);color:var(--fg);font:inherit;font-size:13px;line-height:1.2;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
-.btn svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 13px 0 11px;border:1px solid var(--line2);border-radius:8px;background:color-mix(in srgb,var(--fg) 4%,transparent);color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
+.btn svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+/* Icons with a meaning get a quiet colour of it: folders, copying; clearing turns red on hover. */
+.btn.fold svg{color:var(--folder)}.btn.copyall svg{color:var(--info)}
+.btn.clear svg{color:var(--dim)}.btn.clear:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}.btn.clear:hover svg{color:var(--err)}
 .btn:hover{border-color:rgba(127,127,127,.4);background:rgba(127,127,127,.14)}
 .btn:active{transform:scale(.97)}
 .btn.acc{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 45%,transparent);background:color-mix(in srgb,var(--acc) 12%,transparent)}
@@ -173,10 +195,10 @@ label:hover{color:var(--fg)}
 /* Hints, only where the label doesn't say it all (the page turns title="" into data-tip): one
    bubble for the whole page (#tip), placed by the script below or above the thing so it always
    fits in the window, a solid plate like Material 3's plain tooltip. */
-#tip{position:fixed;left:0;top:0;z-index:60;max-width:280px;padding:7px 10px;border-radius:8px;background:#2b2b2e;color:#f1f1f1;box-shadow:0 8px 24px -8px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);font:12.5px/1.45 system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .15s ease,transform .15s cubic-bezier(.2,.8,.2,1);will-change:transform,opacity}
+#tip{position:fixed;left:0;top:0;z-index:60;max-width:280px;padding:7px 10px;border-radius:8px;background:#2b2b2e;color:#f1f1f1;box-shadow:0 8px 24px -8px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);font:12.5px/1.45 Onest,system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .15s ease,transform .15s cubic-bezier(.2,.8,.2,1);will-change:transform,opacity}
 #tip.on{opacity:1}
 :root[data-theme=light] #tip{background:#2f2f33}
-.seg{overflow:visible}.seg button:first-child{border-radius:9px 0 0 9px}.seg button:last-child{border-radius:0 9px 9px 0}
+.seg{overflow:visible}.seg button:first-child{border-radius:7px 0 0 7px}.seg button:last-child{border-radius:0 7px 7px 0}
 
 /* Signing in to YouTube (ТЯГА's own window on Windows): one button on the right of the header.
    It keeps one width whatever it says, so nothing next to it moves. */
@@ -217,11 +239,12 @@ html.app header h1{font-size:22px}
 html.app .wbtns{display:flex;gap:2px;margin-left:auto;align-self:flex-start}
 html.app .acct{align-self:flex-start;margin-top:2px}
 /* The theme button: a sun that turns into a moon (its bite slides in, the rays draw in). */
-.tbtn{flex:none;align-self:flex-start;margin-left:8px;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s,transform .1s;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
+.tbtn{flex:none;align-self:flex-start;margin-left:6px;font:inherit;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s,transform .1s;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
 .acct[hidden]+.tbtn{margin-left:auto}
 .tbtn:hover{background:var(--line);color:var(--fg)}
 .tbtn:active{transform:scale(.92)}
 .tbtn svg{width:18px;height:18px;overflow:visible}
+.tbtn.lang{font-size:12px;font-weight:700;letter-spacing:.04em}
 .tbtn .body{fill:currentColor;transform-origin:12px 12px;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
 .tbtn .bite{transition:transform .5s cubic-bezier(.4,0,.2,1)}
 .tbtn .rays{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;transform-origin:12px 12px;transition:transform .5s cubic-bezier(.3,1.4,.5,1),opacity .3s}
@@ -279,7 +302,7 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 .seg button.on:hover{background:color-mix(in srgb,var(--acc) 30%,transparent)}
 .chip:hover{border-color:color-mix(in srgb,var(--fg) 30%,transparent);background:color-mix(in srgb,var(--fg) 9%,transparent);color:var(--fg)}
 .chip:active{background:color-mix(in srgb,var(--fg) 15%,transparent)}
-.chip:has(input:checked):hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 22%,transparent)}
+.chip:has(input:checked):hover{border-color:transparent;background:color-mix(in srgb,var(--acc) 28%,transparent)}
 .btn:hover{border-color:color-mix(in srgb,var(--fg) 32%,transparent);background:color-mix(in srgb,var(--fg) 11%,transparent)}
 .btn:active{background:color-mix(in srgb,var(--fg) 17%,transparent)}
 .go:hover{filter:brightness(1.1);box-shadow:0 10px 28px -6px var(--glow)}
@@ -313,8 +336,9 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
       </g>
     </g>
   </svg>
-  <div class="title"><h1>ТЯГА</h1><small id="ver"></small></div>
+  <div class="title"><small id="ver"></small><div class="brand"><h1>ТЯГА</h1><span class="motto" data-t="Reel it in.">Reel it in.</span></div></div>
   <button class="btn acct" id="acct" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.3 3.9-5 7-5s5.8 1.7 7 5"/></svg><span id="acctT">Sign in to YouTube</span></button>
+  <button class="tbtn lang" id="lang" aria-label="Language"></button>
   <button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Hide to the tray (downloads go on)" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
 </header>
@@ -323,49 +347,147 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
 
 <div class="card form">
   <div class="input">
-    <textarea id="links" placeholder="YouTube links — one or more, separated by spaces or new lines.&#10;Enter — download, Shift+Enter — new line."></textarea>
-    <button class="go" id="go">Download</button>
+    <textarea id="links" data-ph="Paste YouTube links: each one goes on its own line.&#10;Enter — download, Shift+Enter — new line."></textarea>
+    <button class="go" id="go"><span id="goT">Download</span></button>
   </div>
   <div class="row opts">
-    <div class="seg" id="mode"><button data-v="audio" class="on">Audio</button><button data-v="video">Video</button></div>
+    <div class="seg" id="mode"><button data-v="audio" class="on" data-t="Audio">Audio</button><button data-v="video" data-t="Video">Video</button></div>
     <div class="seg" id="format" data-for="audio">
       <button data-v="m4a" class="on" title="The original YouTube audio track, no re-encoding">M4A</button>
       <button data-v="mp3" title="Re-encoded at the highest quality, plays on anything">MP3</button>
     </div>
     <div class="seg" id="quality" data-for="video" hidden>
-      <button data-v="0" class="on">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
+      <button data-v="0" class="on" data-t="Best">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
     </div>
   </div>
   <div class="row chips">
-    <label class="chip" id="playlistBox" title="For a link to a video inside a playlist: download the whole playlist, not just this video"><input type="checkbox" id="playlist"> whole playlist</label>
-    <label class="chip" id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"> as one file</label>
-    <label class="chip" id="cutBox"><input type="checkbox" id="cut"> fragment</label>
-    <label class="chip" data-for="audio" id="splitBox" title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked> split by chapters</label>
-    <label class="chip" data-for="video" hidden title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"> for editing</label>
-    <label class="chip"><input type="checkbox" id="sponsors" checked> no sponsors</label>
+    <label class="chip" id="playlistBox" title="For a link to a video inside a playlist: download the whole playlist, not just this video"><input type="checkbox" id="playlist"><span data-t="whole playlist">whole playlist</span></label>
+    <label class="chip" id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"><span data-t="as one file">as one file</span></label>
+    <label class="chip" id="cutBox"><input type="checkbox" id="cut"><span data-t="fragment">fragment</span></label>
+    <label class="chip" data-for="audio" id="splitBox" title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked><span data-t="split by chapters">split by chapters</span></label>
+    <label class="chip" data-for="video" hidden title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"><span data-t="for editing">for editing</span></label>
+    <label class="chip"><input type="checkbox" id="sponsors" checked><span data-t="no sponsors">no sponsors</span></label>
   </div>
   <div class="row cutrow">
     <span class="times" id="cutTimes" hidden title="Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty &quot;to&quot; — to the end.">
-      from <input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds">
-      to <input type="number" id="toM" min="0" placeholder="end" aria-label="to, minutes"><b>:</b><input type="number" id="toS" aria-label="to, seconds">
+      <span data-t="from">from</span> <input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds">
+      <span data-t="to">to</span> <input type="number" id="toM" min="0" data-ph="end" aria-label="to, minutes"><b>:</b><input type="number" id="toS" aria-label="to, seconds">
     </span>
   </div>
   <div class="msg" id="msg"></div>
-  <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB">Undo</button></div>
+  <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB" data-t="Undo">Undo</button></div>
 </div>
 
 <div class="card" id="jobsCard">
   <button class="lhead" id="lhead" aria-label="Show or hide the downloads"><span id="lsum"></span><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>
   <div id="list"></div>
   <div class="foot">
-    <button class="btn" id="open"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
-    <button class="btn" id="pick" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v3"/><path d="M3 7v10a2 2 0 0 0 2 2h7"/><path d="M15 18.5l2 2 4-4.5"/></svg>Change folder</button>
-    <button class="btn" id="clear" title="Takes them off the list; the files stay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>Clear finished</button>
+    <button class="btn fold" id="open"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open folder">Open folder</span></button>
+    <button class="btn fold" id="pick" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change folder">Change folder</span></button>
+    <button class="btn copyall" id="copyall" hidden title="Every finished file onto the clipboard: Ctrl+V in a chat attaches them all"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span id="copyallT" data-t="Copy all files">Copy all files</span></button>
+    <button class="btn clear" id="clear" title="Takes them off the list; the files stay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg><span data-t="Clear finished">Clear finished</span></button>
   </div>
 </div>
 
 </main><script>
 var TOKEN = new URLSearchParams(location.search).get('t');
+
+// Languages: English and Russian, switched like the theme (the button next to it) and
+// remembered (the tray menu reads it too); Windows' language until one is picked. The words
+// are written in English everywhere (the program's own texts too) and T() gives them in the
+// language picked.
+var LANG = (function () {
+  try { var l = localStorage.getItem('tyaga-lang'); if (l === 'en' || l === 'ru') return l; } catch (e) {}
+  return /^(ru|uk|be)\b/i.test(navigator.language || '') ? 'ru' : 'en';
+})();
+var RU = {
+  'Reel it in.': 'Тяни на себя.', 'Download': 'Скачать', 'Audio': 'Аудио', 'Video': 'Видео', 'Best': 'Лучшее',
+  'whole playlist': 'весь плейлист', 'as one file': 'одним файлом', 'fragment': 'фрагмент', 'split by chapters': 'по главам',
+  'for editing': 'для монтажа', 'no sponsors': 'без рекламы', 'from': 'с', 'to': 'до', 'end': 'конец',
+  'Open folder': 'Открыть папку', 'Change folder': 'Сменить папку', 'Clear finished': 'Убрать готовые',
+  'Copy all files': 'Копировать все', 'Undo': 'Вернуть', 'Language': 'Язык',
+  'Paste YouTube links: each one goes on its own line.\nEnter — download, Shift+Enter — new line.':
+    'Вставляй ссылки на YouTube: каждая встанет на свою строку.\nEnter — скачать, Shift+Enter — новая строка.',
+  'Sign in to YouTube': 'Войти в YouTube', 'Signing in…': 'Входим…', 'Sign out?': 'Выйти?', 'Signed in': 'Вход выполнен',
+  'Sign in': 'Войти', 'Retry': 'Повторить', 'Copy error': 'Копировать ошибку', 'Copied': 'Скопировано',
+  "Couldn't copy": 'Не вышло', 'Show file': 'Показать файл',
+  'Queued': 'В очереди', 'Downloading': 'Скачивается', 'Waiting': 'Ждём', 'Getting ready': 'Готовимся',
+  'Finishing': 'Завершаем', 'Done': 'Готово', 'Already there': 'Уже есть', 'Failed': 'Ошибка',
+  'Cancelled': 'Отменено', 'Waiting for setup': 'Ждём установки', 'Cancel': 'Отменить',
+  'Getting ready…': 'Готовимся…', 'Finishing up': 'Завершаем…', 'Starting…': 'Начинаем…',
+  'track': 'трек', 'video': 'видео', 'of': 'из', 'one file': 'одним файлом',
+  'Reading the video page': 'Читаю страницу видео', 'Asking YouTube for the formats': 'Спрашиваю у YouTube форматы',
+  'Picked the best format': 'Выбран лучший формат', "Passing YouTube's check": 'Прохожу проверку YouTube',
+  'Downloading the picture': 'Качаю картинку', 'Downloading the sound': 'Качаю звук',
+  'Joining the picture and the sound': 'Склеиваю картинку и звук', 'Adding the cover': 'Добавляю обложку',
+  'Cutting out the sponsors': 'Вырезаю рекламу', 'Already in the folder': 'Уже в папке',
+  'Found the album cover': 'Нашёл обложку альбома', 'Tagging the tracks': 'Подписываю треки', 'Gluing into one file': 'Склеиваю в один файл',
+  'Private video.': 'Приватное видео.', 'Removed or not available.': 'Удалено или недоступно.',
+  'SponsorBlock didn\'t answer: untick "no sponsors".': 'SponsorBlock не ответил: сними «без рекламы».',
+  'YouTube asks you to sign in: sign in, then Retry.': 'YouTube просит войти: войди и нажми «Повторить».',
+  'YouTube asks you to sign in: put a fresh youtube-cookies.txt next to ТЯГА.': 'YouTube просит войти: положи свежий youtube-cookies.txt рядом с ТЯГОЙ.',
+  'YouTube is limiting requests: try again later.': 'YouTube ограничивает запросы: попробуй позже.',
+  'YouTube refused (403): Retry usually helps.': 'YouTube отказал (403): обычно помогает «Повторить».',
+  'ТЯГА is not responding. Start the program again.': 'ТЯГА не отвечает. Запусти программу заново.',
+  'Nothing on the hook yet. Paste a link above.': 'На крючке пока пусто. Вставь ссылку сверху.',
+  'Nothing on the hook yet': 'На крючке пока пусто', 'Add at least one link.': 'Добавь хотя бы одну ссылку.',
+  'Light theme': 'Светлая тема', 'Dark theme': 'Тёмная тема', 'Minimize': 'Свернуть',
+  'Hide to the tray (downloads go on)': 'Спрятать в трей (загрузки продолжатся)',
+  'Show or hide the downloads': 'Показать или скрыть загрузки',
+  'Takes them off the list; the files stay': 'Убирает их из списка; файлы остаются',
+  'Every finished file onto the clipboard: Ctrl+V in a chat attaches them all': 'Все готовые файлы в буфер: Ctrl+V в чате прикрепит их все',
+  'Copy the file, to paste it into a chat with Ctrl+V': 'Скопировать файл, чтобы вставить в чат через Ctrl+V',
+  'Copied: paste it with Ctrl+V': 'Скопировано: вставь через Ctrl+V', "Couldn't copy the file": 'Не удалось скопировать файл',
+  'Shows it in its folder. Double-click the row to play it': 'Показывает его в папке. Двойной клик по строке — открыть',
+  'For a link to a video inside a playlist: download the whole playlist, not just this video': 'Для ссылки на видео внутри плейлиста: скачать весь плейлист, а не только это видео',
+  'The whole playlist as one long file, each video is a chapter': 'Весь плейлист одним длинным файлом, каждое видео — глава',
+  'An album uploaded as one long video with chapters → a folder with a separate track for every chapter': 'Альбом, залитый одним видео с главами → папка с отдельным треком на каждую главу',
+  'The original YouTube audio track, no re-encoding': 'Оригинальная дорожка YouTube, без перекодирования',
+  'Re-encoded at the highest quality, plays on anything': 'Перекодировано в лучшем качестве, играет где угодно',
+  "For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p.":
+    'Для монтажа. YouTube обычно отдаёт VP9/AV1 и звук Opus, которые DaVinci Resolve и некоторые редакторы не открывают. Тут берётся H.264 + AAC, они открываются везде. Выше 1080p у YouTube часто нет H.264, поэтому может выйти 1080p.',
+  'Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty "to" — to the end.':
+    'Минуты и секунды. Стрелки (или колёсико) меняют число, с Shift — на 10. Секунды больше 59 переходят в минуты. Пустое «до» — до конца.',
+  'Some videos need a signed-in account, and sometimes YouTube asks to prove you\'re not a bot': 'Некоторые видео требуют входа, а иногда YouTube просит доказать, что ты не бот',
+  'Sign in to YouTube on the page that opened; ТЯГА notices by itself': 'Войди в YouTube на открывшейся странице; ТЯГА заметит сама',
+  'Click again: ТЯГА stops using your YouTube account (your browser stays signed in)': 'Нажми ещё раз: ТЯГА перестанет пользоваться твоим аккаунтом (в браузере ты останешься)',
+  'ТЯГА downloads as your YouTube account. Click to sign out': 'ТЯГА качает от твоего аккаунта YouTube. Нажми, чтобы выйти',
+  'Done ✓': 'Готово ✓', 'Checking for yt-dlp updates…': 'Проверяю обновления yt-dlp…',
+};
+var RU_RE = [
+  [/^Playlist: (.*)$/, 'Плейлист: $1'], [/^Converting to (\w+)$/, 'Конвертирую в $1'],
+  [/^Waiting for YouTube · (\d+) s$/, 'YouTube просит подождать · $1 с'],
+  [/^Signed in · (.+)$/, 'Вход: $1'],
+  [/^ТЯГА downloads as your YouTube account in (.+), read afresh every time\. Click to stop$/, 'ТЯГА качает от твоего аккаунта YouTube в $1, читает его заново каждый раз. Нажми, чтобы перестать'],
+  [/^Downloads go to (.+)\. Pick another folder for the next ones$/, 'Файлы сохраняются в $1. Выбери другую папку для следующих'],
+  [/^Downloads go to (.+)$/, 'Файлы сохраняются в $1'],
+  [/^Downloads now go to (.+)\.$/, 'Теперь файлы сохраняются в $1.'],
+  [/^This doesn't look like a link: (.+)$/, 'Это не похоже на ссылку: $1'],
+  [/^A YouTube Mix never ends, so only the first (\d+) videos\.$/, 'Микс YouTube бесконечный, поэтому только первые $1 видео.'],
+  [/^Downloading (yt-dlp|ffmpeg|Deno)(.*)$/, 'Скачиваю $1$2'],
+  [/^(\S+) not found\. (.*)$/, function (m, a, b) { return a + ' не найден. ' + T(b); }],
+  [/^(\d+) (?:track|video)s? (?:was|were) skipped\.\s*(.*)$/, function (m, n, rest) { return 'Пропущено: ' + n + '. ' + T(rest); }],
+];
+function T(s) {
+  if (LANG !== 'ru' || !s) return s;
+  if (Object.prototype.hasOwnProperty.call(RU, s)) return RU[s];
+  for (var i = 0; i < RU_RE.length; i++) if (RU_RE[i][0].test(s)) return s.replace(RU_RE[i][0], RU_RE[i][1]);
+  return s;
+}
+// Sizes and times as yt-dlp's numbers come: "3 MB of 5 MB", "8 MB so far", "0:02 left".
+function Tnums(s) {
+  if (LANG !== 'ru' || !s) return s;
+  return s.replace(/ of /g, ' из ').replace(/ so far/g, ' пока').replace(/\bGB\b/g, 'ГБ').replace(/\bMB\b/g, 'МБ').replace(/\bKB\b/g, 'КБ')
+    .replace(/\/s\b/g, '/с').replace(/(\d+:\d+(?::\d+)?) left/g, 'ещё $1');
+}
+// The page's fixed words: data-t (text), data-ph (placeholder), data-tip (hints, translated when shown).
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = T(e.dataset.t); });
+  document.querySelectorAll('[data-ph]').forEach(function (e) { e.placeholder = T(e.dataset.ph); });
+  var b = document.getElementById('lang');
+  if (b) { b.textContent = LANG === 'ru' ? 'RU' : 'EN'; b.dataset.tip = LANG === 'ru' ? 'Язык: русский. Нажми — English' : 'Language: English. Click — русский'; }
+}
 // The theme: Windows' own until the theme button picks one; that choice is remembered (the
 // tray menu reads it too).
 try { var t0 = localStorage.getItem('tyaga-theme'); if (t0 === 'light' || t0 === 'dark') document.documentElement.dataset.theme = t0; } catch (e) {}
@@ -450,7 +572,7 @@ addEventListener('pointerdown', function (e) {
   var tip = $('tip'), on = null, timer = 0;
   function hide() { clearTimeout(timer); on = null; tip.classList.remove('on'); }
   function show(t) {
-    var text = t.dataset.tip;
+    var text = T(t.dataset.tip);
     if (!text || !t.isConnected) return;
     tip.textContent = text;
     var r = t.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight, gap = 8;
@@ -570,18 +692,19 @@ function options(text) {
 }
 
 function add() {
-  var text = $('links').value.trim();
+  var text = linksIn($('links').value).join('\n') || $('links').value.trim(); // the cleaned links, or what's there (to say it isn't one)
   if (!text) return;
   api('/api/add', options(text)).then(function (r) {
-    $('msg').textContent = r.error || '';
+    $('msg').textContent = T(r.error) || '';
     if (!r.error) { // a fragment is a one-off: the next link is whole again
       $('links').value = '';
+      countLinks();
       TIMES.forEach(function (id) { $(id).value = ''; });
       $('cut').checked = false;
       syncBoxes(); // (the room readyWindow made stays until the row is in: setGone)
     }
     refresh();
-  }, function () { $('msg').textContent = OFFLINE; });
+  }, function () { $('msg').textContent = T(OFFLINE); });
 }
 
 $('go').onclick = function () { askNotify(); add(); };
@@ -614,6 +737,15 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (
   syncThemeBtn(); themeHooks.forEach(function (f) { f(); });
 });
 syncThemeBtn();
+applyLang();
+countLinks(); // "Download" in the language picked
+$('lang').onclick = function () {
+  LANG = LANG === 'ru' ? 'en' : 'ru';
+  try { localStorage.setItem('tyaga-lang', LANG); } catch (e) {}
+  applyLang(); countLinks();
+  Object.keys(rows).forEach(function (id) { rows[id].actsKey = ''; rows[id].st0 = ''; });
+  render();
+};
 // The fish is cast as soon as a link goes in (add() checks it's not empty).
 
 // Ctrl+A anywhere outside a text field selects the links, not the whole page.
@@ -633,14 +765,8 @@ addEventListener('drop', function (e) {
   e.preventDefault();
   dragDepth = 0;
   document.body.classList.remove('drop');
-  var t = (e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain') || '')
-    .split(/\s+/).filter(function (l) { return /^https?:\/\//.test(l); }).join('\n');
-  if (!t) return;
-  var box = $('links');
-  box.value = box.value.trim() ? box.value.trim() + '\n' + t : t;
-  box.focus();
-  syncBoxes();
-  readyWindow();
+  var add = linksIn(e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain') || '');
+  if (add.length) putLinks(add);
 });
 // In ТЯГА's own window (WebView2) a right-click gives only what an app needs: copy and paste
 // in text, not the browser's Back / Reload / Print.
@@ -648,19 +774,59 @@ if (window.chrome && window.chrome.webview) addEventListener('contextmenu', func
   if (!e.target.closest('textarea,input,.name,.sub,.log') && !String(getSelection())) e.preventDefault();
 });
 $('links').addEventListener('input', function () { readyWindow(); });
+
+// Links: pasting puts each one on its own line, cleaned of YouTube's share junk (?si=, &pp=…),
+// without repeats, and the caret waits on a fresh line for the next one. Download says how many.
+function cleanLink(u) {
+  try {
+    var x = new URL(u);
+    ['si', 'pp', 'feature', 'fbclid', 'gclid', 'utm_source', 'utm_medium', 'utm_campaign', 'ab_channel'].forEach(function (k) { x.searchParams.delete(k); });
+    return x.toString().replace(/\?$/, '');
+  } catch (e) { return u; }
+}
+function linksIn(text) { return (text.match(/https?:\/\/[^\s<>"']+/g) || []).map(cleanLink); }
+function putLinks(add) {
+  var box = $('links'), have = linksIn(box.value);
+  var all = have.concat(add.filter(function (l, i) { return have.indexOf(l) < 0 && add.indexOf(l) === i; }));
+  box.value = all.join('\n') + '\n';
+  box.focus();
+  box.selectionStart = box.selectionEnd = box.value.length;
+  box.scrollTop = box.scrollHeight;
+  syncBoxes(); readyWindow(); countLinks();
+}
+function countLinks() {
+  var n = linksIn($('links').value).length;
+  setText($('goT'), T('Download') + (n > 1 ? ' ' + n : ''));
+}
+$('links').addEventListener('paste', function (e) {
+  var add = linksIn((e.clipboardData || window.clipboardData).getData('text') || '');
+  if (!add.length) return; // not a link: an ordinary paste
+  e.preventDefault();
+  putLinks(add);
+});
+$('links').addEventListener('input', countLinks);
 $('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askNotify(); add(); } };
 $('open').onclick = function () { api('/api/open', {}); };
 // Another downloads folder: Windows' folder dialog (ТЯГА's window only), remembered.
 $('pick').onclick = function () {
-  api('/api/folder', {}).then(function (r) { if (r.out) notice('Downloads now go to ' + r.out + '.'); refresh(); });
+  api('/api/folder', {}).then(function (r) { if (r.out) notice(T('Downloads now go to ' + r.out + '.')); refresh(); });
 };
 // Clear finished takes the rows off at once, and says so with an Undo for a few seconds.
 $('clear').onclick = function () {
   api('/api/clear', {}).then(function (r) {
     refresh();
-    if (r && r.n) notice('Cleared ' + r.n + (r.n === 1 ? ' download' : ' downloads') + ' from the list. The files stay.', function () {
+    if (r && r.n) notice(LANG === 'ru' ? 'Убрано из списка: ' + r.n + '. Файлы на месте.'
+      : 'Cleared ' + r.n + (r.n === 1 ? ' download' : ' downloads') + ' from the list. The files stay.', function () {
       api('/api/unclear', {}).then(refresh);
     });
+  });
+};
+// Every finished file onto the clipboard at once (Ctrl+V in a chat attaches them all).
+$('copyall').onclick = function () {
+  api('/api/copyall', {}).then(function (x) {
+    var b = $('copyallT');
+    b.textContent = x.ok ? (LANG === 'ru' ? 'Скопировано: ' + x.n : 'Copied ' + x.n + ' files') : T("Couldn't copy");
+    setTimeout(function () { b.textContent = T('Copy all files'); }, 1800);
   });
 };
 // The note under the options (see .notice): a text, and a button if there's a way back.
@@ -693,14 +859,14 @@ addEventListener('pagehide', function () {
 
 // In a playlist: "video" or "track", and how far the current one is (the progress counts the
 // whole playlist: video 3 of 12 half done is 21 %).
-function itemWord(j) { return j.mode === 'audio' ? 'track' : 'video'; }
+function itemWord(j) { return T(j.mode === 'audio' ? 'track' : 'video'); }
 
 // What the download is: "Audio · MP3", "Video · MP4 · 1080p", plus fragment / one file.
 function kindText(j) {
   var k = (j.channel ? j.channel + ' · ' : '') +
-    (j.mode === 'audio' ? 'Audio · ' + j.format.toUpperCase() : 'Video · MP4' + (j.quality ? ' · ' + j.quality + 'p' : ''));
-  if (j.merge && j.list) k += ' · one file';
-  if (j.from || j.to) k += ' · ✂ ' + (j.from || '0:00') + '–' + (j.to || 'end');
+    (j.mode === 'audio' ? T('Audio') + ' · ' + j.format.toUpperCase() : T('Video') + ' · MP4' + (j.quality ? ' · ' + j.quality + 'p' : ''));
+  if (j.merge && j.list) k += ' · ' + T('one file');
+  if (j.from || j.to) k += ' · ✂ ' + (j.from || '0:00') + '–' + (j.to || T('end'));
   return k;
 }
 function statusText(j) {
@@ -726,7 +892,7 @@ function ping(jobs) {
     if (j.status === 'done') caught.push(j.id);
     if (!document.hidden || !window.Notification || Notification.permission !== 'granted') return;
     try {
-      var n = new Notification(j.status === 'done' ? 'Done ✓' : 'Failed', {
+      var n = new Notification(T(j.status === 'done' ? 'Done ✓' : 'Failed'), {
         body: j.title || j.url, icon: document.querySelector('link[rel=icon]').href, tag: 'tyaga' + j.id,
       });
       n.onclick = function () { window.focus(); n.close(); };
@@ -742,7 +908,7 @@ var rows = {}; // job id → its row and the parts of it
 // Not while a row is opening or folding away: the window gets their final height at the start
 // (openHeight) and is fitted again at their end, instead of being resized every frame.
 var rowWatch = window.ResizeObserver ? new ResizeObserver(function (en) {
-  if (en.some(function (e) { return !/\b(grow|bye)\b/.test(e.target.className); })) fitLater();
+  if (en.some(function (e) { return !/\b(grow|bye|lining)\b/.test(e.target.className); })) fitLater();
 }) : null;
 
 function button(cls, label, title, onclick) {
@@ -757,24 +923,25 @@ function makeRow(j) {
   var r = { row: el('div', 'job'), body: el('div', 'body'), top: el('div', 'top'), line2: el('div', 'line2') };
   r.row.dataset.id = j.id;
   r.name = el('span', 'name');
-  r.st = el('span', 'st');                   // ✓ Done, 42 %, queued, error
+  r.st = el('span', 'st');                   // the state: an icon and a word (Done, Failed, Downloading…)
   r.x = el('button', 'ibtn x');              // cancel, while queued or downloading
   r.x.innerHTML = ICON.cancel;
   r.x.dataset.tip = 'Cancel';
   r.x.onclick = function () { api('/api/cancel', { id: j.id }).then(refresh); };
   r.top.append(r.name, r.st, r.x);
-  r.kind = el('div', 'kind');                // Pilotredsky · Audio · MP3
-  r.live = el('div', 'live');                // while downloading: the bar and the numbers
-  r.wave = el('canvas', 'wave');
-  r.wave.dataset.id = j.id;
-  r.nums = el('span', 'nums');
-  r.live.append(r.wave, r.nums);
+  r.kind = el('div', 'kind');                // Pilotredsky · Audio · MP3, or what went wrong
+  r.nums = el('span', 'nums');               // while downloading: 3 MB of 5 MB · 1.2 MB/s · 0:02 left
+  r.ovr = el('span', 'ovr');                 // and how far all of it is: 52 %, track 2 of 12 · 35 %
   r.acts = el('div', 'acts');
-  r.line2.append(r.kind, r.live, r.acts);
-  r.msg = el('div', 'sub');                  // a note, or what went wrong
+  r.line2.append(r.kind, r.nums, r.ovr, r.acts);
+  r.msg = el('div', 'sub');                  // a note (videos of a playlist that were skipped)
   r.body.append(r.top, r.line2, r.msg);
   r.sideBox = el('div', 'side');
-  r.row.append(r.sideBox, r.body);
+  r.lane = el('div', 'lane shut');           // the fishing line, full width under the row
+  r.wave = el('canvas', 'wave');
+  r.wave.dataset.id = j.id;
+  r.lane.append(r.wave);
+  r.row.append(r.sideBox, r.body, r.lane);
   // A finished row: double-click opens the file in its player, like in Explorer (and doesn't
   // select a word of the title on the way).
   r.row.addEventListener('mousedown', function (e) { if (e.detail > 1 && r.j && r.j.status === 'done') e.preventDefault(); });
@@ -800,100 +967,134 @@ var ICON = {
   copy: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
   user: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.3 3.9-5 7-5s5.8 1.7 7 5"/></svg>',
   check: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  // The states, all in one style: a circle with what it means inside.
+  sDone: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/></svg>',
+  sFailed: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/></svg>',
+  sQueued: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>',
+  sCancelled: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 15.5l7-7"/></svg>',
+  sDownloading: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v8M8.5 12.5l3.5 3.5 3.5-3.5"/></svg>',
+  sWaiting: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>',
+  sFinishing: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>',
 };
 
 function updateRow(r, j) {
   // The picture: the cover that's really inside the finished file, else an icon of what it is
-  // (or of what went wrong). One square in every state, cross-faded, so the text never moves.
+  // (or of what went wrong). One 16:9 box in every state, cross-faded, so the text never moves.
   var side = j.status === 'done' && j.cover ? 'cover' + j.cover
     : j.status === 'done' || j.status === 'running' ? (j.mode === 'audio' ? 'audio' : 'video') : j.status;
   if (r.side !== side) {
     r.side = side;
     var pic, old = r.img;
     // The new picture fades in on top; the old one goes only once it's covered (fading both
-    // at once left the square empty for a moment).
+    // at once left the box empty for a moment).
     var swap = function () { if (!old) return; var o = old; old = null; setTimeout(function () { o.remove(); }, 400); };
     if (side.indexOf('cover') === 0) {
-      pic = el('img', 'cover');
-      pic.alt = '';
-      // The old icon stays until the cover has loaded, so the square is never empty.
-      pic.onload = function () { pic.classList.add('ok'); swap(); };
-      pic.onerror = function () { var ph = el('div', 'ph'); ph.innerHTML = ICON[j.mode === 'audio' ? 'audio' : 'video']; pic.replaceWith(ph); if (r.img === pic) r.img = ph; swap(); };
-      pic.src = '/api/cover?id=' + j.id + '&v=' + j.cover + '&t=' + encodeURIComponent(TOKEN);
+      pic = el('div', 'cover');
+      var src = '/api/cover?id=' + j.id + '&v=' + j.cover + '&t=' + encodeURIComponent(TOKEN);
+      var bg = el('img', 'bg'), fg = el('img', 'fg');
+      bg.alt = fg.alt = '';
+      pic.append(bg, fg);
+      // The old icon stays until the cover has loaded, so the box is never empty.
+      fg.onload = function () { pic.classList.add('ok'); swap(); };
+      fg.onerror = function () { var ph = el('div', 'ph'); ph.innerHTML = ICON[j.mode === 'audio' ? 'audio' : 'video']; pic.replaceWith(ph); if (r.img === pic) r.img = ph; swap(); };
+      bg.src = fg.src = src;
     } else {
       pic = el('div', 'ph');
       pic.innerHTML = ICON[side] || '';
     }
     r.sideBox.append(pic);
-    if (pic.tagName !== 'IMG') swap();
+    if (!pic.classList.contains('cover')) swap();
     r.img = pic;
   }
 
   var running = j.status === 'running', waiting = running && j.wait > 0;
+  var verb = statusText(j);
+  var t = waveTarget[j.id] || (waveTarget[j.id] = {}), now = performance.now();
+  var ind = running && !waiting && j.progress < 1 && !j.speed;
+  var conv = running && (verb === 'converting' || verb === 'finishing');
+  // The state on the right of the title: an icon and a word, in one style for all of them.
+  var key = running ? (waiting ? 'Waiting' : conv ? 'Finishing' : ind ? 'Getting ready' : 'Downloading')
+    : j.status === 'done' ? (j.already ? 'Already there' : 'Done')
+    : j.status === 'error' ? 'Failed' : j.status === 'cancelled' ? 'Cancelled'
+    : verb === 'waiting for setup' ? 'Waiting for setup' : 'Queued';
+  var icon = { Waiting: 'sWaiting', Finishing: 'sFinishing', 'Getting ready': 'sDownloading', Downloading: 'sDownloading',
+    'Already there': 'sDone', Done: 'sDone', Failed: 'sFailed', Cancelled: 'sCancelled' }[key] || 'sQueued';
   var st = j.status + (waiting ? ' waiting' : '');
-  if (r.st0 !== st) {
-    r.row.className = 'job ' + j.status + (r.row.classList.contains('grow') ? ' grow' : '');
+  if (r.st0 !== st + key) {
+    r.row.className = 'job ' + j.status + (r.row.classList.contains('grow') ? ' grow' : '') + (r.row.classList.contains('lining') ? ' lining' : '');
     r.st.className = 'st ' + st + (r.status && r.status !== 'done' && j.status === 'done' ? ' pop' : '');
-    r.st0 = st;
+    r.st.innerHTML = ICON[icon];
+    r.st.append(T(key));
+    r.st0 = st + key;
   }
   // "[2/12] Song" → "Song". No title yet (queued, or it failed before yt-dlp got one): the
   // link, quieter and shorter.
   setText(r.name, j.title ? j.title.replace(/^\[\d+\/\d+\] /, '') : j.url.replace(/^https?:\/\/(www\.)?/, ''));
   r.name.classList.toggle('link', !j.title);
-  // On the right of the title: how far it is (a playlist: which track, and of all of it), or the state.
-  var list = j.of > 1 && j.pos;
-  setText(r.st, running && waiting && j.progress <= 0 ? 'waiting'
-    : running && j.progress >= 100 ? 'finishing' // 100 % reads as done; it isn't yet
-    : running ? (list ? itemWord(j) + ' ' + j.pos + ' of ' + j.of + ' · ' : '') + Math.floor(j.progress) + '%' : statusText(j));
   var canX = running || j.status === 'queued';
   r.x.classList.toggle('off', !canX);
   r.x.tabIndex = canX ? 0 : -1;
 
-  // The second line: what it is; while downloading the fishing line and the numbers instead.
-  // The line stays a moment longer when it ends (the catch, the snapped line, the fish going
-  // belly up), and the row's buttons wait for it: they'd make the line shorter under the fish.
-  // A failed one then keeps its dead fish in the picture square (ICON.error).
-  var t = waveTarget[j.id] || (waveTarget[j.id] = {}), now = performance.now();
+  // The fishing line: open while it downloads, and a moment longer when it ends (the catch,
+  // the snapped line, the fish going belly up). It opens and folds smoothly; the window is
+  // fitted once, not every frame (see .lining in windowFit).
   if (r.status === 'running' && /^(done|cancelled|error)$/.test(j.status) && !still()) {
     t.until = now + (j.status === 'done' ? 1500 : 1800);
     setTimeout(function () { if (r.j) updateRow(r, r.j); }, t.until - now + 30);
   }
   if (waiting && !t.wait) t.waitAt = now; // YouTube's pause began: count it down from now
-  var verb = statusText(j);
   t.p = j.progress; t.status = j.status; t.wait = waiting ? j.wait : 0; t.speed = j.speed;
-  t.ind = running && !waiting && j.progress < 1 && !j.speed;
-  t.conv = running && (verb === 'converting' || verb === 'finishing');
-  t.pos = j.pos; t.of = j.of;
-  var line = running || now < (t.until || 0);
-  r.kind.hidden = line;
-  r.live.hidden = !line;
-  setText(r.kind, kindText(j));
-  setText(r.nums, running ? numsText(j) : '');
+  t.ind = ind; t.conv = conv; t.pos = j.pos; t.of = j.of;
+  var open = running || now < (t.until || 0);
+  if (r.laneOpen !== open) {
+    var animate = r.laneOpen !== undefined && !still();
+    r.laneOpen = open;
+    r.lane.classList.toggle('shut', !open);
+    if (animate) {
+      r.row.classList.add('lining');
+      clearTimeout(r.laneT);
+      r.laneT = setTimeout(function () { r.row.classList.remove('lining'); fitLater(); }, 360);
+      fitLater(); // opening: the window grows ahead (it's transparent below the cards)
+    }
+  }
 
-  // A note, an error, or videos of a playlist that were skipped.
-  var msg = j.status === 'error' || j.status === 'done' ? j.error : j.note;
-  setText(r.msg, msg || '');
-  r.msg.className = 'sub' + (j.status === 'error' ? ' err' : '');
+  // The second line: while downloading, what's happening and how far all of it is; else what
+  // it is, or (failed) what went wrong, short, all of it in the hint.
+  var list = j.of > 1 && j.pos;
+  r.kind.hidden = running;
+  r.nums.hidden = r.ovr.hidden = !running;
+  var bad = j.status === 'error' && j.error;
+  setText(r.kind, bad ? T(j.error) : kindText(j));
+  r.kind.classList.toggle('err', !!bad);
+  if (bad) r.kind.dataset.tip = j.error; else delete r.kind.dataset.tip;
+  setText(r.nums, running ? numsText(j) : '');
+  setText(r.ovr, !running || ind || (waiting && j.progress <= 0) ? ''
+    : (list ? itemWord(j) + ' ' + j.pos + ' ' + T('of') + ' ' + j.of + ' · ' : '') + Math.floor(j.progress) + '%');
+
+  // A note: videos of a playlist that were skipped, a Mix that was cut short.
+  var msg = j.status === 'done' ? j.error : j.status === 'error' ? '' : j.note;
+  setText(r.msg, T(msg) || '');
+  r.msg.className = 'sub';
   r.msg.hidden = !msg;
 
   // Buttons, at the right of the second line: rebuilt only when the state changes.
-  var L = state.login || {}, needIn = j.status === 'error' && L.can && !L.in && /^YouTube wants you to sign in/.test(j.error || '');
-  var acts = j.status + '|' + j.files.length + '|' + needIn + '|' + !!j.error;
+  var L = state.login || {}, needIn = j.status === 'error' && L.can && !L.in && /^YouTube asks you to sign in/.test(j.error || '');
+  var acts = j.status + '|' + j.files.length + '|' + needIn + '|' + !!j.error + '|' + LANG;
   if (r.actsKey !== acts) {
     r.actsKey = acts;
     r.acts.innerHTML = '';
     // Failed or cancelled: back into the queue. What's already downloaded is skipped.
     if (j.status === 'error' || j.status === 'cancelled') {
-      if (needIn) r.acts.append(button('acc', ICON.user + 'Sign in', null, signIn));
-      r.acts.append(button(needIn ? '' : 'acc', ICON.retry + 'Retry', null,
+      if (needIn) r.acts.append(button('acc', ICON.user + T('Sign in'), null, signIn));
+      r.acts.append(button(needIn ? '' : 'acc', ICON.retry + T('Retry'), null,
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
       // The full technical error, to send to someone (the page shows the plain-words version).
       if (j.status === 'error') {
-        var copy = button('', ICON.copy + 'Copy error', null, function () {
+        var copy = button('', ICON.copy + T('Copy error'), null, function () {
           var text = 'ТЯГА ' + (state.version || '') + '\nLink: ' + j.url + '\n' + (j.errorRaw || j.error || '');
           var done = function (ok) {
-            copy.innerHTML = ok ? ICON.check + 'Copied' : ICON.copy + 'Couldn\'t copy';
-            setTimeout(function () { copy.innerHTML = ICON.copy + 'Copy error'; }, 1600);
+            copy.innerHTML = ok ? ICON.check + T('Copied') : ICON.copy + T("Couldn't copy");
+            setTimeout(function () { copy.innerHTML = ICON.copy + T('Copy error'); }, 1600);
           };
           try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); }
           catch (e) { done(false); }
@@ -903,11 +1104,11 @@ function updateRow(r, j) {
     }
     // A playlist with skipped videos: try just those again.
     if (j.status === 'done' && j.error) {
-      r.acts.append(button('', ICON.retry + 'Retry', null,
+      r.acts.append(button('', ICON.retry + T('Retry'), null,
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
     }
     if (j.status === 'done' && j.files.length) {
-      r.acts.append(button('', ICON.folder + 'Show file', 'Shows it in its folder. Double-click the row to play it',
+      r.acts.append(button('', ICON.folder + T('Show file'), 'Shows it in its folder. Double-click the row to play it',
         function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); }));
       // The file itself onto the clipboard: Ctrl+V in a chat attaches it.
       var cp = el('button', 'ibtn');
@@ -916,14 +1117,14 @@ function updateRow(r, j) {
       cp.onclick = function () {
         api('/api/copyfile', { id: j.id, n: j.files.length - 1 }).then(function (x) {
           cp.innerHTML = x.ok ? ICON.check : ICON.copy;
-          cp.dataset.tip = x.ok ? 'Copied: paste it with Ctrl+V' : 'Couldn\'t copy the file';
+          cp.dataset.tip = x.ok ? 'Copied: paste it with Ctrl+V' : "Couldn't copy the file";
           setTimeout(function () { cp.innerHTML = ICON.copy; cp.dataset.tip = 'Copy the file, to paste it into a chat with Ctrl+V'; }, 1800);
         });
       };
       r.acts.append(cp);
     }
   }
-  r.acts.hidden = !r.acts.children.length || line;
+  r.acts.hidden = !r.acts.children.length;
   r.status = j.status;
   r.j = j;
 }
@@ -933,15 +1134,15 @@ function updateRow(r, j) {
 function numsText(j) {
   var log = j.log || [], step = log[log.length - 1] || '';
   if (j.wait > 0) return waitText(waveTarget[j.id] || { wait: j.wait });
-  if (!j.speed && /^(Converting|Joining|Adding the cover|Cutting out)/.test(step)) return step;
-  if (j.progress >= 100) return 'Finishing up';
-  if (j.speed) return [j.size, j.speed, j.eta && j.eta + ' left'].filter(Boolean).join(' · ');
-  if (j.progress > 0) return step || 'Downloading'; // between the picture and the sound: which one is next
+  if (!j.speed && /^(Converting|Joining|Adding the cover|Cutting out)/.test(step)) return T(step);
+  if (j.progress >= 100) return T('Finishing up');
+  if (j.speed) return Tnums([j.size, j.speed, j.eta && j.eta + ' left'].filter(Boolean).join(' · '));
+  if (j.progress > 0) return T(step || 'Downloading'); // between the picture and the sound: which one is next
   // Before the first byte: one calm "Getting ready", not every step yt-dlp takes; only a step
   // that takes a while (YouTube's check can) is named.
   var t = waveTarget[j.id] || {}, now = performance.now();
   if (step !== t.step) { t.step = step; t.stepAt = now; }
-  return step && now - t.stepAt > 2500 && !/^(Downloading the |Playlist: )/.test(step) ? step : 'Getting ready…';
+  return T(step && now - t.stepAt > 2500 && !/^(Downloading the |Playlist: )/.test(step) ? step : 'Getting ready…');
 }
 
 // The YouTube sign-in button (login.go). Signed in: the first click asks "Sign out?",
@@ -953,7 +1154,7 @@ function renderAcct() {
   if (!L.can) return;
   var armed = L.in && !L.open && Date.now() < acctArm;
   var cls = L.open ? 'wait' : armed ? 'arm' : L.in ? 'in' : '';
-  var text = L.open ? 'Signing in…' : armed ? 'Sign out?' : L.in ? (L.via ? 'Signed in · ' + L.via : 'Signed in') : 'Sign in to YouTube';
+  var text = T(L.open ? 'Signing in…' : armed ? 'Sign out?' : L.in ? (L.via ? 'Signed in · ' + L.via : 'Signed in') : 'Sign in to YouTube');
   var tip = L.open ? 'Sign in to YouTube on the page that opened; ТЯГА notices by itself'
     : armed ? 'Click again: ТЯГА stops using your YouTube account (your browser stays signed in)'
     : L.in && L.via ? 'ТЯГА downloads as your YouTube account in ' + L.via + ', read afresh every time. Click to stop'
@@ -965,7 +1166,7 @@ function renderAcct() {
   // What came of signing in goes in the message line under the options; it goes away by itself
   // with the next try (a message about something else is left alone).
   if (L.msg !== lastLoginMsg) {
-    if (L.msg || $('msg').textContent === lastLoginMsg) $('msg').textContent = L.msg;
+    if (L.msg || $('msg').textContent === T(lastLoginMsg)) $('msg').textContent = T(L.msg);
     lastLoginMsg = L.msg;
   }
 }
@@ -988,6 +1189,8 @@ function render() {
   $('ver').textContent = state.version || '';
   $('ver').hidden = !state.version;
   $('pick').hidden = !state.canPick;
+  var nf = (state.jobs || []).reduce(function (a, j) { return a + (j.status === 'done' ? j.files.length : 0); }, 0);
+  $('copyall').hidden = nf < 2; // two finished files or more
   var where = state.outName ? 'Downloads go to ' + state.outName : '';
   $('open').dataset.tip = where;
   $('pick').dataset.tip = where && where + '. Pick another folder for the next ones';
@@ -995,7 +1198,7 @@ function render() {
   // Setup: downloading yt-dlp / ffmpeg / Deno on first start, or something wasn't found.
   var note = state.setup || state.problem || '';
   $('setup').hidden = !note;
-  $('setup').textContent = note;
+  $('setup').textContent = T(note);
   $('setup').classList.toggle('err', !state.setup && !!state.problem);
 
   var list = $('list'), jobs = state.jobs || [];
@@ -1018,7 +1221,8 @@ function render() {
       rows = {};
       var empty = el('div', 'empty');
       empty.innerHTML = '<svg viewBox="0 0 256 256"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="18"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg>';
-      empty.append('Nothing on the hook yet. Paste a link above.');
+      var et = el('span', null, T('Nothing on the hook yet. Paste a link above.')); et.dataset.t = 'Nothing on the hook yet. Paste a link above.';
+      empty.append(et);
       list.append(empty);
     }
     return;
@@ -1062,19 +1266,20 @@ function render() {
 var APP = document.documentElement.classList.contains('app');
 var fold = { on: false, gone: false, count: -1 };
 function foldSummary(jobs) {
-  if (!jobs.length) return APP ? $('lsum').innerHTML : 'Nothing on the hook yet'; // app: the card is leaving, keep its line
+  if (!jobs.length) return APP ? $('lsum').innerHTML : T('Nothing on the hook yet'); // app: the card is leaving, keep its line
   var n = { running: 0, queued: 0, done: 0, error: 0 }, run = null;
   jobs.forEach(function (j) { if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
   var parts = [];
-  if (run) parts.push(statusText(run) === 'waiting' ? 'Waiting for YouTube'
-    : run.of > 1 && run.pos ? 'Downloading ' + itemWord(run) + ' ' + run.pos + ' of ' + run.of + ', ' + Math.floor(run.progress) + '% of all'
-    : run.progress >= 100 ? 'Finishing'
-    : 'Downloading ' + Math.floor(run.progress) + '%');
-  if (n.queued) parts.push(n.queued + ' queued');
-  if (n.done) parts.push(n.done + ' done');
+  var ru = LANG === 'ru';
+  if (run) parts.push(statusText(run) === 'waiting' ? (ru ? 'Ждём YouTube' : 'Waiting for YouTube')
+    : run.of > 1 && run.pos ? (ru ? 'Скачивается ' + itemWord(run) + ' ' + run.pos + ' из ' + run.of + ', всего ' : 'Downloading ' + itemWord(run) + ' ' + run.pos + ' of ' + run.of + ', ') + Math.floor(run.progress) + (ru ? '%' : '% of all')
+    : run.progress >= 100 ? T('Finishing')
+    : T('Downloading') + ' ' + Math.floor(run.progress) + '%');
+  if (n.queued) parts.push(ru ? 'в очереди: ' + n.queued : n.queued + ' queued');
+  if (n.done) parts.push(ru ? 'готово: ' + n.done : n.done + ' done');
   var html = parts.map(function (t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }).join(' · ');
-  if (n.error) html += (html ? ' · ' : '') + '<span class="bad">' + n.error + ' failed</span>';
-  return html || jobs.length + (jobs.length === 1 ? ' download' : ' downloads');
+  if (n.error) html += (html ? ' · ' : '') + '<span class="bad">' + (ru ? 'с ошибкой: ' + n.error : n.error + ' failed') + '</span>';
+  return html || (ru ? 'загрузок: ' + jobs.length : jobs.length + (jobs.length === 1 ? ' download' : ' downloads'));
 }
 // Nothing in the list: no list card at all, the window is just the first card. The first link
 // that goes in brings the card in, open; clearing the list takes it away again (not while the
@@ -1168,6 +1373,7 @@ function openHeight() { // the open list card's natural height, measured without
     e.style.height = e.style.paddingTop = e.style.paddingBottom = '';
   });
   var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + mainPad();
+  list.querySelectorAll('.job.lining .lane').forEach(function (l) { n += (l.classList.contains('shut') ? 0 : 24) - l.offsetHeight; });
   moving.forEach(function (m) { m[0].style.height = m[1]; m[0].style.paddingTop = m[2]; m[0].style.paddingBottom = m[3]; m[0].hidden = m[4]; });
   card.hidden = was[0]; card.className = was[1]; card.style.height = was[2];
   return Math.ceil(n);
@@ -1202,7 +1408,7 @@ function windowFit() {
   // below the cards, so that's invisible) but shrinks only once it's all settled (each part
   // fits it again at its end): resizing the window every frame is what made it stutter.
   // (Also not while the list card is coming in: the room made ahead is given back after.)
-  if (n < innerHeight - 1 && ($('list').querySelector('.job.grow,.job.bye') || Date.now() - comeAt < 600)) {
+  if (n < innerHeight - 1 && ($('list').querySelector('.job.grow,.job.bye,.job.lining') || Date.now() - comeAt < 600)) {
     if (Date.now() - comeAt < 600) setTimeout(fitLater, 650);
     return;
   }
@@ -1258,10 +1464,10 @@ function refresh() {
   return api('/api/state')
     .then(function (s) {
       state = s;
-      if ($('msg').textContent === OFFLINE) $('msg').textContent = '';
+      if ($('msg').textContent === T(OFFLINE)) $('msg').textContent = '';
       render();
     })
-    .catch(function () { if ($('msg')) $('msg').textContent = OFFLINE; });
+    .catch(function () { if ($('msg')) $('msg').textContent = T(OFFLINE); });
 }
 
 // Asking for the state: every 0.7 s while something is going on, every 2 s when nothing is
@@ -1513,14 +1719,15 @@ var waveTarget = {}, waveState = {};
     if (qm > 0) {
       var qy = fy - S - 4 + (still ? 0 : Math.sin(now / 1000 * 2.2) * .8);
       cx.save(); cx.globalAlpha = qm; cx.translate(fx, qy); cx.scale(.6 + .4 * qm, .6 + .4 * qm);
-      cx.fillStyle = acc; cx.font = '700 12px system-ui,sans-serif'; cx.fillText('?', 0, 0); cx.restore();
+      cx.fillStyle = acc; cx.font = '700 12px Onest,system-ui,sans-serif'; cx.fillText('?', 0, 0); cx.restore();
     }
     if (rip > 0) {
-      cx.globalAlpha = rip; cx.fillStyle = dim; cx.font = '700 9px system-ui,sans-serif';
+      cx.globalAlpha = rip; cx.fillStyle = dim; cx.font = '700 9px Onest,system-ui,sans-serif';
       cx.fillText('RIP', fx, fy - S - 3); cx.globalAlpha = 1;
     }
     // YouTube's pause: the seconds left, counted here so they tick every second.
-    if (mode === 'wait' && cv.nextSibling) setText(cv.nextSibling, waitText(t));
+    var rowEl = cv.closest('.job');
+    if (mode === 'wait' && rowEl) setText(rowEl.querySelector('.nums'), waitText(t));
     return moving;
   }
 
@@ -1540,7 +1747,7 @@ var waveTarget = {}, waveState = {};
 // "Waiting for YouTube · 4 s": YouTube's pause, counted down from when it began.
 function waitText(t) {
   var left = Math.max(1, Math.ceil(t.wait - (performance.now() - (t.waitAt || performance.now())) / 1000));
-  return 'Waiting for YouTube · ' + left + ' s';
+  return T('Waiting for YouTube · ' + left + ' s');
 }
 
 </script></body></html>

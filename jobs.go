@@ -701,6 +701,12 @@ func logLine(line string) string {
 		return "Joining the picture and the sound"
 	case tag == "EmbedThumbnail":
 		return "Adding the cover"
+	case tag == "cover":
+		return "Found the album cover" // ТЯГА's own steps, in the same plain words
+	case tag == "tags":
+		return "Tagging the tracks"
+	case tag == "merge":
+		return "Gluing into one file"
 	case strings.HasPrefix(line, "WARNING: "):
 		return "" // yt-dlp's warnings are for developers ("[youtube] id: Some web_embedded client…"); real trouble comes as ERROR
 	}
