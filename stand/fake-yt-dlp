@@ -51,6 +51,13 @@ for i, (artist, title, vid) in enumerate(items, 1):
     say(f'ITEM|{i if playlist else "NA"}|{n if playlist else "NA"}|{title}')
     say(f'THUMB|Youtube|{vid}|https://i.ytimg.com/vi_webp/{vid}/maxresdefault.webp')
     say(f'CHAN|{artist} - Topic')
+    final = f'{base}.{fmt if audio else "mp4"}'
+    if os.path.exists(final):  # downloaded before: --no-overwrites skips it, like the real one
+        say(f'[download] {final} has already been downloaded'); time.sleep(0.3)
+        say(f'FILE|{final}')
+        if audio:
+            say('SONG|' + json.dumps({'filepath': final, 'artist': artist, 'title': title, 'album': None}))
+        continue
     say('[download] Sleeping 5.00 seconds as required by the site...'); time.sleep(5)
     scale = 0.06 if any('TINY' in x for x in a) else 5 if any('LONG' in x for x in a) else 1
     parts = [('webm', int(4_000_000 * scale))] if audio else [('f299.mp4', int(40_000_000 * scale)), ('f140.m4a', int(3_000_000 * scale))]

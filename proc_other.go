@@ -28,6 +28,7 @@ func killTree(cmd *exec.Cmd) {
 // openURL and openFolder open a link or a folder in the default program.
 func openURL(url string)    { openWith(url) }
 func openFolder(dir string) { openWith(dir) }
+func openFile(path string)  { openWith(path) }
 
 // revealFile shows the file in the file manager, selected where it supports that (through
 // D-Bus), otherwise just its folder.

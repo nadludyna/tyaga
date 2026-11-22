@@ -6,7 +6,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 work=${STAND_DIR:-$(cygpath -u "$TEMP")/tyaga-stand}
 taskkill //F //IM tyaga-stand.exe >/dev/null 2>&1 || true
 sleep 0.5
-rm -rf "$work/out" "$work/fakebin"; mkdir -p "$work/app" "$work/out" "$work/fakebin"
+rm -rf "$work/out" "$work/fakebin" "$work/app.log"; mkdir -p "$work/app" "$work/out" "$work/fakebin"
 (cd "$here/winshim" && go build -o "$work/fakebin/yt-dlp.exe" main.go)
 (cd "$here/.." && go build -o "$work/app/tyaga-stand.exe" .)
 cd "$work/app"

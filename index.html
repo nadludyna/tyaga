@@ -90,6 +90,12 @@ label:hover{color:var(--fg)}
 .go:active{transform:scale(.97);filter:brightness(.95)}
 .msg{color:var(--err);margin-top:8px;font-size:14px}
 .msg:empty{margin:0}
+/* A short note about what a click just did, with a way back (Undo), like Material 3's
+   snackbar: under the options, fades in, goes away by itself. */
+.notice{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13.5px;color:var(--dim);animation:fadein .2s ease both;transition:opacity .2s ease}
+.notice.out{opacity:0}
+.notice span{flex:1;min-width:0}
+.notice .btn{padding:4px 12px}
 
 /* One download = one compact row, the way mature downloaders do it (Seal, 4K Video
    Downloader): the picture, then two lines. The title with its state on the right; under it
@@ -129,14 +135,17 @@ label:hover{color:var(--fg)}
 .kind{flex:1;min-width:0;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kind,.live{animation:fadein .2s ease backwards}
 .live{flex:1;min-width:0;display:flex;align-items:center;gap:12px}
-.wave{flex:1;min-width:60px;height:12px;display:block}
-.nums{flex:none;max-width:62%;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+/* The numbers take a fixed share of the line, so the fishing line never changes length when
+   the words do. The fishing line: taller than its place (negative margins), so the fish can jump without
+   the row growing; it never takes the mouse. */
+.wave{flex:1;min-width:60px;height:40px;margin:-14px 0;display:block;pointer-events:none}
+.nums{flex:0 0 42%;min-width:0;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .acts{flex:none;display:flex;gap:6px;margin-left:auto}
 .acts .btn{padding:4px 10px;font-size:12.5px}
 .acts .ibtn{margin:0}
 .sub{font-size:12px;color:var(--dim);word-break:break-word}
 .sub.err{color:var(--err)}
-@media (max-width:560px){.live{flex-wrap:wrap;gap:2px 12px}.wave{flex:1 1 100%}.nums{max-width:none}}
+@media (max-width:560px){.live{flex-wrap:wrap;gap:2px 12px}.wave{flex:1 1 100%}.nums{flex:1 1 100%}}
 .foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 /* Buttons: soft pills with an icon; the accent one is for the thing you most likely want. */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(127,127,127,.07);color:var(--fg);font:inherit;font-size:13px;line-height:1.2;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
@@ -331,6 +340,7 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
     </span>
   </div>
   <div class="msg" id="msg"></div>
+  <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB">Undo</button></div>
 </div>
 
 <div class="card" id="jobsCard">
@@ -338,6 +348,7 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
   <div id="list"></div>
   <div class="foot">
     <button class="btn" id="open"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open folder</button>
+    <button class="btn" id="pick" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v3"/><path d="M3 7v10a2 2 0 0 0 2 2h7"/><path d="M15 18.5l2 2 4-4.5"/></svg>Change folder</button>
     <button class="btn" id="clear" title="Takes them off the list; the files stay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>Clear finished</button>
   </div>
 </div>
@@ -628,7 +639,39 @@ if (window.chrome && window.chrome.webview) addEventListener('contextmenu', func
 $('links').addEventListener('input', function () { readyWindow(); });
 $('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askNotify(); add(); } };
 $('open').onclick = function () { api('/api/open', {}); };
-$('clear').onclick = function () { api('/api/clear', {}).then(refresh); };
+// Another downloads folder: Windows' folder dialog (ТЯГА's window only), remembered.
+$('pick').onclick = function () {
+  api('/api/folder', {}).then(function (r) { if (r.out) notice('Downloads now go to ' + r.out + '.'); refresh(); });
+};
+// Clear finished takes the rows off at once, and says so with an Undo for a few seconds.
+$('clear').onclick = function () {
+  api('/api/clear', {}).then(function (r) {
+    refresh();
+    if (r && r.n) notice('Cleared ' + r.n + (r.n === 1 ? ' download' : ' downloads') + ' from the list. The files stay.', function () {
+      api('/api/unclear', {}).then(refresh);
+    });
+  });
+};
+// The note under the options (see .notice): a text, and a button if there's a way back.
+var noticeTimer = 0;
+function notice(text, undo) {
+  var n = $('notice');
+  clearTimeout(noticeTimer);
+  $('noticeT').textContent = text;
+  $('noticeB').hidden = !undo;
+  $('noticeB').onclick = function () { hideNotice(); if (undo) undo(); };
+  n.classList.remove('out');
+  if (n.hidden) { n.hidden = false; n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; }
+  noticeTimer = setTimeout(hideNotice, 8000);
+}
+function hideNotice() {
+  var n = $('notice');
+  clearTimeout(noticeTimer);
+  if (n.hidden) return;
+  if (still()) { n.hidden = true; return; }
+  n.classList.add('out');
+  noticeTimer = setTimeout(function () { n.hidden = true; n.classList.remove('out'); }, 210);
+}
 
 // Closing or reloading the page: tell TYAGA. If no page comes back, it finishes
 // the downloads and quits by itself.
@@ -650,7 +693,7 @@ function kindText(j) {
   return k;
 }
 function statusText(j) {
-  if (j.status === 'done') return '✓ Done';
+  if (j.status === 'done') return j.already ? '✓ Already there' : '✓ Done';
   if (j.status === 'running' && j.wait > 0) return 'waiting';
   // Downloaded, now yt-dlp converts it, joins the picture and the sound or adds the cover.
   var now = (j.log || [])[(j.log || []).length - 1] || '';
@@ -721,13 +764,22 @@ function makeRow(j) {
   r.body.append(r.top, r.line2, r.msg);
   r.sideBox = el('div', 'side');
   r.row.append(r.sideBox, r.body);
+  // A finished row: double-click opens the file in its player, like in Explorer (and doesn't
+  // select a word of the title on the way).
+  r.row.addEventListener('mousedown', function (e) { if (e.detail > 1 && r.j && r.j.status === 'done') e.preventDefault(); });
+  r.row.addEventListener('dblclick', function (e) {
+    var j = r.j;
+    if (!j || j.status !== 'done' || !j.files.length || e.target.closest('button')) return;
+    api('/api/play', { id: j.id, n: j.files.length - 1 });
+  });
   if (APP && rowWatch) rowWatch.observe(r.row);
   return r;
 }
 
 var ICON = {
   queued: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
-  error: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v5M12 16h0"/></svg>',
+  // Failed: ТЯГА's fish, belly up, RIP (what the fishing line showed when it happened).
+  error: '<svg viewBox="0 0 24 24"><g transform="translate(12.5 14.5) scale(1 -1)"><ellipse rx="5.6" ry="4.8"/><path d="M-4.2 0L-8.2-4.1Q-7.2 0-8.2 4.1Z"/><circle cx="3.2" cy="-1.4" r=".6" fill="currentColor"/></g><text x="12" y="6.4" text-anchor="middle" font-size="5.2" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui,sans-serif">RIP</text></svg>',
   cancelled: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
   audio: '<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>',
   video: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg>',
@@ -780,16 +832,26 @@ function updateRow(r, j) {
     : running ? (list ? itemWord(j) + ' ' + j.pos + ' of ' + j.of + ' · ' : '') + Math.floor(j.progress) + '%' : statusText(j));
   r.x.hidden = !(running || j.status === 'queued');
 
-  // The second line: what it is; while downloading, the bar and the numbers instead.
-  r.kind.hidden = running;
-  r.live.hidden = !running;
-  setText(r.kind, kindText(j));
-  if (running) {
-    // Nothing to count yet (starting, YouTube's pause): a piece of wave runs along the bar
-    // instead of a flat line, until the real bar is long enough to show.
-    waveTarget[j.id] = { p: j.progress, wait: waiting, ind: j.progress < 3 };
-    setText(r.nums, numsText(j));
+  // The second line: what it is; while downloading the fishing line and the numbers instead.
+  // The line stays a moment longer when it ends (the catch, the snapped line, the fish going
+  // belly up), and the row's buttons wait for it: they'd make the line shorter under the fish.
+  // A failed one then keeps its dead fish in the picture square (ICON.error).
+  var t = waveTarget[j.id] || (waveTarget[j.id] = {}), now = performance.now();
+  if (r.status === 'running' && /^(done|cancelled|error)$/.test(j.status) && !still()) {
+    t.until = now + (j.status === 'done' ? 1500 : 1800);
+    setTimeout(function () { if (r.j) updateRow(r, r.j); }, t.until - now + 30);
   }
+  if (waiting && !t.wait) t.waitAt = now; // YouTube's pause began: count it down from now
+  var verb = statusText(j);
+  t.p = j.progress; t.status = j.status; t.wait = waiting ? j.wait : 0; t.speed = j.speed;
+  t.ind = running && !waiting && j.progress < 1 && !j.speed;
+  t.conv = running && (verb === 'converting' || verb === 'finishing');
+  t.pos = j.pos; t.of = j.of;
+  var line = running || now < (t.until || 0);
+  r.kind.hidden = line;
+  r.live.hidden = !line;
+  setText(r.kind, kindText(j));
+  setText(r.nums, running ? numsText(j) : '');
 
   // A note, an error, or videos of a playlist that were skipped.
   var msg = j.status === 'error' || j.status === 'done' ? j.error : j.note;
@@ -828,7 +890,7 @@ function updateRow(r, j) {
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
     }
     if (j.status === 'done' && j.files.length) {
-      r.acts.append(button('', ICON.folder + 'Show file', null,
+      r.acts.append(button('', ICON.folder + 'Show file', 'Shows it in its folder. Double-click the row to play it',
         function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); }));
       // The file itself onto the clipboard: Ctrl+V in a chat attaches it.
       var cp = el('button', 'ibtn');
@@ -843,16 +905,17 @@ function updateRow(r, j) {
       };
       r.acts.append(cp);
     }
-    r.acts.hidden = !r.acts.children.length;
   }
+  r.acts.hidden = !r.acts.children.length || line;
   r.status = j.status;
+  r.j = j;
 }
 
 // The numbers under the title while it downloads, or in words what it's doing right now:
 // "3 MB of 5 MB · 1.2 MB/s · 0:02 left", "Waiting for YouTube · a 5 s pause", "Converting to MP3".
 function numsText(j) {
   var log = j.log || [], step = log[log.length - 1] || '';
-  if (j.wait > 0) return 'Waiting for YouTube · a ' + j.wait + ' s pause';
+  if (j.wait > 0) return waitText(waveTarget[j.id] || { wait: j.wait });
   if (!j.speed && /^(Converting|Joining|Adding the cover|Cutting out)/.test(step)) return step;
   if (j.progress >= 100) return 'Finishing up';
   if (j.speed) return [j.size, j.speed, j.eta && j.eta + ' left'].filter(Boolean).join(' · ');
@@ -902,6 +965,10 @@ function render() {
   renderAcct();
   $('ver').textContent = state.version || '';
   $('ver').hidden = !state.version;
+  $('pick').hidden = !state.canPick;
+  var where = state.outName ? 'Downloads go to ' + state.outName : '';
+  $('open').dataset.tip = where;
+  $('pick').dataset.tip = where && where + '. Pick another folder for the next ones';
 
   // Setup: downloading yt-dlp / ffmpeg / Deno on first start, or something wasn't found.
   var note = state.setup || state.problem || '';
@@ -1182,114 +1249,274 @@ function pollDelay() {
 }
 (function poll() { refresh().then(function () { setTimeout(poll, pollDelay()); }); })();
 
-// Progress wave, done the way Material 3's LinearWavyProgressIndicator does it (the Morphe
-// app uses that one as is):
-// - a thick wave with round ends for the done part, a gap, a flat track for the rest;
-// - the wave rolls at one steady pace, one wavelength per second;
-// - it's flat near the start and the end (up to 10 %, from 95 %) and rises/settles smoothly;
-// - the bar follows the progress with a soft spring: progress comes in steps, and a spring
-//   keeps its speed when the target moves again, so it glides instead of lurching each time.
-// At 100 % (converting, the cover, merging) the line is full and flat, still rolling gently.
-// Each running download has a canvas; its state lives here by job id.
-// The animations sleep while the window is in the tray (state.hidden) and when there's
-// nothing to draw; render() wakes them.
+// The progress bar is a fishing line with ТЯГА's fish on it (the one from the logo). The line
+// is a gentle wave the whole length, grey ahead and orange where the fish has been, and the
+// fish says what's going on without words:
+// - starting (no number yet): the line and the fish fade in together; it waits, tail going;
+// - downloading: it swims along, its tail beating faster the faster the bytes come;
+// - YouTube's pause: it goes grey and lets out a bubble a second (the seconds count down);
+// - nothing comes for 10 s: it stops, looks around, a "?" over it;
+// - a playlist: a dot on the line where each video starts (up to 20); it leaps at each one;
+// - converting (100 %): it turns somersaults at the end and a glint runs along the line;
+// - done: the line pulls straight and it jumps out, straight up (then the row shows the file);
+// - failed: grey, belly up, RIP; cancelled: the line snaps and it swims off.
+// The bar follows the progress with a soft spring (progress comes in steps every 0.7 s; a
+// spring keeps its speed when the target moves again, so it glides instead of lurching), very
+// soft, critically damped, stiffer only when far behind.
+// One canvas per row, drawn only while something moves (a settled one is drawn once); asleep
+// while the window is hidden. "Reduce motion": the fish just sits where the progress is.
 var anim = { loops: [], kick: function () { anim.loops.forEach(function (f) { f(); }); } };
 var waveTarget = {}, waveState = {};
 (function () {
-  var css = getComputedStyle(document.documentElement);
-  var acc = css.getPropertyValue('--acc').trim();
-  themeHooks.push(function () { acc = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim(); });
-  var still = matchMedia('(prefers-reduced-motion: reduce)').matches, last = performance.now();
-  // A thin bar in a compact row: it shows progress, it isn't a show.
-  var THICK = 3, AMP = 2.5, LEN = 22, GAP = 6;  // px: line, wave height (half), wavelength, gap
-  var PACE = 1.2 * 2 * Math.PI;                 // rad/s: 1.2 wavelengths a second
-  // The spring: very soft (progress comes in big steps every 0.7 s; stiffer ones lurched in a
-  // simulation), critically damped. Only when the bar is far behind (a small file that's
-  // already done) does it get stiffer, so it doesn't crawl towards 100 % after the fact.
+  var root = document.documentElement, acc, dim, card;
+  function colours() {
+    var c = getComputedStyle(root);
+    acc = c.getPropertyValue('--acc').trim(); dim = c.getPropertyValue('--dim').trim();
+    card = c.getPropertyValue('--card').trim();
+  }
+  colours();
+  themeHooks.push(function () { colours(); anim.kick(); });
+  var TRACK = 'rgba(127,127,127,.32)', EYE = '#161616', GLINT = 'rgba(255,255,255,.6)';
+  var AMP = 3, LEN = 30, S = 7.5, MID = 20; // px: wave height (half), wavelength, fish size, the line in the canvas
   function spring(gap) { var k = 4 + Math.min(60, Math.max(0, gap - 12) * 1.2); return [k, 2 * Math.sqrt(k)]; }
-  var dim = css.getPropertyValue('--dim').trim();
-  themeHooks.push(function () { dim = getComputedStyle(document.documentElement).getPropertyValue('--dim').trim(); });
-  function easeIO(u) { return u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; }
-  var raf = 0, drawn = 0;
+  function ease(k) { k = Math.max(0, Math.min(1, k)); return 1 - Math.pow(1 - k, 3); }
+  function easeIO(k) { k = Math.max(0, Math.min(1, k)); return k < .5 ? 2 * k * k : 1 - 2 * (1 - k) * (1 - k); }
+  // How lively the tail is (0…1) from the speed: 50 KB/s lazy, 10 MB/s flat out.
+  function liveliness(speed) {
+    var m = /([\d.]+)\s*(KB|MB)\/s/.exec(speed || '');
+    if (!m) return 0;
+    var b = +m[1] * (m[2] === 'MB' ? 1048576 : 1024);
+    return Math.max(0, Math.min(1, Math.log(b / 51200) / Math.log(200)));
+  }
+
+  // The fish from the logo: a fat body, a tail, the play button on its side, an eye. A thin
+  // ring in the card's colour goes round it first, so the line seems to go into the fish.
+  function fish(cx, x, y, col, tail, rot, dir, op) {
+    if (op <= 0) return;
+    cx.save();
+    cx.globalAlpha = op;
+    cx.translate(x, y); cx.rotate(rot); cx.scale(S * dir, S);
+    function tailPath() {
+      cx.save(); cx.translate(-.74, 0); cx.rotate(tail);
+      cx.beginPath(); cx.moveTo(.05, 0); cx.lineTo(-.67, -.7); cx.quadraticCurveTo(-.49, 0, -.67, .7); cx.closePath();
+      cx.restore();
+    }
+    function bodyPath() { cx.beginPath(); cx.ellipse(0, 0, 1, .87, 0, 0, 2 * Math.PI); }
+    cx.lineWidth = .35; cx.lineJoin = 'round'; cx.strokeStyle = card;
+    tailPath(); cx.stroke(); bodyPath(); cx.stroke();
+    cx.fillStyle = col;
+    tailPath(); cx.fill(); bodyPath(); cx.fill();
+    cx.fillStyle = '#fff';
+    cx.beginPath(); cx.moveTo(-.31, -.29); cx.lineTo(-.31, .29); cx.lineTo(.22, 0); cx.closePath(); cx.fill();
+    cx.fillStyle = EYE;
+    cx.beginPath(); cx.arc(.58, -.26, .12, 0, 2 * Math.PI); cx.fill();
+    cx.restore();
+  }
+  function splash(st, x, y, n, pw) {
+    for (var i = 0; i < n; i++) st.parts.push({ k: 'd', x: x, y: y, vx: (Math.random() - .5) * pw * 1.6, vy: -pw * (.6 + Math.random() * .6), life: 0, max: .6, r: 1.1 });
+  }
+
+  // One row's bar. Returns whether it's still moving (false: drawn for good, no need to redraw).
+  function draw(cv, now, dt) {
+    var id = cv.dataset.id, t = waveTarget[id] || { p: 0, status: 'running' };
+    var st = waveState[id];
+    if (!st) {
+      st = waveState[id] = { shown: t.p || 0, vel: 0, phase: 0, amp: 1, parts: [], mode: '', at: now, born: now, lastP: t.p, lastPAt: now, pos: t.pos || 0, acc: 0, ev: {} };
+      if (t.status !== 'running') st.born = st.at = now - 1e5; // already over when the page saw it: its last look at once
+    }
+    var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var mode = t.status === 'done' ? 'done' : t.status === 'error' ? 'err' : t.status === 'cancelled' ? 'cancel'
+      : t.wait ? 'wait' : t.conv ? 'conv' : t.ind ? 'start' : 'move';
+    if (t.p !== st.lastP) { st.lastP = t.p; st.lastPAt = now; }
+    if (mode === 'move' && now - st.lastPAt > 10000) mode = 'stall';
+    if (mode !== st.mode) {
+      var over = /^(done|err|cancel)$/.test(mode);
+      if (mode === 'start' && /^(err|cancel)$/.test(st.mode)) st.born = now; // Retry: it fades in again
+      st.mode = mode; st.ev = {}; st.acc = 0;
+      st.at = over && st.born < now - 9e4 ? now - 1e5 : now; // over before the page saw it: its last look at once
+    }
+    var tm = (now - st.at) / 1000;
+
+    // The spring, in small steps (a long frame must not make it overshoot).
+    var target = mode === 'done' || (mode === 'conv' && t.p >= 99) ? 100 : t.p; // converting mid-playlist: where it is
+    if (mode === 'err' || mode === 'cancel') { target = st.shown; st.vel = 0; } // over: it stays where it got to
+    if (t.p < st.shown - 5 && mode !== 'done') { st.shown = t.p; st.vel = 0; }
+    if (still) st.shown = target;
+    else for (var left = dt; left > 1e-4; left -= 1 / 60) {
+      var d = Math.min(1 / 60, left), sp = spring(target - st.shown);
+      st.vel += (sp[0] * (target - st.shown) - sp[1] * st.vel) * d;
+      st.shown = Math.max(st.shown, Math.min(100, st.shown + st.vel * d)); // never back
+    }
+
+    var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    var cx = cv.getContext('2d');
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.clearRect(0, 0, w, h);
+
+    var padL = 2, x0 = padL + S * 1.45, end = w - S - 3, x = x0 + Math.max(0, end - x0) * st.shown / 100;
+    var ampK = 1, col = acc, lineCol = acc, F = 1.3, A = .18, fx = x, dy = 0, rot = null, dir = 1, op = 1;
+    var lineOp = 1, trackOp = 1, qm = 0, rip = 0, glint = -1, cut = null, hopRot = null, wiggle = false, moving = !still;
+    function wy(xx) { return MID + Math.sin(xx / LEN * 2 * Math.PI) * AMP * ampK; }
+    function slope(xx) { return Math.cos(xx / LEN * 2 * Math.PI) * AMP * ampK * 2 * Math.PI / LEN; }
+    var born = (now - st.born) / 1000;
+
+    if (mode === 'start') {
+      lineOp = trackOp = op = ease(born / .35); dy = (1 - op) * 3; fx = x0;
+    } else if (mode === 'move') {
+      var lv = liveliness(t.speed);
+      F = .8 + lv * 3.4; A = .2 + lv * .15; wiggle = true;
+      st.acc += dt;
+      if (lv > .55 && st.acc > .2 / lv) { st.acc = 0; st.parts.push({ k: 'd', spawn: 'tail', vx: -14 - Math.random() * 8, vy: -14 - Math.random() * 6, life: 0, max: .6, r: 1.1 }); }
+    } else if (mode === 'wait') {
+      col = dim; F = .75; A = .07; dy = Math.sin(tm * 1.2) * .5;
+      st.acc += dt;
+      if (st.acc >= 1) { st.acc -= 1; st.parts.push({ k: 'b', spawn: 'mouth', vx: .6, vy: -7, life: 0, max: 1.4, r: 1.3 }); }
+    } else if (mode === 'stall') {
+      F = .5; A = .06; qm = ease((tm - .3) / .35);
+      if (tm > .6) dir = Math.floor((tm - .6) / 1.3) % 2 ? -1 : 1;
+    } else if (mode === 'conv') {
+      ampK = 1 - .65 * ease(tm / .5); F = 1; A = .1;
+      glint = (tm % 1.6) / 1.6;
+      var cyc = tm % 1, sk = Math.min(1, cyc / .55);
+      rot = -easeIO(sk) * 2 * Math.PI;
+      st.acc += dt;
+      if (st.acc > .6) { st.acc = 0; st.parts.push({ k: 'b', spawn: 'mouth', vx: .4, vy: -6, life: 0, max: 1.4, r: 1.1 }); }
+    } else if (mode === 'done') {
+      ampK = 1 - ease(tm / .5); A = 0;
+      var jk = (tm - .35) / .9;
+      if (jk > 0 && jk < 1) { dy = -Math.sin(jk * Math.PI) * 11; rot = -ease(jk) * 2 * Math.PI; } else rot = 0;
+      if (jk > 0 && !st.ev.up) { st.ev.up = 1; if (tm < 2) splash(st, fx, wy(fx), 8, 34); }
+      if (jk >= 1 && !st.ev.down) { st.ev.down = 1; if (tm < 2) { splash(st, fx, wy(fx), 5, 22); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .9 }); } }
+      moving = moving && tm < 2;
+    } else if (mode === 'err') {
+      col = lineCol = dim; A = 0;
+      var e = ease(tm / .7);
+      rot = Math.PI * e; dy = -2 * e + (tm < 1.6 ? Math.sin(tm * 1.1) * .4 * e : 0);
+      rip = ease((tm - .6) / .4);
+      moving = moving && tm < 1.6;
+    } else if (mode === 'cancel') {
+      var sx = x;
+      if (tm < .3) { fx = sx + Math.sin(tm * 60) * 1.2; F = 4; A = .3; }
+      else {
+        if (!st.ev.snap) { st.ev.snap = 1; if (tm < 1) splash(st, sx, wy(sx), 4, 18); }
+        var c2 = tm - .3;
+        lineCol = dim; trackOp = Math.max(.35, 1 - c2 * 1.5);
+        cut = { back: ease(c2 / .35) * 30, sag: ease(c2 / .6) * 7 };
+        fx = sx + c2 * 26 + c2 * c2 * 14; dy = c2 * 8 + c2 * c2 * 22; rot = .5; op = Math.max(0, 1 - c2 / 1.3); F = 3.5; A = .25;
+        st.acc += dt;
+        if (st.acc > .15 && op > .2) { st.acc = 0; st.parts.push({ k: 'b', spawn: 'back', vx: -2, vy: -5, life: 0, max: .9, r: 1 }); }
+      }
+      moving = moving && tm < 1.8;
+    }
+    if (still) { dy = mode === 'err' ? -2 : 0; rot = mode === 'err' ? Math.PI : 0; dir = 1; A = 0; op = mode === 'cancel' ? 0 : 1; lineOp = trackOp = 1; st.parts = []; if (mode === 'done' || mode === 'conv') ampK = mode === 'done' ? 0 : .35; }
+
+    // A playlist: a dot where each video starts (up to 20 of them); a leap at each new one.
+    var of = t.of > 1 ? t.of : 0, hop = 0;
+    if (of && t.pos > st.pos && st.pos > 0 && t.status === 'running' && !still) { st.hopAt = now; st.landed = 0; splash(st, fx, wy(fx), 4, 18); }
+    if (t.pos) st.pos = t.pos;
+    if (st.hopAt) {
+      var hk = (now - st.hopAt) / 550;
+      if (hk < 1) { hop = Math.sin(hk * Math.PI) * 8; hopRot = -.65 * Math.cos(hk * Math.PI); }
+      else if (!st.landed) { st.landed = 1; splash(st, fx, wy(fx), 3, 14); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .7 }); }
+    }
+
+    var fy = wy(fx) + dy - hop;
+    if (rot === null) rot = hopRot !== null ? hopRot : Math.atan(slope(fx)) * .9 * dir;
+    st.phase += F * 2 * Math.PI * dt;
+    var tail = still ? 0 : Math.sin(st.phase) * A;
+    if (wiggle && !still) rot -= tail * .25;
+    st.amp = ampK;
+
+    // The line: grey ahead, orange (or grey, when it's over) behind; snapped when cancelled.
+    var endDone = cut ? x - cut.back : x, done = [], ahead = [], xx;
+    for (xx = padL; xx <= w - 2; xx += 1.5) {
+      if (xx <= endDone) {
+        var yy = wy(xx);
+        if (cut) { var u = Math.max(0, 1 - (endDone - xx) / 22); yy += u * u * cut.sag; }
+        done.push(xx, yy);
+      } else if (xx > x) ahead.push(xx, wy(xx));
+    }
+    cx.lineCap = cx.lineJoin = 'round';
+    function stroke(pts, colour, width, alpha) {
+      if (pts.length < 4) return;
+      cx.globalAlpha = alpha; cx.strokeStyle = colour; cx.lineWidth = width;
+      cx.beginPath(); cx.moveTo(pts[0], pts[1]);
+      for (var i = 2; i < pts.length; i += 2) cx.lineTo(pts[i], pts[i + 1]);
+      cx.stroke(); cx.globalAlpha = 1;
+    }
+    if (ahead.length) ahead.unshift(x, wy(x));
+    stroke(ahead, TRACK, 1.6, trackOp);
+    stroke(done, lineCol, 2.2, lineOp);
+    if (glint >= 0) {
+      var gx = padL + glint * (x - padL), g = []; // only along what's done
+      for (xx = Math.max(padL, gx - 14); xx <= gx; xx += 1.5) g.push(xx, wy(xx));
+      stroke(g, GLINT, 2.4, 1);
+    }
+    if (of && of <= 20) for (var q = 1; q < of; q++) {
+      var tx = x0 + (end - x0) * q / of;
+      cx.globalAlpha = lineOp; cx.fillStyle = tx <= x ? lineCol : dim; cx.strokeStyle = card; cx.lineWidth = 1.2;
+      cx.beginPath(); cx.arc(tx, wy(tx), 2.7, 0, 2 * Math.PI); cx.stroke(); cx.fill(); cx.globalAlpha = 1;
+    }
+
+    // Bubbles, drops, rings on the water.
+    st.parts = st.parts.filter(function (p) {
+      if (p.spawn === 'tail') { p.x = fx - dir * S * 1.5; p.y = fy; }
+      if (p.spawn === 'mouth') { p.x = fx + dir * S * .95; p.y = fy - S * .2; }
+      if (p.spawn === 'back') { p.x = fx - S * .6; p.y = fy - S * .4; }
+      p.spawn = 0;
+      p.life += dt;
+      if (p.life > p.max) return false;
+      if (p.life < 0) return true;
+      var o = 1 - p.life / p.max;
+      cx.globalAlpha = o;
+      if (p.k === 'r') {
+        var rr = 2 + p.life * 16;
+        cx.strokeStyle = acc; cx.lineWidth = 1; cx.globalAlpha = o * .8;
+        cx.beginPath(); cx.ellipse(p.x, p.y, rr, rr * .3, 0, 0, 2 * Math.PI); cx.stroke();
+      } else {
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        if (p.k === 'd') { p.vy += 70 * dt; cx.fillStyle = acc; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 2 * Math.PI); cx.fill(); }
+        else { cx.strokeStyle = mode === 'wait' ? dim : acc; cx.lineWidth = .9; cx.beginPath(); cx.arc(p.x, p.y, p.r + p.life * .6, 0, 2 * Math.PI); cx.stroke(); }
+      }
+      cx.globalAlpha = 1;
+      return true;
+    });
+    if (st.parts.length) moving = moving || !still;
+
+    fish(cx, fx, fy, col, tail, rot, dir, op);
+    cx.textAlign = 'center';
+    if (qm > 0) {
+      var qy = fy - S - 4 + (still ? 0 : Math.sin(now / 1000 * 2.2) * .8);
+      cx.save(); cx.globalAlpha = qm; cx.translate(fx, qy); cx.scale(.6 + .4 * qm, .6 + .4 * qm);
+      cx.fillStyle = acc; cx.font = '700 12px system-ui,sans-serif'; cx.fillText('?', 0, 0); cx.restore();
+    }
+    if (rip > 0) {
+      cx.globalAlpha = rip; cx.fillStyle = dim; cx.font = '700 9px system-ui,sans-serif';
+      cx.fillText('RIP', fx, fy - S - 3); cx.globalAlpha = 1;
+    }
+    // YouTube's pause: the seconds left, counted here so they tick every second.
+    if (mode === 'wait' && cv.nextSibling) setText(cv.nextSibling, waitText(t));
+    return moving;
+  }
+
+  var raf = 0, last = performance.now();
   function frame(now) {
     raf = 0;
-    var dt = Math.min(0.05, (now - last) / 1000), most = 0;
+    var dt = Math.min(.5, (now - last) / 1000), moving = false;
     last = now;
-    drawn = 0;
     document.querySelectorAll('canvas.wave').forEach(function (cv) {
-      var id = cv.dataset.id, t = waveTarget[id] || { p: 0 };
-      var st = waveState[id] || (waveState[id] = { phase: 0, shown: t.p, vel: 0, amp: 0, k: t.ind ? 1 : 0, run: 0 });
-      var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
-      if (!w) return; // hidden
-      drawn++;
-      if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
-      var cx = cv.getContext('2d');
-      cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cx.clearRect(0, 0, w, h);
-
-      if (t.p < st.shown - 5) { st.shown = t.p; st.vel = 0; }    // started over (retry): no slide back
-      if (still) st.shown = t.p;
-      else {
-        var sp = spring(t.p - st.shown);
-        st.vel += (sp[0] * (t.p - st.shown) - sp[1] * st.vel) * dt;
-        st.shown = Math.max(st.shown, Math.min(100, st.shown + st.vel * dt)); // never back
-        st.phase += dt * PACE;
-      }
-      var f = st.shown / 100;
-      // Waves as soon as the bar is a couple of bends long (not from 10 %), settles flat at the end.
-      var len = (w - THICK) * f;
-      var ampWant = still || f >= 0.97 ? 0 : AMP * Math.max(0, Math.min(1, (len - 10) / 30));
-      st.amp += (ampWant - st.amp) * Math.min(1, dt * 4);
-      most = Math.max(most, f);
-
-      var pad = THICK / 2, mid = h / 2, end = w - pad;
-      var head = Math.max(pad + THICK, pad + (end - pad) * f);
-      cx.lineCap = 'round';
-      cx.lineWidth = THICK;
-      // Indeterminate ↔ determinate: one cross-fades into the other (k: how indeterminate).
-      st.k += ((t.ind && !still ? 1 : 0) - st.k) * Math.min(1, dt * 5);
-      if (st.k > .01) {
-        // A piece of wave running along the track, again and again; slower and grey while
-        // YouTube makes it wait, orange while it's getting going.
-        st.run += dt / (t.wait ? 2.4 : 1.5);
-        var u = st.run % 1, L = .34;
-        var a1 = pad + (end - pad) * Math.max(0, Math.min(1, easeIO(u) * (1 + L) - L));
-        var b1 = pad + (end - pad) * Math.max(0, Math.min(1, easeIO(Math.min(1, u * 1.15)) * (1 + L * .4)));
-        cx.globalAlpha = st.k;
-        cx.strokeStyle = 'rgba(127,127,127,.28)';
-        cx.beginPath(); cx.moveTo(pad, mid); cx.lineTo(end, mid); cx.stroke();
-        if (b1 - a1 > 1) {
-          cx.strokeStyle = t.wait ? dim : acc;
-          cx.beginPath();
-          for (var x1 = a1; ; x1 += 1) {
-            var x2 = Math.min(x1, b1), y1 = mid + Math.sin((x2 / LEN) * 2 * Math.PI - st.phase) * AMP;
-            x1 === a1 ? cx.moveTo(x2, y1) : cx.lineTo(x2, y1);
-            if (x2 >= b1) break;
-          }
-          cx.stroke();
-        }
-        cx.globalAlpha = 1 - st.k;
-        if (st.k > .99) { cx.globalAlpha = 1; return; }
-      }
-      if (head + GAP < end) {                                     // the track: what's left
-        cx.strokeStyle = 'rgba(127,127,127,.28)';
-        cx.beginPath(); cx.moveTo(head + GAP + THICK, mid); cx.lineTo(end, mid); cx.stroke();
-      }
-      cx.strokeStyle = acc;                                       // the wave: what's done
-      cx.beginPath();
-      for (var x = pad; ; x += 1) {
-        var xx = Math.min(x, head);
-        var y = mid + Math.sin((xx / LEN) * 2 * Math.PI - st.phase) * st.amp;
-        x === pad ? cx.moveTo(xx, y) : cx.lineTo(xx, y);
-        if (xx >= head) break;
-      }
-      cx.stroke();
-      cx.globalAlpha = 1;
+      if (cv.clientWidth && draw(cv, now, dt)) moving = true;
     });
-    // Nothing to draw, or the window is hidden: sleep (render() wakes it).
-    if (drawn && !state.hidden) raf = requestAnimationFrame(frame);
+    // Nothing moves any more, or the window is hidden: sleep (render() wakes it).
+    if (moving && !state.hidden) raf = requestAnimationFrame(frame);
   }
   anim.loops.push(function () { if (!raf && !state.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } });
 })();
+// "Waiting for YouTube · 4 s": YouTube's pause, counted down from when it began.
+function waitText(t) {
+  var left = Math.max(1, Math.ceil(t.wait - (performance.now() - (t.waitAt || performance.now())) / 1000));
+  return 'Waiting for YouTube · ' + left + ' s';
+}
 
 </script></body></html>

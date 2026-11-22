@@ -33,6 +33,12 @@ func openURL(url string) {
 	exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
 }
 
+// openFile opens a finished file in the program Windows opens it with (a player).
+func openFile(path string) {
+	unlockForeground()
+	exec.Command("rundll32", "url.dll,FileProtocolHandler", filepath.Clean(path)).Start()
+}
+
 var (
 	ole32   = syscall.NewLazyDLL("ole32.dll")
 	shell32 = syscall.NewLazyDLL("shell32.dll")
