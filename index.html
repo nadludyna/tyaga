@@ -574,15 +574,19 @@ html.app body.solo .card.form::after,html.app #jobsCard::after{content:"";positi
 html.app #jobsCard.folded::after{display:none}
 /* ТЯГА's window (650): the short quality word, no arrow on the folder. */
 @media (max-width:700px){.dd.plain .chev{display:none}.dd.plain{padding:0 6px}}
-@media (max-width:560px){.dd .chev{display:none}.dd{padding:0 10px}.dd.plain{padding:0 6px}#cutB:not(.on)>span{display:none}.opts{gap:6px}.opts .seg button>span{display:none}.dd.plain>span{display:none}.input{flex-direction:row}.go{min-width:0;padding:0 16px}.go>span{display:none}.pvp{width:96px;height:54px}}
+@media (max-width:560px){.dd .chev{display:none}.dd{padding:0 10px}.dd.plain{padding:0 6px}.opts{gap:6px}.opts .seg button>span{display:none}.dd.plain>span{display:none}.input{flex-direction:row}.go{min-width:0;padding:0 16px}.go>span{display:none}.pvp{width:96px;height:54px}}
 /* ——— Build 07 notes (22.11) ——— */
 /* Quality and format share one slot of one width: switching video/audio moves nothing. */
 #qualB,#fmtB{width:108px;justify-content:space-between}
+/* Fragment is the scissors alone (the owner: the word says nothing the icon doesn't); one width
+   on or off, the picked part is in its hint. */
+#cutB>span{display:none}
 .opts .seg button.on{font-weight:500} /* bold made the picked word wider: the row moved by a pixel on every switch */
 #editW{width:32px}
 .dd.icon[aria-pressed=true]{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 #dest>svg:first-child{color:var(--folder)}
 #dest .dk{color:var(--dim);font-weight:400}
+@media (max-width:560px){#dest .dk{display:none}}
 .fh{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:4px 6px 10px}
 .fly .times .tl{font-size:12.5px;color:var(--dim);margin:0 4px 0 2px}
 .fly .times .tl~.tl{margin-left:12px}
@@ -1071,7 +1075,7 @@ function syncBoxes() {
   var canCut = !links.length || !!(one && !one.whole);
   // Several links: Fragment stays where it is, greyed out (it vanishing made the buttons after it jump).
   $('cutB').setAttribute('aria-disabled', !canCut); // (not disabled: its hint still shows under the mouse)
-  $('cutB').dataset.tip = canCut ? 'Download only part of the video' : 'A fragment is for one video at a time';
+  $('cutB').dataset.canCut = canCut ? '1' : '';
   if (!canCut && flyOpen && flyOpen.btn === $('cutB')) closeFly();
   if (!canCut && cutOn()) TIMES.forEach(function (id) { $(id).value = ''; });
   var top = topHeight();
@@ -1092,7 +1096,10 @@ function optLabels() {
   var on = cutOn(), lk = linksIn($('links').value), ff = lk.length === 1 && facts[lk[0]], dur = ff && ff.duration ? Math.round(ff.duration) : 0;
   $('toM').placeholder = dur ? Math.floor(dur / 60) : '–'; $('toS').placeholder = dur ? pad(dur % 60) : '––';
   $('cutB').classList.toggle('on', on);
-  setText($('cutT'), on ? (timeOf('fromM', 'fromS') || '0:00') + '–' + (timeOf('toM', 'toS') || (dur ? clockOf(dur) : '…')) : T('Fragment'));
+  var part = (timeOf('fromM', 'fromS') || '0:00') + '–' + (timeOf('toM', 'toS') || (dur ? clockOf(dur) : '…'));
+  setText($('cutT'), on ? part : T('Fragment'));
+  $('cutB').dataset.tip = !$('cutB').dataset.canCut ? 'A fragment is for one video at a time'
+    : on ? 'Only a part of it' + '\n' + part : 'Download only part of the video';
   $('editB').setAttribute('aria-pressed', $('edit').checked);
   $('editW').style.visibility = mode() === 'video' ? '' : 'hidden'; // its place stays in audio: nothing moves
 }
@@ -1109,9 +1116,14 @@ function openFly(btn, fly) {
   closeFly();
   $('tip').classList.remove('on');
   fly.classList.remove('up', 'end');
+  fly.style.left = '';
   fly.hidden = false;
   var r = fly.getBoundingClientRect(), b = btn.getBoundingClientRect();
-  if (r.right > innerWidth - 8) fly.classList.add('end');
+  if (r.right > innerWidth - 8) {
+    fly.classList.add('end');
+    // A narrow window: neither under its left edge nor its right one fits. Pull it in from the right.
+    if (fly.getBoundingClientRect().left < 8) { fly.classList.remove('end'); fly.style.left = (innerWidth - 8 - r.width - r.left) + 'px'; }
+  }
   if (r.bottom > innerHeight - 8 && b.top - r.height - 8 > 4) fly.classList.add('up');
   btn.setAttribute('aria-expanded', 'true');
   flyOpen = { btn: btn, fly: fly };
