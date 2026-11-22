@@ -79,9 +79,9 @@
       // (a row that wraps in a narrow window puts things on a second line: those aren't compared)
       mids.forEach(function (m) { var d = Math.abs(m[0] - mids[0][0]); if (d > 1 && d < 12) bad.push('not on one line with ' + name(mids[0][1]) + ' by ' + (m[0] - mids[0][0]).toFixed(1) + ' px: ' + name(m[1])); });
     });
-    // 2c. A wide window: audio/video, More and what More opens stay one row.
+    // 2c. A wide window: the options row (audio/video, the drop-downs, the folder) stays one row.
     if (innerWidth > 560) {
-      var tops = [].slice.call(document.querySelectorAll('.opts .seg,#moreB,.morebox .chip')).filter(seen).map(function (e) { return e.getBoundingClientRect().top; });
+      var tops = [].slice.call(document.querySelectorAll('.opts>.seg,.opts>.ddw>.dd')).filter(seen).map(function (e) { return e.getBoundingClientRect().top; });
       if (tops.length && Math.max.apply(null, tops) - Math.min.apply(null, tops) > 6) bad.push('the options row broke into lines');
     }
     // 2d. Letters whole: where a label is clipped (… at the end), the clip must not cut the
@@ -120,9 +120,29 @@
       var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       for (var n; (n = w.nextNode());) {
         var p = n.parentElement;
-        if (/[а-яё]/i.test(n.textContent) && seen(p) && !p.closest('.name,.pvt,textarea,#tip,h1,.kind,.nums')) bad.push('Russian in English: ' + name(p));
+        if (/[а-яё]/i.test(n.textContent) && seen(p) && !p.closest('.name,.pvt,.pvch,textarea,#tip,h1,.kind,.nums')) bad.push('Russian in English: ' + name(p));
       }
     }
+    // 5. An open drop-down lies inside the window.
+    document.querySelectorAll('.fly').forEach(function (f) {
+      if (!seen(f)) return;
+      var r = f.getBoundingClientRect();
+      if (r.top < 0 || r.left < 0 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5) bad.push('drop-down outside the window: ' + name(f));
+    });
+    return bad;
+  };
+  // The drop-downs (docs/ui-principles.md, 1b): each one opened in turn must fit in the window,
+  // not change the page's height (the window would follow) and pass tyagaCheck while open.
+  window.tyagaFlyCheck = function () {
+    var bad = [], h0 = document.querySelector('main').scrollHeight;
+    document.querySelectorAll('.opts .dd').forEach(function (b) {
+      if (!seen(b)) return;
+      b.click();
+      var h = document.querySelector('main').scrollHeight;
+      if (Math.abs(h - h0) > 1) bad.push('opening ' + name(b) + ' changed the height by ' + (h - h0) + ' px');
+      window.tyagaCheck().forEach(function (x) { bad.push(name(b) + ' open: ' + x); });
+      document.body.click();
+    });
     return bad;
   };
 })();

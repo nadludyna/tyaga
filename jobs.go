@@ -25,7 +25,7 @@ import (
 type Options struct {
 	Mode     string `json:"mode"`     // "video" or "audio"
 	Format   string `json:"format"`   // audio: "m4a" or "mp3"
-	Quality  int    `json:"quality"`  // video: max height (1440, 1080, 720), 0 = the best there is
+	Quality  int    `json:"quality"`  // video: max height (4320 … 144), 0 = the best there is
 	Playlist bool   `json:"playlist"` // download the whole playlist if the link points to one
 	Split    bool   `json:"split"`    // audio: split into separate tracks by chapters
 	Edit     bool   `json:"edit"`     // video: H.264 + AAC for video editors

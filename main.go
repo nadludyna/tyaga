@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -270,7 +271,7 @@ func handler(token string) http.Handler {
 			if o.Format != "mp3" {
 				o.Format = "m4a"
 			}
-			if o.Quality != 1440 && o.Quality != 1080 && o.Quality != 720 {
+			if !slices.Contains([]int{4320, 2160, 1440, 1080, 720, 480, 360, 240, 144}, o.Quality) {
 				o.Quality = 0
 			}
 			if _, _, ok := cutRange(o.From, o.To); !ok {
