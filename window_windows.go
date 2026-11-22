@@ -252,7 +252,7 @@ func runWindow(token string) bool {
 	trayAction = func(what string) any {
 		switch what {
 		case "busy":
-			return map[string]int{"busy": downloading()}
+			return trayStatus()
 		case "open":
 			menuWin.Hide()
 			showWin()
@@ -293,7 +293,7 @@ func runWindow(token string) bool {
 const winWidth, winHeight = 800, 800
 
 // The tray menu's window: the menu card (menu.html) plus room for its shadow.
-const menuWidth, menuHeight = 256, 210
+const menuWidth, menuHeight = 288, 236 // measured: the card is 220 high with the "what's going on" line, plus 16 for the shadow
 
 // lightWebview: WebView2 is Edge inside, and by itself it downloads Edge's add-ons into its
 // data folder (DRM for Netflix, speech recognition, ad-block lists: some 60 MB) and phones home.
