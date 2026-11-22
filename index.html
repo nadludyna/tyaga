@@ -581,6 +581,8 @@ var RU = {
     'Минуты и секунды. Стрелки (или колёсико) меняют число, с Shift — на 10. Секунды больше 59 переходят в минуты. Пустое «до» — до конца.',
   'Some videos need a signed-in account, and sometimes YouTube asks to prove you\'re not a bot': 'Некоторые видео требуют входа, а иногда YouTube просит доказать, что ты не бот',
   'Sign in to YouTube on the page that opened; ТЯГА notices by itself': 'Войди в YouTube на открывшейся странице; ТЯГА заметит сама',
+  'Checking that you are signed in to YouTube…': 'Проверяю, выполнен ли вход в YouTube…',
+  'Sign in to YouTube in the window that opened; it closes by itself': 'Войди в YouTube в открывшемся окне; оно закроется само',
   'Click again: ТЯГА stops using your YouTube account (your browser stays signed in)': 'Нажми ещё раз: ТЯГА перестанет пользоваться твоим аккаунтом (в браузере ты останешься)',
   'Signed in to YouTube: ТЯГА downloads as you. Click to sign out': 'Вход в YouTube выполнен: ТЯГА качает от твоего имени. Нажми, чтобы выйти',
   "Not signed in to YouTube. Some videos need it, and sometimes YouTube asks to prove you're not a bot. Click to sign in": 'Вход в YouTube не выполнен. Некоторым видео он нужен, а иногда YouTube просит доказать, что ты не бот. Нажми, чтобы войти',
@@ -590,6 +592,7 @@ var RU_RE = [
   [/^Playlist: (.*)$/, 'Плейлист: $1'], [/^Converting to (\w+)$/, 'Конвертирую в $1'],
   [/^Waiting for YouTube · (\d+) s$/, 'YouTube просит подождать · $1 с'],
   [/^Signed in · (.+)$/, 'Вход: $1'],
+  [/^Checking that you are signed in to YouTube in (.+)…$/, 'Проверяю вход в YouTube в $1…'],
   [/^Signed in to YouTube in (.+): ТЯГА downloads as you. Click to stop$/, 'Вход в YouTube выполнен в $1: ТЯГА качает от твоего имени. Нажми, чтобы перестать'],
   [/^Downloads go to (.+)\. Pick another folder for the next ones$/, 'Файлы сохраняются в $1. Выбери другую папку для следующих'],
   [/^Downloads go to (.+)$/, 'Файлы сохраняются в $1'],
@@ -1463,6 +1466,8 @@ function renderAcct() {
   var armed = L.in && !L.open && Date.now() < acctArm;
   var cls = !L.can ? '' : L.open ? 'wait' : armed ? 'arm' : L.in ? 'in' : 'out';
   var tip = !L.can ? ''
+    : L.open && L.step === 'check' ? (L.via ? 'Checking that you are signed in to YouTube in ' + L.via + '…' : 'Checking that you are signed in to YouTube…')
+    : L.open && L.step === 'window' ? 'Sign in to YouTube in the window that opened; it closes by itself'
     : L.open ? 'Sign in to YouTube on the page that opened; ТЯГА notices by itself'
     : armed ? 'Click again: ТЯГА stops using your YouTube account (your browser stays signed in)'
     : L.in && L.via ? 'Signed in to YouTube in ' + L.via + ': ТЯГА downloads as you. Click to stop'
@@ -1482,7 +1487,9 @@ function signIn() { api('/api/login', {}).then(refresh); }
 $('acct').onclick = function () {
   var L = state.login || {};
   if (!L.can) return;
-  if (L.open) { signIn(); return; } // brings the sign-in window up again
+  // Under way: only shows what's going on (and brings ТЯГА's own sign-in window up again);
+  // never opens YouTube a second time.
+  if (L.open) { signIn(); tipNow($('acct')); return; }
   if (!L.in) { $('msg').textContent = ''; signIn(); return; }
   if (Date.now() < acctArm) { acctArm = 0; api('/api/logout', {}).then(refresh); return; }
   acctArm = Date.now() + 3000;

@@ -30,6 +30,15 @@ the wrong font, a window that blinked. So these are measured, every time, before
    see-through window.
 3. **Old behaviour still there**: walk the flows that worked before (paste several links,
    Retry, Undo, cancel, fold the list) — a change must not take anything away unasked.
+4. **The flows, in the real window, start to finish, recorded**: paste a video link →
+   preview → change the quality → fragment → Download → done → Show file → Copy; an audio
+   link (album with chapters); a playlist link and a video inside a playlist; a failed one →
+   Retry; cancel; clear finished → Undo; sign in → sign out. At every step, the window's
+   height must match rule 1b, and nothing may vanish that is still needed.
+
+Layout itself (grid, spacing, grouping, what goes in a flyout) follows the owner's `ui-layout`
+skill (kept with his Claude settings, for all his projects): mockup first, then build, then
+this check.
 
 The rules behind the check are in "Ours first" below; a new kind of mistake found by eye gets
 a new line in the check, so it's caught by itself next time.
@@ -53,6 +62,21 @@ Before a build, list every state change the work touches (appear, disappear, exp
 collapse, switch views, clear, hover, press, the mouse leaving and coming back) and watch each
 one frame by frame on the stand (screenshots every ~100 ms). The owner should never have to
 point one out.
+
+**1b. The window changes its height only on these events, and on nothing else** (the owner's
+call: compact, but predictable):
+1. Nothing pasted, no downloads: header and the links box only, the smallest window.
+2. A link is pasted and looked at: the window grows once by the preview card. The link is
+   removed: it shrinks back.
+3. A download is added: the preview turns into a row of the list; the list grows by one row
+   per download, up to about five rows, then scrolls inside.
+4. Finished downloads are cleared, or the list is folded or unfolded: it shrinks or grows.
+
+Opening the quality or fragment picker, More, the folder menu, a tooltip, hovering or
+switching an option never changes the window's size. The pickers are flyouts over the preview
+card (they only exist while there is one, and it is taller than them). Every grow is the exact
+reverse of its shrink: same duration, same easing. The see-through part of the window never
+catches clicks.
 
 **2. The window never freezes and nothing is lost.** Every click answers at once (at least a
 visible change), the work goes on in the background, and closing the window or the program
