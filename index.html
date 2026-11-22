@@ -572,6 +572,8 @@ html.app .card.form{background:var(--card)}
 .card.form>*{position:relative;z-index:1}
 html.app body.solo .card.form::after,html.app #jobsCard::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;pointer-events:none;z-index:0;border-radius:0 0 15px 15px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='24'%3E%3Cpath d='M0 12c20-8 40-8 60 0s40 8 60 0 30-6 40-3' fill='none' stroke='%23ff6b2c' stroke-opacity='.08' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 0 100%/160px 24px,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='30'%3E%3Cpath d='M0 15c27-10 55-10 82 0s55 10 82 0 40-7 56-4' fill='none' stroke='%23ff6b2c' stroke-opacity='.055' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 40px calc(100% - 16px)/220px 30px}
 html.app #jobsCard.folded::after{display:none}
+/* ТЯГА's window (650): the short quality word, no arrow on the folder. */
+@media (max-width:700px){.dd.plain .chev{display:none}.dd.plain{padding:0 6px}}
 @media (max-width:560px){.dd .chev{display:none}.dd{padding:0 10px}.dd.plain{padding:0 6px}#cutB:not(.on)>span{display:none}.opts{gap:6px}.opts .seg button>span{display:none}.dd.plain>span{display:none}.input{flex-direction:row}.go{min-width:0;padding:0 16px}.go>span{display:none}.pvp{width:96px;height:54px}}
 </style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
@@ -1067,7 +1069,7 @@ function syncBoxes() {
 // What each drop-down shows: what's picked now.
 function optLabels() {
   var q = quality(), top = topHeight();
-  setText($('qualT'), q === '0' ? T(innerWidth > 560 ? 'Best quality' : 'Best') : q + 'p'); // narrow: the short word
+  setText($('qualT'), q === '0' ? T(innerWidth > 700 ? 'Best quality' : 'Best') : q + 'p'); // narrow: the short word
   setText($('qBest'), T('Best') + (top ? ' (' + top + 'p)' : ''));
   setText($('fmtT'), format() === 'mp3' ? 'MP3' : T('Original'));
   var on = cutOn();
