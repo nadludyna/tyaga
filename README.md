@@ -54,7 +54,7 @@ You need [Go](https://go.dev/dl/) 1.26 or newer:
 GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -tags production -trimpath -ldflags "-s -w -H=windowsgui" -o tyaga.exe .
 ```
 
-Tests: `go test ./...`. The test stand (`stand/README.md`) runs the program against a fake yt-dlp, to see every state without YouTube. Notes for AI agents working on the repo: `CLAUDE.md`. Releases: Actions → Release → a version like `v1.2.0`.
+Tests: `go test ./...`. The test stand (`stand/README.md`) runs the program against a fake yt-dlp, to see every state without YouTube. Releases: Actions → Release → a version like `v1.2.0`.
 
 ## The name
 

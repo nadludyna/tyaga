@@ -2,7 +2,8 @@
 
 The basics every change to the page is checked against. They come from Jakob Nielsen's ten
 usability heuristics (1994), which most UI guidelines still build on, plus rules of our
-own. The visual rules (colours, motion, Material 3) are in `CLAUDE.md` under "Design rules";
+own. The visual rules (colours, motion, Material 3) are in the notes for AI agents (`CLAUDE.md`,
+kept on the owner's computer, not in the repo) under "Design rules";
 this file is about behaviour.
 
 ## How to check a change
