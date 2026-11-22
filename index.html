@@ -475,6 +475,8 @@ textarea{resize:none;min-height:68px;height:68px;max-height:150px;padding:10px 1
 /* How many links: a badge on the button's corner, off the word (outside the button, which clips its ripple). */
 .gow{position:relative;flex:none}
 .gon{position:absolute;top:-7px;right:-7px;z-index:2;min-width:22px;height:22px;padding:0 6px;border-radius:11px;display:grid;place-items:center;background:#1a0c04;color:var(--acc2);box-shadow:0 0 0 2px var(--card);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;pointer-events:none;animation:pop2 .3s cubic-bezier(.3,1.6,.5,1) both}
+/* The digit in the middle of the circle by its own height, not the font's line box (it sat high: the owner, 22.11). */
+.gon>span{line-height:1;text-box:trim-both cap alphabetic}
 /* The options row: one line, nothing wraps or moves when something is picked. */
 .row.opts{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;margin-top:12px}
 .opts .seg{flex:none;display:flex}
@@ -1272,7 +1274,7 @@ function countLinks() {
   var n = linksIn($('links').value).length;
   setText($('goT'), T('Download'));
   var b = $('goN'), k = n > 1 ? String(n) : '';
-  if (b.textContent !== k) { b.textContent = k; b.hidden = !k; }
+  if (b.textContent !== k) { b.innerHTML = k ? '<span>' + k + '</span>' : ''; b.hidden = !k; } // a span: centred by the digits themselves (.gon)
 }
 $('links').addEventListener('paste', function (e) {
   var add = linksIn((e.clipboardData || window.clipboardData).getData('text') || '');

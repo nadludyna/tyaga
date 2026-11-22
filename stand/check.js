@@ -36,6 +36,8 @@
   }
   window.tyagaCheck = function () {
     var bad = [];
+    // Measure things where they end up, not halfway through their appearing (a badge pops in from 30 %).
+    document.getAnimations().forEach(function (x) { try { if (x.effect && x.effect.getTiming().iterations !== Infinity) x.finish(); } catch (e) {} });
     // 1. Labels in the middle.
     document.querySelectorAll('button,.chip,.seg button').forEach(function (b) {
       if (!seen(b)) return;
@@ -56,6 +58,17 @@
         if (Math.abs(d2) > 0.75) bad.push('label vs button ' + d2.toFixed(2) + ' px: ' + name(b));
       }
       if (t.scrollWidth > t.clientWidth + 1 && getComputedStyle(t).textOverflow !== 'ellipsis' && t !== b) bad.push('label cut off: ' + name(b));
+    });
+    // 1b. A number in a round badge (how many links on Download) in the middle of its circle.
+    document.querySelectorAll('.gon').forEach(function (g) {
+      var t = g.firstElementChild || g;
+      if (!seen(g) || !t.textContent.trim()) return;
+      var r = document.createRange(); r.selectNodeContents(t);
+      var tr = r.getBoundingClientRect(), gr = g.getBoundingClientRect();
+      cv.font = getComputedStyle(t).fontWeight + ' ' + getComputedStyle(t).fontSize + ' ' + getComputedStyle(t).fontFamily;
+      var m = cv.measureText(t.textContent), base = tr.top + (tr.height - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
+      var mid = base - m.actualBoundingBoxAscent / 2, d = mid - (gr.top + gr.bottom) / 2;
+      if (Math.abs(d) > 0.5) bad.push('number vs its circle ' + d.toFixed(2) + ' px: ' + name(g));
     });
     // 2. Nothing overlaps in a row.
     document.querySelectorAll('.row,.opts,.lbar,.top,.line2,header,.pvc,.input').forEach(function (row) {
