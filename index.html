@@ -391,14 +391,28 @@ html.app .menu{background:var(--card)}
 .pvc .chip::before{left:8px}
 .chip.on{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 .chip.on::before{opacity:1;transform:none}
-.pvc .chip:not(.on)::before{opacity:.75;transform:none;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.pvc .chip:not(.on)::before,.morebox .chip:not(:has(input:checked))::before{opacity:.75;transform:none;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E")}
 .chip.on:hover{border-color:transparent;background:color-mix(in srgb,var(--acc) 28%,transparent)}
 .pvseg button{height:28px;padding:0 12px;font-size:12.5px}
 /* More: the rest, for all the links. */
-.morebox{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.morew{position:relative}
+/* An open More hangs out of the first card: the card must not clip it (it clips its shadow off the list). */
+
+.morew{display:flex;align-items:center;gap:8px;min-width:0}
+.morebox{display:flex;align-items:center;gap:8px;animation:morein .2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes morein{from{opacity:0;transform:translateX(-8px)}}
+.morebox>.mrow{display:contents}
+/* While More is open the folder steps aside (it's back when More closes): the row stays one row. */
+.opts:has(.morebox:not([hidden])) .destw{display:none}
+.morew:has(.morebox:not([hidden])) #moreB>span{display:none}
+.morew:has(.morebox:not([hidden])) #moreB{padding:0 9px}
+.morebox .chip{flex:none;padding:0 12px 0 30px}
+.morebox .chip::before{left:9px}
+.morebox .seg button{padding:0 12px}
 .mrow{margin-top:0;gap:8px}
 .mrow .chip{flex:none}
-.morebox .cutrow{margin-top:10px;justify-content:flex-start}
+.cutrow{justify-content:flex-start}
+.morebox .mrow{flex-wrap:wrap}
 /* The list's header: what's going on, the actions for the whole list, the fold arrow. */
 .lbar{display:flex;align-items:center;gap:4px;justify-content:flex-end;margin:0 0 4px}
 html.app .lbar{margin:-4px 0 0}
@@ -422,7 +436,7 @@ button.chip{font-family:inherit}
 .btn>span,.seg button,.chip>span,.go>span,.menu button>span,.tbtn.lang>span,.st,.lhead #lsum,.notice .btn{text-box:trim-both cap alphabetic}
 /* Narrow: More and the list's actions keep only their icons (the hint still says the word),
    so the folder stays on its row and the list's summary isn't cut. */
-@media (max-width:560px){.opts{flex-wrap:nowrap}.job.error .line2 .acts{flex-basis:100%;margin-left:0}#moreB>span,.lbar .btn>span{display:none}#moreB,.lbar .btn{padding:0 8px}.destw{flex:0 1 auto}.dest{max-width:100%}.pvp{width:72px;height:40.5px}}
+@media (max-width:560px){.opts:has(.morebox:not([hidden])){flex-wrap:wrap}.morew{display:contents}.morebox{flex-basis:100%;flex-wrap:wrap}.opts{flex-wrap:nowrap}.job.error .line2 .acts{flex-basis:100%;margin-left:0}#moreB>span,.lbar .btn>span{display:none}#moreB,.lbar .btn{padding:0 8px}.destw{flex:0 1 auto}.dest{max-width:100%}.pvp{width:72px;height:40.5px}}
 </style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
   <button class="logob" id="acct" type="button" aria-label="YouTube account"><svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
@@ -456,36 +470,37 @@ button.chip{font-family:inherit}
   </div>
   <div class="row opts">
     <div class="seg" id="mode"><button data-v="audio" class="on" data-t="Audio">Audio</button><button data-v="video" data-t="Video">Video</button></div>
-    <button class="btn ghost" id="moreB" aria-expanded="false" title="More: format, quality, a fragment, for editing"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span data-t="More">More</span></button>
+    <div class="morew"><button class="btn ghost" id="moreB" aria-expanded="false" title="More: format, quality, a fragment, for editing"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span data-t="More">More</span></button>
+      <div class="morebox" id="morebox" hidden>
+        <div class="row mrow">
+          <div class="seg" id="format" data-for="audio">
+            <button data-v="m4a" class="on" title="The original YouTube audio track, no re-encoding">M4A</button>
+            <button data-v="mp3" title="Re-encoded at the highest quality, plays on anything">MP3</button>
+          </div>
+          <div class="seg" id="quality" data-for="video" hidden>
+            <button data-v="0" class="on" data-t="Best">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
+          </div>
+          <label class="chip" id="cutBox"><input type="checkbox" id="cut"><span data-t="Fragment">Fragment</span></label>
+          <label class="chip" data-for="video" hidden title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"><span data-t="For editing">For editing</span></label>
+        </div>
+      </div>
+    </div>
     <span class="sp"></span>
     <div class="destw"><button class="btn ghost dest" id="dest" aria-haspopup="menu"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="destT"></span><svg class="chev" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></button>
       <div class="menu" id="destMenu" role="menu" hidden><button id="open" role="menuitem"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open folder">Open folder</span></button><button id="pick" role="menuitem" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Save downloads elsewhere…">Save downloads elsewhere…</span></button></div></div>
   </div>
-  <div class="pv" id="pv" hidden></div>
-  <div class="morebox" id="morebox" hidden>
-    <div class="row mrow">
-      <div class="seg" id="format" data-for="audio">
-        <button data-v="m4a" class="on" title="The original YouTube audio track, no re-encoding">M4A</button>
-        <button data-v="mp3" title="Re-encoded at the highest quality, plays on anything">MP3</button>
-      </div>
-      <div class="seg" id="quality" data-for="video" hidden>
-        <button data-v="0" class="on" data-t="Best">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
-      </div>
-      <label class="chip" id="cutBox"><input type="checkbox" id="cut"><span data-t="fragment">fragment</span></label>
-      <label class="chip" data-for="video" hidden title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"><span data-t="for editing">for editing</span></label>
-    </div>
-    <div class="row cutrow">
-      <span class="times" id="cutTimes" hidden title="Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty &quot;to&quot; — to the end.">
-        <span data-t="from">from</span> <input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds">
-        <span data-t="to">to</span> <input type="number" id="toM" min="0" data-ph="end" aria-label="to, minutes"><b>:</b><input type="number" id="toS" aria-label="to, seconds">
-      </span>
-    </div>
+  <div class="row cutrow">
+    <span class="times" id="cutTimes" hidden title="Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty &quot;to&quot; — to the end.">
+      <span data-t="from">from</span> <input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds">
+      <span data-t="to">to</span> <input type="number" id="toM" min="0" data-ph="end" aria-label="to, minutes"><b>:</b><input type="number" id="toS" aria-label="to, seconds">
+    </span>
   </div>
+  <div class="pv" id="pv" hidden></div>
   <div class="msg" id="msg"></div>
   <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB">Undo</button><i class="ntime" id="ntime" hidden></i></div>
 </div>
 
-<div class="card" id="jobsCard">
+<div class="card" id="jobsCard" hidden>
   <div class="lbar" id="lbar"><button class="lhead" id="lhead" aria-label="Show or hide the downloads"><span id="lsum"></span></button>
     <button class="btn ghost sm copyall" id="copyall" hidden title="Every finished file onto the clipboard: Ctrl+V in a chat attaches them all"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span id="copyallT" data-t="Copy all files">Copy all files</span></button>
     <button class="btn ghost sm clear" id="clear" title="Takes them off the list; the files stay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg><span data-t="Clear finished">Clear finished</span></button>
@@ -506,8 +521,8 @@ var LANG = (function () {
 })();
 var RU = {
   'Reel it in.': 'Подсекай.', 'Download': 'Скачать', 'Audio': 'Аудио', 'Video': 'Видео', 'Best': 'Лучшее',
-  'whole playlist': 'весь плейлист', 'as one file': 'одним файлом', 'fragment': 'фрагмент', 'split by chapters': 'по главам',
-  'for editing': 'для монтажа', 'no sponsors': 'без рекламы', 'from': 'с', 'to': 'до', 'end': 'конец',
+  'whole playlist': 'весь плейлист', 'as one file': 'одним файлом', 'fragment': 'фрагмент', 'Fragment': 'Фрагмент', 'split by chapters': 'по главам',
+  'for editing': 'для монтажа', 'For editing': 'Для монтажа', 'no sponsors': 'без рекламы', 'from': 'с', 'to': 'до', 'end': 'конец',
   'More': 'Ещё', 'More: format, quality, a fragment, for editing': 'Ещё: формат, качество, фрагмент, для монтажа', 'Downloads': 'Загрузки', 'Save downloads elsewhere…': 'Сохранять в другую папку…',
   'A separate file for every chapter, in a folder of its own': 'Отдельный файл на каждую главу, в своей папке',
   'Sponsor ads, self-promotion and "subscribe!" bits, as marked by SponsorBlock; for music also talking and intros': 'Реклама спонсоров, самореклама и «подпишись!» по разметке SponsorBlock; в музыке ещё разговоры и вступления',
@@ -868,13 +883,14 @@ function syncBoxes() {
 }
 $('cut').onchange = syncBoxes;
 $('links').addEventListener('input', syncBoxes);
-// More: the rest of the switches, folded away until asked for.
-$('moreB').onclick = function () {
-  var open = $('morebox').hidden;
+// More: the rest of the switches, folded away until asked for; they open to the right of it.
+function setMore(open) {
   $('morebox').hidden = !open;
   $('moreB').classList.toggle('on', open);
   $('moreB').setAttribute('aria-expanded', open);
-};
+  fitLater();
+}
+$('moreB').onclick = function () { setMore($('morebox').hidden); };
 // Where the files go: the folder's name; its menu opens it or picks another one.
 $('dest').onclick = function (e) { e.stopPropagation(); $('destMenu').hidden = !$('destMenu').hidden; };
 addEventListener('click', function (e) { if (!e.target.closest('.destw')) $('destMenu').hidden = true; });
@@ -1578,7 +1594,7 @@ function grow(row) {
 function syncFold(jobs) {
   var html = foldSummary(jobs);
   if ($('lsum').innerHTML !== html) $('lsum').innerHTML = html;
-  if (fold.count < 0) { if (jobs.length) setFold(false, false); else setGone(true, false); }  // first look
+  if (fold.count < 0) { if (jobs.length) { $('jobsCard').hidden = false; setFold(false, false); } else setGone(true, false); }  // first look (the card starts hidden: no joined-up corners for a moment)
   else if (jobs.length && fold.gone) setGone(false, true);                // the first link went in
   else if (jobs.length > fold.count && fold.on) setFold(false, true);     // another one, while folded
   else if (!jobs.length && !fold.gone) setGone(true, true); // the list was cleared
@@ -1656,7 +1672,10 @@ var lastFit = 0;
 // the animation, was the stutter. An empty box gives the room back.
 var ROW_GUESS = 160; // the first row (74 px) and the list card around it (measured on the stand)
 var readyH = 0, comeAt = 0;
+// Not any more: the window grown ahead was see-through but still caught the clicks under the
+// first card (the owner couldn't click YouTube there). The window grows when the list comes.
 function readyWindow() {
+  return;
   if (!APP || !fold.gone) return;
   var want = $('links').value.trim() ? openHeight() + ROW_GUESS : 0;
   if (want === readyH) return;

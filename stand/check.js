@@ -79,6 +79,11 @@
       // (a row that wraps in a narrow window puts things on a second line: those aren't compared)
       mids.forEach(function (m) { var d = Math.abs(m[0] - mids[0][0]); if (d > 1 && d < 12) bad.push('not on one line with ' + name(mids[0][1]) + ' by ' + (m[0] - mids[0][0]).toFixed(1) + ' px: ' + name(m[1])); });
     });
+    // 2c. A wide window: audio/video, More and what More opens stay one row.
+    if (innerWidth > 560) {
+      var tops = [].slice.call(document.querySelectorAll('.opts .seg,#moreB,.morebox .chip')).filter(seen).map(function (e) { return e.getBoundingClientRect().top; });
+      if (tops.length && Math.max.apply(null, tops) - Math.min.apply(null, tops) > 6) bad.push('the options row broke into lines');
+    }
     // 3. Nothing sticks out sideways.
     var se = document.scrollingElement;
     if (se.scrollWidth > se.clientWidth + 1) bad.push('the page scrolls sideways by ' + (se.scrollWidth - se.clientWidth) + ' px');
