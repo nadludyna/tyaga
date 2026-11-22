@@ -85,18 +85,14 @@ for i, (artist, title, vid) in enumerate(items, 1):
         say(f'[Merger] Merging formats into "{final}"')
         say(f'Deleting original file {base}.f299.mp4 (pass -k to keep)')
     # A thumbnail like YouTube's: 16:9; the first song has album art between plain bars.
-    from PIL import Image, ImageDraw
-    im = Image.new('RGB', (1280, 720), (24, 92, 70) if i == 1 else (40, 40, 60))
-    dr = ImageDraw.Draw(im)
+    # Drawn with ffmpeg (already needed), so the stand needs no Python packages.
+    thumb = base + '.thumb.jpg'
     if i == 1:
-        for y in range(720):
-            dr.line([(280, y), (999, y)], fill=(120 + y // 6, 60, 160))
-        dr.ellipse([440, 160, 840, 560], fill=(240, 200, 220))
+        src, draw = 'color=c=0x185c46:s=1280x720', ('drawbox=x=280:y=0:w=720:h=720:color=0x8c3ca0:t=fill,'
+                                                  'drawbox=x=440:y=160:w=400:h=400:color=0xf0c8dc:t=fill')
     else:
-        for x in range(1280):
-            dr.line([(x, 0), (x, 719)], fill=(x // 6, 80 + x // 20, 200 - x // 8))
-        dr.rectangle([100, 500, 700, 640], fill=(250, 250, 250))
-    thumb = base + '.thumb.jpg'; im.save(thumb, quality=88)
+        src, draw = 'gradients=s=1280x720:c0=0x283c8c:c1=0x2ab478:seed=7', 'drawbox=x=100:y=500:w=600:h=140:color=white:t=fill'
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', src, '-vf', draw, '-frames:v', '1', '-q:v', '3', thumb], check=False)
     if audio:
         cmd = ['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', 'sine=d=2', '-i', thumb, '-map', '0:a', '-map', '1:0',
                '-c:v', 'copy', '-disposition:v:0', 'attached_pic', '-id3v2_version', '3', final]

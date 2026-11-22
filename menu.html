@@ -36,6 +36,7 @@ button svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke
     <div class="now" id="now">&nbsp;</div>
     <button id="open"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg>Open ТЯГА</button>
     <button id="folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Open the downloads folder</button>
+    <button id="pick"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v3"/><path d="M3 7v10a2 2 0 0 0 2 2h7"/><path d="M15 18.5l2 2 4-4.5"/></svg>Save downloads elsewhere…</button>
     <div class="sep"></div>
     <button id="quit" class="quit"><svg viewBox="0 0 24 24"><path d="M12 3v8M7 6a8 8 0 1 0 10 0"/></svg>Quit ТЯГА</button>
   </div>
@@ -68,6 +69,7 @@ addEventListener('keydown', function (e) { if (e.key === 'Escape') tray('hide');
 addEventListener('contextmenu', function (e) { e.preventDefault(); });
 $('open').onclick = function () { tray('open'); };
 $('folder').onclick = function () { tray('folder'); };
+$('pick').onclick = function () { tray('pick'); };
 $('quit').onclick = function () { if (busy) { document.body.classList.add('asking'); $('keep').focus(); } else tray('quit'); };
 $('keep').onclick = function () { tray('hide'); };
 $('quit2').onclick = function () { tray('quit'); };

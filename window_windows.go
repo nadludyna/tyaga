@@ -241,6 +241,14 @@ func runWindow(token string) bool {
 			w32.SetForegroundWindow(hwnd)
 		}
 	}
+	pickFolder = func() string {
+		dir, err := app.Dialog.OpenFile().CanChooseFiles(false).CanChooseDirectories(true).CanCreateDirectories(true).
+			SetTitle("Where should ТЯГА save downloads?").SetDirectory(downloadsDir()).AttachToWindow(win).PromptForSingleSelection()
+		if err != nil {
+			logf("The folder dialog failed: %v", err)
+		}
+		return dir
+	}
 	trayAction = func(what string) any {
 		switch what {
 		case "busy":
@@ -250,8 +258,12 @@ func runWindow(token string) bool {
 			showWin()
 		case "folder":
 			menuWin.Hide()
-			os.MkdirAll(outDir, 0o755)
-			openFolder(outDir)
+			dir := downloadsDir()
+			os.MkdirAll(dir, 0o755)
+			openFolder(dir)
+		case "pick":
+			menuWin.Hide()
+			go chooseFolder()
 		case "quit":
 			menuWin.Hide()
 			go func() { time.Sleep(100 * time.Millisecond); quit() }() // let the answer reach the menu first
@@ -281,7 +293,7 @@ func runWindow(token string) bool {
 const winWidth, winHeight = 800, 800
 
 // The tray menu's window: the menu card (menu.html) plus room for its shadow.
-const menuWidth, menuHeight = 256, 176
+const menuWidth, menuHeight = 256, 210
 
 // lightWebview: WebView2 is Edge inside, and by itself it downloads Edge's add-ons into its
 // data folder (DRM for Netflix, speech recognition, ad-block lists: some 60 MB) and phones home.
@@ -432,6 +444,8 @@ func trayBalloon(title, text string) {
 	for i := 0; i < 16; i++ {
 		h, _, _ := findWindowEx.Call(uintptr(w32.HWND_MESSAGE), after, uintptr(unsafe.Pointer(class)), 0)
 		if h == 0 {
+			// Found by Wails' window class name: if a Wails update renames it, say so in the log.
+			logf("No tray notification: the tray icon's window wasn't found (%d tried)", i)
 			return
 		}
 		after = h

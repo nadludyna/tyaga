@@ -1,0 +1,6 @@
+# Go files and shell scripts keep LF line ends on every system. Git on Windows checks text out
+# with CRLF by default, and then `gofmt -l .` lists every Go file (CI on Linux never sees it)
+# and sh refuses the scripts.
+*.go          text eol=lf
+*.sh          text eol=lf
+stand/fake-yt-dlp text eol=lf

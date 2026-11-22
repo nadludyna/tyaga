@@ -1,6 +1,7 @@
 package main
 
 import (
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -153,7 +154,7 @@ func TestCut(t *testing.T) {
 	if _, _, ok := (Options{}).cut(); ok {
 		t.Error("no times must mean no fragment")
 	}
-	for _, bad := range [][2]string{{"3:00", "1:00"}, {"1:75", ""}, {"abc", ""}, {"-5", ""}, {"1:2:3:4", ""}, {"1:00", "1:00"}} {
+	for _, bad := range [][2]string{{"3:00", "1:00"}, {"1:75", ""}, {"abc", ""}, {"-5", ""}, {"1:2:3:4", ""}, {"1:00", "1:00"}, {"1.5:20", ""}, {"1:2.5:00", ""}} {
 		if _, _, ok := cutRange(bad[0], bad[1]); ok {
 			t.Errorf("cutRange(%q, %q) should be rejected", bad[0], bad[1])
 		}
@@ -402,5 +403,55 @@ func TestHasSignIn(t *testing.T) {
 	google := visit + ".google.com\tTRUE\t/\tTRUE\t1893456000\tSAPISID\tz\n"
 	if hasSignIn([]byte(visit)) || hasSignIn([]byte(google)) || !hasSignIn([]byte(in)) {
 		t.Error("hasSignIn: a visit, Google only and a YouTube sign-in told apart wrongly")
+	}
+}
+
+func TestClearAndUndo(t *testing.T) {
+	mu.Lock()
+	saved := jobs
+	jobs = []*Job{{ID: 1, Status: "done"}, {ID: 2, Status: "running"}, {ID: 3, Status: "error"}, {ID: 4, Status: "queued"}}
+	mu.Unlock()
+	defer func() { mu.Lock(); jobs, cleared = saved, nil; mu.Unlock() }()
+
+	if n := clearFinished(); n != 2 {
+		t.Errorf("cleared %d, want 2", n)
+	}
+	mu.Lock()
+	jobs = append(jobs, &Job{ID: 5, Status: "queued"}) // added in between
+	mu.Unlock()
+	unclear()
+	mu.Lock()
+	defer mu.Unlock()
+	var ids []int
+	for _, j := range jobs {
+		ids = append(ids, j.ID)
+	}
+	if !slices.Equal(ids, []int{1, 2, 3, 4, 5}) {
+		t.Errorf("after undo: %v", ids)
+	}
+}
+
+func TestAlreadyThere(t *testing.T) {
+	j := &Job{Options: Options{Mode: "audio"}, Status: "running"}
+	onLine(j, `[download] C:\Users\x\Downloads\YouTube\Song.m4a has already been downloaded`)
+	if !j.had || j.got {
+		t.Errorf("had %v got %v", j.had, j.got)
+	}
+	if last := j.Log[len(j.Log)-1]; last != "Already in the folder" {
+		t.Errorf("log line %q: no paths on the page", last)
+	}
+	onLine(j, "PROG|1|10|NA|1|1|NA|NA")
+	if !j.got {
+		t.Error("a progress line means something was downloaded")
+	}
+}
+
+func TestFolderName(t *testing.T) {
+	sep := string(filepath.Separator)
+	if got := folderName(filepath.Join(sep+"home", "me", "Downloads", "YouTube")); got != "Downloads › YouTube" {
+		t.Errorf("folderName = %q", got)
+	}
+	if got := folderName(sep + "Music"); got != "Music" {
+		t.Errorf("folderName = %q", got)
 	}
 }

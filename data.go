@@ -10,13 +10,16 @@ package main
 //	login\            ТЯГА's own sign-in window, only for Chrome/Edge users (Windows)
 //	tyaga.log         what happened in the last run, for when something goes wrong
 //	youtube-signin.txt  which browser the YouTube sign-in is read from
+//	settings.json     what was picked on the page and has to outlive the window: the
+//	                  downloads folder (the switches live in the window's own storage)
 //
-// Downloads go to Downloads\YouTube, of course. Only when the program's folder can't be
+// Downloads go to Downloads\YouTube unless another folder was picked. Only when the program's folder can't be
 // written to (Program Files) is the data kept in the user's own app data folder instead.
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -74,4 +77,25 @@ func moveIn(from, to string) {
 func folderID() string {
 	sum := sha256.Sum256([]byte(strings.ToLower(appDir)))
 	return hex.EncodeToString(sum[:8])
+}
+
+// settings are kept in tyaga-data/settings.json.
+type settings struct {
+	Out string `json:"out,omitempty"` // the downloads folder, if one was picked
+}
+
+func settingsFile() string { return filepath.Join(dataDir, "settings.json") }
+
+func loadSettings() settings {
+	var s settings
+	if b, err := os.ReadFile(settingsFile()); err == nil {
+		json.Unmarshal(b, &s)
+	}
+	return s
+}
+
+func saveSettings(s settings) {
+	if b, err := json.MarshalIndent(s, "", "  "); err == nil {
+		os.WriteFile(settingsFile(), b, 0o644)
+	}
 }

@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -33,7 +34,7 @@ type Options struct {
 	To       string `json:"to"`
 }
 
-// parseTime reads "1:02:03", "1:20", "80" or "80.5" as seconds.
+// parseTime reads "1:02:03", "1:20", "80", "80.5" or "1:20.5" as seconds.
 func parseTime(s string) (float64, bool) {
 	s = strings.TrimSpace(s)
 	if s == "" {
@@ -46,7 +47,8 @@ func parseTime(s string) (float64, bool) {
 	}
 	for i, p := range parts {
 		v, err := strconv.ParseFloat(p, 64)
-		if err != nil || v < 0 || math.IsInf(v, 0) || math.IsNaN(v) || (i > 0 && v >= 60) {
+		if err != nil || v < 0 || math.IsInf(v, 0) || math.IsNaN(v) || (i > 0 && v >= 60) ||
+			(i < len(parts)-1 && v != math.Trunc(v)) { // "1.5:20": only the seconds may have a fraction
 			return 0, false
 		}
 		total = total*60 + v
@@ -122,6 +124,7 @@ type Job struct {
 	Error    string   `json:"error"`
 	ErrorRaw string   `json:"errorRaw"` // yt-dlp's own error line, for "Copy error"
 	Files    []string `json:"files"`    // names of finished files
+	Already  bool     `json:"already"`  // done without downloading anything: it was all in the folder already
 
 	mix      bool            // a YouTube Mix: only the first mixLimit videos
 	listName string          // the playlist's own name, for the finished row
@@ -133,6 +136,7 @@ type Job struct {
 	cover    []byte          // the picture inside the finished file
 	splits   []splitInfo     // videos that were split by chapters
 	tracks   []track         // playlist items to glue into one file (Merge)
+	had, got bool            // yt-dlp found a file already there / downloaded something itself
 }
 
 // splitInfo is what yt-dlp reports about a video that was split by chapters.
@@ -495,6 +499,7 @@ func onLine(j *Job, line string) {
 		j.addLog(line)
 	case strings.HasPrefix(line, "PROG|"):
 		j.Wait = 0
+		j.got = true
 		p := strings.Split(line[5:], "|")
 		if len(p) < 7 {
 			return
@@ -593,6 +598,9 @@ func onLine(j *Job, line string) {
 			j.part, j.lastB = 0, 0
 			j.Progress = math.Max(j.Progress, j.overall(0))
 		}
+	case strings.HasPrefix(line, "[download] ") && strings.HasSuffix(line, "has already been downloaded"):
+		j.had = true // --no-overwrites: the file is in the folder from an earlier download
+		j.addLog(line)
 	case strings.HasPrefix(line, "[") || strings.HasPrefix(line, "WARNING:"):
 		if m := sleepRe.FindStringSubmatch(line); m != nil && strings.HasPrefix(line, "[download]") {
 			j.Wait, j.Speed, j.ETA, j.Size = int(num(m[1])+0.5), "", "", "" // nothing is downloading during the pause
@@ -658,6 +666,8 @@ func logLine(line string) string {
 	case tag == "download" && strings.HasPrefix(line, "Destination: "):
 		return fileStep // which file it is (the picture or the sound) only the job knows: addLog
 
+	case tag == "download" && strings.HasSuffix(line, "has already been downloaded"):
+		return "Already in the folder"
 	case tag == "download" && has("Sleeping"):
 		return "" // shown as "waiting" with the seconds, not as a log line
 	case tag == "ExtractAudio" && strings.HasPrefix(line, "Destination: "):
@@ -887,6 +897,7 @@ func pump() {
 					j.Title = j.listName // a finished playlist is the playlist, not its last video
 				}
 				j.Status = "done"
+				j.Already = j.had && !j.got
 			} else {
 				j.Status = "error"
 				if j.Error == "" {
@@ -955,23 +966,41 @@ func retryJob(id int) {
 			j.Pos, j.Of, j.part, j.lastB, j.failed = 0, 0, 0, 0, 0
 			j.songs = nil
 			j.Log = nil
+			j.had, j.got, j.Already = false, false, false
 		}
 	}
 	mu.Unlock()
 	pump()
 }
 
-// clearFinished removes everything that is no longer downloading or waiting.
-func clearFinished() {
+// cleared: what the last "Clear finished" took off the list, for Undo.
+var cleared []*Job
+
+// clearFinished removes everything that is no longer downloading or waiting, and says how
+// many went. They're kept aside until the next clear, so Undo can bring them back.
+func clearFinished() int {
 	mu.Lock()
 	defer mu.Unlock()
-	kept := jobs[:0]
+	var kept, gone []*Job
 	for _, j := range jobs {
 		if j.Status == "queued" || j.Status == "running" {
 			kept = append(kept, j)
+		} else {
+			gone = append(gone, j)
 		}
 	}
-	jobs = kept
+	jobs, cleared = kept, gone
+	return len(gone)
+}
+
+// unclear puts back what the last clear took off, each in its old place (the list is in the
+// order the links were added, which is the order of the ids).
+func unclear() {
+	mu.Lock()
+	defer mu.Unlock()
+	jobs = append(jobs, cleared...)
+	cleared = nil
+	sort.SliceStable(jobs, func(a, b int) bool { return jobs[a].ID < jobs[b].ID })
 }
 
 // jobFile returns the full path of a finished file — only files this program downloaded itself.

@@ -45,6 +45,10 @@ var windowHidden = func() bool { return false }
 // trayAction is what the tray menu's buttons do (Windows only).
 var trayAction = func(string) any { return nil }
 
+// pickFolder asks where downloads should go, with Windows' own folder dialog. Only ТЯГА's
+// window has one (window_windows.go); "" = nothing picked.
+var pickFolder func() string
+
 // version is set when a release is built (see .github/workflows/release.yml).
 var version = "dev"
 
@@ -72,6 +76,12 @@ func main() {
 		cookiesFile = byHand
 	}
 	outDir = *out
+	// A folder picked on the page (settings.json) counts, unless -out was given (the stand).
+	outGiven := false
+	flag.Visit(func(f *flag.Flag) { outGiven = outGiven || f.Name == "out" })
+	if s := loadSettings(); !outGiven && s.Out != "" && filepath.IsAbs(s.Out) {
+		outDir = s.Out
+	}
 
 	// The sign-in window (login.go): started by ТЯГА itself, closes when you close it.
 	if *loginWin {
@@ -191,7 +201,8 @@ func handler(token string) http.Handler {
 				defer mu.Unlock()
 				writeJSON(w, map[string]any{
 					"version": version, "ready": ready, "setup": status, "problem": problem,
-					"out": outDir, "jobs": jobs, "login": loginState(), "hidden": hidden,
+					"out": outDir, "outName": folderName(outDir), "canPick": pickFolder != nil,
+					"jobs": jobs, "login": loginState(), "hidden": hidden,
 				})
 			case "/api/cover":
 				id, _ := strconv.Atoi(r.URL.Query().Get("id"))
@@ -259,7 +270,13 @@ func handler(token string) http.Handler {
 		case "/api/logout":
 			logout()
 		case "/api/clear":
-			clearFinished()
+			writeJSON(w, map[string]int{"n": clearFinished()})
+			return
+		case "/api/unclear": // Undo after Clear finished
+			unclear()
+		case "/api/folder": // pick another downloads folder
+			writeJSON(w, map[string]string{"out": chooseFolder()})
+			return
 		case "/api/bye":
 			pageClosed()
 		case "/api/window": // the buttons of ТЯГА's own window, which has no system title bar
@@ -272,8 +289,9 @@ func handler(token string) http.Handler {
 			go func() { time.Sleep(200 * time.Millisecond); quit() }() // let the answer reach the page first
 			return
 		case "/api/open":
-			os.MkdirAll(outDir, 0o755)
-			openFolder(outDir)
+			dir := downloadsDir()
+			os.MkdirAll(dir, 0o755)
+			openFolder(dir)
 		case "/api/reveal":
 			if path, ok := jobFile(body.ID, body.N); ok && fileExists(path) {
 				revealFile(path)
@@ -288,4 +306,41 @@ func handler(token string) http.Handler {
 		}
 		writeJSON(w, map[string]bool{"ok": true})
 	})
+}
+
+// downloadsDir is where downloads go now (it can change while ТЯГА runs).
+func downloadsDir() string {
+	mu.Lock()
+	defer mu.Unlock()
+	return outDir
+}
+
+// chooseFolder shows the folder dialog and, if a folder was picked, sends the next downloads
+// there and remembers it. What's downloading now finishes where it started. Returns the
+// folder's short name for the page, or "" if nothing changed.
+func chooseFolder() string {
+	if pickFolder == nil {
+		return ""
+	}
+	dir := pickFolder()
+	if dir == "" || !filepath.IsAbs(dir) {
+		return ""
+	}
+	mu.Lock()
+	outDir = dir
+	mu.Unlock()
+	saveSettings(settings{Out: dir})
+	logf("Downloads now go to %s", dir)
+	return folderName(dir)
+}
+
+// folderName is how the page names a folder: its last two parts ("Downloads › YouTube"),
+// not the whole path.
+func folderName(dir string) string {
+	dir = filepath.Clean(dir)
+	base, parent := filepath.Base(dir), filepath.Base(filepath.Dir(dir))
+	if parent == "" || parent == "." || parent == string(filepath.Separator) || strings.HasSuffix(parent, ":\\") || parent == dir {
+		return base
+	}
+	return parent + " › " + base
 }
