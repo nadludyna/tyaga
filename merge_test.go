@@ -83,6 +83,22 @@ func TestMerge(t *testing.T) {
 	}
 }
 
+func TestAlbumName(t *testing.T) {
+	for in, want := range map[string][2]string{
+		"Album - KOMPRESSOR": {"KOMPRESSOR", "Album"},
+		"EP – Night Drive":   {"Night Drive", "EP"},
+		"Best of 2020":       {"Best of 2020", ""},
+		"Single - A - B":     {"A - B", "Single"},
+	} {
+		if n, k := albumName(in); n != want[0] || k != want[1] {
+			t.Errorf("albumName(%q) = %q, %q; want %q, %q", in, n, k, want[0], want[1])
+		}
+	}
+	if got := fileSafe("AC/DC: Live?"); got != "AC_DC_ Live_" {
+		t.Errorf("fileSafe = %q", got)
+	}
+}
+
 func TestAlbumArtist(t *testing.T) {
 	tr := func(artist, uploader string) track { return track{Artist: artist, Uploader: uploader} }
 	cases := []struct {
@@ -92,7 +108,10 @@ func TestAlbumArtist(t *testing.T) {
 		{[]track{tr("Band", "Band - Topic"), tr("Band", "Band - Topic")}, "Band"},
 		// one title had "Someone - Song" in it, the rest only the channel: still the channel's album
 		{[]track{tr("", "Band - Topic"), tr("Band feat. X", "Band - Topic"), tr("", "BandVEVO")}, "Band"},
-		{[]track{tr("A", ""), tr("B", ""), tr("C", "")}, "Various Artists"},
+		// a compilation: the people, never "Various Artists"
+		{[]track{tr("A", ""), tr("B", ""), tr("C", "")}, "A, B, C"},
+		// two artists on every track, a guest on one
+		{[]track{tr("TVETH, Lil Smooky", ""), tr("TVETH, Lil Smooky feat. Guest", ""), tr("TVETH & Lil Smooky", "")}, "TVETH, Lil Smooky"},
 		{[]track{tr("NA", ""), tr("", "")}, ""},
 	}
 	for _, c := range cases {

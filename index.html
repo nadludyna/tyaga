@@ -455,16 +455,21 @@ html.app header .title{gap:2px}
 .title .motto{font-size:11.5px;line-height:1;font-weight:500;letter-spacing:.02em;color:var(--dim);text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
 h1,html.app header h1{font-size:24px;line-height:1;letter-spacing:.08em;font-weight:800}
 /* Language and theme: one pair, like minimise + close, pressed against the divider. */
-.hpair{margin-left:auto;align-self:flex-start;display:flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
-.hpair .tbtn{margin:0;border-radius:0;height:30px;width:auto;min-width:34px;padding:0 9px;align-self:auto}
-.hpair .tbtn+.tbtn{border-left:1px solid var(--line2)}
-.tbtn.lang{display:flex;align-items:center;gap:6px;margin-left:0}
+/* Pin, language and theme: plain icons side by side (no frame, the owner), like the window buttons. */
+.hpair{margin-left:auto;align-self:flex-start;display:flex;gap:2px;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
+.hpair .tbtn{margin:0;width:34px;height:30px;padding:0;align-self:auto}
+.tbtn.pin svg,.tbtn.lang svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tbtn.pin .pinb{transition:fill .15s ease}
+.tbtn.pin.on{color:var(--tonal);background:color-mix(in srgb,var(--acc) 18%,transparent)}
+.tbtn.pin.on .pinb{fill:currentColor}
+.tbtn.pin.on:hover{background:color-mix(in srgb,var(--acc) 26%,transparent);color:var(--tonal)}
+.tbtn.lang{display:grid;place-items:center;margin-left:0}
 .tbtn.lang svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 html.app .hpair+.wbtns{margin-left:0}
 html.app .wbtns::before{margin:7px 6px 0 6px}
 /* Switching the language: the window cross-fades to the new words (like the theme's circle). */
-html.vt-lang::view-transition-old(root){animation:vtout .22s ease both}
-html.vt-lang::view-transition-new(root){animation:fadein .28s ease both}
+html.vt-lang::view-transition-old(root){animation:vtout .13s ease-in both}
+html.vt-lang::view-transition-new(root){animation:fadein .2s ease-out .11s both} /* after the old words are gone: never both at once */
 @keyframes vtout{to{opacity:0}}
 #tip{white-space:pre-line}
 /* The links box grows with the links (up to a few lines, then scrolls); Download keeps its size. */
@@ -480,12 +485,12 @@ textarea{resize:none;min-height:68px;height:68px;max-height:150px;padding:10px 1
 /* The options row: one line, nothing wraps or moves when something is picked. */
 .row.opts{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;margin-top:12px}
 .opts .seg{flex:none;display:flex}
-.opts .seg button{display:flex;align-items:center;gap:6px;padding:0 12px;height:32px}
+.opts .seg button{display:flex;align-items:center;gap:6px;padding:0 10px;height:32px}
 .opts .seg button svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .opts .seg button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
 .ddw{position:relative;flex:none;display:flex}
 .ddw.destw{flex:0 1 auto;min-width:0}
-.dd{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 9px 0 12px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
+.dd{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 8px 0 10px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
 .dd>span{min-width:0;overflow:hidden;text-overflow:ellipsis;text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em;font-variant-numeric:tabular-nums}
 .dd svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .dd .chev{width:14px;height:14px;color:var(--dim);transition:transform .2s ease}
@@ -527,7 +532,8 @@ html.app .card.form:has(.fly:not([hidden])){clip-path:none}
 .flist button.on small{color:inherit;opacity:.8}
 .fh{font-size:12px;color:var(--dim);padding:4px 6px 8px}
 .fly .times{display:flex;align-items:center;gap:4px;padding:0 6px;color:var(--dim)}
-.fly .times input{width:52px;height:32px;padding:0 4px 0 8px;text-align:center}
+.fly .times input{width:52px;height:32px;padding:0 6px;text-align:center;-moz-appearance:textfield;appearance:textfield}
+.fly .times input::-webkit-inner-spin-button,.fly .times input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .fly .times i{font-style:normal;margin:0 6px}
 .fly .times b{font-weight:400;margin:0}
 .ffoot{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:8px;padding:8px 6px 2px;border-top:1px solid var(--line);font-size:12px;color:var(--dim);white-space:nowrap}
@@ -586,7 +592,7 @@ html.app #jobsCard.folded::after{display:none}
     </g>
   </svg><span class="badge" id="badge" aria-hidden="true"></span></button>
   <div class="title"><small class="motto" data-t="Reel it in.">Reel it in.</small><h1>ТЯГА</h1></div>
-  <div class="hpair"><button class="tbtn lang" id="lang" aria-label="Language"></button><button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button></div>
+  <div class="hpair"><button class="tbtn pin" id="pin" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pinb" d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></svg></button><button class="tbtn lang" id="lang" aria-label="Language"></button><button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button></div>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Close to tray" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
 </header>
 
@@ -714,6 +720,8 @@ var RU = {
   "More options": "Ещё настройки",
   "H.264 + AAC: opens in any editor. Up to 1080p": "H.264 + AAC: откроется в любом редакторе. До 1080p",
   "Open": "Открыть",
+  "Keep on top of other windows": "Поверх всех окон",
+  "Stop keeping on top": "Больше не поверх всех окон",
   "Change…": "Сменить…",
   "Close to tray": "Свернуть в трей",
   "Copy all files": "Копировать все файлы",
@@ -767,7 +775,7 @@ function applyLang() {
   document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = T(e.dataset.t); });
   document.querySelectorAll('[data-ph]').forEach(function (e) { e.placeholder = T(e.dataset.ph); });
   var b = document.getElementById('lang');
-  if (b) { b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg><span>' + (LANG === 'ru' ? 'RU' : 'EN') + '</span>'; b.dataset.tip = LANG === 'ru' ? 'Переключить на английский' : 'Switch to Russian'; }
+  if (b) { b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>'; b.dataset.tip = LANG === 'ru' ? 'Переключить на английский' : 'Switch to Russian'; }
 }
 // The theme: Windows' own until the theme button picks one; that choice is remembered (the
 // tray menu reads it too).
@@ -853,6 +861,7 @@ addEventListener('pointerdown', function (e) {
   var tip = $('tip'), on = null, timer = 0;
   function hide() { clearTimeout(timer); on = null; tip.classList.remove('on'); }
   function show(t) {
+    if (t.getAttribute('aria-expanded') === 'true') return; // its drop-down is open: the hint would cover it
     var text = (t.dataset.tip || '').split('\n').map(T).join('\n');
     if (!text || !t.isConnected) return;
     tip.textContent = text;
@@ -1077,6 +1086,7 @@ function closeFly() {
 }
 function openFly(btn, fly) {
   closeFly();
+  $('tip').classList.remove('on');
   fly.classList.remove('up', 'end');
   fly.hidden = false;
   var r = fly.getBoundingClientRect(), b = btn.getBoundingClientRect();
@@ -1228,6 +1238,21 @@ $('lang').onclick = function () {
   root.classList.add('vt-lang');
   document.startViewTransition(apply).finished.finally(function () { root.classList.remove('vt-lang'); });
 };
+// The pin: ТЯГА's window stays over all the others (remembered; ТЯГА's window only).
+var INAPP = document.documentElement.classList.contains('app'); // (APP itself is set further down)
+function setPin(on) {
+  $('pin').classList.toggle('on', on);
+  $('pin').setAttribute('aria-pressed', on);
+  $('pin').dataset.tip = on ? 'Stop keeping on top' : 'Keep on top of other windows';
+  if (INAPP) api('/api/window', { text: 'top', n: on ? 1 : 0 }).catch(function () {});
+}
+$('pin').hidden = !INAPP;
+$('pin').onclick = function () {
+  var on = !$('pin').classList.contains('on');
+  try { localStorage.setItem('tyaga-top', on ? '1' : ''); } catch (e) {}
+  setPin(on);
+};
+(function () { var on = false; try { on = localStorage.getItem('tyaga-top') === '1'; } catch (e) {} if (on || !INAPP) setPin(on); else $('pin').dataset.tip = 'Keep on top of other windows'; })();
 // The fish is cast as soon as a link goes in (add() checks it's not empty).
 
 // Ctrl+A anywhere outside a text field selects the links, not the whole page.
@@ -1709,7 +1734,8 @@ function render() {
   $('pick').hidden = !state.canPick;
   var nf = (state.jobs || []).reduce(function (a, j) { return a + (j.status === 'done' ? j.files.length : 0); }, 0);
   $('copyall').hidden = nf < 2; // two finished files or more
-  setText($('destT'), state.outName || T('Downloads'));
+  // Just the folder's own name on the button (the narrower window: the full path is in its hint).
+  setText($('destT'), state.outName ? state.outName.split(' › ').pop() : T('Downloads'));
   $('dest').dataset.tip = state.outName ? 'Downloads folder: ' + state.outName : '';
 
   // Setup: downloading yt-dlp / ffmpeg / Deno on first start, or something wasn't found.

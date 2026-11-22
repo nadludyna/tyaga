@@ -96,6 +96,9 @@
     if (innerWidth > 560) {
       var tops = [].slice.call(document.querySelectorAll('.opts>.seg,.opts>.ddw>.dd')).filter(seen).map(function (e) { return e.getBoundingClientRect().top; });
       if (tops.length && Math.max.apply(null, tops) - Math.min.apply(null, tops) > 6) bad.push('the options row broke into lines');
+      // and the folder's name on its button is whole (where the files go: one of the four questions)
+      var dt = document.getElementById('destT');
+      if (dt && seen(dt) && dt.scrollWidth > dt.clientWidth + 1) bad.push('the folder name is cut: ' + name(dt));
     }
     // 2d. Letters whole: where a label is clipped (… at the end), the clip must not cut the
     // tails of у, р, g (the label's box, trimmed to the letters, plus its padding).

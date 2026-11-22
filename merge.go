@@ -44,28 +44,80 @@ func (t track) who() string {
 
 var topicRe = regexp.MustCompile(`(?i)\s*(- topic|vevo)$`)
 
-// albumArtist is the artist of the whole glued file. Tracks of one playlist often disagree:
-// one gets the artist from "Artist - Song" in its title, another just the channel name,
-// a feat. track names two people. So it's the artist of at least half of the tracks,
-// and "Various Artists" for a real compilation.
+// albumArtist is the artist of the whole glued file: the people, by name, comma-separated
+// (the owner: never "Various Artists"). Tracks of one playlist often disagree: one gets the
+// artist from "Artist - Song" in its title, another just the channel name, a feat. track
+// names a guest. So it's everyone on at least half of the tracks; when nobody is (a real
+// compilation), the ones on the most tracks, up to four.
 func albumArtist(tracks []track) string {
 	count := map[string]int{}
-	best, known := "", 0
+	var order []string
 	for _, t := range tracks {
-		if a := t.who(); a != "" {
-			known++
-			if count[a]++; count[a] > count[best] {
-				best = a
+		seen := map[string]bool{}
+		for _, a := range splitArtists(t.who()) {
+			if !seen[a] {
+				seen[a] = true
+				if count[a] == 0 {
+					order = append(order, a)
+				}
+				count[a]++
 			}
 		}
 	}
-	switch {
-	case known == 0:
+	if len(order) == 0 {
 		return ""
-	case count[best]*2 >= len(tracks):
-		return best
 	}
-	return "Various Artists"
+	var main []string
+	for _, a := range order {
+		if count[a]*2 >= len(tracks) {
+			main = append(main, a)
+		}
+	}
+	if len(main) == 0 {
+		main = slices.Clone(order)
+		slices.SortStableFunc(main, func(a, b string) int { return count[b] - count[a] })
+		main = main[:min(4, len(main))]
+	}
+	return strings.Join(main, ", ")
+}
+
+// splitArtists: "A, B & C feat. D" → A, B, C, D.
+func splitArtists(s string) []string {
+	var out []string
+	for _, a := range artistSep.Split(s, -1) {
+		if a = strings.TrimSpace(a); a != "" {
+			out = append(out, a)
+		}
+	}
+	return out
+}
+
+var artistSep = regexp.MustCompile(`(?i),\s*|\s+&\s+|\s+(?:feat|ft)\.?\s+`)
+
+// albumName splits YouTube Music's "Album - KOMPRESSOR" into the name and what it is
+// (Album, EP, Single…), which goes at the very end: "KOMPRESSOR (Album)".
+func albumName(title string) (name, kind string) {
+	if m := albumKindRe.FindStringSubmatch(title); m != nil {
+		return strings.TrimSpace(m[2]), m[1]
+	}
+	return title, ""
+}
+
+var albumKindRe = regexp.MustCompile(`(?i)^(Album|EP|Single|Mixtape|Compilation|Альбом|Сингл|Мини-альбом)\s+[-–—]\s+(.+)$`)
+
+// fileSafe makes a name usable as a Windows file name.
+func fileSafe(s string) string {
+	s = strings.Map(func(r rune) rune {
+		if strings.ContainsRune(`<>:"/\|?*`, r) || r < 32 {
+			return '_'
+		}
+		return r
+	}, s)
+	s = strings.TrimRight(strings.TrimSpace(s), ". ")
+	if r := []rune(s); len(r) > 150 {
+		s = string(r[:150])
+	}
+	return s
 }
 
 // probeInfo is the part of ffprobe's answer that matters here.
@@ -198,15 +250,29 @@ func mergePlaylist(j *Job, tracks []track) (string, error) {
 	// The pieces lie in the playlist folder; the glued file goes next to the folder, with the same name.
 	dir := filepath.Dir(tracks[0].Filepath)
 	ext := filepath.Ext(tracks[0].Filepath)
-	out := freeName(dir, ext)
-	tmp := filepath.Join(filepath.Dir(dir), "~"+filepath.Base(out)) // same extension: ffmpeg picks the format by it
-
 	// Tags and chapters: one chapter per piece, named after the video.
 	title := tracks[0].PlaylistTitle
 	if title == "" || title == "NA" {
 		title = filepath.Base(dir)
 	}
 	artist := albumArtist(tracks)
+	// The file and its title: the artists first, then the name, what it is at the very end
+	// ("TVETH, Lil Smooky - KOMPRESSOR (Album)"; players show "artist – title").
+	album, kind := albumName(title)
+	full := album
+	if kind != "" {
+		full += " (" + kind + ")"
+	}
+	base := full
+	if artist != "" {
+		base = artist + " - " + full
+	}
+	if base = fileSafe(base); base == "" {
+		base = filepath.Base(dir)
+	}
+	out := freeName(filepath.Join(filepath.Dir(dir), base), ext)
+	tmp := filepath.Join(filepath.Dir(dir), "~"+filepath.Base(out)) // same extension: ffmpeg picks the format by it
+	title = full
 	// Cover: from the first track that has one (a track whose thumbnail failed has none).
 	cover := ""
 	for i, t := range tracks {
@@ -219,7 +285,7 @@ func mergePlaylist(j *Job, tracks []track) (string, error) {
 	var b strings.Builder
 	b.WriteString(";FFMETADATA1\n")
 	b.WriteString("title=" + metaEscape(title) + "\n")
-	b.WriteString("album=" + metaEscape(title) + "\n")
+	b.WriteString("album=" + metaEscape(album) + "\n")
 	if artist != "" {
 		b.WriteString("artist=" + metaEscape(artist) + "\n")
 		b.WriteString("album_artist=" + metaEscape(artist) + "\n")
