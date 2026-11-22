@@ -20,7 +20,9 @@ him more than one that adds nothing. So, before **every** build, however small t
 - `tyagaCheck()`, `tyagaFlyCheck()` and `tyagaModeCheck()` all come back empty, in the empty
   window, with a link pasted, and with a list (queued, downloading, done); English and Russian,
   dark and light, 680 px and ~440 px. Run them once the theme has finished switching: its
-  circle covers the page for a moment and the corner check then reports false alarms.
+  circle covers the page for a moment and the corner check then reports false alarms. In a
+  hidden browser pane that circle never finishes: set the theme with
+  `localStorage.setItem('tyaga-theme', 'light')` and reload instead of clicking.
 - The flows in step 3 below, walked on the stand.
 - Anything that fails is fixed before the build, not listed as "known" in the report.
 
