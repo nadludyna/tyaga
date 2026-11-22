@@ -15,7 +15,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/subtle"
-	_ "embed"
+	"embed"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
@@ -37,6 +37,12 @@ var page []byte
 //
 //go:embed menu.html
 var menuPage []byte
+
+// The page's font, Onest (SIL Open Font License, fonts/OFL.txt): inside the program, so the
+// window looks the same on every computer and needs no internet.
+//
+//go:embed fonts/*.woff2
+var fontFiles embed.FS
 
 // windowHidden: ТЯГА's window is in the tray or minimised (Windows). A hidden WebView2 page
 // isn't told it's hidden, so the page asks, and stops its animations meanwhile.
@@ -175,6 +181,17 @@ func handler(token string) http.Handler {
 			return
 		}
 
+		if strings.HasPrefix(r.URL.Path, "/fonts/") { // nothing secret either
+			b, err := fontFiles.ReadFile(strings.TrimPrefix(r.URL.Path, "/"))
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
+			w.Header().Set("Content-Type", "font/woff2")
+			w.Header().Set("Cache-Control", "max-age=31536000")
+			w.Write(b)
+			return
+		}
 		if !strings.HasPrefix(r.URL.Path, "/api/") { // favicon and such don't count as break-in attempts
 			http.NotFound(w, r)
 			return
@@ -300,6 +317,10 @@ func handler(token string) http.Handler {
 			if path, ok := jobFile(body.ID, body.N); ok && fileExists(path) {
 				openFile(path)
 			}
+		case "/api/copyall": // every finished file onto the clipboard at once
+			paths := finishedFiles()
+			writeJSON(w, map[string]any{"ok": len(paths) > 0 && copyFiles(paths), "n": len(paths)})
+			return
 		case "/api/copyfile": // the finished file onto the clipboard, to paste into a chat
 			path, ok := jobFile(body.ID, body.N)
 			writeJSON(w, map[string]bool{"ok": ok && fileExists(path) && copyFile(path)})

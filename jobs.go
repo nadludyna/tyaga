@@ -385,20 +385,20 @@ var (
 func explain(line string) string {
 	switch {
 	case privateRe.MatchString(line):
-		return "The video is private."
+		return "Private video."
 	case goneRe.MatchString(line):
-		return "The video was removed or isn't available."
+		return "Removed or not available."
 	case sponsorRe.MatchString(line):
-		return "SponsorBlock didn't answer. Untick \"no sponsors\" and add the link again."
+		return "SponsorBlock didn't answer: untick \"no sponsors\"."
 	case signInRe.MatchString(line):
 		if canLogin {
-			return "YouTube wants you to sign in. Sign in, then Retry."
+			return "YouTube asks you to sign in: sign in, then Retry."
 		}
-		return "YouTube wants you to sign in. Put a fresh youtube-cookies.txt next to the program."
+		return "YouTube asks you to sign in: put a fresh youtube-cookies.txt next to ТЯГА."
 	case tooManyRe.MatchString(line):
-		return "YouTube is limiting requests for now. Try again later."
+		return "YouTube is limiting requests: try again later."
 	case strings.Contains(line, "HTTP Error 403"):
-		return "YouTube refused the download (HTTP 403). It usually goes through on Retry."
+		return "YouTube refused (403): Retry usually helps."
 	}
 	// Whatever else: without "ERROR: [youtube] dQw4w9WgXcQ: " in front.
 	line = strings.TrimPrefix(line, "ERROR: ")
@@ -1019,6 +1019,24 @@ func unclear() {
 	jobs = append(jobs, cleared...)
 	cleared = nil
 	sort.SliceStable(jobs, func(a, b int) bool { return jobs[a].ID < jobs[b].ID })
+}
+
+// finishedFiles lists every file the finished downloads made that's still there, oldest first.
+func finishedFiles() []string {
+	mu.Lock()
+	defer mu.Unlock()
+	var out []string
+	for _, j := range jobs {
+		if j.Status != "done" {
+			continue
+		}
+		for _, p := range j.paths {
+			if fileExists(p) {
+				out = append(out, p)
+			}
+		}
+	}
+	return out
 }
 
 // jobFile returns the full path of a finished file — only files this program downloaded itself.

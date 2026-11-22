@@ -46,6 +46,7 @@ func openWith(target string) { exec.Command("xdg-open", target).Start() }
 
 // copyFile puts the file itself on the clipboard (Windows only; the stand says it can't).
 func copyFile(path string) bool { return false }
+func copyFiles([]string) bool   { return false }
 
 func consoleUTF8() {}
 

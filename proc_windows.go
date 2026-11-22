@@ -94,18 +94,28 @@ func unlockForeground() {
 	user32.NewProc("AllowSetForegroundWindow").Call(uintptr(anyProcess))
 }
 
-// copyFile puts the file itself on the clipboard, the way Explorer's Copy does (CF_HDROP),
-// so Ctrl+V in a chat (Telegram, Discord…) attaches it. A DROPFILES header, then the path in
-// UTF-16 and two zero characters.
-func copyFile(path string) bool {
+// copyFile puts the file itself on the clipboard (see copyFiles).
+func copyFile(path string) bool { return copyFiles([]string{path}) }
+
+// copyFiles puts the files themselves on the clipboard, the way Explorer's Copy does
+// (CF_HDROP), so Ctrl+V in a chat (Telegram, Discord…) attaches them. A DROPFILES header, then
+// each path in UTF-16 with its zero, and one more zero to end the list.
+func copyFiles(paths []string) bool {
 	runtime.LockOSThread() // the clipboard is opened and closed on one thread
 	defer runtime.UnlockOSThread()
-	name, err := syscall.UTF16FromString(filepath.Clean(path))
-	if err != nil {
+	var names []uint16
+	for _, p := range paths {
+		name, err := syscall.UTF16FromString(filepath.Clean(p))
+		if err != nil {
+			return false
+		}
+		names = append(names, name...) // with its own zero
+	}
+	if len(names) == 0 {
 		return false
 	}
 	const headSize, gmemMoveable, cfHDrop = 20, 0x0002, 15
-	size := uintptr(headSize + (len(name)+1)*2) // the path's own zero, and one more to end the list
+	size := uintptr(headSize + (len(names)+1)*2)
 	kernel32 := syscall.NewLazyDLL("kernel32.dll")
 	h, _, _ := kernel32.NewProc("GlobalAlloc").Call(gmemMoveable|0x0040, size) // GMEM_ZEROINIT
 	if h == 0 {
@@ -119,7 +129,7 @@ func copyFile(path string) bool {
 	buf := make([]byte, size)
 	buf[0] = headSize // DROPFILES.pFiles: where the names start
 	buf[16] = 1       // DROPFILES.fWide: the names are UTF-16
-	for i, c := range name {
+	for i, c := range names {
 		buf[headSize+2*i], buf[headSize+2*i+1] = byte(c), byte(c>>8)
 	}
 	kernel32.NewProc("RtlMoveMemory").Call(ptr, uintptr(unsafe.Pointer(&buf[0])), size)
@@ -134,7 +144,7 @@ func copyFile(path string) bool {
 		kernel32.NewProc("GlobalFree").Call(h)
 		return false
 	}
-	return true // the clipboard owns the memory now
+	return true
 }
 
 // openFolder opens a folder in Explorer.
