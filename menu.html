@@ -35,7 +35,7 @@ button:active{transform:scale(.98)}
 button svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 button>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* The words sit in the middle by the letters themselves, like in the main window. */
-button>span{text-box:trim-both cap alphabetic}
+button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em} /* room for the tails of у, р, g where a label is cut with "…" */
 #open svg{color:var(--acc)}#folder svg{color:var(--folder)}#pick svg{color:var(--info)}.quit svg{color:var(--dim)}
 .sep{height:1px;background:var(--line);margin:4px 6px}
 .quit:hover,.quit:focus-visible{color:var(--err);background:color-mix(in srgb,var(--err) 12%,transparent)}

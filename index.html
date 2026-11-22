@@ -406,12 +406,18 @@ html.app .menu{background:var(--card)}
 .opts:has(.morebox:not([hidden])) .destw{display:none}
 .morew:has(.morebox:not([hidden])) #moreB>span{display:none}
 .morew:has(.morebox:not([hidden])) #moreB{padding:0 9px}
-.morebox .chip{flex:none;padding:0 12px 0 30px}
+.morebox .chip{flex:none;padding:0 11px 0 29px}
 .morebox .chip::before{left:9px}
-.morebox .seg button{padding:0 12px}
+.morebox .seg button{padding:0 10px}
+.morew,.morebox{gap:6px}
 .mrow{margin-top:0;gap:8px}
 .mrow .chip{flex:none}
-.cutrow{justify-content:flex-start}
+.cutrow{justify-content:flex-start;margin-top:10px}
+/* The times hang under the Fragment chip (placeTimes() lines them up), an arrow pointing at it. */
+.cutrow .times{position:relative;padding:7px 10px;border:1px solid var(--line2);border-radius:10px;background:var(--card);animation:timesin .18s cubic-bezier(.2,.8,.2,1) both}
+.cutrow .times::before{content:"";position:absolute;top:-6px;left:var(--caret,24px);width:10px;height:10px;margin-left:-5px;background:var(--card);border-left:1px solid var(--line2);border-top:1px solid var(--line2);transform:rotate(45deg)}
+.cutrow .times.free::before{display:none}
+@keyframes timesin{from{opacity:0;transform:translateY(-4px)}}
 .morebox .mrow{flex-wrap:wrap}
 /* The list's header: what's going on, the actions for the whole list, the fold arrow. */
 .lbar{display:flex;align-items:center;gap:4px;justify-content:flex-end;margin:0 0 4px}
@@ -433,7 +439,10 @@ html.app #jobsCard.folded .lchev svg{transform:rotate(180deg)}
    line box: Onest's box is much taller above the letters than below (13 : 4), so its middle
    was 1.2 px above the icons' middle (1–2 screen pixels at 125 %). */
 button.chip{font-family:inherit}
-.btn>span,.seg button,.chip>span,.go>span,.menu button>span,.tbtn.lang>span,.st,.lhead #lsum,.notice .btn{text-box:trim-both cap alphabetic}
+.seg button,.notice .btn{text-box:trim-both cap alphabetic}
+.btn>span,.chip>span,.go>span,.menu button>span,.tbtn.lang>span,.st,.lhead #lsum{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
+/* (the same room above and below the letters: where a long label is cut with "…", the tails
+   of у, р, g stay whole; the middle stays where it was) */
 /* Narrow: More and the list's actions keep only their icons (the hint still says the word),
    so the folder stays on its row and the list's summary isn't cut. */
 @media (max-width:560px){.opts:has(.morebox:not([hidden])){flex-wrap:wrap}.morew{display:contents}.morebox{flex-basis:100%;flex-wrap:wrap}.opts{flex-wrap:nowrap}.job.error .line2 .acts{flex-basis:100%;margin-left:0}#moreB>span,.lbar .btn>span{display:none}#moreB,.lbar .btn{padding:0 8px}.destw{flex:0 1 auto}.dest{max-width:100%}.pvp{width:72px;height:40.5px}}
@@ -727,6 +736,7 @@ addEventListener('pointerdown', function (e) {
 // Elements with data-for="audio" / "video" are visible only in their mode.
 var mode = segmented('mode', function (m) {
   document.querySelectorAll('[data-for]').forEach(function (e) { e.hidden = e.dataset.for !== m; });
+  if (window.placeTimes) placeTimes(); // the chips moved: the times follow Fragment
 });
 var format = segmented('format');
 var quality = segmented('quality');
@@ -873,6 +883,7 @@ function syncBoxes() {
   $('cutBox').hidden = !canCut;
   if (!canCut) $('cut').checked = false;
   $('cutTimes').hidden = !$('cut').checked;
+  placeTimes();
   var f = one && facts[links[0]], top = f && f.heights && f.heights.length ? f.heights[0] : 0;
   document.querySelectorAll('#quality button').forEach(function (b) {
     var h = +b.dataset.v;
@@ -881,11 +892,24 @@ function syncBoxes() {
   });
   renderPv();
 }
+// The times start under the Fragment chip, as far as the row lets them, the arrow at its middle.
+function placeTimes() {
+  var t = $('cutTimes');
+  // More closed with a fragment on: the times stay (they still count), at the left, no arrow.
+  t.classList.toggle('free', !t.hidden && !$('cutBox').offsetWidth);
+  if (t.hidden || $('cutBox').hidden || !$('cutBox').offsetWidth) { t.style.marginLeft = ''; return; }
+  var row = t.parentElement.getBoundingClientRect(), chip = $('cutBox').getBoundingClientRect();
+  var left = Math.max(0, Math.min(chip.left - row.left, row.width - t.offsetWidth));
+  t.style.marginLeft = left + 'px';
+  t.style.setProperty('--caret', Math.max(14, Math.min(t.offsetWidth - 14, chip.left + chip.width / 2 - row.left - left)) + 'px');
+}
+addEventListener('resize', placeTimes);
 $('cut').onchange = syncBoxes;
 $('links').addEventListener('input', syncBoxes);
 // More: the rest of the switches, folded away until asked for; they open to the right of it.
 function setMore(open) {
   $('morebox').hidden = !open;
+  placeTimes();
   $('moreB').classList.toggle('on', open);
   $('moreB').setAttribute('aria-expanded', open);
   fitLater();

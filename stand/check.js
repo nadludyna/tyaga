@@ -84,6 +84,19 @@
       var tops = [].slice.call(document.querySelectorAll('.opts .seg,#moreB,.morebox .chip')).filter(seen).map(function (e) { return e.getBoundingClientRect().top; });
       if (tops.length && Math.max.apply(null, tops) - Math.min.apply(null, tops) > 6) bad.push('the options row broke into lines');
     }
+    // 2d. Letters whole: where a label is clipped (… at the end), the clip must not cut the
+    // tails of у, р, g (the label's box, trimmed to the letters, plus its padding).
+    document.querySelectorAll('span,div,b').forEach(function (e) {
+      if (!seen(e) || !e.textContent.trim() || e.children.length) return;
+      var cs = getComputedStyle(e);
+      if (cs.overflowY === 'visible' && cs.overflowX === 'visible') return;
+      var r = document.createRange(); r.selectNodeContents(e);
+      var t = r.getBoundingClientRect(), b = e.getBoundingClientRect();
+      if (!t.height) return;
+      cv.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+      var m = cv.measureText('уgр'), base = t.top + (t.height - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
+      if (base + m.actualBoundingBoxDescent > b.bottom + 0.5) bad.push('letters cut at the bottom: ' + name(e));
+    });
     // 3. Nothing sticks out sideways.
     var se = document.scrollingElement;
     if (se.scrollWidth > se.clientWidth + 1) bad.push('the page scrolls sideways by ' + (se.scrollWidth - se.clientWidth) + ' px');
