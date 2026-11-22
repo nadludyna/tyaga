@@ -10,6 +10,25 @@ a = sys.argv[1:]
 if '-U' in a or '--version' in a:
     print('Latest version: 2026.11.10 from yt-dlp/yt-dlp\nyt-dlp is up to date (2026.11.10 from yt-dlp/yt-dlp)'); sys.exit(0)
 out = a[a.index('-P') + 1] if '-P' in a else '.'
+# -J: what the link is, no download (inspect.go). Words in the link pick what it is like:
+# CHAP an album with 10 chapters (Music), SPON a video with ads (SponsorBlock, see inspect.go),
+# HD720 only up to 720p, FAIL fails; a playlist link (list=) gives 3 entries with --flat-playlist.
+if '-J' in a:
+    link = a[-1]
+    time.sleep(1.0)
+    if 'FAIL' in link:
+        print('ERROR: [youtube] FAILabcdefg: Video unavailable', file=sys.stderr); sys.exit(1)
+    if '--flat-playlist' in a and 'list=' in link:
+        print(json.dumps({'id': 'PLxyz', 'title': 'My Wife Is Drink Paint - a very long playlist name that goes on and on',
+                          'playlist_count': 3, 'entries': [{'id': 'Ab3dEf5Gh7J', 'title': 'Rotten Apple Juice'}, {'id': 'Kl9mNo1Pq3R', 'title': 'Digital Love'}, {'id': 'St5uVw7Xy9Z', 'title': 'Nice Little Penguin'}]})); sys.exit(0)
+    vid = (link.split('v=')[-1] if 'v=' in link else link.rstrip('/').split('/')[-1])[:11]
+    chap = 'CHAP' in link
+    info = {'id': vid, 'title': 'Pink Floyd - The Dark Side of the Moon (Full Album)' if chap else 'Rotten Apple Juice',
+            'channel': 'Pink Floyd' if chap else 'Pilotredsky', 'duration': 2580 if chap else 200,
+            'thumbnail': '', 'categories': ['Music'] if (chap or 'MUSIC' in link) else ['Entertainment'],
+            'chapters': [{'title': f'Part {i}', 'start_time': i * 258} for i in range(10)] if chap else [],
+            'formats': [{'height': h, 'vcodec': 'avc1'} for h in ([720, 480, 360] if 'HD720' in link else [2160, 1440, 1080, 720, 480])] + [{'height': None, 'vcodec': 'none'}]}
+    print(json.dumps(info)); sys.exit(0)
 audio = '-x' in a
 fmt = a[a.index('--audio-format') + 1] if '--audio-format' in a else 'mp4'
 playlist = '--yes-playlist' in a

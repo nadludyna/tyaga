@@ -468,3 +468,14 @@ func TestSmoothSpeed(t *testing.T) {
 		t.Errorf("time left %q: should follow the average speed, not the dip", j.ETA)
 	}
 }
+
+// The stand's SponsorBlock: ids with SPON in them have two ads, 80 s together.
+func TestFakeSponsorBlock(t *testing.T) {
+	t.Setenv("TYAGA_SPONSORBLOCK", "fake")
+	if n, sec, _ := sponsorSegments("SPONvideo01"); n != 2 || sec != 80 {
+		t.Fatalf("SPON: %d ads, %v s", n, sec)
+	}
+	if n, _, _ := sponsorSegments("Ab3dEf5Gh7J"); n != 0 {
+		t.Fatalf("plain: %d ads", n)
+	}
+}

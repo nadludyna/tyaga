@@ -1,0 +1,110 @@
+// The stand's layout check: run it in the page (the browser's console, or a test tool's
+// "run JavaScript") in every state you look at; it returns a list of problems, empty when
+// all is well. What it measures is what the owner had to point out by eye before:
+// - a button's label not in the middle of its icon or of the button (by the letters
+//   themselves, not by the font's line box), more than half a pixel off;
+// - controls in one row overlapping each other;
+// - anything sticking out of the window sideways, or a label cut off without "…";
+// - in Russian, a label still in English; a label not in Onest (a button's own font);
+// - words side by side in a row not standing on one line.
+(function () {
+  var cv = document.createElement('canvas').getContext('2d');
+  function seen(e) {
+    if (!e.isConnected || e.closest('[hidden]')) return false;
+    var r = e.getBoundingClientRect(), cs = getComputedStyle(e);
+    return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && +cs.opacity > 0.05;
+  }
+  function name(e) {
+    return (e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.className && e.className.baseVal === undefined ? '.' + String(e.className).trim().split(/\s+/).join('.') : '')) +
+      ' "' + (e.textContent || '').trim().slice(0, 24) + '"';
+  }
+  // The middle of the capital letters of a label (where the eye puts its middle).
+  function capMid(t) {
+    var cs = getComputedStyle(t), r = document.createRange();
+    r.selectNodeContents(t);
+    var b = r.getBoundingClientRect();
+    if (!b.height) return null;
+    cv.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    var m = cv.measureText('Hн'), cap = cv.measureText('H').actualBoundingBoxAscent;
+    // The text's own box (not the element's) is the font's box: baseline = its top + ascent.
+    var base = b.top + (b.height - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
+    return base - cap / 2;
+  }
+  function textEl(b) {
+    var s = [].slice.call(b.querySelectorAll('span')).filter(function (x) { return x.textContent.trim() && seen(x); })[0];
+    return s || (b.textContent.trim() ? b : null);
+  }
+  window.tyagaCheck = function () {
+    var bad = [];
+    // 1. Labels in the middle.
+    document.querySelectorAll('button,.chip,.seg button').forEach(function (b) {
+      if (!seen(b)) return;
+      var t = textEl(b);
+      if (!t) return;
+      if (!/Onest/.test(getComputedStyle(t).fontFamily)) bad.push('not in Onest: ' + name(b));
+      var c = capMid(t);
+      if (c === null) return;
+      var icon = [].slice.call(b.querySelectorAll(':scope>svg')).filter(seen)[0];
+      var ir = icon && icon.getBoundingClientRect();
+      // The icon above the word (Download): nothing to line up.
+      if (ir && ir.bottom < c) icon = null;
+      if (icon) {
+        var d = c - (ir.top + ir.bottom) / 2;
+        if (Math.abs(d) > 0.5) bad.push('label vs icon ' + d.toFixed(2) + ' px: ' + name(b));
+      } else if (b.getBoundingClientRect().height <= 40) {
+        var br = b.getBoundingClientRect(), d2 = c - (br.top + br.bottom) / 2;
+        if (Math.abs(d2) > 0.75) bad.push('label vs button ' + d2.toFixed(2) + ' px: ' + name(b));
+      }
+      if (t.scrollWidth > t.clientWidth + 1 && getComputedStyle(t).textOverflow !== 'ellipsis' && t !== b) bad.push('label cut off: ' + name(b));
+    });
+    // 2. Nothing overlaps in a row.
+    document.querySelectorAll('.row,.opts,.lbar,.top,.line2,header,.pvc,.input').forEach(function (row) {
+      if (!seen(row)) return;
+      var kids = [].slice.call(row.children).filter(function (k) { return seen(k) && getComputedStyle(k).position !== 'absolute'; });
+      for (var i = 0; i < kids.length; i++) for (var j = i + 1; j < kids.length; j++) {
+        var a = kids[i].getBoundingClientRect(), b = kids[j].getBoundingClientRect();
+        var w = Math.min(a.right, b.right) - Math.max(a.left, b.left), h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+        if (w > 1 && h > 1) bad.push('overlap: ' + name(kids[i]) + ' and ' + name(kids[j]));
+      }
+    });
+    // 2b. Words side by side in one row stand on one line: their letters' middles within 1 px.
+    document.querySelectorAll('.lbar,.opts,.line2,.top').forEach(function (row) {
+      if (!seen(row)) return;
+      var mids = [];
+      row.querySelectorAll('span,button,.kind,.nums,.ovr,.st').forEach(function (e) {
+        if (!seen(e) || e.closest('.menu') || ![].some.call(e.childNodes, function (n) { return n.nodeType === 3 && n.textContent.trim(); })) return;
+        var c = capMid(e);
+        if (c !== null) mids.push([c, e]);
+      });
+      // (a row that wraps in a narrow window puts things on a second line: those aren't compared)
+      mids.forEach(function (m) { var d = Math.abs(m[0] - mids[0][0]); if (d > 1 && d < 12) bad.push('not on one line with ' + name(mids[0][1]) + ' by ' + (m[0] - mids[0][0]).toFixed(1) + ' px: ' + name(m[1])); });
+    });
+    // 3. Nothing sticks out sideways.
+    var se = document.scrollingElement;
+    if (se.scrollWidth > se.clientWidth + 1) bad.push('the page scrolls sideways by ' + (se.scrollWidth - se.clientWidth) + ' px');
+    document.querySelectorAll('.card').forEach(function (card) {
+      if (!seen(card)) return;
+      var cr = card.getBoundingClientRect();
+      card.querySelectorAll('button,.chip,.seg,.pvi,.job').forEach(function (e) {
+        if (!seen(e) || e.closest('.menu')) return;
+        var r = e.getBoundingClientRect();
+        if (r.right > cr.right + 0.5 || r.left < cr.left - 0.5) bad.push('out of its card: ' + name(e));
+      });
+    });
+    // 4. Russian: no label left in English.
+    if (document.documentElement.lang === 'ru' || (window.LANG === 'ru')) {
+      document.querySelectorAll('[data-t]').forEach(function (e) {
+        if (seen(e) && e.textContent.trim() === e.dataset.t.trim() && /[a-z]{3}/i.test(e.dataset.t)) bad.push('not translated: ' + name(e));
+      });
+    }
+    // English: no Russian left in the window's own words (titles and links are the user's).
+    if (window.LANG === 'en') {
+      var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      for (var n; (n = w.nextNode());) {
+        var p = n.parentElement;
+        if (/[а-яё]/i.test(n.textContent) && seen(p) && !p.closest('.name,.pvt,textarea,#tip,h1,.kind,.nums')) bad.push('Russian in English: ' + name(p));
+      }
+    }
+    return bad;
+  };
+})();

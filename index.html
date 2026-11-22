@@ -301,7 +301,7 @@ html.app .bg{display:none}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
 .lhead{display:none}
-html.app .lhead{display:flex;align-items:center;gap:10px;width:100%;flex:none;margin:-4px 0 0;padding:2px 4px;border:0;border-radius:8px;background:transparent;color:var(--dim);font:inherit;font-size:13.5px;text-align:left;cursor:pointer;transition:color .15s}
+html.app .lhead{display:flex;align-items:center;gap:10px;width:100%;flex:none;margin:0;padding:2px 4px;border:0;border-radius:8px;background:transparent;color:var(--dim);font:inherit;font-size:13.5px;text-align:left;cursor:pointer;transition:color .15s}
 html.app .lhead:hover{color:var(--fg)}
 .lhead #lsum{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .lhead .bad{color:var(--err)}.lhead .good{color:var(--ok)}
@@ -351,6 +351,78 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
 .rip{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;background:currentColor;opacity:.22;transform:scale(0);animation:rip .55s cubic-bezier(.2,.8,.2,1) forwards}
 .go .rip{background:#fff;opacity:.45}
 @keyframes rip{to{transform:scale(1);opacity:0}}
+/* ——— The layout after "what is this link" (see renderPv): ———
+   Row 1: the links box and Download. Row 2: audio or video, More, and where the files go.
+   Then a line for every link with only its own switches. More folds the rest away. */
+.opts{display:flex;align-items:center;gap:8px}
+.opts .seg{display:inline-flex}
+.opts .seg button{flex:none;padding:0 16px}
+.opts .sp{flex:1}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--dim)}
+.btn.ghost:hover{border-color:transparent;background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}
+.btn.ghost.on{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--tonal)}
+.btn.sm{height:28px;padding:0 10px 0 8px;font-size:12.5px;gap:6px}
+.btn.sm svg{width:15px;height:15px}
+.destw{position:relative;min-width:0}
+.dest{max-width:240px}
+.dest #destT{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.dest svg:first-child{color:var(--folder)}
+.dest .chev{width:14px;height:14px;margin-left:-2px}
+/* The folder menu opens upwards: under the first card the window may end right away. */
+.menu{position:absolute;right:0;bottom:calc(100% + 6px);z-index:30;min-width:230px;padding:5px;border-radius:10px;background:var(--card);border:1px solid var(--line2);box-shadow:0 14px 34px -12px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:2px;animation:fadein .15s ease}
+html.app .menu{background:var(--card)}
+.menu button{display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;text-align:left;cursor:pointer;white-space:nowrap}
+.menu button:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.menu svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#open svg{color:var(--folder)}#pick svg{color:var(--info)}
+/* A line per link: picture, title, what's in it, its switches. */
+.pv{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.pvi{display:flex;gap:12px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:10px;animation:fadein .2s ease both}
+.pvp{flex:none;width:96px;height:54px;border-radius:7px;overflow:hidden;background:var(--line);display:grid;place-items:center;color:var(--dim)}
+.pvp img{width:100%;height:100%;object-fit:cover;display:block;animation:fadein .25s ease}
+.pvp svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pvb{flex:1;min-width:0;padding-top:2px}
+.pvt{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pvf{font-size:12.5px;color:var(--dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.pvi.looking .pvf{animation:breathe2 1.6s ease-in-out infinite}
+.pvmore{padding-left:2px}
+.pvc{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pvc .chip{flex:none;height:28px;padding:0 12px 0 30px;font-size:12.5px}
+.pvc .chip::before{left:8px}
+.chip.on{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
+.chip.on::before{opacity:1;transform:none}
+.pvc .chip:not(.on)::before{opacity:.75;transform:none;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.chip.on:hover{border-color:transparent;background:color-mix(in srgb,var(--acc) 28%,transparent)}
+.pvseg button{height:28px;padding:0 12px;font-size:12.5px}
+/* More: the rest, for all the links. */
+.morebox{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.mrow{margin-top:0;gap:8px}
+.mrow .chip{flex:none}
+.morebox .cutrow{margin-top:10px;justify-content:flex-start}
+/* The list's header: what's going on, the actions for the whole list, the fold arrow. */
+.lbar{display:flex;align-items:center;gap:4px;justify-content:flex-end;margin:0 0 4px}
+html.app .lbar{margin:-4px 0 0}
+html.app .lhead{flex:1;width:auto;min-width:0}
+.lchev{display:none}
+html.app .lchev{flex:none;display:grid;place-items:center;width:30px;height:28px;border:0;border-radius:8px;background:transparent;color:var(--dim);cursor:pointer}
+html.app .lchev:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}
+.lchev svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
+html.app #jobsCard.folded .lchev svg{transform:rotate(180deg)}
+.lbar .btn.clear svg{color:var(--dim)}
+.lbar .btn.clear:hover{color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
+.lbar .btn.clear:hover svg{color:var(--err)}
+/* A row: the state is the start of its second line ("Done · Pilotredsky · Audio · M4A"). */
+.line2>.st{flex:none;margin-right:-4px}
+.line2>.st~:is(.kind,.nums):not(:empty)::before{content:"·";margin-right:6px;color:var(--dim)}
+.line2>.st~.kind.err:not(:empty)::before{color:var(--dim)}
+/* Labels sit in the middle of their buttons by the letters themselves, not by the font's
+   line box: Onest's box is much taller above the letters than below (13 : 4), so its middle
+   was 1.2 px above the icons' middle (1–2 screen pixels at 125 %). */
+button.chip{font-family:inherit}
+.btn>span,.seg button,.chip>span,.go>span,.menu button>span,.tbtn.lang>span,.st,.lhead #lsum,.notice .btn{text-box:trim-both cap alphabetic}
+/* Narrow: More and the list's actions keep only their icons (the hint still says the word),
+   so the folder stays on its row and the list's summary isn't cut. */
+@media (max-width:560px){.opts{flex-wrap:nowrap}.job.error .line2 .acts{flex-basis:100%;margin-left:0}#moreB>span,.lbar .btn>span{display:none}#moreB,.lbar .btn{padding:0 8px}.destw{flex:0 1 auto}.dest{max-width:100%}.pvp{width:72px;height:40.5px}}
 </style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
   <button class="logob" id="acct" type="button" aria-label="YouTube account"><svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
@@ -384,41 +456,41 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
   </div>
   <div class="row opts">
     <div class="seg" id="mode"><button data-v="audio" class="on" data-t="Audio">Audio</button><button data-v="video" data-t="Video">Video</button></div>
-    <div class="seg" id="format" data-for="audio">
-      <button data-v="m4a" class="on" title="The original YouTube audio track, no re-encoding">M4A</button>
-      <button data-v="mp3" title="Re-encoded at the highest quality, plays on anything">MP3</button>
-    </div>
-    <div class="seg" id="quality" data-for="video" hidden>
-      <button data-v="0" class="on" data-t="Best">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
-    </div>
+    <button class="btn ghost" id="moreB" aria-expanded="false" title="More: format, quality, a fragment, for editing"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span data-t="More">More</span></button>
+    <span class="sp"></span>
+    <div class="destw"><button class="btn ghost dest" id="dest" aria-haspopup="menu"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="destT"></span><svg class="chev" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></button>
+      <div class="menu" id="destMenu" role="menu" hidden><button id="open" role="menuitem"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open folder">Open folder</span></button><button id="pick" role="menuitem" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Save downloads elsewhere…">Save downloads elsewhere…</span></button></div></div>
   </div>
-  <div class="row chips calm">
-    <label class="chip" id="playlistBox" title="For a link to a video inside a playlist: download the whole playlist, not just this video"><input type="checkbox" id="playlist"><span data-t="whole playlist">whole playlist</span></label>
-    <label class="chip" id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"><span data-t="as one file">as one file</span></label>
-    <label class="chip" id="cutBox"><input type="checkbox" id="cut"><span data-t="fragment">fragment</span></label>
-    <label class="chip" data-for="audio" id="splitBox" title="An album uploaded as one long video with chapters → a folder with a separate track for every chapter"><input type="checkbox" id="split" checked><span data-t="split by chapters">split by chapters</span></label>
-    <label class="chip" data-for="video" hidden title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"><span data-t="for editing">for editing</span></label>
-    <label class="chip"><input type="checkbox" id="sponsors" checked><span data-t="no sponsors">no sponsors</span></label>
-  </div>
-  <div class="row cutrow">
-    <span class="times" id="cutTimes" hidden title="Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty &quot;to&quot; — to the end.">
-      <span data-t="from">from</span> <input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds">
-      <span data-t="to">to</span> <input type="number" id="toM" min="0" data-ph="end" aria-label="to, minutes"><b>:</b><input type="number" id="toS" aria-label="to, seconds">
-    </span>
+  <div class="pv" id="pv" hidden></div>
+  <div class="morebox" id="morebox" hidden>
+    <div class="row mrow">
+      <div class="seg" id="format" data-for="audio">
+        <button data-v="m4a" class="on" title="The original YouTube audio track, no re-encoding">M4A</button>
+        <button data-v="mp3" title="Re-encoded at the highest quality, plays on anything">MP3</button>
+      </div>
+      <div class="seg" id="quality" data-for="video" hidden>
+        <button data-v="0" class="on" data-t="Best">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
+      </div>
+      <label class="chip" id="cutBox"><input type="checkbox" id="cut"><span data-t="fragment">fragment</span></label>
+      <label class="chip" data-for="video" hidden title="For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p."><input type="checkbox" id="edit"><span data-t="for editing">for editing</span></label>
+    </div>
+    <div class="row cutrow">
+      <span class="times" id="cutTimes" hidden title="Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty &quot;to&quot; — to the end.">
+        <span data-t="from">from</span> <input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds">
+        <span data-t="to">to</span> <input type="number" id="toM" min="0" data-ph="end" aria-label="to, minutes"><b>:</b><input type="number" id="toS" aria-label="to, seconds">
+      </span>
+    </div>
   </div>
   <div class="msg" id="msg"></div>
   <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB">Undo</button><i class="ntime" id="ntime" hidden></i></div>
 </div>
 
 <div class="card" id="jobsCard">
-  <button class="lhead" id="lhead" aria-label="Show or hide the downloads"><span id="lsum"></span><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>
+  <div class="lbar" id="lbar"><button class="lhead" id="lhead" aria-label="Show or hide the downloads"><span id="lsum"></span></button>
+    <button class="btn ghost sm copyall" id="copyall" hidden title="Every finished file onto the clipboard: Ctrl+V in a chat attaches them all"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span id="copyallT" data-t="Copy all files">Copy all files</span></button>
+    <button class="btn ghost sm clear" id="clear" title="Takes them off the list; the files stay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg><span data-t="Clear finished">Clear finished</span></button>
+    <button class="lchev" id="lchev" aria-label="Show or hide the downloads"><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button></div>
   <div id="list"></div>
-  <div class="foot">
-    <button class="btn fold" id="open"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open folder">Open folder</span></button>
-    <button class="btn fold" id="pick" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change folder">Change folder</span></button>
-    <button class="btn copyall" id="copyall" hidden title="Every finished file onto the clipboard: Ctrl+V in a chat attaches them all"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span id="copyallT" data-t="Copy all files">Copy all files</span></button>
-    <button class="btn clear" id="clear" title="Takes them off the list; the files stay"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg><span data-t="Clear finished">Clear finished</span></button>
-  </div>
 </div>
 
 </main><script>
@@ -436,6 +508,9 @@ var RU = {
   'Reel it in.': 'Тяни на себя.', 'Download': 'Скачать', 'Audio': 'Аудио', 'Video': 'Видео', 'Best': 'Лучшее',
   'whole playlist': 'весь плейлист', 'as one file': 'одним файлом', 'fragment': 'фрагмент', 'split by chapters': 'по главам',
   'for editing': 'для монтажа', 'no sponsors': 'без рекламы', 'from': 'с', 'to': 'до', 'end': 'конец',
+  'More': 'Ещё', 'More: format, quality, a fragment, for editing': 'Ещё: формат, качество, фрагмент, для монтажа', 'Downloads': 'Загрузки', 'Save downloads elsewhere…': 'Сохранять в другую папку…',
+  'A separate file for every chapter, in a folder of its own': 'Отдельный файл на каждую главу, в своей папке',
+  'Sponsor ads, self-promotion and "subscribe!" bits, as marked by SponsorBlock; for music also talking and intros': 'Реклама спонсоров, самореклама и «подпишись!» по разметке SponsorBlock; в музыке ещё разговоры и вступления',
   'Open folder': 'Открыть папку', 'Change folder': 'Сменить папку', 'Clear finished': 'Убрать готовые',
   'Copy all files': 'Копировать все', 'Undo': 'Вернуть', 'Language': 'Язык',
   'Paste YouTube links: each one goes on its own line.\nEnter — download, Shift+Enter — new line.':
@@ -519,7 +594,7 @@ function applyLang() {
   document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = T(e.dataset.t); });
   document.querySelectorAll('[data-ph]').forEach(function (e) { e.placeholder = T(e.dataset.ph); });
   var b = document.getElementById('lang');
-  if (b) { b.textContent = LANG === 'ru' ? 'RU' : 'EN'; b.dataset.tip = LANG === 'ru' ? 'Язык: русский. Нажми — English' : 'Language: English. Click — русский'; }
+  if (b) { b.innerHTML = '<span>' + (LANG === 'ru' ? 'RU' : 'EN') + '</span>'; b.dataset.tip = LANG === 'ru' ? 'Язык: русский. Нажми — English' : 'Language: English. Click — русский'; }
 }
 // The theme: Windows' own until the theme button picks one; that choice is remembered (the
 // tray menu reads it too).
@@ -640,15 +715,13 @@ var mode = segmented('mode', function (m) {
 });
 var format = segmented('format');
 var quality = segmented('quality');
-var BOXES = ['playlist', 'merge', 'split', 'edit', 'sponsors'];
-
-// The switches are remembered in this browser. Storage may be unavailable (private mode),
-// then they just start from the defaults.
+// The switches that stay the same from link to link are remembered in this browser (audio
+// or video, the format, the quality, "for editing"). Storage may be unavailable (private
+// mode), then they just start from the defaults.
 var restoring = true;
 function save() {
   if (restoring) return;
-  var s = { mode: mode(), format: format(), quality: quality() };
-  BOXES.forEach(function (id) { s[id] = $(id).checked; });
+  var s = { mode: mode(), format: format(), quality: quality(), edit: $('edit').checked };
   try { localStorage.setItem('tyaga', JSON.stringify(s)); } catch (e) {}
 }
 function restore() {
@@ -656,35 +729,158 @@ function restore() {
   try { s = JSON.parse(localStorage.getItem('tyaga')); } catch (e) {}
   if (s) {
     mode(s.mode); format(s.format); quality(s.quality);
-    BOXES.forEach(function (id) { if (typeof s[id] === 'boolean') $(id).checked = s[id]; });
+    if (typeof s.edit === 'boolean') $('edit').checked = s.edit;
   }
   restoring = false;
 }
-BOXES.forEach(function (id) { $(id).addEventListener('change', save); });
+$('edit').addEventListener('change', save);
 
-// "As one file" only makes sense for a playlist; and then splitting by chapters doesn't.
-// A fragment is for one video, not a playlist.
-// "Whole playlist" only counts for a link to a video inside a playlist (…&list=…): greyed out
-// otherwise, in its place, so nothing moves when you paste. A playlist link is a list anyway.
-function isList() {
-  var v = $('links').value;
-  if (/youtube\.com\/(playlist\?|@|channel\/|c\/|user\/)/.test(v)) return true;
-  return /[?&]list=/.test(v) && $('playlist').checked;
+// What each link is (inspect.go), and the options that go with it. Every link in the box
+// gets a line under it: its picture, its title, what's in it, and only the switches that make
+// sense for it, already set the sensible way:
+// - a video inside a playlist: "only this video" or "the whole playlist";
+// - audio of an album uploaded as one video (music with 3 chapters or more): split into
+//   tracks, on; other videos with chapters: offered, off;
+// - ads that SponsorBlock knows of: cut them, on; none known: nothing to switch;
+// - a whole playlist: as one file, off.
+// What's set by hand for a link stays (picks). The rest (format, quality, a fragment, for
+// editing) is under "More", for all the links.
+var facts = {}, picks = {}, pvRows = {}, lookT = 0;
+function tr(en, ru) { return LANG === 'ru' ? ru : en; }
+function isListLink(l) { return /youtube\.com\/(playlist\?|@|channel\/|c\/|user\/)/.test(l); }
+function look(link) {
+  if (facts[link]) return;
+  facts[link] = { looking: true };
+  api('/api/inspect', { text: link }).then(function (f) {
+    facts[link] = f.error ? { failed: true } : f;
+    syncBoxes();
+  }, function () { facts[link] = { failed: true }; syncBoxes(); });
 }
+function plan(link) {
+  var f = facts[link] || { looking: true }, p = picks[link] || {}, audio = mode() === 'audio';
+  var kind = f.kind || (isListLink(link) ? 'list' : /[?&]list=/.test(link) ? 'inlist' : 'video');
+  var o = { kind: kind, whole: kind === 'list' || (kind === 'inlist' && !!p.whole) };
+  var junk = audio && f.offtopic >= 20; // music: talking and intros SponsorBlock knows of
+  o.canSplit = audio && !o.whole && f.chapters >= 2;
+  o.split = o.canSplit && (p.split !== undefined ? p.split : !!(f.music && f.chapters >= 3));
+  o.canAds = !o.whole && (f.ads > 0 || junk);
+  // Not known (still looking, couldn't look, a playlist): cutting stays on, it only cuts what's known.
+  o.sponsors = o.canAds ? (p.sponsors !== undefined ? p.sponsors : true) : !(f.ads === 0 && !junk);
+  o.canMerge = o.whole;
+  o.merge = o.whole && !!p.merge;
+  return o;
+}
+function clockOf(s) { s = Math.round(s || 0); var h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60; return (h ? h + ':' + pad(m) : m) + ':' + pad(s % 60); }
+function plural(n, one, few, many) { var a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; }
+function pvFacts(f, o) {
+  if (f.looking) return tr('Looking at the link…', 'Смотрю, что за ссылка…');
+  if (f.failed) return tr("Couldn't look it up: it'll download with the usual settings", 'Не вышло посмотреть: скачаю с обычными настройками');
+  var bits = [];
+  if (o.kind === 'list') bits.push(tr('Playlist · ' + f.listCount + ' videos', 'Плейлист · ' + f.listCount + ' видео'));
+  else {
+    if (f.duration) bits.push(clockOf(f.duration));
+    if (f.channel) bits.push(f.channel);
+    if (f.chapters >= 2) bits.push(tr(f.chapters + ' chapters', f.chapters + ' ' + plural(f.chapters, 'глава', 'главы', 'глав')));
+    if (f.ads > 0) bits.push(tr(f.ads + (f.ads === 1 ? ' ad' : ' ads') + ' inside', f.ads + ' ' + plural(f.ads, 'рекламная вставка', 'рекламные вставки', 'рекламных вставок')));
+  }
+  return bits.join(' · ');
+}
+// A switch in a preview line: a chip, on or off.
+function pvChip(on, text, tip, flip) {
+  var b = el('button', 'chip' + (on ? ' on' : ''));
+  b.type = 'button';
+  b.setAttribute('aria-pressed', on);
+  b.append(el('span', '', text));
+  if (tip) b.dataset.tip = tip;
+  b.onclick = flip;
+  return b;
+}
+function renderPv() {
+  var links = linksIn($('links').value), box = $('pv'), seen = {};
+  // Looked up once the box is still for a moment: typing a link by hand doesn't look up every half of it.
+  clearTimeout(lookT);
+  if (links.some(function (l) { return !facts[l]; })) lookT = setTimeout(function () { linksIn($('links').value).forEach(look); }, 400);
+  links.slice(0, 6).forEach(function (link, i) {
+    var f = facts[link] || { looking: true }, o = plan(link), r = pvRows[link];
+    seen[link] = 1;
+    if (!r) {
+      r = pvRows[link] = { el: el('div', 'pvi'), pic: el('div', 'pvp'), t: el('div', 'pvt'), f: el('div', 'pvf'), c: el('div', 'pvc') };
+      var b = el('div', 'pvb');
+      b.append(r.t, r.f, r.c);
+      r.el.append(r.pic, b);
+    }
+    if (box.children[i] !== r.el) box.insertBefore(r.el, box.children[i] || null);
+    var key = JSON.stringify([LANG, mode(), f, o]);
+    if (r.key === key) return;
+    r.key = key;
+    r.el.classList.toggle('looking', !!f.looking);
+    var pic = f.id && o.kind !== 'list' ? 'https://i.ytimg.com/vi/' + f.id + '/mqdefault.jpg' : '';
+    var icon = o.kind === 'list' ? 'list' : mode() === 'audio' ? 'audio' : 'video';
+    if (r.picSrc !== pic || r.icon !== icon) {
+      r.picSrc = pic; r.icon = icon;
+      r.pic.innerHTML = ICON[icon];
+      if (pic) { var im = new Image(); im.onload = function () { if (r.picSrc === pic) { r.pic.innerHTML = ''; r.pic.append(im); } }; im.src = pic; }
+    }
+    setText(r.t, o.kind === 'list' ? (f.listTitle || link) : (f.title || link.replace(/^https?:\/\/(www\.)?/, '')));
+    setText(r.f, pvFacts(f, o));
+    r.c.innerHTML = '';
+    var set = function (k, v) { picks[link] = picks[link] || {}; picks[link][k] = v; syncBoxes(); };
+    if (o.kind === 'inlist' && !f.looking) {
+      var seg = el('div', 'seg pvseg');
+      [[false, tr('Only this video', 'Только это видео')], [true, tr('Whole playlist · ' + f.listCount, 'Весь плейлист · ' + f.listCount)]].forEach(function (c) {
+        var b = el('button', o.whole === c[0] ? 'on' : '', c[1]);
+        b.type = 'button';
+        b.onclick = function () { set('whole', c[0]); };
+        seg.append(b);
+      });
+      r.c.append(seg);
+    }
+    if (o.canSplit) r.c.append(pvChip(o.split, tr('Split into ' + f.chapters + ' tracks', 'Разбить на ' + f.chapters + ' ' + plural(f.chapters, 'трек', 'трека', 'треков')),
+      'A separate file for every chapter, in a folder of its own', function () { set('split', !o.split); }));
+    if (o.canAds) r.c.append(pvChip(o.sponsors, f.ads > 0 ? tr('Cut the ads (' + clockOf(f.adsSec) + ')', 'Вырезать рекламу (' + clockOf(f.adsSec) + ')')
+      : tr('Cut the non-music parts (' + clockOf(f.offtopic) + ')', 'Вырезать не-музыку (' + clockOf(f.offtopic) + ')'),
+      'Sponsor ads, self-promotion and "subscribe!" bits, as marked by SponsorBlock; for music also talking and intros', function () { set('sponsors', !o.sponsors); }));
+    if (o.canMerge) r.c.append(pvChip(o.merge, tr('As one file', 'Одним файлом'), 'The whole playlist as one long file, each video is a chapter', function () { set('merge', !o.merge); }));
+    r.c.hidden = !r.c.firstChild;
+  });
+  Object.keys(pvRows).forEach(function (l) { if (!seen[l]) { pvRows[l].el.remove(); delete pvRows[l]; } });
+  var more = $('pvMore') || el('div', 'pvf pvmore');
+  more.id = 'pvMore';
+  more.textContent = links.length > 6 ? tr('and ' + (links.length - 6) + ' more', 'и ещё ' + (links.length - 6)) : '';
+  if (links.length > 6) box.append(more); else more.remove();
+  box.hidden = !links.length;
+}
+// What's under "More" depends on the links too: a fragment is for one video; the qualities
+// are the ones that video has.
 function syncBoxes() {
-  $('playlist').disabled = !/[?&]list=/.test($('links').value) || /youtube\.com\/(playlist\?|@|channel\/|c\/|user\/)/.test($('links').value);
-  var list = isList(), cut = !list && $('cut').checked;
-  $('mergeBox').hidden = !list;
-  $('cutBox').hidden = list;
-  $('cutTimes').hidden = !cut;
-  $('split').disabled = (list && $('merge').checked) || cut;
-  $('playlistBox').classList.toggle('away', $('playlist').disabled);
+  var links = linksIn($('links').value), one = links.length === 1 ? plan(links[0]) : null;
+  var canCut = !links.length || !!(one && !one.whole);
+  $('cutBox').hidden = !canCut;
+  if (!canCut) $('cut').checked = false;
+  $('cutTimes').hidden = !$('cut').checked;
+  var f = one && facts[links[0]], top = f && f.heights && f.heights.length ? f.heights[0] : 0;
+  document.querySelectorAll('#quality button').forEach(function (b) {
+    var h = +b.dataset.v;
+    b.hidden = !!(top && h && h > top);
+    if (b.hidden && b.classList.contains('on')) quality('0');
+  });
+  renderPv();
 }
-$('playlist').onchange = $('merge').onchange = $('cut').onchange = syncBoxes;
+$('cut').onchange = syncBoxes;
 $('links').addEventListener('input', syncBoxes);
+// More: the rest of the switches, folded away until asked for.
+$('moreB').onclick = function () {
+  var open = $('morebox').hidden;
+  $('morebox').hidden = !open;
+  $('moreB').classList.toggle('on', open);
+  $('moreB').setAttribute('aria-expanded', open);
+};
+// Where the files go: the folder's name; its menu opens it or picks another one.
+$('dest').onclick = function (e) { e.stopPropagation(); $('destMenu').hidden = !$('destMenu').hidden; };
+addEventListener('click', function (e) { if (!e.target.closest('.destw')) $('destMenu').hidden = true; });
+addEventListener('keydown', function (e) { if (e.key === 'Escape') $('destMenu').hidden = true; });
 restore();
 syncBoxes();
-requestAnimationFrame(function () { requestAnimationFrame(function () { document.querySelector('.chips').classList.remove('calm'); }); });
 
 // Fragment times: two counters each, minutes and seconds. Seconds roll over into minutes
 // (0:59 ↑ → 1:00, 1:00 ↓ → 0:59), Shift + arrow steps by 10.
@@ -716,24 +912,30 @@ function timeOf(m, s) {
   return Math.floor(+$(m).value || 0) + ':' + pad(Math.floor(+$(s).value || 0));
 }
 
-// The switches as they are now, for /api/add.
-function options(text) {
-  var list = isList(), cut = !list && $('cut').checked;
+// The switches for one link, for /api/add.
+function options(link) {
+  var o = plan(link), cut = $('cut').checked && !o.whole;
   return {
-    text: text, mode: mode(), format: format(),
-    quality: +quality(), playlist: !$('playlist').disabled && $('playlist').checked, split: $('split').checked, edit: $('edit').checked,
-    merge: list && $('merge').checked, sponsors: $('sponsors').checked,
+    text: link, mode: mode(), format: format(), quality: +quality(), edit: $('edit').checked,
+    playlist: o.whole, split: o.split, merge: o.merge, sponsors: o.sponsors,
     from: cut ? timeOf('fromM', 'fromS') : '', to: cut ? timeOf('toM', 'toS') : '',
   };
 }
 
+// Each link goes in with its own switches, one after another (so the list keeps their order).
 function add() {
-  var text = linksIn($('links').value).join('\n') || $('links').value.trim(); // the cleaned links, or what's there (to say it isn't one)
-  if (!text) return;
-  api('/api/add', options(text)).then(function (r) {
+  var links = linksIn($('links').value);
+  if (!links.length) { // not a link: the server says what's wrong with it
+    if ($('links').value.trim()) api('/api/add', { text: $('links').value.trim() }).then(function (r) { $('msg').textContent = T(r.error) || ''; });
+    return;
+  }
+  var go = Promise.resolve({});
+  links.forEach(function (l) { go = go.then(function (r) { return r.error ? r : api('/api/add', options(l)); }); });
+  go.then(function (r) {
     $('msg').textContent = T(r.error) || '';
     if (!r.error) { // a fragment is a one-off: the next link is whole again
       $('links').value = '';
+      picks = {};
       countLinks();
       TIMES.forEach(function (id) { $(id).value = ''; });
       $('cut').checked = false;
@@ -778,7 +980,7 @@ countLinks(); // "Download" in the language picked
 $('lang').onclick = function () {
   LANG = LANG === 'ru' ? 'en' : 'ru';
   try { localStorage.setItem('tyaga-lang', LANG); } catch (e) {}
-  applyLang(); countLinks();
+  applyLang(); countLinks(); syncBoxes(); // the link lines are written in the language too
   Object.keys(rows).forEach(function (id) { rows[id].actsKey = ''; rows[id].st0 = ''; });
   render();
 };
@@ -844,9 +1046,10 @@ $('links').addEventListener('paste', function (e) {
 });
 $('links').addEventListener('input', countLinks);
 $('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askNotify(); add(); } };
-$('open').onclick = function () { api('/api/open', {}); };
+$('open').onclick = function () { $('destMenu').hidden = true; api('/api/open', {}); };
 // Another downloads folder: Windows' folder dialog (ТЯГА's window only), remembered.
 $('pick').onclick = function () {
+  $('destMenu').hidden = true;
   api('/api/folder', {}).then(function (r) { if (r.out) notice(T('Downloads now go to ' + r.out + '.')); refresh(); });
 };
 // Clear finished takes the rows off at once, and says so with an Undo for a few seconds.
@@ -957,9 +1160,11 @@ var rowWatch = window.ResizeObserver ? new ResizeObserver(function (en) {
   if (en.some(function (e) { return !/\b(grow|bye|lining)\b/.test(e.target.className); })) fitLater();
 }) : null;
 
+// An icon and a word; the word goes in a span so it can sit in the middle by its letters (.btn>span).
+function iconText(html) { return html.replace(/(<\/svg>)([^<]+)$/, '$1<span>$2</span>'); }
 function button(cls, label, title, onclick) {
   var b = el('button', 'btn ' + cls);
-  b.innerHTML = label;
+  b.innerHTML = iconText(label);
   if (title) b.dataset.tip = title;
   b.onclick = onclick;
   return b;
@@ -974,12 +1179,12 @@ function makeRow(j) {
   r.x.innerHTML = ICON.cancel;
   r.x.dataset.tip = 'Cancel';
   r.x.onclick = function () { api('/api/cancel', { id: j.id }).then(refresh); };
-  r.top.append(r.name, r.st, r.x);
+  r.top.append(r.name, r.x);
   r.kind = el('div', 'kind');                // Pilotredsky · Audio · MP3, or what went wrong
   r.nums = el('span', 'nums');               // while downloading: 3 MB of 5 MB · 1.2 MB/s · 0:02 left
   r.ovr = el('span', 'ovr');                 // and how far all of it is: 52 %, track 2 of 12 · 35 %
   r.acts = el('div', 'acts');
-  r.line2.append(r.kind, r.nums, r.ovr, r.acts);
+  r.line2.append(r.st, r.kind, r.nums, r.ovr, r.acts); // the state first: "Done · Pilotredsky · Audio · M4A"
   r.msg = el('div', 'sub');                  // a note (videos of a playlist that were skipped)
   r.body.append(r.top, r.line2, r.msg);
   r.sideBox = el('div', 'side');
@@ -1007,6 +1212,7 @@ var ICON = {
   cancelled: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
   audio: '<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>',
   video: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg>',
+  list: '<svg viewBox="0 0 24 24"><path d="M4 6h11M4 11h11M4 16h7"/><path d="M17 13.5v6l4.5-3z"/></svg>',
   retry: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"/></svg>',
   folder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
   cancel: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
@@ -1075,8 +1281,9 @@ function updateRow(r, j) {
   }
   // "[2/12] Song" → "Song". No title yet (queued, or it failed before yt-dlp got one): the
   // link, quieter and shorter.
-  setText(r.name, j.title ? j.title.replace(/^\[\d+\/\d+\] /, '') : j.url.replace(/^https?:\/\/(www\.)?/, ''));
-  r.name.classList.toggle('link', !j.title);
+  var known = j.title || knownTitle(j.url); // in the queue: the title the link check found
+  setText(r.name, known ? known.replace(/^\[\d+\/\d+\] /, '') : j.url.replace(/^https?:\/\/(www\.)?/, ''));
+  r.name.classList.toggle('link', !known);
   var canX = running || j.status === 'queued';
   r.x.classList.toggle('off', !canX);
   r.x.tabIndex = canX ? 0 : -1;
@@ -1085,7 +1292,7 @@ function updateRow(r, j) {
   // the snapped line, the fish going belly up). It opens and folds smoothly; the window is
   // fitted once, not every frame (see .lining in windowFit).
   if (r.status === 'running' && /^(done|cancelled|error)$/.test(j.status) && !still()) {
-    t.until = now + 1800; // its last moment plays out (the catch, RIP, the snapped line), then the lane folds
+    t.until = now + (j.status === 'done' ? 2600 : 1800); // its last moment (done: it may swim the rest of the way first) plays out (the catch, RIP, the snapped line), then the lane folds
     setTimeout(function () { if (r.j) updateRow(r, r.j); }, t.until - now + 30);
   }
   if (waiting && !t.wait) t.waitAt = now; // YouTube's pause began: count it down from now
@@ -1139,8 +1346,8 @@ function updateRow(r, j) {
         var copy = button('', ICON.copy + T('Copy error'), null, function () {
           var text = 'ТЯГА ' + (state.version || '') + '\nLink: ' + j.url + '\n' + (j.errorRaw || j.error || '');
           var done = function (ok) {
-            copy.innerHTML = ok ? ICON.check + T('Copied') : ICON.copy + T("Couldn't copy");
-            setTimeout(function () { copy.innerHTML = ICON.copy + T('Copy error'); }, 1600);
+            copy.innerHTML = iconText(ok ? ICON.check + T('Copied') : ICON.copy + T("Couldn't copy"));
+            setTimeout(function () { copy.innerHTML = iconText(ICON.copy + T('Copy error')); }, 1600);
           };
           try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); }
           catch (e) { done(false); }
@@ -1177,18 +1384,28 @@ function updateRow(r, j) {
 
 // The numbers under the title while it downloads, or in words what it's doing right now:
 // "3 MB of 5 MB · 1.2 MB/s · 0:02 left", "Waiting for YouTube · a 5 s pause", "Converting to MP3".
+// The title a link check (renderPv) found for this link, by its video or playlist id.
+function knownTitle(u) {
+  var v = /(?:[?&]v=|youtu\.be\/|shorts\/)([\w-]{11})/.exec(u), l = /[?&]list=([\w-]+)/.exec(u);
+  for (var k in facts) {
+    var f = facts[k];
+    if (v && f.id === v[1] && f.title) return f.title;
+    if (!v && l && f.kind === 'list' && k.indexOf(l[1]) >= 0 && f.listTitle) return f.listTitle;
+  }
+  return '';
+}
 function numsText(j) {
   var log = j.log || [], step = log[log.length - 1] || '';
   if (j.wait > 0) return waitText(waveTarget[j.id] || { wait: j.wait });
   if (!j.speed && /^(Converting|Joining|Adding the cover|Cutting out)/.test(step)) return T(step);
-  if (j.progress >= 100) return T('Finishing up');
+  if (j.progress >= 100) return ''; // the state says it: Finishing
   if (j.speed) return Tnums([j.size, j.speed, j.eta && j.eta + ' left'].filter(Boolean).join(' · '));
   if (j.progress > 0) return T(step || 'Downloading'); // between the picture and the sound: which one is next
   // Before the first byte: one calm "Getting ready", not every step yt-dlp takes; only a step
   // that takes a while (YouTube's check can) is named.
   var t = waveTarget[j.id] || {}, now = performance.now();
   if (step !== t.step) { t.step = step; t.stepAt = now; }
-  return T(step && now - t.stepAt > 2500 && !/^(Downloading the |Playlist: )/.test(step) ? step : 'Getting ready…');
+  return step && now - t.stepAt > 2500 && !/^(Downloading the |Playlist: )/.test(step) ? T(step) : ''; // else the state says it: Getting ready
 }
 
 // The YouTube account, in the logo (login.go): its badge says the state, the hint says it in
@@ -1245,7 +1462,8 @@ function render() {
   var nf = (state.jobs || []).reduce(function (a, j) { return a + (j.status === 'done' ? j.files.length : 0); }, 0);
   $('copyall').hidden = nf < 2; // two finished files or more
   var where = state.outName ? 'Downloads go to ' + state.outName : '';
-  $('open').dataset.tip = where;
+  setText($('destT'), tr('to ', 'в ') + (state.outName || T('Downloads')));
+  $('dest').dataset.tip = where;
   $('pick').dataset.tip = where && where + '. Pick another folder for the next ones';
 
   // Setup: downloading yt-dlp / ffmpeg / Deno on first start, or something wasn't found.
@@ -1508,7 +1726,7 @@ function setFold(on, animate) {
   }
 }
 if (APP) {
-  $('lhead').onclick = function () { setFold(!fold.on, true); };
+  $('lhead').onclick = $('lchev').onclick = function () { setFold(!fold.on, true); };
   // The first card can grow (fragment times, an error): the folded window follows it.
   if (window.ResizeObserver) new ResizeObserver(fitLater).observe(document.querySelector('.card.form'));
 }
@@ -1627,6 +1845,9 @@ var waveTarget = {}, waveState = {};
       : t.wait ? 'wait' : t.conv ? 'conv' : t.ind ? 'start' : 'move';
     if (t.p !== st.lastP) { st.lastP = t.p; st.lastPAt = now; }
     if (mode === 'move' && now - st.lastPAt > 10000) mode = 'stall';
+    // 100 % came in a step: it swims the rest of the way first, then the somersaults or the catch.
+    var finishing = mode === 'done' || (mode === 'conv' && t.p >= 99);
+    if (finishing && st.shown < 99.3 && !still) mode = 'move';
     if (mode !== st.mode) {
       var over = /^(done|err|cancel)$/.test(mode);
       if (mode === 'start' && /^(err|cancel)$/.test(st.mode)) { st.born = now + 350; st.dropped = 0; } // Retry: the lane opens again, it drops in again
@@ -1637,7 +1858,7 @@ var waveTarget = {}, waveState = {};
     var tm = (now - st.at) / 1000;
 
     // The spring, in small steps (a long frame must not make it overshoot).
-    var target = mode === 'done' || (mode === 'conv' && t.p >= 99) ? 100 : t.p; // converting mid-playlist: where it is
+    var target = finishing ? 100 : t.p; // converting mid-playlist: where it is
     if (mode === 'err' || mode === 'cancel') { target = st.shown; st.vel = 0; } // over: it stays where it got to
     if (t.p < st.shown - 5 && mode !== 'done') { st.shown = t.p; st.vel = 0; }
     if (still) st.shown = target;
@@ -1726,7 +1947,7 @@ var waveTarget = {}, waveState = {};
       else if (!st.landed) { st.landed = 1; splash(st, fx, wy(fx), 3, 14); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .7 }); }
     }
 
-    if (rot === null) rot = hopRot !== null ? hopRot : level ? 0 : Math.atan(slope(fx)) * .6 * dir;
+    if (rot === null) rot = hopRot !== null ? hopRot : level ? 0 : Math.atan(slope(fx)) * .6 * dir * Math.min(1, Math.abs(st.vel) / 2.5);
     // A new state grows out of the last look over a third of a second: no colour, tilt or
     // wave height snaps from one to the other.
     if (st.from && tm < .35 && !still) {

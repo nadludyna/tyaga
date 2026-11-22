@@ -12,6 +12,28 @@ Walk through it as the owner would, start to finish, not state by state: paste a
 quit. Count what he has to do. Any step the program could have done itself, any moment where
 he has to guess what's going on or wait without knowing why, is a bug to fix before showing.
 
+### Before every build, measured, not by eye
+
+The owner kept finding things the eye skips: a label 1–2 pixels above its icon, a button in
+the wrong font, a window that blinked. So these are measured, every time, before a build:
+
+1. **The layout check** (`stand/check.js`): load it in the stand's page and run
+   `tyagaCheck()` in every state the change touches (empty, a link pasted and looked at, More
+   open, the folder menu open, downloading, done, failed; English and Russian; dark and light;
+   wide and ~440 px). It must return an empty list: labels in the middle of their icons and
+   buttons by the letters themselves (±0.5 px), words in one row on one line (±1 px), Onest
+   everywhere, nothing overlapping, nothing sticking out, nothing left in English in Russian.
+2. **The real window** (`stand/run-window.sh`, `stand/record-window.ps1`): ТЯГА's own
+   window over a bright magenta screen, a download started, the screen recorded at 20–30
+   frames a second. Look at every frame of the list card for a blink (magenta showing
+   through) and at the fish from start to the catch. The browser can't show this: it has no
+   see-through window.
+3. **Old behaviour still there**: walk the flows that worked before (paste several links,
+   Retry, Undo, cancel, fold the list) — a change must not take anything away unasked.
+
+The rules behind the check are in "Ours first" below; a new kind of mistake found by eye gets
+a new line in the check, so it's caught by itself next time.
+
 ## Ours first
 
 **1. Nothing jumps.** The layout is stable and predictable. Things don't grow, shrink or move

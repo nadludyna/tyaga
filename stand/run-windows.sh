@@ -10,7 +10,7 @@ rm -rf "$work/out" "$work/fakebin" "$work/app.log"; mkdir -p "$work/app" "$work/
 (cd "$here/winshim" && go build -o "$work/fakebin/yt-dlp.exe" main.go)
 (cd "$here/.." && go build -o "$work/app/tyaga-stand.exe" .)
 cd "$work/app"
-FAKE_YTDLP=$(cygpath -w "$here/fake-yt-dlp") PATH="$work/fakebin:$PATH" \
+TYAGA_SPONSORBLOCK=fake FAKE_YTDLP=$(cygpath -w "$here/fake-yt-dlp") PATH="$work/fakebin:$PATH" \
   nohup ./tyaga-stand.exe -no-browser -out "$(cygpath -w "$work/out")" > "$work/app.log" 2>&1 &
 for _ in $(seq 60); do
   url=$(grep -o "http://[^ ]*" "$work/app.log" 2>/dev/null | head -1 || true)

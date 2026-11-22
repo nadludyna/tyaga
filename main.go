@@ -278,6 +278,14 @@ func handler(token string) http.Handler {
 				return
 			}
 			addJobs(links, o)
+		case "/api/inspect": // what a link is, before it's downloaded (inspect.go)
+			u, err := url.Parse(strings.TrimSpace(body.Text))
+			if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+				writeJSON(w, Facts{Error: "not a link"})
+				return
+			}
+			writeJSON(w, inspect(u.String()))
+			return
 		case "/api/cancel":
 			cancelJob(body.ID)
 		case "/api/retry":
