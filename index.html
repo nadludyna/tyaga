@@ -295,14 +295,19 @@ html.app .wbtns::before{content:"";width:1px;height:16px;margin:7px 6px 0 0;back
 .wbtns button.x:hover{background:#c42b1c;color:#fff}
 .wbtns svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3}
 html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+/* Room under the last row for the water lines at the card's bottom: they lie under the rows, not
+   behind their text and progress line (the owner). On the list, not the card: folded stays as it is. */
+html.app #list{padding-bottom:38px}
 html.app #jobsCard>*{position:relative;z-index:1}
 html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;scrollbar-gutter:stable;padding:0 7px;margin-left:-7px;margin-right:-17px} /* room for a row's glow, both sides */
 html.app .bg{display:none}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
 .lhead{display:none}
-html.app .lhead{display:flex;align-items:center;gap:10px;width:100%;flex:none;margin:0;padding:2px 4px;border:0;border-radius:8px;background:transparent;color:var(--dim);font:inherit;font-size:13.5px;text-align:left;cursor:pointer;transition:color .15s}
-html.app .lhead:hover{color:var(--fg)}
+/* The list header is a plain line: what is going on. Folding is the arrow on the right (the line
+   itself used to fold the list too, and lit up under the mouse like a button). */
+html.app .lhead{display:flex;align-items:center;gap:10px;width:100%;flex:none;margin:0;padding:2px 0;color:var(--dim);font-size:13.5px;text-align:left;user-select:none;-webkit-user-select:none}
+
 .lhead #lsum{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .lhead .bad{color:var(--err)}.lhead .good{color:var(--ok)}
 .lhead svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
@@ -332,7 +337,7 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 /* States: every control clearly shows that it's under the mouse, pressed (it sinks a little
    and a ripple spreads from where you pressed, like Material 3) or focused from the keyboard
    (an orange ring). Colours mix in the text colour, so it works in both themes. */
-.seg button,.chip,.btn,.go,.tbtn,.wbtns button,.lhead{position:relative;overflow:hidden}
+.seg button,.chip,.btn,.go,.tbtn,.wbtns button{position:relative;overflow:hidden}
 .seg button:hover:not(.on){background:color-mix(in srgb,var(--fg) 10%,transparent);color:var(--fg)}
 .seg button:active:not(.on){background:color-mix(in srgb,var(--fg) 16%,transparent)}
 .seg button.on:hover{background:color-mix(in srgb,var(--acc) 30%,transparent)}
@@ -347,8 +352,8 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 .tbtn:active,.wbtns button:active{background:color-mix(in srgb,var(--fg) 19%,transparent)}
 .wbtns button.x:hover{background:#c42b1c;color:#fff}
 .wbtns button.x:active{background:#a32317}
-html.app .lhead:hover{background:color-mix(in srgb,var(--fg) 7%,transparent)}
-html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
+
+
 .seg button:focus-visible,.btn:focus-visible,.go:focus-visible,.tbtn:focus-visible,.wbtns button:focus-visible,.lhead:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .seg button:focus-visible{outline-offset:-2px}
 .rip{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;background:currentColor;opacity:.22;transform:scale(0);animation:rip .55s cubic-bezier(.2,.8,.2,1) forwards}
@@ -432,6 +437,7 @@ html.app .lchev:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);col
 .lchev svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
 html.app #jobsCard.folded .lchev svg{transform:rotate(180deg)}
 .lbar .btn.clear svg{color:var(--dim)}
+.lbar .btn:not([hidden]){animation:fadein .2s ease}
 .lbar .btn.clear:hover{color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
 .lbar .btn.clear:hover svg{color:var(--err)}
 /* A row: the state is the start of its second line ("Done · Pilotredsky · Audio · M4A"). */
@@ -516,7 +522,7 @@ html.app .fly{background:var(--card)}
 .fly.end{left:auto;right:0}
 @keyframes flyin{from{opacity:0;transform:translateY(-4px)}}
 @keyframes flyup{from{opacity:0;transform:translateY(4px)}}
-html.app .card.form:has(+#jobsCard:not([hidden])):has(.fly:not([hidden])){clip-path:none} /* a drop-down hangs over the list: nothing clips it */
+/* A drop-down hanging over the list: the clip opens just where it is (clipFor). */
 .card.form>.opts{position:relative;z-index:3}
 .qgrid{display:grid;grid-template-columns:repeat(3,76px);gap:4px}
 .qgrid button,.flist button,.menu button{border:0;border-radius:6px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;cursor:pointer;font-variant-numeric:tabular-nums;transition:background .12s ease}
@@ -584,6 +590,28 @@ html.app #jobsCard.folded::after{display:none}
 /* Fragment is the scissors alone (the owner: the word says nothing the icon doesn't); one width
    on or off, the picked part is in its hint. */
 #cutB>span{display:none}
+/* One column on the right: Download and the folder button are the same width, one above the other,
+   and the links box ends where that column starts. A long folder name is cut (all of it is in the hint). */
+.gow{width:164px}
+.gow .go{width:100%;min-width:0}
+.ddw.destw{flex:none;width:164px}
+.ddw.destw #dest{width:100%;justify-content:flex-start}
+#destT{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+@media (max-width:560px){.gow,.ddw.destw{width:auto}.ddw.destw #dest{width:auto}}
+/* The fragment: says what to do, "from" above "to" with the fields in one column, and Reset as
+   a button across the bottom (tonal: solid orange stays for Download). */
+#cutFly{width:244px}
+#cutFly .fh{display:block;font-size:13px;line-height:1.35;color:var(--fg);padding:4px 6px 12px}
+#cutFly .times{display:grid;grid-template-columns:auto 1fr auto 1fr;column-gap:6px;row-gap:8px;padding:0 6px}
+#cutFly .times .tl,#cutFly .times .tl~.tl{margin:0 4px 0 0}
+#cutFly .times input{width:100%}
+.cutoff{display:flex;align-items:center;justify-content:center;width:calc(100% - 12px);height:34px;margin:14px 6px 4px;border:0;border-radius:10px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--tonal);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}
+.cutoff:hover{background:color-mix(in srgb,var(--acc) 22%,transparent)}
+.cutoff:active{background:color-mix(in srgb,var(--acc) 28%,transparent)}
+.cutoff>span{text-box:trim-both cap alphabetic}
+/* The options row sits in the middle between the links box and the card's bottom edge. */
+html.app .card.form .opts{margin-top:15px}
+html.app .card.form:has(+#jobsCard:not([hidden])){padding-bottom:14px}
 .opts .seg button.on{font-weight:500} /* bold made the picked word wider: the row moved by a pixel on every switch */
 #editW{width:32px}
 .dd.icon[aria-pressed=true]{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
@@ -626,7 +654,7 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
 
 <div class="card form">
   <div class="input">
-    <textarea id="links" rows="2" data-ph="Paste YouTube links, one per line"></textarea>
+    <textarea id="links" rows="2" data-ph="Paste links. Each goes on its own line by itself"></textarea>
     <div class="gow"><button class="go" id="go"><svg class="goi" viewBox="0 0 24 24" aria-hidden="true"><g class="ga"><path d="M12 3.5v11.5"/><path d="M7 10l5 5 5-5"/></g><path d="M5 20h14"/></svg><span id="goT">Download</span></button><b class="gon" id="goN" hidden></b></div>
   </div>
   <div class="row opts">
@@ -636,8 +664,9 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
     <div class="ddw" data-for="audio"><button class="dd" id="fmtB" aria-haspopup="true" aria-expanded="false" title="Audio format"><span id="fmtT">Original</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
       <div class="fly" id="fmtFly" hidden><div class="flist" id="format"><button data-v="m4a" class="on"><b data-t="Original">Original</b><small data-t="Original YouTube audio, no conversion">Original YouTube audio, no conversion</small></button><button data-v="mp3"><b>MP3</b><small data-t="Converted to MP3. Plays anywhere">Converted to MP3. Plays anywhere</small></button></div></div></div>
     <div class="ddw" id="cutW"><button class="dd" id="cutB" aria-haspopup="true" aria-expanded="false" title="Download only part of the video"><svg class="lead" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span id="cutT">Fragment</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
-      <div class="fly" id="cutFly" hidden><div class="fh"><span data-t="Only a part of it">Only a part of it</span><button class="lnk" id="cutOff" data-t="Reset">Reset</button></div>
-        <div class="times" id="cutTimes"><span class="tl" data-t="from">from</span><input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds"><span class="tl" data-t="to">to</span><input type="number" id="toM" min="0" placeholder="0" aria-label="to, minutes"><b>:</b><input type="number" id="toS" placeholder="00" aria-label="to, seconds"></div></div></div>
+      <div class="fly" id="cutFly" hidden><div class="fh" data-t="Choose the start and end of the fragment:">Choose the start and end of the fragment:</div>
+        <div class="times" id="cutTimes"><span class="tl" data-t="from">from</span><input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds"><span class="tl" data-t="to">to</span><input type="number" id="toM" min="0" placeholder="0" aria-label="to, minutes"><b>:</b><input type="number" id="toS" placeholder="00" aria-label="to, seconds"></div>
+        <button class="cutoff" id="cutOff"><span data-t="Reset">Reset</span></button></div></div>
     <div class="ddw" id="editW"><button class="dd icon" id="editB" aria-pressed="false" title="For editing: H.264 + AAC, opens in any editor. Up to 1080p"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></button><input type="checkbox" id="edit" hidden></div>
     <span class="sp"></span>
     <div class="ddw destw"><button class="dd" id="dest" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="destT"></span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
@@ -652,7 +681,7 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
 </div>
 
 <div class="card" id="jobsCard" hidden>
-  <div class="lbar" id="lbar"><button class="lhead" id="lhead" aria-label="Hide downloads list"><span id="lsum"></span></button>
+  <div class="lbar" id="lbar"><div class="lhead" id="lhead"><span id="lsum"></span></div>
     <button class="btn ghost sm copyall" id="copyall" hidden title="Copy all files"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span id="copyallT" data-t="Copy all files">Copy all files</span></button>
     <button class="btn ghost sm clear" id="clear" title="Clear finished. Files stay on disk"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg><span data-t="Clear finished">Clear finished</span></button>
     <button class="lchev" id="lchev" aria-label="Hide downloads list"><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button></div>
@@ -729,7 +758,7 @@ var RU = {
   "Not signed in to YouTube. Some videos need it, and sometimes YouTube asks to prove you're not a bot. Click to sign in": 'Вход в YouTube не выполнен. Некоторым видео он нужен, а иногда YouTube просит доказать, что ты не бот. Нажми, чтобы войти',
   'Done ✓': 'Готово ✓',
   "Nothing on the hook yet. Cast a link above.": "На крючке пусто. Закинь ссылку сверху.",
-  "Paste YouTube links, one per line": "Вставь ссылки на YouTube, по одной на строку",
+  "Paste links. Each goes on its own line by itself": "Вставляй ссылки — каждая сама встанет на новую строку",
   "Video quality": "Качество видео",
   "Best quality": "Лучшее качество",
   "Audio format": "Формат звука",
@@ -739,6 +768,7 @@ var RU = {
   "Download only part of the video": "Скачать только часть видео",
   "A fragment is for one video at a time": "Фрагмент — только для одного видео",
   "Only a part of it": "Скачать только кусок",
+  "Choose the start and end of the fragment:": "Выбери начало и конец фрагмента:",
   "Empty “to”: to the end": "Пустое «до» — до конца",
   "Reset": "Сбросить",
   "More options": "Ещё настройки",
@@ -867,7 +897,7 @@ document.querySelectorAll('main [title]').forEach(function (e) {
 });
 
 // The ripple from where a control is pressed (transform and opacity only; gone in 0.6 s).
-var PRESS = '.seg button,.chip,.btn,.go,.tbtn,.wbtns button,.lhead';
+var PRESS = '.seg button,.chip,.btn,.go,.tbtn,.wbtns button';
 addEventListener('pointerdown', function (e) {
   var c = e.target.closest && e.target.closest(PRESS);
   if (!c || e.button !== 0 || c.disabled || c.querySelector('input:disabled') || still()) return;
@@ -1114,6 +1144,18 @@ function closeFly() {
   flyOpen.fly.hidden = true;
   flyOpen.btn.setAttribute('aria-expanded', 'false');
   flyOpen = null;
+  document.querySelector('.card.form').style.clipPath = '';
+}
+// Over the list, the top card is clipped at its bottom edge (its shadow would darken the list's
+// top). An open drop-down hangs out of it: the clip opens only where the drop-down is, so the
+// card's shadow still doesn't fall on the list (turning the clip off darkened the seam).
+function clipFor(fly) {
+  var card = document.querySelector('.card.form');
+  if ($('jobsCard').hidden) return;
+  var c = card.getBoundingClientRect(), f = fly.getBoundingClientRect();
+  var H = c.height, l = f.left - c.left - 14, r = f.right - c.left + 14, b = f.bottom - c.top + 34;
+  if (b <= H) return;
+  card.style.clipPath = 'polygon(-40px -40px,' + (c.width + 40) + 'px -40px,' + (c.width + 40) + 'px ' + H + 'px,' + r + 'px ' + H + 'px,' + r + 'px ' + b + 'px,' + l + 'px ' + b + 'px,' + l + 'px ' + H + 'px,-40px ' + H + 'px)';
 }
 function openFly(btn, fly) {
   closeFly();
@@ -1128,6 +1170,7 @@ function openFly(btn, fly) {
     if (fly.getBoundingClientRect().left < 8) { fly.classList.remove('end'); fly.style.left = (innerWidth - 8 - r.width - r.left) + 'px'; }
   }
   if (r.bottom > innerHeight - 8 && b.top - r.height - 8 > 4) fly.classList.add('up');
+  clipFor(fly);
   btn.setAttribute('aria-expanded', 'true');
   flyOpen = { btn: btn, fly: fly };
   var first = fly.querySelector('input,button.on,button:not(:disabled)');
@@ -1539,7 +1582,10 @@ var ICON = {
 function updateRow(r, j) {
   // The picture: the cover that's really inside the finished file, else an icon of what it is
   // (or of what went wrong). One 16:9 box in every state, cross-faded, so the text never moves.
+  // While it downloads: the preview of the video it's on (a playlist: of the track it's on), so
+  // each row shows what's coming; the real cover replaces it when the file is done.
   var side = j.status === 'done' && j.cover ? 'cover' + j.cover
+    : j.status === 'running' && j.thumb ? 'thumb' + j.thumb
     : j.status === 'done' || j.status === 'running' ? (j.mode === 'audio' ? 'audio' : 'video') : j.status;
   if (r.side !== side) {
     r.side = side;
@@ -1547,9 +1593,9 @@ function updateRow(r, j) {
     // The new picture fades in on top; the old one goes only once it's covered (fading both
     // at once left the box empty for a moment).
     var swap = function () { if (!old) return; var o = old; old = null; setTimeout(function () { o.remove(); }, 400); };
-    if (side.indexOf('cover') === 0) {
+    if (side.indexOf('cover') === 0 || side.indexOf('thumb') === 0) {
       pic = el('div', 'cover');
-      var src = '/api/cover?id=' + j.id + '&v=' + j.cover + '&t=' + encodeURIComponent(TOKEN);
+      var src = side.indexOf('thumb') === 0 ? j.thumb : '/api/cover?id=' + j.id + '&v=' + j.cover + '&t=' + encodeURIComponent(TOKEN);
       var bg = el('img', 'bg'), fg = el('img', 'fg');
       bg.alt = fg.alt = '';
       pic.append(bg, fg);
@@ -1772,6 +1818,9 @@ function render() {
   $('pick').hidden = !state.canPick;
   var nf = (state.jobs || []).reduce(function (a, j) { return a + (j.status === 'done' ? j.files.length : 0); }, 0);
   $('copyall').hidden = nf < 2; // two finished files or more
+  // "Clear finished" only once something has finished (done, failed or cancelled): before that
+  // there is nothing for it to clear.
+  $('clear').hidden = !(state.jobs || []).some(function (j) { return j.status !== 'queued' && j.status !== 'running'; });
   // Just the folder's own name on the button (the narrower window: the full path is in its hint).
   // "Folder: YouTube": says what the button is (its name alone looked like a link to YouTube).
   var dn = state.outName ? state.outName.split(' › ').pop() : T('Downloads');
@@ -2049,7 +2098,7 @@ function setFold(on, animate) {
   }
 }
 if (APP) {
-  $('lhead').onclick = $('lchev').onclick = function () { setFold(!fold.on, true); };
+  $('lchev').onclick = function () { setFold(!fold.on, true); };
   // The first card can grow (fragment times, an error): the folded window follows it.
   if (window.ResizeObserver) new ResizeObserver(fitLater).observe(document.querySelector('.card.form'));
 }

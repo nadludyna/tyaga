@@ -105,9 +105,19 @@
     document.querySelectorAll('span,div,b').forEach(function (e) {
       if (!seen(e) || !e.textContent.trim() || e.children.length) return;
       var cs = getComputedStyle(e);
-      if (cs.overflowY === 'visible' && cs.overflowX === 'visible') return;
+      // the box that clips it: its own, or a parent's (the list header's text was cut by the
+      // button around it)
+      var b = null;
+      for (var p = e; p && p !== document.body; p = p.parentElement) {
+        var ps = p === e ? cs : getComputedStyle(p);
+        if (ps.overflowY === 'visible' && ps.overflowX === 'visible') continue;
+        if (p !== e && /auto|scroll/.test(ps.overflowY)) continue; // a scrolled list cuts rows on purpose
+        var pr = p.getBoundingClientRect();
+        if (!b || pr.bottom < b.bottom) b = { bottom: pr.bottom };
+      }
+      if (!b) return;
       var r = document.createRange(); r.selectNodeContents(e);
-      var t = r.getBoundingClientRect(), b = e.getBoundingClientRect();
+      var t = r.getBoundingClientRect();
       if (!t.height) return;
       cv.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
       var m = cv.measureText('уgр'), base = t.top + (t.height - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;

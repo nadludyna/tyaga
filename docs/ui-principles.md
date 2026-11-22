@@ -12,6 +12,23 @@ Walk through it as the owner would, start to finish, not state by state: paste a
 quit. Count what he has to do. Any step the program could have done itself, any moment where
 he has to guess what's going on or wait without knowing why, is a bug to fix before showing.
 
+### Nothing that worked may break
+
+The owner's words, after fixing the same things twice: a build that breaks what worked costs
+him more than one that adds nothing. So, before **every** build, however small the change:
+
+- `tyagaCheck()`, `tyagaFlyCheck()` and `tyagaModeCheck()` all come back empty, in the empty
+  window, with a link pasted, and with a list (queued, downloading, done); English and Russian,
+  dark and light, 680 px and ~440 px. Run them once the theme has finished switching: its
+  circle covers the page for a moment and the corner check then reports false alarms.
+- The flows in step 3 below, walked on the stand.
+- Anything that fails is fixed before the build, not listed as "known" in the report.
+
+Things the owner had to find himself, each now caught by a check (keep them in it):
+a drop-down cut off under the list; the options row moving when Video/Audio switch; something
+moving inside an opening drop-down; the link count off-centre in its badge; text cut at its
+bottom edge; a button that doesn't fit its card in a narrow window.
+
 ### Before every build, measured, not by eye
 
 The owner kept finding things the eye skips: a label 1–2 pixels above its icon, a button in
