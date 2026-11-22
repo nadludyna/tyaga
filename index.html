@@ -226,7 +226,7 @@ label:hover{color:var(--fg)}
 
 /* Signing in to YouTube (ТЯГА's own window on Windows): one button on the right of the header.
    It keeps one width whatever it says, so nothing next to it moves. */
-header{position:relative;z-index:3}
+header{position:relative;z-index:5} /* above the options row: the folder menu hangs over it */
 /* The YouTube account lives in the logo: a little badge in its corner says whether ТЯГА
    downloads as you (green tick), isn't signed in (grey person), is waiting for the sign-in
    window (orange, breathing) or asks "sign out?" (red cross); the hint says it in words. */
@@ -523,7 +523,7 @@ html.app .fly{background:var(--card)}
 @keyframes flyin{from{opacity:0;transform:translateY(-4px)}}
 @keyframes flyup{from{opacity:0;transform:translateY(4px)}}
 /* A drop-down hanging over the list: the clip opens just where it is (clipFor). */
-.card.form>.opts,.card.form>.gorow{position:relative;z-index:3}
+.card.form>.opts{position:relative;z-index:3}
 .card.form>.opts{z-index:4} /* its drop-downs hang over the bottom row */
 .qgrid{display:grid;grid-template-columns:repeat(3,76px);gap:4px}
 .qgrid button,.flist button,.menu button{border:0;border-radius:6px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;cursor:pointer;font-variant-numeric:tabular-nums;transition:background .12s ease}
@@ -580,6 +580,8 @@ body.solo .area{min-height:184px;display:flex;flex-direction:column;justify-cont
 /* Background: calm, still, on theme — faint water lines along the bottom of the window. No glow. */
 html.app .card.form{background:var(--card)}
 .card.form>*{position:relative;z-index:1}
+.card.form>header{z-index:6} /* the folder menu hangs over the links box and the options */
+.card.form>.opts{z-index:4}  /* its drop-downs hang over what is under it */
 html.app body.solo .card.form::after,html.app #jobsCard::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;pointer-events:none;z-index:0;border-radius:0 0 15px 15px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='24'%3E%3Cpath d='M0 12c20-8 40-8 60 0s40 8 60 0 30-6 40-3' fill='none' stroke='%23ff6b2c' stroke-opacity='.08' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 0 100%/160px 24px,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='30'%3E%3Cpath d='M0 15c27-10 55-10 82 0s55 10 82 0 40-7 56-4' fill='none' stroke='%23ff6b2c' stroke-opacity='.055' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 40px calc(100% - 16px)/220px 30px}
 html.app #jobsCard.folded::after{display:none}
 /* ТЯГА's window (650): the short quality word, no arrow on the folder. */
@@ -591,20 +593,22 @@ html.app #jobsCard.folded::after{display:none}
 /* Fragment is the scissors alone (the owner: the word says nothing the icon doesn't); one width
    on or off, the picked part is in its hint. */
 #cutB>span{display:none}
-/* The bottom row (the owner picked it from three): where the files go on the left, Download on
-   the right, a normal-sized button where Windows windows keep their main one. The links box gets
-   the whole width above. Order as you work: paste, pick what, where, Download. */
+/* One row under the links (the owner picked it from mockups, after a bottom row left two
+   half-empty rows): what to download ... Download, at the row's end and the row's height. The folder
+   is a setting like the language or the theme: it sits in the header next to them, always in view. */
 .input{display:block}
-.gorow{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-.gorow .gow{flex:none}
-.gorow .sp{flex:1}
-.gorow .go{height:40px;min-width:0;padding:0 22px;font-size:15px}
-.ddw.destw{flex:0 1 auto;min-width:0;max-width:62%}
-.ddw.destw #dest{max-width:100%}
-#destMenu{left:0;right:auto} /* the folder is on the left now: its menu opens rightwards */
-#destMenu.end{left:auto;right:0}
+.opts .gow{flex:none}
+.opts .go{height:32px;min-width:0;padding:0 16px;font-size:14px;border-radius:8px}
+.opts .go .goi{width:17px;height:17px}
+header .ddw.destw{margin-left:auto;align-self:flex-start;flex:0 1 auto;min-width:0;max-width:40%;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
+header .ddw.destw+.hpair{margin-left:6px}
+header #dest{height:30px;max-width:100%;border-color:transparent;color:var(--dim);font-size:13px;padding:0 8px}
+header #dest:hover{border-color:transparent;background:color-mix(in srgb,var(--fg) 7%,transparent)}
+header #dest[aria-expanded=true]{background:color-mix(in srgb,var(--fg) 10%,transparent)}
 #destT{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media (max-width:560px){.gorow .go>span{display:inline}.gorow .go{padding:0 18px}}
+header #destT{color:var(--fg)}
+#destMenu{left:auto;right:0}
+@media (max-width:560px){.opts .go>span{display:none}.opts .go{padding:0 12px}header #destT{display:none}header .ddw.destw{max-width:none}}
 /* The fragment: says what to do, "from" above "to" with the fields in one column, and Reset as
    a button across the bottom (tonal: solid orange stays for Download). */
 #cutFly{width:244px}
@@ -618,8 +622,7 @@ html.app #jobsCard.folded::after{display:none}
 .cutoff>span{text-box:trim-both cap alphabetic}
 /* The sky over the header, the other half of the water scene at the bottom: gulls, a cloud, the
    sun, in the empty space between the name and the buttons. Still, like the reeds: drawn once. */
-html.app .card.form::before{content:"";position:absolute;top:12px;left:192px;width:228px;height:54px;pointer-events:none;z-index:0;opacity:.8;background-size:228px 54px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='270' height='64' viewBox='0 0 270 64'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='.24' stroke-width='1.6'%3E%3Cpath d='M20 30c6-6 12-6 15 0c3-6 9-6 15 0'/%3E%3Cpath d='M62 18c4-4 8-4 10 0c2-4 6-4 10 0'/%3E%3Cpath d='M4 44c3-3 6-3 8 0c2-3 5-3 8 0'/%3E%3C/g%3E%3Cg stroke-opacity='.15' stroke-width='1.4'%3E%3Cpath d='M120 46h48M112 54h40M130 38c4-10 18-12 24-2c8-6 20 0 18 10'/%3E%3C/g%3E%3Cg stroke-opacity='.2' stroke-width='1.4'%3E%3Ccircle cx='226' cy='34' r='10'/%3E%3Cpath d='M226 17v-5M226 51v5M209 34h-5M243 34h5M214 22l-3-3M238 22l3-3M214 46l-3 3M238 46l3 3'/%3E%3C/g%3E%3C/g%3E%3Cg fill='%23ff6b2c' fill-opacity='.2'%3E%3Ccircle cx='100' cy='10' r='1.4'/%3E%3Ccircle cx='186' cy='16' r='1.2'/%3E%3Ccircle cx='262' cy='8' r='1'/%3E%3Ccircle cx='48' cy='6' r='1.1'/%3E%3C/g%3E%3C/svg%3E");background-repeat:no-repeat}
-@media (max-width:620px){html.app .card.form::before{display:none}}
+html.app .card.form::before{content:"";position:absolute;top:22px;left:var(--skyx,180px);width:88px;height:37px;pointer-events:none;z-index:0;opacity:.85;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='130' height='54' viewBox='0 0 130 54'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='.24' stroke-width='1.6'%3E%3Cpath d='M14 26c6-6 12-6 15 0c3-6 9-6 15 0'/%3E%3Cpath d='M52 14c4-4 8-4 10 0c2-4 6-4 10 0'/%3E%3Cpath d='M2 40c3-3 6-3 8 0c2-3 5-3 8 0'/%3E%3C/g%3E%3Cg stroke-opacity='.2' stroke-width='1.4'%3E%3Ccircle cx='106' cy='30' r='8'/%3E%3Cpath d='M106 16v-4M106 44v4M92 30h-4M120 30h4M96 20l-3-3M116 20l3-3M96 40l-3 3M116 40l3 3'/%3E%3C/g%3E%3C/g%3E%3Cg fill='%23ff6b2c' fill-opacity='.2'%3E%3Ccircle cx='84' cy='8' r='1.3'/%3E%3Ccircle cx='40' cy='6' r='1.1'/%3E%3Ccircle cx='126' cy='10' r='1'/%3E%3C/g%3E%3C/svg%3E") 0 0/88px 37px no-repeat;display:var(--sky,none)}
 .input #links{width:100%;display:block}
 /* Even steps: links box, options, line, folder and Download, the card's edge: 14 px each. */
 html.app .card.form .opts{margin-top:14px}
@@ -658,6 +661,8 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
     </g>
   </svg><span class="badge" id="badge" aria-hidden="true"></span></button>
   <div class="title"><small class="motto" data-t="Reel it in.">Reel it in.</small><h1>ТЯГА</h1></div>
+  <div class="ddw destw"><button class="dd" id="dest" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="destT"></span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
+      <div class="fly menu" id="destMenu" role="menu" hidden><button id="open" role="menuitem"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open">Open</span></button><button id="pick" role="menuitem" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change…">Change…</span></button></div></div>
   <div class="hpair"><button class="tbtn pin" id="pin" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pinb" d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></svg></button><button class="tbtn lang" id="lang" aria-label="Language"></button><button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button></div>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Close to tray" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
 </header>
@@ -679,10 +684,6 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
         <div class="times" id="cutTimes"><span class="tl" data-t="from">from</span><input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds"><span class="tl" data-t="to">to</span><input type="number" id="toM" min="0" placeholder="0" aria-label="to, minutes"><b>:</b><input type="number" id="toS" placeholder="00" aria-label="to, seconds"></div>
         <button class="cutoff" id="cutOff"><span data-t="Reset">Reset</span></button></div></div>
     <div class="ddw" id="editW"><button class="dd icon" id="editB" aria-pressed="false" title="For editing: H.264 + AAC, opens in any editor. Up to 1080p"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></button><input type="checkbox" id="edit" hidden></div>
-  </div>
-  <div class="row gorow">
-    <div class="ddw destw"><button class="dd" id="dest" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="destT"></span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
-      <div class="fly menu" id="destMenu" role="menu" hidden><button id="open" role="menuitem"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open">Open</span></button><button id="pick" role="menuitem" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change…">Change…</span></button></div></div>
     <span class="sp"></span>
     <div class="gow"><button class="go" id="go"><svg class="goi" viewBox="0 0 24 24" aria-hidden="true"><g class="ga"><path d="M12 3.5v11.5"/><path d="M7 10l5 5 5-5"/></g><path d="M5 20h14"/></svg><span id="goT">Download</span></button><b class="gon" id="goN" hidden></b></div>
   </div>
@@ -1824,6 +1825,17 @@ $('acct').onclick = function () {
   setTimeout(renderAcct, 3050);
 };
 
+// The sky over the header sits in the middle of the gap between the name and the folder button,
+// or not at all when the gap is too small for it (a long folder name, a narrow window).
+function placeSky() {
+  var card = document.querySelector('.card.form'), c = card.getBoundingClientRect();
+  var l = document.querySelector('header .title').getBoundingClientRect().right, r = $('dest').getBoundingClientRect().left;
+  var fits = r - l >= 88 + 8;
+  card.style.setProperty('--sky', fits ? 'block' : 'none');
+  if (fits) card.style.setProperty('--skyx', Math.round((l + r) / 2 - 44 - c.left) + 'px');
+}
+addEventListener('resize', function () { placeSky(); });
+if (document.fonts) document.fonts.ready.then(function () { placeSky(); });
 function setText(e, t) { if (e.textContent !== t) e.textContent = t; }
 
 function render() {
@@ -1839,6 +1851,7 @@ function render() {
   // "Folder: YouTube": says what the button is (its name alone looked like a link to YouTube).
   var dn = state.outName ? state.outName.split(' › ').pop() : T('Downloads');
   if ($('destT').dataset.n !== dn + LANG) { $('destT').dataset.n = dn + LANG; $('destT').innerHTML = ''; $('destT').append(el('span', 'dk', T('Folder:') + ' '), dn); }
+  placeSky();
   $('dest').dataset.tip = state.outName ? 'Downloads folder: ' + state.outName : '';
 
   // Setup: downloading yt-dlp / ffmpeg / Deno on first start, or something wasn't found.

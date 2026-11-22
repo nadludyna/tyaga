@@ -161,7 +161,7 @@
   // not change the page's height (the window would follow) and pass tyagaCheck while open.
   window.tyagaFlyCheck = function () {
     var bad = [], h0 = document.querySelector('main').scrollHeight;
-    document.querySelectorAll('.opts .dd,.gorow .dd').forEach(function (b) {
+    document.querySelectorAll('.opts .dd,header .dd').forEach(function (b) {
       if (!seen(b)) return;
       b.click();
       var h = document.querySelector('main').scrollHeight;
