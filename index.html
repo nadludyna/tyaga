@@ -48,7 +48,13 @@ h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;
 .title{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0}
 .title small{font-size:11px;line-height:1.1;color:var(--dim);letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .brand{display:flex;align-items:baseline;gap:14px;min-width:0}
-.motto{font-size:14px;font-weight:500;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.motto{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--tonal);white-space:nowrap;min-width:0;overflow:hidden}
+.motto>span{overflow:hidden;text-overflow:ellipsis}
+/* The motto hangs on a little fishing line: a wave that ends in a hook (it bobs when the logo
+   or the motto is under the mouse; still otherwise). */
+.motto svg{width:30px;height:13px;flex:none;fill:none;stroke:var(--acc);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+.motto .mh{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+header:has(.logob:hover,.motto:hover) .motto .mh{transform:translateY(2px)}
 
 .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 50px -30px rgba(0,0,0,.6);animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .card+.card{margin-top:16px}
@@ -76,8 +82,15 @@ label:hover{color:var(--fg)}
 .opts{display:grid;grid-template-columns:1fr 2fr;gap:8px}
 .opts .seg{display:flex}
 .opts .seg button{flex:1;padding-left:6px;padding-right:6px}
-.chips{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
-@media (max-width:560px){.motto,#acctT{display:none}.acct{min-width:0!important;padding:0 9px}.opts{grid-template-columns:1fr}.chips{grid-auto-flow:row;grid-template-columns:1fr 1fr}}
+.chips{display:flex;gap:8px}
+.chips>.chip{flex:1 1 0}
+/* "Whole playlist" is there only for a link to a video inside a playlist: it opens out of
+   nothing at the left and the others make room (and close up again when it goes). */
+.chips>.chip{transition:flex-grow .3s cubic-bezier(.2,.8,.2,1),padding .3s cubic-bezier(.2,.8,.2,1),margin .3s cubic-bezier(.2,.8,.2,1),border-width .3s,opacity .2s ease,border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
+.chips>.chip.away{flex-grow:0;padding-left:0;padding-right:0;border-width:0;margin-right:-8px;opacity:0;pointer-events:none}
+.chips.calm>.chip{transition:none}
+@media (max-width:560px){.opts{grid-template-columns:1fr}.chips{display:grid;grid-auto-flow:row;grid-template-columns:1fr 1fr}.foot .btn.clear{margin-left:0}}
+@media (max-width:430px){.motto{display:none}}
 .chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 28px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
 .chip:hover{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.1)}
 /* Filter chips like Material 3: no checkbox square, a check mark when on. Its place is always
@@ -94,11 +107,17 @@ label:hover{color:var(--fg)}
 .cutrow{justify-content:center}
 .input{display:flex;gap:12px;align-items:stretch}
 .input textarea{flex:1}
-@media (max-width:560px){.input{flex-direction:column}.input .go{padding:12px}}
+@media (max-width:560px){.input{flex-direction:column}.input .go{flex-direction:row;padding:12px}.chips>.chip.away{display:none}}
 /* Every button answers the same calm way: a little lighter under the mouse, a little smaller
    while pressed. No jumps, no flashes. */
 .go{flex:none;min-width:132px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:filter .15s ease,transform .1s ease}
 .go:hover{filter:brightness(1.08)}
+.go{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:15.5px;box-shadow:0 8px 22px -8px var(--glow),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.08)}
+.go .goi{width:24px;height:24px;flex:none;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.go .goi .ga{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.go:hover .goi .ga{transform:translateY(2.5px)}
+.go b{position:absolute;top:8px;right:8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;display:grid;place-items:center;background:#1a0c04;color:var(--acc2);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;animation:pop2 .3s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes pop2{from{transform:scale(.3);opacity:0}}
 .go:active{transform:scale(.97);filter:brightness(.95)}
 .msg{color:var(--err);margin-top:8px;font-size:14px}
 .msg:empty{margin:0}
@@ -107,7 +126,11 @@ label:hover{color:var(--fg)}
 .notice{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13.5px;color:var(--dim);animation:fadein .2s ease both;transition:opacity .2s ease}
 .notice.out{opacity:0}
 .notice span{flex:1;min-width:0}
-.notice .btn{height:28px;padding:0 12px}
+.notice .btn{height:28px;padding:0 12px;font-variant-numeric:tabular-nums}
+.notice{position:relative;padding-bottom:8px}
+.ntime{position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--line);overflow:hidden}
+.ntime::after{content:"";position:absolute;inset:0;border-radius:2px;background:var(--acc);opacity:.7;transform-origin:left;animation:drain 8s linear forwards}
+@keyframes drain{to{transform:scaleX(0)}}
 
 /* One download = one compact row, the way mature downloaders do it (Seal, 4K Video
    Downloader): the picture, then two lines. The title with its state on the right; under it
@@ -176,7 +199,8 @@ label:hover{color:var(--fg)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 13px 0 11px;border:1px solid var(--line2);border-radius:8px;background:color-mix(in srgb,var(--fg) 4%,transparent);color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
 .btn svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 /* Icons with a meaning get a quiet colour of it: folders, copying; clearing turns red on hover. */
-.btn.fold svg{color:var(--folder)}.btn.copyall svg{color:var(--info)}
+#open svg{color:var(--folder)}#pick svg{color:var(--info)}.btn.copyall svg{color:var(--ok)}
+.foot .btn.clear{margin-left:auto}
 .btn.clear svg{color:var(--dim)}.btn.clear:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}.btn.clear:hover svg{color:var(--err)}
 .btn:hover{border-color:rgba(127,127,127,.4);background:rgba(127,127,127,.14)}
 .btn:active{transform:scale(.97)}
@@ -203,13 +227,20 @@ label:hover{color:var(--fg)}
 /* Signing in to YouTube (ТЯГА's own window on Windows): one button on the right of the header.
    It keeps one width whatever it says, so nothing next to it moves. */
 header{position:relative;z-index:3}
-.acct{margin-left:auto;flex:none;min-width:196px;justify-content:center;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
-.acct.in{color:var(--dim);background:transparent}
-.acct.in svg{color:var(--ok);opacity:1}
-.acct.in:hover{color:var(--fg)}
-.acct.arm{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}
-.acct.wait{color:var(--dim);cursor:default}
-.acct.wait svg{animation:breathe2 1.6s ease-in-out infinite}
+/* The YouTube account lives in the logo: a little badge in its corner says whether ТЯГА
+   downloads as you (green tick), isn't signed in (grey person), is waiting for the sign-in
+   window (orange, breathing) or asks "sign out?" (red cross); the hint says it in words. */
+.logob{position:relative;flex:none;display:block;padding:0;border:0;background:none;border-radius:12px;color:inherit;cursor:pointer;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
+.logob:not(.can){cursor:default}
+.logob:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.logob:active .logo{transform:scale(.94)}
+.badge{position:absolute;right:-5px;bottom:-5px;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;color:#fff;background:#7d7d82;box-shadow:0 0 0 2.5px var(--card);transform:scale(0);transition:transform .3s cubic-bezier(.3,1.6,.5,1),background .2s ease}
+.logob.can .badge{transform:none}
+.badge svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.logob.in .badge{background:var(--ok);color:#0d2a12}
+.logob.arm .badge{background:var(--err);color:#fff}
+.logob.wait .badge{background:var(--acc);color:#1a0c04;animation:breathe2 1.6s ease-in-out infinite}
+.logob:hover .badge{transform:scale(1.12)}
 @keyframes breathe2{0%,100%{opacity:.8}50%{opacity:.3}}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -237,10 +268,9 @@ html.app header{margin:-4px -6px 16px 0;animation:none;app-region:drag;-webkit-a
 html.app header .logo{width:46px;height:46px;border-radius:12px;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
 html.app header h1{font-size:22px}
 html.app .wbtns{display:flex;gap:2px;margin-left:auto;align-self:flex-start}
-html.app .acct{align-self:flex-start;margin-top:2px}
 /* The theme button: a sun that turns into a moon (its bite slides in, the rays draw in). */
 .tbtn{flex:none;align-self:flex-start;margin-left:6px;font:inherit;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s,transform .1s;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
-.acct[hidden]+.tbtn{margin-left:auto}
+.tbtn.lang{margin-left:auto}
 .tbtn:hover{background:var(--line);color:var(--fg)}
 .tbtn:active{transform:scale(.92)}
 .tbtn svg{width:18px;height:18px;overflow:visible}
@@ -251,7 +281,10 @@ html.app .acct{align-self:flex-start;margin-top:2px}
 .tbtn.moon .body{transform:scale(1.35)}
 .tbtn.moon .bite{transform:translate(-5px,5px)}
 .tbtn.moon .rays{transform:rotate(-90deg) scale(.4);opacity:0}
-html.app .tbtn+.wbtns{margin-left:2px}
+html.app .tbtn+.wbtns{margin-left:6px}
+/* Language and theme sit next to the window buttons, a hairline and a gap away from them:
+   close enough to belong to the window's corner, far enough not to hit "close" by mistake. */
+html.app .wbtns::before{content:"";width:1px;height:16px;margin:7px 6px 0 0;background:var(--line2)}
 /* Switching the theme: the new one spreads in a circle from the button (the View Transitions
    API: one snapshot, then the graphics card animates it). */
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
@@ -320,7 +353,7 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
 @keyframes rip{to{transform:scale(1);opacity:0}}
 </style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
-  <svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
+  <button class="logob" id="acct" type="button" aria-label="YouTube account"><svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
     <rect width="256" height="256" rx="58" fill="#161616"/>
     <path d="M176 0 V22" stroke="#8a96a3" stroke-width="6"/>
     <g class="catch">
@@ -335,9 +368,8 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
         <circle cx="131.3" cy="109.9" r="6" fill="#161616"/>
       </g>
     </g>
-  </svg>
-  <div class="title"><small id="ver"></small><div class="brand"><h1>ТЯГА</h1><span class="motto" data-t="Reel it in.">Reel it in.</span></div></div>
-  <button class="btn acct" id="acct" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.3 3.9-5 7-5s5.8 1.7 7 5"/></svg><span id="acctT">Sign in to YouTube</span></button>
+  </svg><span class="badge" id="badge" aria-hidden="true"></span></button>
+  <div class="title"><small id="ver"></small><div class="brand"><h1>ТЯГА</h1><span class="motto"><svg viewBox="0 0 34 14" aria-hidden="true"><path class="ml" d="M1 7c2.5-4 5-4 7.5 0s5 4 7.5 0 5-4 7.5 0"/><path class="mh" d="M23.5 7H27v3.2a2.6 2.6 0 0 1-5.2 0"/></svg><span data-t="Reel it in.">Reel it in.</span></span></div></div>
   <button class="tbtn lang" id="lang" aria-label="Language"></button>
   <button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Hide to the tray (downloads go on)" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
@@ -348,7 +380,7 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
 <div class="card form">
   <div class="input">
     <textarea id="links" data-ph="Paste YouTube links: each one goes on its own line.&#10;Enter — download, Shift+Enter — new line."></textarea>
-    <button class="go" id="go"><span id="goT">Download</span></button>
+    <button class="go" id="go"><svg class="goi" viewBox="0 0 24 24" aria-hidden="true"><g class="ga"><path d="M12 3.5v11.5"/><path d="M7 10l5 5 5-5"/></g><path d="M5 20h14"/></svg><span id="goT">Download</span><b id="goN" hidden></b></button>
   </div>
   <div class="row opts">
     <div class="seg" id="mode"><button data-v="audio" class="on" data-t="Audio">Audio</button><button data-v="video" data-t="Video">Video</button></div>
@@ -360,7 +392,7 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
       <button data-v="0" class="on" data-t="Best">Best</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button>
     </div>
   </div>
-  <div class="row chips">
+  <div class="row chips calm">
     <label class="chip" id="playlistBox" title="For a link to a video inside a playlist: download the whole playlist, not just this video"><input type="checkbox" id="playlist"><span data-t="whole playlist">whole playlist</span></label>
     <label class="chip" id="mergeBox" hidden title="The whole playlist as one long file, each video is a chapter"><input type="checkbox" id="merge"><span data-t="as one file">as one file</span></label>
     <label class="chip" id="cutBox"><input type="checkbox" id="cut"><span data-t="fragment">fragment</span></label>
@@ -375,7 +407,7 @@ html.app .lhead:active{background:color-mix(in srgb,var(--fg) 12%,transparent)}
     </span>
   </div>
   <div class="msg" id="msg"></div>
-  <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB" data-t="Undo">Undo</button></div>
+  <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB">Undo</button><i class="ntime" id="ntime" hidden></i></div>
 </div>
 
 <div class="card" id="jobsCard">
@@ -451,14 +483,15 @@ var RU = {
   'Some videos need a signed-in account, and sometimes YouTube asks to prove you\'re not a bot': 'Некоторые видео требуют входа, а иногда YouTube просит доказать, что ты не бот',
   'Sign in to YouTube on the page that opened; ТЯГА notices by itself': 'Войди в YouTube на открывшейся странице; ТЯГА заметит сама',
   'Click again: ТЯГА stops using your YouTube account (your browser stays signed in)': 'Нажми ещё раз: ТЯГА перестанет пользоваться твоим аккаунтом (в браузере ты останешься)',
-  'ТЯГА downloads as your YouTube account. Click to sign out': 'ТЯГА качает от твоего аккаунта YouTube. Нажми, чтобы выйти',
+  'Signed in to YouTube: ТЯГА downloads as you. Click to sign out': 'Вход в YouTube выполнен: ТЯГА качает от твоего имени. Нажми, чтобы выйти',
+  "Not signed in to YouTube. Some videos need it, and sometimes YouTube asks to prove you're not a bot. Click to sign in": 'Вход в YouTube не выполнен. Некоторым видео он нужен, а иногда YouTube просит доказать, что ты не бот. Нажми, чтобы войти',
   'Done ✓': 'Готово ✓', 'Checking for yt-dlp updates…': 'Проверяю обновления yt-dlp…',
 };
 var RU_RE = [
   [/^Playlist: (.*)$/, 'Плейлист: $1'], [/^Converting to (\w+)$/, 'Конвертирую в $1'],
   [/^Waiting for YouTube · (\d+) s$/, 'YouTube просит подождать · $1 с'],
   [/^Signed in · (.+)$/, 'Вход: $1'],
-  [/^ТЯГА downloads as your YouTube account in (.+), read afresh every time\. Click to stop$/, 'ТЯГА качает от твоего аккаунта YouTube в $1, читает его заново каждый раз. Нажми, чтобы перестать'],
+  [/^Signed in to YouTube in (.+): ТЯГА downloads as you. Click to stop$/, 'Вход в YouTube выполнен в $1: ТЯГА качает от твоего имени. Нажми, чтобы перестать'],
   [/^Downloads go to (.+)\. Pick another folder for the next ones$/, 'Файлы сохраняются в $1. Выбери другую папку для следующих'],
   [/^Downloads go to (.+)$/, 'Файлы сохраняются в $1'],
   [/^Downloads now go to (.+)\.$/, 'Теперь файлы сохраняются в $1.'],
@@ -594,6 +627,7 @@ addEventListener('pointerdown', function (e) {
     on = t;
     timer = setTimeout(function () { if (on === t) show(t); }, 500);
   });
+  window.tipNow = function (t) { hide(); on = t; show(t); };
   addEventListener('pointerdown', hide, true);
   addEventListener('keydown', hide, true);
   addEventListener('wheel', hide, { passive: true });
@@ -644,11 +678,13 @@ function syncBoxes() {
   $('cutBox').hidden = list;
   $('cutTimes').hidden = !cut;
   $('split').disabled = (list && $('merge').checked) || cut;
+  $('playlistBox').classList.toggle('away', $('playlist').disabled);
 }
 $('playlist').onchange = $('merge').onchange = $('cut').onchange = syncBoxes;
 $('links').addEventListener('input', syncBoxes);
 restore();
 syncBoxes();
+requestAnimationFrame(function () { requestAnimationFrame(function () { document.querySelector('.chips').classList.remove('calm'); }); });
 
 // Fragment times: two counters each, minutes and seconds. Seconds roll over into minutes
 // (0:59 ↑ → 1:00, 1:00 ↓ → 0:59), Shift + arrow steps by 10.
@@ -796,7 +832,9 @@ function putLinks(add) {
 }
 function countLinks() {
   var n = linksIn($('links').value).length;
-  setText($('goT'), T('Download') + (n > 1 ? ' ' + n : ''));
+  setText($('goT'), T('Download'));
+  var b = $('goN'), k = n > 1 ? String(n) : '';
+  if (b.textContent !== k) { b.textContent = k; b.hidden = !k; }
 }
 $('links').addEventListener('paste', function (e) {
   var add = linksIn((e.clipboardData || window.clipboardData).getData('text') || '');
@@ -830,20 +868,28 @@ $('copyall').onclick = function () {
   });
 };
 // The note under the options (see .notice): a text, and a button if there's a way back.
-var noticeTimer = 0;
+// With a way back, it shows how long that's there: a line drains under it and the button
+// counts the seconds ("Undo · 7").
+var noticeTimer = 0, noticeTick = 0, NOTICE_MS = 8000;
 function notice(text, undo) {
-  var n = $('notice');
-  clearTimeout(noticeTimer);
+  var n = $('notice'), bar = $('ntime'), end = Date.now() + NOTICE_MS;
+  clearTimeout(noticeTimer); clearInterval(noticeTick);
   $('noticeT').textContent = text;
   $('noticeB').hidden = !undo;
+  if (!undo) bar.hidden = true;
+  if (undo) {
+    bar.hidden = true; void bar.offsetWidth; bar.hidden = false; // its draining starts over
+    var label = function () { setText($('noticeB'), T('Undo') + ' · ' + Math.max(1, Math.ceil((end - Date.now()) / 1000))); };
+    label(); noticeTick = setInterval(label, 250);
+  }
   $('noticeB').onclick = function () { hideNotice(); if (undo) undo(); };
   n.classList.remove('out');
   if (n.hidden) { n.hidden = false; n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; }
-  noticeTimer = setTimeout(hideNotice, 8000);
+  noticeTimer = setTimeout(hideNotice, NOTICE_MS);
 }
 function hideNotice() {
   var n = $('notice');
-  clearTimeout(noticeTimer);
+  clearTimeout(noticeTimer); clearInterval(noticeTick);
   if (n.hidden) return;
   if (still()) { n.hidden = true; return; }
   n.classList.add('out');
@@ -1039,7 +1085,7 @@ function updateRow(r, j) {
   // the snapped line, the fish going belly up). It opens and folds smoothly; the window is
   // fitted once, not every frame (see .lining in windowFit).
   if (r.status === 'running' && /^(done|cancelled|error)$/.test(j.status) && !still()) {
-    t.until = now + (j.status === 'done' ? 1500 : 1800);
+    t.until = now + 1800; // its last moment plays out (the catch, RIP, the snapped line), then the lane folds
     setTimeout(function () { if (r.j) updateRow(r, r.j); }, t.until - now + 30);
   }
   if (waiting && !t.wait) t.waitAt = now; // YouTube's pause began: count it down from now
@@ -1145,24 +1191,29 @@ function numsText(j) {
   return T(step && now - t.stepAt > 2500 && !/^(Downloading the |Playlist: )/.test(step) ? step : 'Getting ready…');
 }
 
-// The YouTube sign-in button (login.go). Signed in: the first click asks "Sign out?",
-// a second one within 3 s signs out.
+// The YouTube account, in the logo (login.go): its badge says the state, the hint says it in
+// words. Signed in: the first click asks "Sign out?" (the hint shows at once), a second one
+// within 3 s signs out.
 var acctArm = 0, lastLoginMsg = '';
+var BADGE = {
+  in: '<svg viewBox="0 0 12 12"><path d="M2.6 6.3l2.2 2.2 4.6-4.9"/></svg>',
+  out: '<svg viewBox="0 0 12 12"><circle cx="6" cy="4.2" r="1.9"/><path d="M2.4 10.2c.6-1.8 2-2.7 3.6-2.7s3 .9 3.6 2.7"/></svg>',
+  wait: '<svg viewBox="0 0 12 12"><path d="M3 6h.01M6 6h.01M9 6h.01"/></svg>',
+  arm: '<svg viewBox="0 0 12 12"><path d="M3.5 3.5l5 5M8.5 3.5l-5 5"/></svg>'
+};
 function renderAcct() {
   var L = state.login || {}, b = $('acct');
-  b.hidden = !L.can;
-  if (!L.can) return;
   var armed = L.in && !L.open && Date.now() < acctArm;
-  var cls = L.open ? 'wait' : armed ? 'arm' : L.in ? 'in' : '';
-  var text = T(L.open ? 'Signing in…' : armed ? 'Sign out?' : L.in ? (L.via ? 'Signed in · ' + L.via : 'Signed in') : 'Sign in to YouTube');
-  var tip = L.open ? 'Sign in to YouTube on the page that opened; ТЯГА notices by itself'
+  var cls = !L.can ? '' : L.open ? 'wait' : armed ? 'arm' : L.in ? 'in' : 'out';
+  var tip = !L.can ? ''
+    : L.open ? 'Sign in to YouTube on the page that opened; ТЯГА notices by itself'
     : armed ? 'Click again: ТЯГА stops using your YouTube account (your browser stays signed in)'
-    : L.in && L.via ? 'ТЯГА downloads as your YouTube account in ' + L.via + ', read afresh every time. Click to stop'
-    : L.in ? 'ТЯГА downloads as your YouTube account. Click to sign out'
-    : 'Some videos need a signed-in account, and sometimes YouTube asks to prove you\'re not a bot';
-  b.className = 'btn acct' + (cls ? ' ' + cls : '');
-  setText($('acctT'), text);
-  if (b.dataset.tip !== tip) b.dataset.tip = tip;
+    : L.in && L.via ? 'Signed in to YouTube in ' + L.via + ': ТЯГА downloads as you. Click to stop'
+    : L.in ? 'Signed in to YouTube: ТЯГА downloads as you. Click to sign out'
+    : "Not signed in to YouTube. Some videos need it, and sometimes YouTube asks to prove you're not a bot. Click to sign in";
+  var c = 'logob' + (cls ? ' can ' + cls : '');
+  if (b.className !== c) { b.className = c; $('badge').innerHTML = BADGE[cls] || ''; }
+  if (tip) { if (b.dataset.tip !== tip) b.dataset.tip = tip; } else delete b.dataset.tip;
   // What came of signing in goes in the message line under the options; it goes away by itself
   // with the next try (a message about something else is left alone).
   if (L.msg !== lastLoginMsg) {
@@ -1173,11 +1224,13 @@ function renderAcct() {
 function signIn() { api('/api/login', {}).then(refresh); }
 $('acct').onclick = function () {
   var L = state.login || {};
+  if (!L.can) return;
   if (L.open) { signIn(); return; } // brings the sign-in window up again
   if (!L.in) { $('msg').textContent = ''; signIn(); return; }
   if (Date.now() < acctArm) { acctArm = 0; api('/api/logout', {}).then(refresh); return; }
   acctArm = Date.now() + 3000;
   renderAcct();
+  tipNow($('acct'));
   setTimeout(renderAcct, 3050);
 };
 
@@ -1365,7 +1418,7 @@ function mainPad() { return parseFloat(getComputedStyle(document.querySelector('
 function openHeight() { // the open list card's natural height, measured without painting
   var card = $('jobsCard'), list = $('list');
   var was = [card.hidden, card.className, card.style.height];
-  card.hidden = false; card.classList.remove('folded', 'leave', 'come', 'anim'); card.style.height = '';
+  card.hidden = false; card.classList.remove('folded', 'leave', 'anim'); card.style.height = ''; // not 'come': taking it off and back restarts its fade (the card blinked on every update)
   // Parts that are opening or folding right now count at the height they're going to.
   var moving = [];
   list.querySelectorAll('.job.grow').forEach(function (e) {
@@ -1482,13 +1535,16 @@ function pollDelay() {
 // The progress bar is a fishing line with ТЯГА's fish on it (the one from the logo). The line
 // is a gentle wave the whole length, grey ahead and orange where the fish has been, and the
 // fish says what's going on without words:
-// - starting (no number yet): the line and the fish fade in together; it waits, tail going;
+// - starting (no number yet): once the lane is open the line runs out from the left and the
+//   fish drops onto it with a splash; it waits there, level, tail going;
 // - downloading: it swims along, its tail beating faster the faster the bytes come;
 // - YouTube's pause: it goes grey and lets out a bubble a second (the seconds count down);
 // - nothing comes for 10 s: it stops, looks around, a "?" over it;
 // - a playlist: a dot on the line where each video starts (up to 20); it leaps at each one;
 // - converting (100 %): it turns somersaults at the end and a glint runs along the line;
-// - done: the line pulls straight and it jumps out, straight up (then the row shows the file);
+// - done: the line pulls straight and it leaps straight up with one flip, lands with a ring,
+//   bobs once (then the lane folds and the row shows the file);
+// A change of state never snaps: colour, tilt and wave height grow out of the last look.
 // - failed: grey, belly up, RIP; cancelled: the line snaps and it swims off.
 // The bar follows the progress with a soft spring (progress comes in steps every 0.7 s; a
 // spring keeps its speed when the target moves again, so it glides instead of lurching), very
@@ -1507,7 +1563,18 @@ var waveTarget = {}, waveState = {};
   colours();
   themeHooks.push(function () { colours(); anim.kick(); });
   var TRACK = 'rgba(127,127,127,.32)', EYE = '#161616', GLINT = 'rgba(255,255,255,.6)';
-  var AMP = 3, LEN = 30, S = 7.5, MID = 20; // px: wave height (half), wavelength, fish size, the line in the canvas
+  var AMP = 3, LEN = 30, S = 8.5, MID = 20; // px: wave height (half), wavelength, fish size, the line in the canvas
+  // Colours mixed by a number (0 = orange, 1 = grey), so a change of colour can fade.
+  function rgb(c) {
+    var m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(c);
+    return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [255, 107, 44];
+  }
+  function mix(a, b, k) {
+    var x = rgb(a), y = rgb(b);
+    return 'rgb(' + [0, 1, 2].map(function (i) { return Math.round(x[i] + (y[i] - x[i]) * k); }).join(',') + ')';
+  }
+  // The angle nearest to `from` that looks the same as `to` (no extra turn when blending).
+  function near(from, to) { return to + Math.round((from - to) / (2 * Math.PI)) * 2 * Math.PI; }
   function spring(gap) { var k = 4 + Math.min(60, Math.max(0, gap - 12) * 1.2); return [k, 2 * Math.sqrt(k)]; }
   function ease(k) { k = Math.max(0, Math.min(1, k)); return 1 - Math.pow(1 - k, 3); }
   function easeIO(k) { k = Math.max(0, Math.min(1, k)); return k < .5 ? 2 * k * k : 1 - 2 * (1 - k) * (1 - k); }
@@ -1551,7 +1618,8 @@ var waveTarget = {}, waveState = {};
     var id = cv.dataset.id, t = waveTarget[id] || { p: 0, status: 'running' };
     var st = waveState[id];
     if (!st) {
-      st = waveState[id] = { shown: t.p || 0, vel: 0, phase: 0, amp: 1, parts: [], mode: '', at: now, born: now, lastP: t.p, lastPAt: now, pos: t.pos || 0, acc: 0, ev: {} };
+      st = waveState[id] = { shown: t.p || 0, vel: 0, phase: 0, amp: 1, parts: [], mode: '', at: now, born: now + 350, // the lane opens first (and the list card fades in): then the intro
+        lastP: t.p, lastPAt: now, pos: t.pos || 0, acc: 0, ev: {} };
       if (t.status !== 'running') st.born = st.at = now - 1e5; // already over when the page saw it: its last look at once
     }
     var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1561,7 +1629,8 @@ var waveTarget = {}, waveState = {};
     if (mode === 'move' && now - st.lastPAt > 10000) mode = 'stall';
     if (mode !== st.mode) {
       var over = /^(done|err|cancel)$/.test(mode);
-      if (mode === 'start' && /^(err|cancel)$/.test(st.mode)) st.born = now; // Retry: it fades in again
+      if (mode === 'start' && /^(err|cancel)$/.test(st.mode)) { st.born = now + 350; st.dropped = 0; } // Retry: the lane opens again, it drops in again
+      st.from = st.mode && st.last ? st.last : null; // the look it had: the new one grows out of it
       st.mode = mode; st.ev = {}; st.acc = 0;
       st.at = over && st.born < now - 9e4 ? now - 1e5 : now; // over before the page saw it: its last look at once
     }
@@ -1584,26 +1653,28 @@ var waveTarget = {}, waveState = {};
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
     cx.clearRect(0, 0, w, h);
 
-    var padL = 2, x0 = padL + S * 1.45, end = w - S - 3, x = x0 + Math.max(0, end - x0) * st.shown / 100;
-    var ampK = 1, col = acc, lineCol = acc, F = 1.3, A = .18, fx = x, dy = 0, rot = null, dir = 1, op = 1;
+    var padL = 2, x0 = padL + S * 1.5, end = w - S - 3, x = x0 + Math.max(0, end - x0) * st.shown / 100;
+    // g: how grey the fish is, gl: how grey the line behind it (0 orange … 1 grey). level: the
+    // fish lies flat (waiting, looking round) instead of following the slope of the wave.
+    var ampK = 1, g = 0, gl = 0, F = 1.3, A = .18, fx = x, dy = 0, rot = null, dir = 1, op = 1, level = false;
     var lineOp = 1, trackOp = 1, qm = 0, rip = 0, glint = -1, cut = null, hopRot = null, wiggle = false, moving = !still;
     function wy(xx) { return MID + Math.sin(xx / LEN * 2 * Math.PI) * AMP * ampK; }
     function slope(xx) { return Math.cos(xx / LEN * 2 * Math.PI) * AMP * ampK * 2 * Math.PI / LEN; }
     var born = (now - st.born) / 1000;
 
     if (mode === 'start') {
-      lineOp = trackOp = op = ease(born / .35); dy = (1 - op) * 3; fx = x0;
+      F = 1; A = .14; level = true; fx = x0; dy = Math.sin(tm * 2) * .5;
     } else if (mode === 'move') {
       var lv = liveliness(t.speed);
       F = .8 + lv * 3.4; A = .2 + lv * .15; wiggle = true;
       st.acc += dt;
       if (lv > .55 && st.acc > .2 / lv) { st.acc = 0; st.parts.push({ k: 'd', spawn: 'tail', vx: -14 - Math.random() * 8, vy: -14 - Math.random() * 6, life: 0, max: .6, r: 1.1 }); }
     } else if (mode === 'wait') {
-      col = dim; F = .75; A = .07; dy = Math.sin(tm * 1.2) * .5;
+      g = 1; F = .75; A = .07; dy = Math.sin(tm * 1.6) * .6; level = true;
       st.acc += dt;
       if (st.acc >= 1) { st.acc -= 1; st.parts.push({ k: 'b', spawn: 'mouth', vx: .6, vy: -7, life: 0, max: 1.4, r: 1.3 }); }
     } else if (mode === 'stall') {
-      F = .5; A = .06; qm = ease((tm - .3) / .35);
+      F = .5; A = .06; qm = ease((tm - .3) / .35); level = true;
       if (tm > .6) dir = Math.floor((tm - .6) / 1.3) % 2 ? -1 : 1;
     } else if (mode === 'conv') {
       ampK = 1 - .65 * ease(tm / .5); F = 1; A = .1;
@@ -1613,14 +1684,18 @@ var waveTarget = {}, waveState = {};
       st.acc += dt;
       if (st.acc > .6) { st.acc = 0; st.parts.push({ k: 'b', spawn: 'mouth', vx: .4, vy: -6, life: 0, max: 1.4, r: 1.1 }); }
     } else if (mode === 'done') {
-      ampK = 1 - ease(tm / .5); A = 0;
-      var jk = (tm - .35) / .9;
-      if (jk > 0 && jk < 1) { dy = -Math.sin(jk * Math.PI) * 11; rot = -ease(jk) * 2 * Math.PI; } else rot = 0;
-      if (jk > 0 && !st.ev.up) { st.ev.up = 1; if (tm < 2) splash(st, fx, wy(fx), 8, 34); }
-      if (jk >= 1 && !st.ev.down) { st.ev.down = 1; if (tm < 2) { splash(st, fx, wy(fx), 5, 22); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .9 }); } }
-      moving = moving && tm < 2;
+      // The line pulls straight, the fish crouches a little, leaps straight up with one clean
+      // flip, lands with a splash and a ring, bobs once and lies still.
+      ampK = 1 - ease(tm / .4); F = 1.6; A = .12 * (1 - ease(tm / .3)); level = true;
+      var jk = (tm - .3) / .7;
+      if (jk < 0) dy = ease(tm / .3) * 1.5;
+      else if (jk < 1) { dy = 1.5 * (1 - ease(jk * 4)) - Math.sin(jk * Math.PI) * 13; rot = -easeIO(jk) * 2 * Math.PI; }
+      else { var bk = tm - 1; dy = Math.sin(bk * 14) * 1.6 * Math.exp(-bk * 6); rot = 0; }
+      if (jk > 0 && !st.ev.up) { st.ev.up = 1; if (tm < 2) splash(st, fx, wy(fx), 7, 30); }
+      if (jk >= 1 && !st.ev.down) { st.ev.down = 1; if (tm < 2) { splash(st, fx, wy(fx), 5, 20); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .7 }); } }
+      moving = moving && tm < 1.8;
     } else if (mode === 'err') {
-      col = lineCol = dim; A = 0;
+      g = gl = 1; A = 0;
       var e = ease(tm / .7);
       rot = Math.PI * e; dy = -2 * e + (tm < 1.6 ? Math.sin(tm * 1.1) * .4 * e : 0);
       rip = ease((tm - .6) / .4);
@@ -1631,7 +1706,7 @@ var waveTarget = {}, waveState = {};
       else {
         if (!st.ev.snap) { st.ev.snap = 1; if (tm < 1) splash(st, sx, wy(sx), 4, 18); }
         var c2 = tm - .3;
-        lineCol = dim; trackOp = Math.max(.35, 1 - c2 * 1.5);
+        gl = 1; trackOp = Math.max(.35, 1 - c2 * 1.5);
         cut = { back: ease(c2 / .35) * 30, sag: ease(c2 / .6) * 7 };
         fx = sx + c2 * 26 + c2 * c2 * 14; dy = c2 * 8 + c2 * c2 * 22; rot = .5; op = Math.max(0, 1 - c2 / 1.3); F = 3.5; A = .25;
         st.acc += dt;
@@ -1651,8 +1726,23 @@ var waveTarget = {}, waveState = {};
       else if (!st.landed) { st.landed = 1; splash(st, fx, wy(fx), 3, 14); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .7 }); }
     }
 
+    if (rot === null) rot = hopRot !== null ? hopRot : level ? 0 : Math.atan(slope(fx)) * .6 * dir;
+    // A new state grows out of the last look over a third of a second: no colour, tilt or
+    // wave height snaps from one to the other.
+    if (st.from && tm < .35 && !still) {
+      var bl = easeIO(tm / .35), f0 = st.from;
+      var lerp = function (a, b) { return a + (b - a) * bl; };
+      ampK = lerp(f0.ampK, ampK); rot = lerp(f0.rot, near(f0.rot, rot)); dy = lerp(f0.dy, dy);
+      g = lerp(f0.g, g); gl = lerp(f0.gl, gl); A = lerp(f0.A, A);
+    }
+    st.last = { ampK: ampK, rot: rot, dy: dy, g: g, gl: gl, A: A };
+    var col = g ? mix(acc, dim, g) : acc, lineCol = gl ? mix(acc, dim, gl) : acc;
+    // The very start: the line runs out from the left and the fish drops in with a splash.
+    var reveal = still ? 1 : ease(born / .5), drop = still ? 1 : ease(born / .4);
+    if (drop < 1) { dy -= (1 - drop) * 12; op *= Math.min(1, born / .12); }
+    if (!still && !st.dropped && born >= .4) { st.dropped = 1; if (born < 1) { splash(st, fx, wy(fx), 4, 16); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .6 }); } }
+    if (reveal < 1 || drop < 1) moving = true;
     var fy = wy(fx) + dy - hop;
-    if (rot === null) rot = hopRot !== null ? hopRot : Math.atan(slope(fx)) * .9 * dir;
     st.phase += F * 2 * Math.PI * dt;
     var tail = still ? 0 : Math.sin(st.phase) * A;
     if (wiggle && !still) rot -= tail * .25;
@@ -1660,7 +1750,8 @@ var waveTarget = {}, waveState = {};
 
     // The line: grey ahead, orange (or grey, when it's over) behind; snapped when cancelled.
     var endDone = cut ? x - cut.back : x, done = [], ahead = [], xx;
-    for (xx = padL; xx <= w - 2; xx += 1.5) {
+    var x1 = x0 - S * 1.1; // the line starts under the fish's tail: nothing orange behind it at 0 %
+    for (xx = x1; xx <= x1 + (w - 2 - x1) * reveal; xx += 1.5) {
       if (xx <= endDone) {
         var yy = wy(xx);
         if (cut) { var u = Math.max(0, 1 - (endDone - xx) / 22); yy += u * u * cut.sag; }
@@ -1679,9 +1770,9 @@ var waveTarget = {}, waveState = {};
     stroke(ahead, TRACK, 1.6, trackOp);
     stroke(done, lineCol, 2.2, lineOp);
     if (glint >= 0) {
-      var gx = padL + glint * (x - padL), g = []; // only along what's done
-      for (xx = Math.max(padL, gx - 14); xx <= gx; xx += 1.5) g.push(xx, wy(xx));
-      stroke(g, GLINT, 2.4, 1);
+      var gx = x1 + glint * (x - x1), gp = []; // only along what's done
+      for (xx = Math.max(x1, gx - 14); xx <= gx; xx += 1.5) gp.push(xx, wy(xx));
+      stroke(gp, GLINT, 2.4, 1);
     }
     if (of && of <= 20) for (var q = 1; q < of; q++) {
       var tx = x0 + (end - x0) * q / of;
