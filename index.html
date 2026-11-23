@@ -673,17 +673,16 @@ html.app[data-theme=light] .card.form::before,html.app[data-theme=light] body.so
 .tw{display:inline-grid;justify-items:center}
 .tw>*{grid-area:1/1}
 .tw>.ghost{visibility:hidden}
-/* The fragment: says what to do, "from" above "to" with the fields in one column, and Reset as
-   a button across the bottom (tonal: solid orange stays for Download). */
-#cutFly{width:296px} /* the line on top fits on one line: the drop-down is low enough for the empty window (the owner, build 16) */
-#cutFly .fh{display:block;box-sizing:border-box;height:30px;white-space:nowrap;font-size:13px;line-height:1.35;color:var(--fg);padding:4px 6px 8px}
-#cutFly .times{display:grid;grid-template-columns:auto 1fr auto 1fr;column-gap:6px;row-gap:8px;padding:0 6px}
+/* The fragment: one line, "from [0:00] to [3:20]", under the word Fragment; Reset is a quiet link
+   next to it, there only once a part is set. */
+#cutFly{width:auto;min-width:0} /* as small as its one row of times (the owner, build 23: it was 296×170 for two numbers) */
+#cutFly .fh{display:flex;align-items:center;justify-content:space-between;gap:16px;box-sizing:border-box;height:28px;white-space:nowrap;font-size:13px;color:var(--fg);padding:2px 6px 6px}
+#cutFly .fh>span{text-box:trim-both cap alphabetic}
+#cutFly .lnk{font-size:12.5px}
+#cutFly .times{display:flex;align-items:center;gap:6px;padding:0 6px 4px}
 #cutFly .times .tl,#cutFly .times .tl~.tl{margin:0 4px 0 0}
-#cutFly .times input{width:100%}
-.cutoff{display:flex;align-items:center;justify-content:center;width:calc(100% - 12px);height:32px;margin:10px 6px 4px;border:0;border-radius:10px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--tonal);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .08s}
-.cutoff:hover{background:color-mix(in srgb,var(--acc) 22%,transparent)}
-.cutoff:active{background:color-mix(in srgb,var(--acc) 28%,transparent)}
-.cutoff>span{text-box:trim-both cap alphabetic}
+#cutFly .times input{width:72px;font-variant-numeric:tabular-nums}
+#cutFly .times .tl~.tl{margin-left:6px}
 /* The sky over the header, the other half of the water scene at the bottom: gulls, a cloud, the
    sun, in the empty space between the name and the buttons. Still, like the reeds: drawn once. */
 html.app .card.form::before{content:"";position:absolute;top:22px;left:var(--skyx,180px);width:88px;height:37px;pointer-events:none;z-index:0;opacity:1;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='130' height='54' viewBox='0 0 130 54'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='.43' stroke-width='1.6'%3E%3Cpath d='M14 26c6-6 12-6 15 0c3-6 9-6 15 0'/%3E%3Cpath d='M52 14c4-4 8-4 10 0c2-4 6-4 10 0'/%3E%3Cpath d='M2 40c3-3 6-3 8 0c2-3 5-3 8 0'/%3E%3C/g%3E%3Cg stroke-opacity='.36' stroke-width='1.4'%3E%3Ccircle cx='106' cy='30' r='8'/%3E%3Cpath d='M106 16v-4M106 44v4M92 30h-4M120 30h4M96 20l-3-3M116 20l3-3M96 40l-3 3M116 40l3 3'/%3E%3C/g%3E%3C/g%3E%3Cg fill='%23ff6b2c' fill-opacity='.36'%3E%3Ccircle cx='84' cy='8' r='1.3'/%3E%3Ccircle cx='40' cy='6' r='1.1'/%3E%3Ccircle cx='126' cy='10' r='1'/%3E%3C/g%3E%3C/svg%3E") 0 0/88px 37px no-repeat;display:var(--sky,none)}
@@ -740,9 +739,8 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
     <div class="ddw" data-for="audio"><button class="dd" id="fmtB" aria-haspopup="true" aria-expanded="false" title="Audio format"><svg class="lead" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><circle cx="10.5" cy="16" r="1.8"/><path d="M12.3 16v-5l2.7 1"/></svg><span id="fmtT">Original</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
       <div class="fly" id="fmtFly" hidden><div class="flist" id="format"><button data-v="m4a" class="on"><b data-t="Original">Original</b><small data-t="Original YouTube audio, no conversion">Original YouTube audio, no conversion</small></button><button data-v="mp3"><b>MP3</b><small data-t="Converted to MP3. Plays anywhere">Converted to MP3. Plays anywhere</small></button></div></div></div>
     <div class="ddw" id="cutW"><button class="dd" id="cutB" aria-haspopup="true" aria-expanded="false" title="Download only part of the video"><svg class="lead" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span id="cutT">Fragment</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
-      <div class="fly" id="cutFly" hidden><div class="fh" data-t="Choose the start and end of the fragment:">Choose the start and end of the fragment:</div>
-        <div class="times" id="cutTimes"><span class="tl" data-t="from">from</span><input type="number" id="fromM" min="0" placeholder="0" aria-label="from, minutes"><b>:</b><input type="number" id="fromS" placeholder="00" aria-label="from, seconds"><span class="tl" data-t="to">to</span><input type="number" id="toM" min="0" placeholder="0" aria-label="to, minutes"><b>:</b><input type="number" id="toS" placeholder="00" aria-label="to, seconds"></div>
-        <button class="cutoff" id="cutOff"><span data-t="Reset">Reset</span></button></div></div>
+      <div class="fly" id="cutFly" hidden><div class="fh"><span data-t="Fragment">Fragment</span><button class="lnk" id="cutOff" hidden><span data-t="Reset">Reset</span></button></div>
+        <div class="times" id="cutTimes"><span class="tl" data-t="from">from</span><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="cutFrom" placeholder="0:00" aria-label="from"><span class="tl" data-t="to">to</span><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="cutTo" placeholder="–" aria-label="to"></div></div></div>
     <div class="ddw" id="editW"><button class="dd icon" id="editB" aria-pressed="false" title="For editing: H.264 + AAC, opens in any editor. Up to 1080p"><svg viewBox="0 0 24 24"><path d="M4 10.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path d="M4 10.5 3.4 7.6a1.2 1.2 0 0 1 .9-1.4l13.4-2.9a1.2 1.2 0 0 1 1.4.9l.6 2.9z"/><path d="m8.4 5.6 2.6 3.2M13.4 4.5 16 7.7"/></svg></button><input type="checkbox" id="edit" hidden></div>
     <span class="sp"></span>
     <div class="ddw destw"><button class="dd" id="dest" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="destT"></span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
@@ -1062,7 +1060,7 @@ $('edit').addEventListener('change', save);
 // - a whole playlist: as one file, off.
 // What's set by hand for a link stays (picks). The rest (format, quality, a fragment, for
 // editing) is under "More", for all the links.
-var facts = {}, picks = {}, pvRows = {}, lookT = 0, TIMES = ['fromM', 'fromS', 'toM', 'toS'];
+var facts = {}, picks = {}, pvRows = {}, lookT = 0, TIMES = ['cutFrom', 'cutTo'];
 function tr(en, ru) { return LANG === 'ru' ? ru : en; }
 function isListLink(l) { return /youtube\.com\/(playlist\?|@|channel\/|c\/|user\/)/.test(l); }
 function look(link) {
@@ -1209,9 +1207,10 @@ function optLabels() {
   $('qualB').dataset.tip = 'Video quality\n' + (q === '0' ? 'Best' : q + 'p');
   $('fmtB').dataset.tip = 'Audio format\n' + (format() === 'mp3' ? 'MP3' : 'Original');
   var on = cutOn(), lk = linksIn($('links').value), ff = lk.length === 1 && facts[lk[0]], dur = ff && ff.duration ? Math.round(ff.duration) : 0;
-  $('toM').placeholder = dur ? Math.floor(dur / 60) : '–'; $('toS').placeholder = dur ? pad(dur % 60) : '––';
+  $('cutTo').placeholder = dur ? clockOf(dur) : '–';
+  $('cutOff').hidden = !cutOn(); // nothing to reset until a part is set
   $('cutB').classList.toggle('on', on);
-  var part = (timeOf('fromM', 'fromS') || '0:00') + '–' + (timeOf('toM', 'toS') || (dur ? clockOf(dur) : '…'));
+  var part = (timeOf('cutFrom') || '0:00') + '–' + (timeOf('cutTo') || (dur ? clockOf(dur) : '…'));
   setText($('cutT'), on ? part : T('Fragment'));
   $('cutB').dataset.tip = !$('cutB').dataset.canCut ? 'A fragment is for one video at a time'
     : on ? 'Only a part of it' + '\n' + part : 'Download only part of the video';
@@ -1283,35 +1282,38 @@ $('links').addEventListener('input', syncBoxes);
 restore();
 syncBoxes();
 
-// Fragment times: two counters each, minutes and seconds. Seconds roll over into minutes
-// (0:59 ↑ → 1:00, 1:00 ↓ → 0:59), Shift + arrow steps by 10.
+// Fragment times: one field each (the owner: four counters made the drop-down big). "1:30",
+// "1:02:03", or digits alone: up to two are seconds ("90" = 1:30), more end in the seconds
+// ("130" = 1:30). Written back as a clock when the field is left or Enter is pressed;
+// arrows step a second, Shift + arrow ten.
 function pad(n) { return (n < 10 ? '0' : '') + n; }
-function rollover(m, s) {
-  var mm = $(m), ss = $(s);
-  if (ss.value === '' && mm.value === '') return;
-  var total = Math.max(0, Math.floor(+mm.value || 0) * 60 + Math.floor(+ss.value || 0));
-  mm.value = Math.floor(total / 60);
-  ss.value = pad(total % 60);
+function secsOf(v) {
+  v = String(v || '').trim().replace(/[.,;\s]+/g, ':');
+  if (!v) return null;
+  if (/^\d+$/.test(v)) return v.length <= 2 ? +v : +v.slice(0, -2) * 60 + +v.slice(-2);
+  if (!/^\d+(:\d{1,2}){1,2}$/.test(v)) return NaN;
+  return v.split(':').reduce(function (a, x) { return a * 60 + +x; }, 0);
 }
-[['fromM', 'fromS'], ['toM', 'toS']].forEach(function (p) {
-  p.forEach(function (id) {
-    $(id).addEventListener('change', function () { rollover(p[0], p[1]); optLabels(); });
-    $(id).addEventListener('input', optLabels);
-    $(id).addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); rollover(p[0], p[1]); closeFly(); optLabels(); return; }
-      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
-      e.preventDefault();
-      var step = (e.shiftKey ? 10 : 1) * (e.key === 'ArrowUp' ? 1 : -1);
-      $(id).value = (+$(id).value || 0) + step;
-      rollover(p[0], p[1]);
-      optLabels();
-    });
+function tidy(id) {
+  var n = secsOf($(id).value);
+  $(id).value = n === null || isNaN(n) ? '' : clockOf(n);
+}
+TIMES.forEach(function (id) {
+  $(id).addEventListener('change', function () { tidy(id); optLabels(); });
+  $(id).addEventListener('input', optLabels);
+  $(id).addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); tidy(id); closeFly(); optLabels(); return; }
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    var n = secsOf($(id).value) || 0;
+    $(id).value = clockOf(Math.max(0, (isNaN(n) ? 0 : n) + (e.shiftKey ? 10 : 1) * (e.key === 'ArrowUp' ? 1 : -1)));
+    optLabels();
   });
 });
-// "m:ss" for the server, or "" when both counters are empty (= start / end).
-function timeOf(m, s) {
-  if ($(m).value === '' && $(s).value === '') return '';
-  return Math.floor(+$(m).value || 0) + ':' + pad(Math.floor(+$(s).value || 0));
+// "m:ss" (or "h:mm:ss") for the server, or "" when the field is empty (= start / end).
+function timeOf(id) {
+  var n = secsOf($(id).value);
+  return n === null || isNaN(n) ? '' : clockOf(n);
 }
 
 // The switches for one link, for /api/add.
@@ -1320,7 +1322,7 @@ function options(link) {
   return {
     text: link, mode: mode(), format: format(), quality: +quality(), edit: $('edit').checked,
     playlist: o.whole, split: o.split, merge: o.merge, sponsors: o.sponsors,
-    from: cut ? timeOf('fromM', 'fromS') : '', to: cut ? timeOf('toM', 'toS') : '',
+    from: cut ? timeOf('cutFrom') : '', to: cut ? timeOf('cutTo') : '',
   };
 }
 
