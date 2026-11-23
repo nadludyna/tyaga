@@ -471,8 +471,8 @@ h1,html.app header h1{font-size:24px;line-height:1;letter-spacing:.08em;font-wei
 .tbtn.pin.on:hover{background:color-mix(in srgb,var(--acc) 26%,transparent);color:var(--tonal)}
 .tbtn.lang{display:grid;place-items:center;margin-left:0}
 .tbtn.lang svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-html.app .hpair+.wbtns{margin-left:0}
-html.app .wbtns::before{margin:7px 6px 0 6px}
+html.app .hpair+.wbtns{margin-left:10px}
+html.app .wbtns::before{display:none} /* no divider (the owner): a wider gap keeps the two groups apart */
 /* Switching the language: the window cross-fades to the new words (like the theme's circle). */
 html.vt-lang::view-transition-old(root){animation:vtout .13s ease-in both}
 html.vt-lang::view-transition-new(root){animation:fadein .2s ease-out .11s both} /* after the old words are gone: never both at once */
@@ -589,10 +589,10 @@ html.app #jobsCard.folded::after{display:none}
 @media (max-width:560px){.dd .chev{display:none}.dd{padding:0 10px}.dd.plain{padding:0 6px}.opts{gap:6px}.opts .seg button>span{display:none}.dd.plain>span{display:none}.input{flex-direction:row}.go{min-width:0;padding:0 16px}.go>span{display:none}.pvp{width:96px;height:54px}}
 /* ——— Build 07 notes (22.11) ——— */
 /* Quality and format share one slot of one width: switching video/audio moves nothing. */
-#qualB,#fmtB{width:108px;justify-content:space-between}
+
 /* Fragment is the scissors alone (the owner: the word says nothing the icon doesn't); one width
    on or off, the picked part is in its hint. */
-#cutB>span{display:none}
+#cutB>span,#qualB>span,#fmtB>span,#destT{display:none}
 /* One row under the links (the owner picked it from mockups, after a bottom row left two
    half-empty rows): what to download ... Download, at the row's end and the row's height. The folder
    is a setting like the language or the theme: it sits in the header next to them, always in view. */
@@ -609,7 +609,7 @@ html.app #jobsCard.folded::after{display:none}
 #destMenu.up{top:auto;bottom:calc(100% + 8px)}
 /* Room above the name (the owner: it was pressed against the top); the window buttons stay in the corner. */
 html.app header .logo,html.app header .title{margin-top:8px}
-@media (max-width:560px){.opts .go>span{display:none}.opts .go{padding:0 12px}#destT{display:none}}
+@media (max-width:560px){.opts .go>span{display:none}.opts .go{padding:0 12px}}
 /* The fragment: says what to do, "from" above "to" with the fields in one column, and Reset as
    a button across the bottom (tonal: solid orange stays for Download). */
 #cutFly{width:244px}
@@ -668,13 +668,13 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
 
 <div class="card form">
   <div class="input">
-    <textarea id="links" rows="2" data-ph="Paste links, each goes on a new line"></textarea>
+    <textarea id="links" rows="2" data-ph="Paste links freely, each will go on a new line"></textarea>
   </div>
   <div class="row opts">
     <div class="seg" id="mode"><button data-v="video"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="m10 9.5 4.5 2.5-4.5 2.5z"/></svg><span data-t="Video">Video</span></button><button data-v="audio" class="on"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span data-t="Audio">Audio</span></button></div>
-    <div class="ddw" data-for="video" hidden><button class="dd" id="qualB" aria-haspopup="true" aria-expanded="false" title="Video quality"><span id="qualT">Best quality</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
+    <div class="ddw" data-for="video" hidden><button class="dd" id="qualB" aria-haspopup="true" aria-expanded="false" title="Video quality"><svg class="lead" viewBox="0 0 24 24"><path d="M4 9V6a1 1 0 0 1 1-1h3M20 9V6a1 1 0 0 0-1-1h-3M4 15v3a1 1 0 0 0 1 1h3M20 15v3a1 1 0 0 1-1 1h-3"/><path d="M9 9.5v5M9 12h3M12 9.5v5M15 9.5v5"/></svg><span id="qualT">Best quality</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
       <div class="fly" id="qualFly" hidden><div class="qgrid" id="quality"><button data-v="0" class="on wide"><span id="qBest">Best</span></button><button data-v="2160"><span>2160p</span></button><button data-v="1440"><span>1440p</span></button><button data-v="1080"><span>1080p</span></button><button data-v="720"><span>720p</span></button><button data-v="480"><span>480p</span></button><button data-v="360"><span>360p</span></button><button data-v="240"><span>240p</span></button><button data-v="144"><span>144p</span></button></div></div></div>
-    <div class="ddw" data-for="audio"><button class="dd" id="fmtB" aria-haspopup="true" aria-expanded="false" title="Audio format"><span id="fmtT">Original</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
+    <div class="ddw" data-for="audio"><button class="dd" id="fmtB" aria-haspopup="true" aria-expanded="false" title="Audio format"><svg class="lead" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><circle cx="10.5" cy="16" r="1.8"/><path d="M12.3 16v-5l2.7 1"/></svg><span id="fmtT">Original</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
       <div class="fly" id="fmtFly" hidden><div class="flist" id="format"><button data-v="m4a" class="on"><b data-t="Original">Original</b><small data-t="Original YouTube audio, no conversion">Original YouTube audio, no conversion</small></button><button data-v="mp3"><b>MP3</b><small data-t="Converted to MP3. Plays anywhere">Converted to MP3. Plays anywhere</small></button></div></div></div>
     <div class="ddw" id="cutW"><button class="dd" id="cutB" aria-haspopup="true" aria-expanded="false" title="Download only part of the video"><svg class="lead" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span id="cutT">Fragment</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
       <div class="fly" id="cutFly" hidden><div class="fh" data-t="Choose the start and end of the fragment:">Choose the start and end of the fragment:</div>
@@ -772,7 +772,7 @@ var RU = {
   "Not signed in to YouTube. Some videos need it, and sometimes YouTube asks to prove you're not a bot. Click to sign in": 'Вход в YouTube не выполнен. Некоторым видео он нужен, а иногда YouTube просит доказать, что ты не бот. Нажми, чтобы войти',
   'Done ✓': 'Готово ✓',
   "Nothing on the hook yet. Cast a link above.": "На крючке пусто. Закинь ссылку сверху.",
-  "Paste links, each goes on a new line": "Вставляй ссылки, каждая встанет на новую строку",
+  "Paste links freely, each will go on a new line": "Вставляй ссылки как угодно, каждая встанет на новую строку",
   "Video quality": "Качество видео",
   "Best quality": "Лучшее качество",
   "Audio format": "Формат звука",
@@ -1139,6 +1139,12 @@ function optLabels() {
   setText($('qualT'), q === '0' ? T('Best') : q + 'p'); // narrow: the short word
   setText($('qBest'), T('Best') + (top ? ' (' + top + 'p)' : ''));
   setText($('fmtT'), format() === 'mp3' ? 'MP3' : T('Original'));
+  // The icons alone (the owner): the picked value is in the hint, and anything but the default
+  // lights the button up, so a changed setting still shows at a glance.
+  $('qualB').classList.toggle('on', q !== '0');
+  $('qualB').dataset.tip = 'Video quality\n' + (q === '0' ? 'Best' : q + 'p');
+  $('fmtB').classList.toggle('on', format() === 'mp3');
+  $('fmtB').dataset.tip = 'Audio format\n' + (format() === 'mp3' ? 'MP3' : 'Original');
   var on = cutOn(), lk = linksIn($('links').value), ff = lk.length === 1 && facts[lk[0]], dur = ff && ff.duration ? Math.round(ff.duration) : 0;
   $('toM').placeholder = dur ? Math.floor(dur / 60) : '–'; $('toS').placeholder = dur ? pad(dur % 60) : '––';
   $('cutB').classList.toggle('on', on);

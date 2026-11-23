@@ -29,7 +29,11 @@ him more than one that adds nothing. So, before **every** build, however small t
 Things the owner had to find himself, each now caught by a check (keep them in it):
 a drop-down cut off under the list; the options row moving when Video/Audio switch; something
 moving inside an opening drop-down; the link count off-centre in its badge; text cut at its
-bottom edge; a button that doesn't fit its card in a narrow window.
+bottom edge; a button that doesn't fit its card in a narrow window; a button lying over its
+neighbour because the box around it shrank and it didn't (the folder under Download); a page
+whose script failed to load (a syntax error) and so did nothing while every layout check passed.
+Test with real-looking data: the stand's folder is called "out", three letters, and hid how a
+longer name behaves.
 
 ### Before every build, measured, not by eye
 

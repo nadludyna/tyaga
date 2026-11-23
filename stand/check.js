@@ -36,6 +36,9 @@
   }
   window.tyagaCheck = function () {
     var bad = [];
+    // 0. The page's script ran at all: a syntax error in it leaves a page that looks right and
+    // does nothing, and every other check below passes on it (build 14: a line break in a string).
+    if (typeof window.placeSky !== 'function' || typeof window.optLabels !== 'function') bad.push('the page script did not load (a syntax error?)');
     // Measure things where they end up, not halfway through their appearing (a badge pops in from 30 %).
     document.getAnimations().forEach(function (x) { try { if (x.effect && x.effect.getTiming().iterations !== Infinity) x.finish(); } catch (e) {} });
     // 1. Labels in the middle.
@@ -79,6 +82,16 @@
         var w = Math.min(a.right, b.right) - Math.max(a.left, b.left), h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
         if (w > 1 && h > 1) bad.push('overlap: ' + name(kids[i]) + ' and ' + name(kids[j]));
       }
+      // A button wider than the box it sits in: the box shrank, the button didn't, and it lies over
+      // its neighbour while the boxes themselves don't overlap (the folder under Download, build 14).
+      kids.forEach(function (k) {
+        var kr = k.getBoundingClientRect();
+        k.querySelectorAll('button').forEach(function (b) {
+          if (!seen(b) || b.closest('.fly')) return;
+          var br = b.getBoundingClientRect();
+          if (br.right > kr.right + 1 || br.left < kr.left - 1) bad.push('sticks out of its place: ' + name(b));
+        });
+      });
     });
     // 2b. Words side by side in one row stand on one line: their letters' middles within 1 px.
     document.querySelectorAll('.lbar,.opts,.line2,.top').forEach(function (row) {
