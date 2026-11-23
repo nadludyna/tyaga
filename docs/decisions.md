@@ -71,3 +71,30 @@ Updated at the end of every work session.
   resizing a transparent window on Windows is slow and was the stutter the stand didn't show.
 - **Test builds by one PowerShell line** that clones the branch fresh and builds into the
   owner's builds folder: building from his own clone picked up `main` by mistake.
+
+## 2026-11-22/23
+
+- **The options row is icons of one size.** Every button 32 px tall, icon buttons 56 px wide,
+  8 px between all of them, and the window (653) as wide as the row: no hole anywhere.
+  Quality (HD in a frame), format, fragment, "for editing" and the folder are icons with a hint.
+- **A word holds its place in both languages.** A button carries its label in both languages,
+  the other one invisible: switching the language moves and resizes nothing.
+- **A drop-down grows out of its button as one shape**, a neutral outline, unrolling in 0.12 s,
+  opening upwards when the list is folded. Rejected: an orange outline (too loud), a floating
+  menu (looked unattached). Hover and press are about twice as fast as before ("snappy").
+- **Fragment is a slider and the chapters, not typed times.** Knowing timestamps was the chore.
+  A link's own `?t=` is the start, as a chip that switches it off. Greyed out until there is
+  exactly one video link. Rejected after trying: frame previews (storyboards), heavy and slow.
+- **Quality lists only the heights the video has**; with no link or several links, all of them.
+- **Downloads go to `Downloads\ТЯГА\Видео|Аудио`** (folder names in the page's language; an
+  existing one wins). The old default `Downloads\YouTube` moves over; its files stay.
+- **A playlist's line is the current track**, 0 → 100 % each, with a catch and a new cast per
+  track; how far the whole list is stays in words. Rejected: one line for the whole list (the
+  fish crept a pixel per track).
+- **The line and the fish go away as one**: the picture fades, then its place folds; nothing
+  over the fish (a leap, "?", splashes) reaches the row above, and the water scene under the
+  list ends where the fish ends. The sky over the header got clouds.
+- **The tray icon's place is left to Windows.** Windows keys "show on the taskbar" by the
+  exe's path; forcing it means the registry, which ТЯГА doesn't touch (portable).
+- **Pin on top is "always on top", not "survives Win+D".** Show desktop hides every window,
+  pinned ones too, as in Windows itself; keeping one over it needs hacks.
