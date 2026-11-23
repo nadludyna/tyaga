@@ -1,9 +1,12 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestClassify(t *testing.T) {
@@ -153,7 +156,7 @@ func TestCut(t *testing.T) {
 	if _, _, ok := (Options{}).cut(); ok {
 		t.Error("no times must mean no fragment")
 	}
-	for _, bad := range [][2]string{{"3:00", "1:00"}, {"1:75", ""}, {"abc", ""}, {"-5", ""}, {"1:2:3:4", ""}, {"1:00", "1:00"}} {
+	for _, bad := range [][2]string{{"3:00", "1:00"}, {"1:75", ""}, {"abc", ""}, {"-5", ""}, {"1:2:3:4", ""}, {"1:00", "1:00"}, {"1.5:20", ""}, {"1:2.5:00", ""}} {
 		if _, _, ok := cutRange(bad[0], bad[1]); ok {
 			t.Errorf("cutRange(%q, %q) should be rejected", bad[0], bad[1])
 		}
@@ -235,11 +238,10 @@ func TestLog(t *testing.T) {
 		onLine(j, l)
 	}
 	want := []string{
-		"⚠ something odd",
 		"Converting to MP3",
 		"Adding the cover",
 	}
-	if !slices.Equal(j.Log[1:], want) || j.Log[0] != "Downloading the sound" {
+	if !slices.Equal(j.Log[len(j.Log)-2:], want) || j.Log[len(j.Log)-3] != "Downloading the sound" || slices.ContainsFunc(j.Log, func(l string) bool { return strings.Contains(l, "odd") }) {
 		t.Errorf("log = %q", j.Log)
 	}
 	for _, l := range j.Log {
@@ -309,11 +311,11 @@ func TestExplain(t *testing.T) {
 	if got := explain("ERROR: [youtube] FAILabcdefg: unable to download video data: HTTP Error 403: Forbidden"); !strings.HasPrefix(got, "YouTube refused") {
 		t.Errorf("403: %q", got)
 	}
-	if got := explain("ERROR: [youtube] dQw4w9WgXcQ: Video unavailable"); got != "The video was removed or isn't available." {
+	if got := explain("ERROR: [youtube] dQw4w9WgXcQ: Video unavailable"); got != "Removed or not available." {
 		t.Errorf("unavailable: %q", got)
 	}
 	// "Private video. Sign in if you've been granted access": private, not "sign in".
-	if got := explain("ERROR: [youtube] dQw4w9WgXcQ: Private video. Sign in if you've been granted access to this video"); got != "The video is private." {
+	if got := explain("ERROR: [youtube] dQw4w9WgXcQ: Private video. Sign in if you've been granted access to this video"); got != "Private video." {
 		t.Errorf("private: %q", got)
 	}
 	if got := explain("ERROR: [generic] dQw4w9WgXcQ: Unsupported URL here"); got != "Unsupported URL here" {
@@ -402,5 +404,95 @@ func TestHasSignIn(t *testing.T) {
 	google := visit + ".google.com\tTRUE\t/\tTRUE\t1893456000\tSAPISID\tz\n"
 	if hasSignIn([]byte(visit)) || hasSignIn([]byte(google)) || !hasSignIn([]byte(in)) {
 		t.Error("hasSignIn: a visit, Google only and a YouTube sign-in told apart wrongly")
+	}
+}
+
+func TestClearAndUndo(t *testing.T) {
+	mu.Lock()
+	saved := jobs
+	jobs = []*Job{{ID: 1, Status: "done"}, {ID: 2, Status: "running"}, {ID: 3, Status: "error"}, {ID: 4, Status: "queued"}}
+	mu.Unlock()
+	defer func() { mu.Lock(); jobs, cleared = saved, nil; mu.Unlock() }()
+
+	if n := clearFinished(); n != 2 {
+		t.Errorf("cleared %d, want 2", n)
+	}
+	mu.Lock()
+	jobs = append(jobs, &Job{ID: 5, Status: "queued"}) // added in between
+	mu.Unlock()
+	unclear()
+	mu.Lock()
+	defer mu.Unlock()
+	var ids []int
+	for _, j := range jobs {
+		ids = append(ids, j.ID)
+	}
+	if !slices.Equal(ids, []int{1, 2, 3, 4, 5}) {
+		t.Errorf("after undo: %v", ids)
+	}
+}
+
+func TestAlreadyThere(t *testing.T) {
+	j := &Job{Options: Options{Mode: "audio"}, Status: "running"}
+	onLine(j, `[download] C:\Users\x\Downloads\YouTube\Song.m4a has already been downloaded`)
+	if !j.had || j.got {
+		t.Errorf("had %v got %v", j.had, j.got)
+	}
+	if last := j.Log[len(j.Log)-1]; last != "Already in the folder" {
+		t.Errorf("log line %q: no paths on the page", last)
+	}
+	onLine(j, "PROG|1|10|NA|1|1|NA|NA")
+	if !j.got {
+		t.Error("a progress line means something was downloaded")
+	}
+}
+
+func TestFolderName(t *testing.T) {
+	sep := string(filepath.Separator)
+	if got := folderName(filepath.Join(sep+"home", "me", "Downloads", "YouTube")); got != "Downloads › YouTube" {
+		t.Errorf("folderName = %q", got)
+	}
+	if got := folderName(sep + "Music"); got != "Music" {
+		t.Errorf("folderName = %q", got)
+	}
+}
+
+func TestSmoothSpeed(t *testing.T) {
+	j := &Job{Options: Options{Mode: "audio"}, Status: "running"}
+	onLine(j, "PROG|100|1000|NA|3000000|10|NA|NA")
+	j.avgAt = j.avgAt.Add(-time.Second) // a second later, a dip to 100 KB/s
+	onLine(j, "PROG|200|1000|NA|100000|300|NA|NA")
+	if j.avgV < 2000000 {
+		t.Errorf("one slow second pulled the average down to %.0f", j.avgV)
+	}
+	if j.ETA != "0:11" {
+		t.Errorf("time left %q: should follow the average speed, not the dip", j.ETA)
+	}
+}
+
+// The stand's SponsorBlock: ids with SPON in them have two ads, 80 s together.
+func TestFakeSponsorBlock(t *testing.T) {
+	t.Setenv("TYAGA_SPONSORBLOCK", "fake")
+	if n, sec, _ := sponsorSegments("SPONvideo01"); n != 2 || sec != 80 {
+		t.Fatalf("SPON: %d ads, %v s", n, sec)
+	}
+	if n, _, _ := sponsorSegments("Ab3dEf5Gh7J"); n != 0 {
+		t.Fatalf("plain: %d ads", n)
+	}
+}
+
+// Downloads are sorted into Видео / Аудио (Video / Audio in English); a folder that's already
+// there wins, so switching the language doesn't start a second pair.
+func TestTypeDir(t *testing.T) {
+	root := t.TempDir()
+	if got := typeDir(root, true, "ru"); got != filepath.Join(root, "Аудио") {
+		t.Errorf("audio, ru: %s", got)
+	}
+	if got := typeDir(root, false, "en"); got != filepath.Join(root, "Video") {
+		t.Errorf("video, en: %s", got)
+	}
+	os.Mkdir(filepath.Join(root, "Audio"), 0o755)
+	if got := typeDir(root, true, "ru"); got != filepath.Join(root, "Audio") {
+		t.Errorf("audio, ru, with Audio already there: %s", got)
 	}
 }

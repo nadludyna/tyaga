@@ -2,7 +2,8 @@
 
 The basics every change to the page is checked against. They come from Jakob Nielsen's ten
 usability heuristics (1994), which most UI guidelines still build on, plus rules of our
-own. The visual rules (colours, motion, Material 3) are in `CLAUDE.md` under "Design rules";
+own. The visual rules (colours, motion, Material 3) are in the notes for AI agents (`CLAUDE.md`,
+kept on the owner's computer, not in the repo) under "Design rules";
 this file is about behaviour.
 
 ## How to check a change
@@ -10,6 +11,63 @@ this file is about behaviour.
 Walk through it as the owner would, start to finish, not state by state: paste a link, sign in,
 quit. Count what he has to do. Any step the program could have done itself, any moment where
 he has to guess what's going on or wait without knowing why, is a bug to fix before showing.
+
+### Nothing that worked may break
+
+The owner's words, after fixing the same things twice: a build that breaks what worked costs
+him more than one that adds nothing. So, before **every** build, however small the change:
+
+- `tyagaCheck()`, `tyagaFlyCheck()`, `tyagaModeCheck()` and `tyagaLangCheck()` (async: switching
+  the language moves and resizes nothing) all come back empty, in the empty
+  window, with a link pasted, and with a list (queued, downloading, done); English and Russian,
+  dark and light, 680 px and ~440 px. Run them once the theme has finished switching: its
+  circle covers the page for a moment and the corner check then reports false alarms. In a
+  hidden browser pane that circle never finishes: set the theme with
+  `localStorage.setItem('tyaga-theme', 'light')` and reload instead of clicking.
+- The flows in step 3 below, walked on the stand.
+- Anything that fails is fixed before the build, not listed as "known" in the report.
+
+Things the owner had to find himself, each now caught by a check (keep them in it):
+a drop-down cut off under the list; the options row moving when Video/Audio switch; something
+moving inside an opening drop-down; the link count off-centre in its badge; text cut at its
+bottom edge; a button that doesn't fit its card in a narrow window; a button lying over its
+neighbour because the box around it shrank and it didn't (the folder under Download); a page
+whose script failed to load (a syntax error) and so did nothing while every layout check passed.
+Buttons that changed size or place when the language was switched ("Video" and "Видео" are
+not one length: a button holds both words, the other one invisible). A drop-down on the window's bottom edge or past it: the stand's page is taller than ТЯГА's
+window, which ends under its last card, so the check measures against that card. Test with real-looking data: the stand's folder is called "out", three letters, and hid how a
+longer name behaves.
+
+### Before every build, measured, not by eye
+
+The owner kept finding things the eye skips: a label 1–2 pixels above its icon, a button in
+the wrong font, a window that blinked. So these are measured, every time, before a build:
+
+1. **The layout check** (`stand/check.js`): load it in the stand's page and run
+   `tyagaCheck()` in every state the change touches (empty, a link pasted and looked at, More
+   open, the folder menu open, downloading, done, failed; English and Russian; dark and light;
+   wide and ~440 px). It must return an empty list: labels in the middle of their icons and
+   buttons by the letters themselves (±0.5 px), words in one row on one line (±1 px), Onest
+   everywhere, nothing overlapping, nothing sticking out, nothing left in English in Russian.
+2. **The real window** (`stand/run-window.sh`, `stand/record-window.ps1`): ТЯГА's own
+   window over a bright magenta screen, a download started, the screen recorded at 20–30
+   frames a second. Look at every frame of the list card for a blink (magenta showing
+   through) and at the fish from start to the catch. The browser can't show this: it has no
+   see-through window.
+3. **Old behaviour still there**: walk the flows that worked before (paste several links,
+   Retry, Undo, cancel, fold the list) — a change must not take anything away unasked.
+4. **The flows, in the real window, start to finish, recorded**: paste a video link →
+   preview → change the quality → fragment → Download → done → Show file → Copy; an audio
+   link (album with chapters); a playlist link and a video inside a playlist; a failed one →
+   Retry; cancel; clear finished → Undo; sign in → sign out. At every step, the window's
+   height must match rule 1b, and nothing may vanish that is still needed.
+
+Layout itself (grid, spacing, grouping, what goes in a flyout) follows the owner's `ui-layout`
+skill (kept with his Claude settings, for all his projects): mockup first, then build, then
+this check.
+
+The rules behind the check are in "Ours first" below; a new kind of mistake found by eye gets
+a new line in the check, so it's caught by itself next time.
 
 ## Ours first
 
@@ -24,12 +82,28 @@ by themselves while you look at them, and nothing moves when you click.
 
 **1a. Every change of state moves, briefly.** Nothing pops in or vanishes: what appears fades
 or slides in, what goes away folds up or fades out, a switch between two views cross-fades,
-and the neighbours glide to their new place. Short (0.15–0.35 s), the same easing everywhere,
+and the neighbours glide to their new place. Snappy (the owner): hover and press 0.06–0.1 s, a
+drop-down unrolls out of its button in 0.12 s, a view or a row 0.15–0.35 s; the same easing everywhere,
 never a bounce or a show. A missing or abrupt transition is a bug, the same as a wrong number.
 Before a build, list every state change the work touches (appear, disappear, expand,
 collapse, switch views, clear, hover, press, the mouse leaving and coming back) and watch each
 one frame by frame on the stand (screenshots every ~100 ms). The owner should never have to
 point one out.
+
+**1b. The window changes its height only on these events, and on nothing else** (the owner's
+call: compact, but predictable):
+1. Nothing pasted, no downloads: header and the links box only, the smallest window.
+2. A link is pasted and looked at: the window grows once by the preview card. The link is
+   removed: it shrinks back.
+3. A download is added: the preview turns into a row of the list; the list grows by one row
+   per download, up to about five rows, then scrolls inside.
+4. Finished downloads are cleared, or the list is folded or unfolded: it shrinks or grows.
+
+Opening the quality or fragment picker, More, the folder menu, a tooltip, hovering or
+switching an option never changes the window's size. The pickers are flyouts over the preview
+card (they only exist while there is one, and it is taller than them). Every grow is the exact
+reverse of its shrink: same duration, same easing. The see-through part of the window never
+catches clicks.
 
 **2. The window never freezes and nothing is lost.** Every click answers at once (at least a
 visible change), the work goes on in the background, and closing the window or the program

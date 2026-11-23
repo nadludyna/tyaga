@@ -30,9 +30,10 @@ On the first run ТЯГА fetches yt-dlp, ffmpeg and Deno (about 250 MB, once, e
 - **Video:** MP4 at the best quality or capped at 1440p / 1080p / 720p. "For editing" gives H.264 + AAC, which opens in DaVinci Resolve and any editor.
 - **Music:** M4A (the original track) or MP3, clean tags, and the real cover of the album the track is from (from the Apple Music catalogue), not of some compilation that has the same song.
 - **Albums** uploaded as one long video get split into tracks by chapters.
-- **Playlists and channels** go into a numbered folder, or "as one file" with a chapter per video.
+- **Playlists and channels** go into a numbered folder, or "as one file" with a chapter per video. The progress line shows the track it's on; how far the whole list is, in words.
+- **Tidy folders:** everything goes to `Downloads\ТЯГА`, sorted into Видео and Аудио (Video and Audio in English).
 - **No sponsors:** SponsorBlock cuts the ads and "don't forget to subscribe".
-- **Fragment:** download only a piece, cut exactly at the minutes and seconds you set.
+- **Fragment:** download only a piece: drag the two ends on a slider or pick chapters; a link with `?t=` starts where the link does.
 - **Clear progress, compact:** one row per download, with a thin bar and "8 MB of 19 MB · 1.2 MB/s · 0:59 left" (or in words what it's doing: waiting for YouTube, converting). The same progress shows on ТЯГА's taskbar button, so you can follow it with the window out of the way. When something fails: what happened in plain words, Retry and Copy error.
 - **Into a chat in one go:** a finished file can be copied with one click and pasted into Telegram (or any chat) with Ctrl+V.
 - **Playlists with gaps:** a deleted or private video in a playlist is skipped, the rest is downloaded, and Retry fetches only what's missing.
@@ -54,7 +55,7 @@ You need [Go](https://go.dev/dl/) 1.26 or newer:
 GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -tags production -trimpath -ldflags "-s -w -H=windowsgui" -o tyaga.exe .
 ```
 
-Tests: `go test ./...`. The test stand (`stand/README.md`) runs the program against a fake yt-dlp, to see every state without YouTube. Notes for AI agents working on the repo: `CLAUDE.md`. Releases: Actions → Release → a version like `v1.2.0`.
+Tests: `go test ./...`. The test stand (`stand/README.md`) runs the program against a fake yt-dlp, to see every state without YouTube. Releases: Actions → Release → a version like `v1.2.0`.
 
 ## The name
 

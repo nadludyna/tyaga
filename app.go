@@ -150,3 +150,32 @@ func quit() {
 	}
 	exitApp()
 }
+
+// trayInfo is what the tray menu shows on top: how many downloads are left, the one going
+// now and how far it is, and the folder the files go to.
+type trayInfo struct {
+	Busy     int     `json:"busy"`
+	Title    string  `json:"title"`
+	Progress float64 `json:"progress"`
+	Folder   string  `json:"folder"`
+	CanPick  bool    `json:"canPick"`
+}
+
+func trayStatus() trayInfo {
+	t := trayInfo{Folder: folderName(outDir), CanPick: pickFolder != nil}
+	mu.Lock()
+	defer mu.Unlock()
+	for _, j := range jobs {
+		switch j.Status {
+		case "running":
+			t.Busy++
+			t.Title, t.Progress = j.Title, j.Progress
+			if t.Title == "" {
+				t.Title = j.URL
+			}
+		case "queued":
+			t.Busy++
+		}
+	}
+	return t
+}

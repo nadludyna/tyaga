@@ -10,6 +10,31 @@ a = sys.argv[1:]
 if '-U' in a or '--version' in a:
     print('Latest version: 2026.11.10 from yt-dlp/yt-dlp\nyt-dlp is up to date (2026.11.10 from yt-dlp/yt-dlp)'); sys.exit(0)
 out = a[a.index('-P') + 1] if '-P' in a else '.'
+# -J: what the link is, no download (inspect.go). Words in the link pick what it is like:
+# CHAP an album with 10 chapters (Music), SPON a video with ads (SponsorBlock, see inspect.go),
+# HD720 only up to 720p, FAIL fails; a playlist link (list=) gives 3 entries with --flat-playlist.
+if '-J' in a:
+    link = a[-1]
+    time.sleep(1.0)
+    if 'FAIL' in link:
+        print('ERROR: [youtube] FAILabcdefg: Video unavailable', file=sys.stderr); sys.exit(1)
+    if '--flat-playlist' in a and 'list=' in link:
+        print(json.dumps({'id': 'PLxyz', 'title': 'My Wife Is Drink Paint - a very long playlist name that goes on and on',
+                          'playlist_count': 3, 'entries': [{'id': 'Ab3dEf5Gh7J', 'title': 'Rotten Apple Juice'}, {'id': 'Kl9mNo1Pq3R', 'title': 'Digital Love'}, {'id': 'St5uVw7Xy9Z', 'title': 'Nice Little Penguin'}]})); sys.exit(0)
+    vid = (link.split('v=')[-1] if 'v=' in link else link.rstrip('/').split('/')[-1])[:11]
+    chap = 'CHAP' in link
+    # The real album's tracks with their real lengths, as yt-dlp gives chapters (start, end, title).
+    T = [('Speak to Me', 67), ('Breathe (In the Air)', 169), ('On the Run', 225), ('Time', 413), ('The Great Gig in the Sky', 276),
+         ('Money', 382), ('Us and Them', 469), ('Any Colour You Like', 206), ('Brain Damage', 226), ('Eclipse', 147)]
+    ALBUM, t0 = [], 0
+    for name, sec in T:
+        ALBUM.append({'start_time': float(t0), 'end_time': float(min(t0 + sec, 2580)), 'title': name}); t0 += sec
+    info = {'id': vid, 'title': 'Pink Floyd - The Dark Side of the Moon (Full Album)' if chap else 'Rotten Apple Juice',
+            'channel': 'Pink Floyd' if chap else 'Pilotredsky', 'duration': 2580 if chap else 200,
+            'thumbnail': '', 'categories': ['Music'] if (chap or 'MUSIC' in link) else ['Entertainment'],
+            'chapters': ALBUM if chap else [],
+            'formats': [{'height': h, 'vcodec': 'avc1'} for h in ([720, 480, 360] if 'HD720' in link else [2160, 1440, 1080, 720, 480])] + [{'height': None, 'vcodec': 'none'}]}
+    print(json.dumps(info)); sys.exit(0)
 audio = '-x' in a
 fmt = a[a.index('--audio-format') + 1] if '--audio-format' in a else 'mp4'
 playlist = '--yes-playlist' in a
@@ -51,6 +76,13 @@ for i, (artist, title, vid) in enumerate(items, 1):
     say(f'ITEM|{i if playlist else "NA"}|{n if playlist else "NA"}|{title}')
     say(f'THUMB|Youtube|{vid}|https://i.ytimg.com/vi_webp/{vid}/maxresdefault.webp')
     say(f'CHAN|{artist} - Topic')
+    final = f'{base}.{fmt if audio else "mp4"}'
+    if os.path.exists(final):  # downloaded before: --no-overwrites skips it, like the real one
+        say(f'[download] {final} has already been downloaded'); time.sleep(0.3)
+        say(f'FILE|{final}')
+        if audio:
+            say('SONG|' + json.dumps({'filepath': final, 'artist': artist, 'title': title, 'album': None}))
+        continue
     say('[download] Sleeping 5.00 seconds as required by the site...'); time.sleep(5)
     scale = 0.06 if any('TINY' in x for x in a) else 5 if any('LONG' in x for x in a) else 1
     parts = [('webm', int(4_000_000 * scale))] if audio else [('f299.mp4', int(40_000_000 * scale)), ('f140.m4a', int(3_000_000 * scale))]
@@ -85,18 +117,14 @@ for i, (artist, title, vid) in enumerate(items, 1):
         say(f'[Merger] Merging formats into "{final}"')
         say(f'Deleting original file {base}.f299.mp4 (pass -k to keep)')
     # A thumbnail like YouTube's: 16:9; the first song has album art between plain bars.
-    from PIL import Image, ImageDraw
-    im = Image.new('RGB', (1280, 720), (24, 92, 70) if i == 1 else (40, 40, 60))
-    dr = ImageDraw.Draw(im)
+    # Drawn with ffmpeg (already needed), so the stand needs no Python packages.
+    thumb = base + '.thumb.jpg'
     if i == 1:
-        for y in range(720):
-            dr.line([(280, y), (999, y)], fill=(120 + y // 6, 60, 160))
-        dr.ellipse([440, 160, 840, 560], fill=(240, 200, 220))
+        src, draw = 'color=c=0x185c46:s=1280x720', ('drawbox=x=280:y=0:w=720:h=720:color=0x8c3ca0:t=fill,'
+                                                  'drawbox=x=440:y=160:w=400:h=400:color=0xf0c8dc:t=fill')
     else:
-        for x in range(1280):
-            dr.line([(x, 0), (x, 719)], fill=(x // 6, 80 + x // 20, 200 - x // 8))
-        dr.rectangle([100, 500, 700, 640], fill=(250, 250, 250))
-    thumb = base + '.thumb.jpg'; im.save(thumb, quality=88)
+        src, draw = 'gradients=s=1280x720:c0=0x283c8c:c1=0x2ab478:seed=7', 'drawbox=x=100:y=500:w=600:h=140:color=white:t=fill'
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', src, '-vf', draw, '-frames:v', '1', '-q:v', '3', thumb], check=False)
     if audio:
         cmd = ['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', 'sine=d=2', '-i', thumb, '-map', '0:a', '-map', '1:0',
                '-c:v', 'copy', '-disposition:v:0', 'attached_pic', '-id3v2_version', '3', final]

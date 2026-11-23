@@ -10,7 +10,7 @@ rm -rf "$work/out" "$work/fakebin"; mkdir -p "$work/app/bin" "$work/out" "$work/
 cp "$here/fake-yt-dlp" "$work/fakebin/yt-dlp"
 (cd "$here/.." && go build -o "$work/app/tyaga" .)
 cd "$work/app"
-PATH="$work/fakebin:$PATH" nohup ./tyaga -no-browser -out "$work/out" > "$work/app.log" 2>&1 &
+TYAGA_SPONSORBLOCK=fake PATH="$work/fakebin:$PATH" nohup ./tyaga -no-browser -out "$work/out" > "$work/app.log" 2>&1 &
 for _ in $(seq 40); do
   url=$(grep -o "http://[^ ]*" "$work/app.log" | head -1 || true)
   [ -n "$url" ] && break

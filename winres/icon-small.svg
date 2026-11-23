@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- ТЯГА's icon, 32 px and down (taskbar, tray): the same picture with only what still
+       shows that small: a thick hook with its point, a big fish with its play button and its eye. -->
+  <rect width="256" height="256" rx="58" fill="#161616"/>
+  <path d="M184 22 V166 A47 47 0 0 1 90 166 V58" fill="none" stroke="#fff" stroke-width="32" stroke-linecap="round"/>
+  <path d="M70 66 L90 22 L110 66 Z" fill="#fff" stroke="#fff" stroke-width="8" stroke-linejoin="round"/>
+  <g fill="#161616" stroke="#161616" stroke-width="18" stroke-linejoin="round"><ellipse cx="104" cy="136" rx="66" ry="56"/><path d="M56 136 L12 90 Q26 136 12 182 Z"/></g>
+  <g fill="#ff6b2c" stroke="#ff6b2c" stroke-width="3" stroke-linejoin="round"><ellipse cx="104" cy="136" rx="66" ry="56"/><path d="M56 136 L12 90 Q26 136 12 182 Z"/></g>
+  <path d="M84 110 L84 162 L128 136 Z" fill="#fff" stroke="#fff" stroke-width="9" stroke-linejoin="round"/>
+  <circle cx="142" cy="115" r="10" fill="#161616"/>
+</svg>

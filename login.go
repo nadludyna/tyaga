@@ -33,22 +33,32 @@ var login struct {
 	sync.Mutex
 	open bool   // signing in is under way (a window, or waiting for the browser)
 	msg  string // what came of the last try, for the page ("" = nothing to say)
+	win  bool   // ТЯГА's own sign-in window is open
+	step string // while open: "check" (reading the browser's sign-in), "page" (Google's page is open in the browser), "window" (ТЯГА's own window)
 }
 
-// startLogin signs in (see the top of the file). Clicked again while that's under way, it
-// brings the sign-in up again.
+func setStep(s string) {
+	login.Lock()
+	login.step = s
+	login.Unlock()
+}
+
+// startLogin signs in (see the top of the file). Clicked again while that's under way, it only
+// brings ТЯГА's own sign-in window up again if that's what is open. It never opens YouTube in
+// the browser a second time: a click while ТЯГА is still checking the browser's sign-in opened
+// YouTube for someone who was signed in already (the owner, 22.11).
 func startLogin() {
 	if !canLogin {
 		return
 	}
 	login.Lock()
-	already := login.open
-	login.open, login.msg = true, ""
+	already, win := login.open, login.win
+	if !already {
+		login.open, login.msg = true, ""
+	}
 	login.Unlock()
 	if already {
-		if b := defaultBrowser(); b != "" && browserReadable(b) {
-			openURL(signInURL)
-		} else {
+		if win {
 			startLoginWindow() // the second copy finds the open one and brings it up
 		}
 		return
@@ -67,9 +77,11 @@ func signIn() string {
 		return "ТЯГА is still getting ready. Sign in again once it's done."
 	}
 	if b := defaultBrowser(); b != "" && browserReadable(b) {
+		setStep("check")
 		in, ok := browserSignedIn(b)
 		if ok && !in {
 			// Readable, but not signed in to YouTube there: the sign-in page in that browser.
+			setStep("page")
 			openURL(signInURL)
 			for end := time.Now().Add(5 * time.Minute); time.Now().Before(end); {
 				time.Sleep(3 * time.Second)
@@ -92,7 +104,13 @@ func signIn() string {
 	if cmd == nil {
 		return "Couldn't open the sign-in window."
 	}
+	login.Lock()
+	login.win, login.step = true, "window"
+	login.Unlock()
 	cmd.Wait()
+	login.Lock()
+	login.win = false
+	login.Unlock()
 	return takeCookies()
 }
 
@@ -255,5 +273,5 @@ func loginState() map[string]any {
 	if b := browserSource(); b != "" {
 		via = browserName(b)
 	}
-	return map[string]any{"can": canLogin, "open": login.open, "in": signedIn(), "via": via, "msg": login.msg}
+	return map[string]any{"can": canLogin, "open": login.open, "step": login.step, "in": signedIn(), "via": via, "msg": login.msg}
 }

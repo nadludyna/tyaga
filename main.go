@@ -15,7 +15,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/subtle"
-	_ "embed"
+	"embed"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -38,12 +39,22 @@ var page []byte
 //go:embed menu.html
 var menuPage []byte
 
+// The page's font, Onest (SIL Open Font License, fonts/OFL.txt): inside the program, so the
+// window looks the same on every computer and needs no internet.
+//
+//go:embed fonts/*.woff2
+var fontFiles embed.FS
+
 // windowHidden: ТЯГА's window is in the tray or minimised (Windows). A hidden WebView2 page
 // isn't told it's hidden, so the page asks, and stops its animations meanwhile.
 var windowHidden = func() bool { return false }
 
 // trayAction is what the tray menu's buttons do (Windows only).
 var trayAction = func(string) any { return nil }
+
+// pickFolder asks where downloads should go, with Windows' own folder dialog. Only ТЯГА's
+// window has one (window_windows.go); "" = nothing picked.
+var pickFolder func() string
 
 // version is set when a release is built (see .github/workflows/release.yml).
 var version = "dev"
@@ -59,7 +70,9 @@ var (
 func main() {
 	consoleUTF8()
 	home, _ := os.UserHomeDir()
-	out := flag.String("out", filepath.Join(home, "Downloads", "YouTube"), "folder for downloads")
+	// The downloads folder: one of its own, named after the program (sorted into Видео and Аудио
+	// inside it, see typeDir). Until build 28 it was Downloads\YouTube.
+	out := flag.String("out", filepath.Join(home, "Downloads", "ТЯГА"), "folder for downloads")
 	noBrowser := flag.Bool("no-browser", false, "no window and no browser: just the server, its address is in the log")
 	loginWin := flag.Bool("login", false, "only the window for signing in to YouTube (the page opens it)")
 	flag.Parse()
@@ -72,6 +85,14 @@ func main() {
 		cookiesFile = byHand
 	}
 	outDir = *out
+	// A folder picked on the page (settings.json) counts, unless -out was given (the stand).
+	outGiven := false
+	flag.Visit(func(f *flag.Flag) { outGiven = outGiven || f.Name == "out" })
+	// The old default (Downloads\YouTube) remembered as if picked counts as not picked: it moves
+	// to the new one. What's in the old folder stays there.
+	if s := loadSettings(); !outGiven && s.Out != "" && filepath.IsAbs(s.Out) && !strings.EqualFold(filepath.Clean(s.Out), filepath.Join(home, "Downloads", "YouTube")) {
+		outDir = s.Out
+	}
 
 	// The sign-in window (login.go): started by ТЯГА itself, closes when you close it.
 	if *loginWin {
@@ -165,6 +186,17 @@ func handler(token string) http.Handler {
 			return
 		}
 
+		if strings.HasPrefix(r.URL.Path, "/fonts/") { // nothing secret either
+			b, err := fontFiles.ReadFile(strings.TrimPrefix(r.URL.Path, "/"))
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
+			w.Header().Set("Content-Type", "font/woff2")
+			w.Header().Set("Cache-Control", "max-age=31536000")
+			w.Write(b)
+			return
+		}
 		if !strings.HasPrefix(r.URL.Path, "/api/") { // favicon and such don't count as break-in attempts
 			http.NotFound(w, r)
 			return
@@ -191,7 +223,8 @@ func handler(token string) http.Handler {
 				defer mu.Unlock()
 				writeJSON(w, map[string]any{
 					"version": version, "ready": ready, "setup": status, "problem": problem,
-					"out": outDir, "jobs": jobs, "login": loginState(), "hidden": hidden,
+					"out": outDir, "outName": folderName(outDir), "canPick": pickFolder != nil,
+					"jobs": jobs, "login": loginState(), "hidden": hidden,
 				})
 			case "/api/cover":
 				id, _ := strconv.Atoi(r.URL.Query().Get("id"))
@@ -242,7 +275,7 @@ func handler(token string) http.Handler {
 			if o.Format != "mp3" {
 				o.Format = "m4a"
 			}
-			if o.Quality != 1440 && o.Quality != 1080 && o.Quality != 720 {
+			if !slices.Contains([]int{4320, 2160, 1440, 1080, 720, 480, 360, 240, 144}, o.Quality) {
 				o.Quality = 0
 			}
 			if _, _, ok := cutRange(o.From, o.To); !ok {
@@ -250,6 +283,14 @@ func handler(token string) http.Handler {
 				return
 			}
 			addJobs(links, o)
+		case "/api/inspect": // what a link is, before it's downloaded (inspect.go)
+			u, err := url.Parse(strings.TrimSpace(body.Text))
+			if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+				writeJSON(w, Facts{Error: "not a link"})
+				return
+			}
+			writeJSON(w, inspect(u.String()))
+			return
 		case "/api/cancel":
 			cancelJob(body.ID)
 		case "/api/retry":
@@ -259,7 +300,13 @@ func handler(token string) http.Handler {
 		case "/api/logout":
 			logout()
 		case "/api/clear":
-			clearFinished()
+			writeJSON(w, map[string]int{"n": clearFinished()})
+			return
+		case "/api/unclear": // Undo after Clear finished
+			unclear()
+		case "/api/folder": // pick another downloads folder
+			writeJSON(w, map[string]string{"out": chooseFolder()})
+			return
 		case "/api/bye":
 			pageClosed()
 		case "/api/window": // the buttons of ТЯГА's own window, which has no system title bar
@@ -272,12 +319,21 @@ func handler(token string) http.Handler {
 			go func() { time.Sleep(200 * time.Millisecond); quit() }() // let the answer reach the page first
 			return
 		case "/api/open":
-			os.MkdirAll(outDir, 0o755)
-			openFolder(outDir)
+			dir := downloadsDir()
+			os.MkdirAll(dir, 0o755)
+			openFolder(dir)
 		case "/api/reveal":
 			if path, ok := jobFile(body.ID, body.N); ok && fileExists(path) {
 				revealFile(path)
 			}
+		case "/api/play": // double-click on a finished row: the file opens in its player
+			if path, ok := jobFile(body.ID, body.N); ok && fileExists(path) {
+				openFile(path)
+			}
+		case "/api/copyall": // every finished file onto the clipboard at once
+			paths := finishedFiles()
+			writeJSON(w, map[string]any{"ok": len(paths) > 0 && copyFiles(paths), "n": len(paths)})
+			return
 		case "/api/copyfile": // the finished file onto the clipboard, to paste into a chat
 			path, ok := jobFile(body.ID, body.N)
 			writeJSON(w, map[string]bool{"ok": ok && fileExists(path) && copyFile(path)})
@@ -288,4 +344,41 @@ func handler(token string) http.Handler {
 		}
 		writeJSON(w, map[string]bool{"ok": true})
 	})
+}
+
+// downloadsDir is where downloads go now (it can change while ТЯГА runs).
+func downloadsDir() string {
+	mu.Lock()
+	defer mu.Unlock()
+	return outDir
+}
+
+// chooseFolder shows the folder dialog and, if a folder was picked, sends the next downloads
+// there and remembers it. What's downloading now finishes where it started. Returns the
+// folder's short name for the page, or "" if nothing changed.
+func chooseFolder() string {
+	if pickFolder == nil {
+		return ""
+	}
+	dir := pickFolder()
+	if dir == "" || !filepath.IsAbs(dir) {
+		return ""
+	}
+	mu.Lock()
+	outDir = dir
+	mu.Unlock()
+	saveSettings(settings{Out: dir})
+	logf("Downloads now go to %s", dir)
+	return folderName(dir)
+}
+
+// folderName is how the page names a folder: its last two parts ("Downloads › YouTube"),
+// not the whole path.
+func folderName(dir string) string {
+	dir = filepath.Clean(dir)
+	base, parent := filepath.Base(dir), filepath.Base(filepath.Dir(dir))
+	if parent == "" || parent == "." || parent == string(filepath.Separator) || strings.HasSuffix(parent, ":\\") || parent == dir {
+		return base
+	}
+	return parent + " › " + base
 }
