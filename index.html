@@ -864,6 +864,7 @@ var RU = {
   "Converted to MP3. Plays anywhere": "В MP3. Играет везде",
   "Download only part of the video": "Скачать только часть видео",
   "A fragment is for one video at a time": "Фрагмент — только для одного видео",
+  "Paste a link to a video first": "Сначала вставь ссылку на видео",
   "Only a part of it": "Скачать только кусок",
   "Choose the start and end of the fragment:": "Выбери начало и конец фрагмента:",
   "Empty “to”: to the end": "Пустое «до» — до конца",
@@ -1227,7 +1228,7 @@ function topHeight() {
 }
 function syncBoxes() {
   var links = linksIn($('links').value), one = links.length === 1 ? plan(links[0]) : null;
-  var canCut = !links.length || !!(one && !one.whole);
+  var canCut = !!(one && !one.whole); // a part of one video: no link, nothing to cut (the owner)
   // Several links: Fragment stays where it is, greyed out (it vanishing made the buttons after it jump).
   $('cutB').setAttribute('aria-disabled', !canCut); // (not disabled: its hint still shows under the mouse)
   $('cutB').dataset.canCut = canCut ? '1' : '';
@@ -1265,7 +1266,7 @@ function optLabels() {
   $('cutB').classList.toggle('on', on);
   var part = (timeOf('cutFrom') || '0:00') + '–' + (timeOf('cutTo') || (dur ? clockOf(dur) : '…'));
   setText($('cutT'), on ? part : T('Fragment'));
-  $('cutB').dataset.tip = !$('cutB').dataset.canCut ? 'A fragment is for one video at a time'
+  $('cutB').dataset.tip = !$('cutB').dataset.canCut ? (linksIn($('links').value).length ? 'A fragment is for one video at a time' : 'Paste a link to a video first')
     : on ? 'Only a part of it' + '\n' + part : 'Download only part of the video';
   $('editB').setAttribute('aria-pressed', $('edit').checked);
   // In audio it stays in its place, greyed out (hidden, it left a hole in the row: build 19);
