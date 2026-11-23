@@ -683,8 +683,20 @@ html.app[data-theme=light] .card.form::before,html.app[data-theme=light] body.so
 #cutFly .times .tl,#cutFly .times .tl~.tl{margin:0 4px 0 0}
 #cutFly .times input{width:72px;font-variant-numeric:tabular-nums}
 #cutFly .times .tl~.tl{margin-left:6px}
-#cutFly:has(#cutChaps:not([hidden])){width:272px}
-.chaps{width:0;min-width:100%;max-height:84px;overflow-y:auto;margin:6px 0 0;padding:6px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:1px}
+#cutFly:has(#cutChaps:not([hidden])),#cutFly:has(#cutTrim:not([hidden])){width:272px}
+/* The slider: a thin track, the kept part tonal, two round handles; what's picked in the header. */
+#cutFly .fh{gap:10px}
+.trv{margin-left:auto;font-size:12.5px;font-weight:500;color:var(--dim);font-variant-numeric:tabular-nums;text-box:trim-both cap alphabetic}
+.trv.on{color:var(--tonal)}
+.tr-h:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#cutTimes[hidden]{display:none}
+.trim{position:relative;padding:8px 10px 2px}
+.tr-track{position:relative;height:22px;cursor:pointer;touch-action:none}
+.tr-track::before{content:"";position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:color-mix(in srgb,var(--fg) 14%,transparent)}
+.tr-fill{position:absolute;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:color-mix(in srgb,var(--acc) 60%,transparent)}
+.tr-h{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;box-sizing:border-box;border-radius:50%;background:var(--menu);border:2px solid var(--acc);transition:transform .08s ease}
+.tr-track:hover .tr-h,.tr-h.drag{transform:scale(1.15)}
+.chaps{width:0;min-width:100%;max-height:70px;overflow-y:auto;margin:6px 0 0;padding:6px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:1px}
 .chap{flex:none;display:flex;align-items:center;gap:10px;width:100%;height:28px;padding:0 8px;border:0;border-radius:7px;background:transparent;color:var(--fg);font:inherit;font-size:13px;text-align:left;cursor:pointer;transition:background .08s ease}
 .chap:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
 .chap.on{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--tonal)}
@@ -747,7 +759,8 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
     <div class="ddw" data-for="audio"><button class="dd" id="fmtB" aria-haspopup="true" aria-expanded="false" title="Audio format"><svg class="lead" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><circle cx="10.5" cy="16" r="1.8"/><path d="M12.3 16v-5l2.7 1"/></svg><span id="fmtT">Original</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
       <div class="fly" id="fmtFly" hidden><div class="flist" id="format"><button data-v="m4a" class="on"><b data-t="Original">Original</b><small data-t="Original YouTube audio, no conversion">Original YouTube audio, no conversion</small></button><button data-v="mp3"><b>MP3</b><small data-t="Converted to MP3. Plays anywhere">Converted to MP3. Plays anywhere</small></button></div></div></div>
     <div class="ddw" id="cutW"><button class="dd" id="cutB" aria-haspopup="true" aria-expanded="false" title="Download only part of the video"><svg class="lead" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><span id="cutT">Fragment</span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
-      <div class="fly" id="cutFly" hidden><div class="fh"><span data-t="Fragment">Fragment</span><button class="lnk" id="cutOff" hidden><span data-t="Reset">Reset</span></button></div>
+      <div class="fly" id="cutFly" hidden><div class="fh"><span data-t="Fragment">Fragment</span><b class="trv" id="trV"></b><button class="lnk" id="cutOff" hidden><span data-t="Reset">Reset</span></button></div>
+        <div class="trim" id="cutTrim" hidden><div class="tr-track" id="trTrack"><i class="tr-fill"></i><b class="tr-h" data-h="a" tabindex="0" role="slider" aria-label="from"></b><b class="tr-h" data-h="z" tabindex="0" role="slider" aria-label="to"></b></div></div>
         <div class="times" id="cutTimes"><span class="tl" data-t="from">from</span><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="cutFrom" placeholder="0:00" aria-label="from"><span class="tl" data-t="to">to</span><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="cutTo" placeholder="–" aria-label="to"></div>
         <div class="chaps" id="cutChaps" hidden></div></div></div>
     <div class="ddw" id="editW"><button class="dd icon" id="editB" aria-pressed="false" title="For editing: H.264 + AAC, opens in any editor. Up to 1080p"><svg viewBox="0 0 24 24"><path d="M4 10.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path d="M4 10.5 3.4 7.6a1.2 1.2 0 0 1 .9-1.4l13.4-2.9a1.2 1.2 0 0 1 1.4.9l.6 2.9z"/><path d="m8.4 5.6 2.6 3.2M13.4 4.5 16 7.7"/></svg></button><input type="checkbox" id="edit" hidden></div>
@@ -1036,7 +1049,9 @@ addEventListener('pointerdown', function (e) {
 // Elements with data-for="audio" / "video" are visible only in their mode.
 var mode = segmented('mode', function (m) {
   document.querySelectorAll('[data-for]').forEach(function (e) { e.hidden = e.dataset.for !== m; });
-  if (window.optLabels) optLabels();
+  // The preview too: what's offered depends on audio or video ("split into tracks" is audio's;
+  // it only appeared on the next redraw, a language switch moved the list by its height).
+  if (window.syncBoxes) syncBoxes(); else if (window.optLabels) optLabels();
 });
 var format = segmented('format', function () { closeFly(); optLabels(); });
 var quality = segmented('quality', function () { closeFly(); optLabels(); });
@@ -1081,8 +1096,8 @@ function look(link) {
     syncBoxes();
   }, function () { facts[link] = { failed: true }; syncBoxes(); });
 }
-function plan(link) {
-  var f = facts[link] || { looking: true }, p = picks[link] || {}, audio = mode() === 'audio';
+function plan(link, m) {
+  var f = facts[link] || { looking: true }, p = picks[link] || {}, audio = (m || mode()) === 'audio';
   var kind = f.kind || (isListLink(link) ? 'list' : /[?&]list=/.test(link) ? 'inlist' : 'video');
   var o = { kind: kind, whole: kind === 'list' || (kind === 'inlist' && !!p.whole) };
   var junk = audio && f.offtopic >= 20; // music: talking and intros SponsorBlock knows of
@@ -1180,7 +1195,11 @@ function renderPv() {
         $('cutFrom').value = $('cutFrom').value === clockOf(ls) ? '' : clockOf(ls);
         optLabels(); renderPv();
       }));
-    r.c.hidden = !r.c.firstChild;
+    // The row of switches keeps its place in both modes when the other mode has some ("split into
+    // tracks" is audio's): switching audio and video never changes the window's height (rule 1b).
+    var oo = plan(link, mode() === 'audio' ? 'video' : 'audio');
+    r.c.hidden = !r.c.firstChild && !(oo.canSplit || oo.canAds);
+    r.c.style.minHeight = !r.c.firstChild && !r.c.hidden ? '28px' : '';
   });
   Object.keys(pvRows).forEach(function (l) { if (!seen[l]) { pvRows[l].el.remove(); delete pvRows[l]; } });
   var more = $('pvMore') || el('div', 'pvf pvmore');
@@ -1242,6 +1261,7 @@ function optLabels() {
   $('cutTo').placeholder = dur ? clockOf(dur) : '–';
   $('cutOff').hidden = !cutOn(); // nothing to reset until a part is set
   renderChaps(ff && ff.parts && ff.parts.length >= 2 ? ff.parts : [], dur);
+  renderTrim(dur);
   $('cutB').classList.toggle('on', on);
   var part = (timeOf('cutFrom') || '0:00') + '–' + (timeOf('cutTo') || (dur ? clockOf(dur) : '…'));
   setText($('cutT'), on ? part : T('Fragment'));
@@ -1346,6 +1366,70 @@ TIMES.forEach(function (id) {
     optLabels();
   });
 });
+// The slider: the whole video as a strip, the part to download between two handles, what's
+// picked written in the drop-down's header (the owner: no typing times, no frame pictures). The
+// time fields stay as the state, and are shown only when the video's length isn't known.
+function trimDur() { var lk = linksIn($('links').value), ff = lk.length === 1 && facts[lk[0]]; return ff && ff.duration ? ff.duration : 0; }
+function trimEnds(dur) {
+  var a = secsOf($('cutFrom').value), z = secsOf($('cutTo').value);
+  a = a === null || isNaN(a) ? 0 : Math.min(Math.max(0, a), dur);
+  z = z === null || isNaN(z) ? dur : Math.min(Math.max(a, z), dur);
+  return [a, z];
+}
+function renderTrim(dur) {
+  var box = $('cutTrim');
+  box.hidden = !dur;
+  $('cutTimes').hidden = !!dur; // the fields only when the length isn't known (no slider then)
+  var v = $('trV');
+  if (!dur) { setText(v, ''); return; }
+  var e = trimEnds(dur), pa = e[0] / dur * 100, pz = e[1] / dur * 100;
+  var fill = box.querySelector('.tr-fill'), hs = box.querySelectorAll('.tr-h');
+  fill.style.left = pa + '%'; fill.style.width = (pz - pa) + '%';
+  hs[0].style.left = pa + '%'; hs[1].style.left = pz + '%';
+  hs[0].setAttribute('aria-valuetext', clockOf(e[0])); hs[1].setAttribute('aria-valuetext', clockOf(e[1]));
+  setText(v, clockOf(e[0]) + '–' + clockOf(e[1]));
+  v.classList.toggle('on', cutOn());
+}
+(function () {
+  var track = $('trTrack'), drag = null;
+  var at = function (e) { var r = track.getBoundingClientRect(); return Math.min(Math.max(0, e.clientX - r.left), r.width) / r.width; };
+  var put = function (h, t, dur) {
+    var e = trimEnds(dur);
+    t = Math.round(Math.min(Math.max(0, t), dur));
+    if (h === 'a') { t = Math.min(t, e[1] - 1); $('cutFrom').value = t <= 0 ? '' : clockOf(t); }
+    else { t = Math.max(t, e[0] + 1); $('cutTo').value = t >= dur - 0.5 ? '' : clockOf(t); }
+    optLabels();
+  };
+  track.addEventListener('pointerdown', function (e) {
+    var dur = trimDur(); if (!dur) return;
+    var t = at(e) * dur, ends = trimEnds(dur);
+    // the handle pressed, or the nearer one to where the strip was pressed
+    drag = e.target.dataset && e.target.dataset.h || (Math.abs(t - ends[0]) <= Math.abs(t - ends[1]) ? 'a' : 'z');
+    track.setPointerCapture(e.pointerId);
+    track.querySelector('.tr-h[data-h="' + drag + '"]').classList.add('drag');
+    put(drag, t, dur);
+    e.preventDefault();
+  });
+  track.addEventListener('pointermove', function (e) { var dur = trimDur(); if (drag && dur) put(drag, at(e) * dur, dur); });
+  var end = function () {
+    if (!drag) return;
+    track.querySelectorAll('.tr-h').forEach(function (x) { x.classList.remove('drag'); });
+    drag = null; renderPv();
+  };
+  track.addEventListener('pointerup', end);
+  track.addEventListener('pointercancel', end);
+  // A handle by the keyboard: arrows move it a second, Shift + arrow ten.
+  track.querySelectorAll('.tr-h').forEach(function (h) {
+    h.addEventListener('keydown', function (e) {
+      var dur = trimDur(), d = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+      if (!dur || !d) return;
+      e.preventDefault();
+      var ends = trimEnds(dur);
+      put(h.dataset.h, ends[h.dataset.h === 'a' ? 0 : 1] + d * (e.shiftKey ? 10 : 1), dur);
+      renderPv();
+    });
+  });
+})();
 // The video's chapters under the times: one click sets "from" and "to" to it, no numbers to know
 // (the owner: knowing timestamps is a chore). The picked one is lit.
 function renderChaps(parts, dur) {

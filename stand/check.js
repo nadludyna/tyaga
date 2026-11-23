@@ -214,12 +214,18 @@
   window.tyagaModeCheck = function () {
     var at = function () { return [].map.call(document.querySelectorAll('.opts>*'), function (e) { return e.hidden ? 'h' : Math.round(e.getBoundingClientRect().right); }); };
     var btn = document.querySelectorAll('#mode button'), was = document.querySelector('#mode .on'), out = [];
-    var a = null;
+    var a = null, h = null;
+    // ...and changes no height: the window grows only on its own few events (rule 1b); the
+    // album's "split into tracks" row came and went with audio (build 25).
+    var tall = function () { return Math.round(document.querySelector('.card.form').getBoundingClientRect().height); };
     [].forEach.call(btn, function (b) {
       b.click();
       var r = at().filter(function (x) { return x !== 'h'; }).join(',');
       if (a !== null && r !== a) out.push('switching to ' + b.dataset.v + ' moved the row: ' + a + ' → ' + r);
       a = r;
+      var t = tall();
+      if (h !== null && t !== h) out.push('switching to ' + b.dataset.v + ' changed the height: ' + h + ' → ' + t);
+      h = t;
     });
     was.click();
     return out;
