@@ -53,6 +53,7 @@ button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.
 .ask .row button{flex:1;justify-content:center;white-space:nowrap;border:1px solid var(--line)}
 .ask .row .quit{color:var(--err);border-color:color-mix(in srgb,var(--err) 40%,transparent)}
 .asking .items{display:none}.asking .ask{display:block}
+html.off .menu{opacity:0;animation:none;transition:opacity .08s ease}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
 <div class="menu" id="menu">
@@ -110,21 +111,35 @@ function showNow(s) {
 // Every time the menu shows: what's going on now, and the plain menu (not the question).
 function fresh() {
   try { var t = localStorage.getItem('tyaga-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
-  document.body.classList.remove('asking');
   langNow();
-  var m = $('menu'); m.style.animation = 'none'; void m.offsetWidth; m.style.animation = '';
   tray('busy').then(showNow, function () {});
+  // The fade-in once per opening: Windows gives the focus to the taskbar and back right after
+  // the click (and "visible" comes with "focus"), and starting it over each time made it blink.
+  if (Date.now() - shownAt < 600 && !document.documentElement.classList.contains('off')) return;
+  shownAt = Date.now();
+  document.body.classList.remove('asking');
+  document.documentElement.classList.remove('off');
+  var m = $('menu'); m.style.animation = 'none'; void m.offsetWidth; m.style.animation = '';
+}
+// Going away: the card fades out first, then ТЯГА hides the window, so the window's last
+// frame is an empty one and the next opening doesn't flash the old menu before fading in.
+// (Right after opening ТЯГА ignores "hide": then it isn't faded, or it'd stay open, invisible.)
+var shownAt = 0;
+function away(what) {
+  if (what === 'hide' && Date.now() - shownAt < 520) { tray('hide'); return; }
+  document.documentElement.classList.add('off');
+  setTimeout(function () { tray(what); }, 90);
 }
 document.addEventListener('visibilitychange', function () { if (!document.hidden) fresh(); });
 addEventListener('focus', fresh);
-addEventListener('blur', function () { tray('hide'); }); // ТЯГА ignores this right after opening
-addEventListener('keydown', function (e) { if (e.key === 'Escape') tray('hide'); });
+addEventListener('blur', function () { away('hide'); }); // ТЯГА ignores this right after opening
+addEventListener('keydown', function (e) { if (e.key === 'Escape') away('hide'); });
 addEventListener('contextmenu', function (e) { e.preventDefault(); });
-$('open').onclick = function () { tray('open'); };
-$('folder').onclick = function () { tray('folder'); };
-$('pick').onclick = function () { tray('pick'); };
-$('quit').onclick = function () { if (busy) { document.body.classList.add('asking'); $('keep').focus(); } else tray('quit'); };
-$('keep').onclick = function () { tray('hide'); };
-$('quit2').onclick = function () { tray('quit'); };
+$('open').onclick = function () { away('open'); };
+$('folder').onclick = function () { away('folder'); };
+$('pick').onclick = function () { away('pick'); };
+$('quit').onclick = function () { if (busy) { document.body.classList.add('asking'); $('keep').focus(); } else away('quit'); };
+$('keep').onclick = function () { away('hide'); };
+$('quit2').onclick = function () { away('quit'); };
 fresh();
 </script></body></html>

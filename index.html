@@ -125,9 +125,13 @@ label:hover{color:var(--fg)}
    snackbar: under the options, fades in, goes away by itself. */
 .notice{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13.5px;color:var(--dim);animation:fadein .2s ease both;transition:opacity .2s ease}
 .notice.out{opacity:0}
+/* It comes and goes as one: it fades and its place opens or folds with it, so what's under it
+   glides instead of jumping (the owner: Clear finished's note vanished, then the list jumped up). */
+.notice{transition:opacity .2s ease,height .3s cubic-bezier(.2,.8,.2,1),margin-top .3s cubic-bezier(.2,.8,.2,1),padding-bottom .3s cubic-bezier(.2,.8,.2,1)}
+.notice.out{margin-top:0;padding-bottom:0}
 .notice span{flex:1;min-width:0}
 .notice .btn{height:28px;padding:0 12px;font-variant-numeric:tabular-nums}
-.notice{position:relative;padding-bottom:8px}
+.notice{position:relative;padding-bottom:8px;box-sizing:border-box} /* its height, set while it opens or folds, includes this padding */
 .ntime{position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--line);overflow:hidden}
 .ntime::after{content:"";position:absolute;inset:0;border-radius:2px;background:var(--acc);opacity:.7;transform-origin:left;animation:drain 8s linear forwards}
 @keyframes drain{to{transform:scaleX(0)}}
@@ -187,9 +191,9 @@ label:hover{color:var(--fg)}
 /* The lane opens when the download starts and folds after its last moment (the catch, the
    snapped line); the canvas is taller than the lane, so the fish can jump without the row
    growing, and never takes the mouse. */
-.lane{flex:0 0 100%;position:relative;height:24px;transition:height .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
+.lane{flex:0 0 100%;position:relative;height:30px;transition:height .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
 .lane.shut{height:0;opacity:0;overflow:hidden}
-.wave{position:absolute;left:0;top:-8px;width:100%;height:40px;display:block;pointer-events:none}
+.wave{position:absolute;left:0;top:-2px;width:100%;height:40px;display:block;pointer-events:none}
 .acts{flex:none;display:flex;gap:6px;margin-left:auto}
 .acts .btn{height:28px;padding:0 10px 0 8px;font-size:12.5px;gap:6px}
 .acts .btn svg{width:15px;height:15px}
@@ -1681,8 +1685,13 @@ function notice(text, undo) {
     label(); noticeTick = setInterval(label, 250);
   }
   $('noticeB').onclick = function () { hideNotice(); if (undo) undo(); };
-  n.classList.remove('out');
-  if (n.hidden) { n.hidden = false; n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; }
+  if (n.hidden && !still()) { // opens: its place grows from nothing while it fades in
+    n.hidden = false; n.classList.remove('out'); n.style.height = '';
+    var full = n.offsetHeight;
+    n.style.overflow = 'hidden'; n.classList.add('out'); n.style.height = '0px'; void n.offsetHeight;
+    n.classList.remove('out'); n.style.height = full + 'px';
+    clearTimeout(n.sizeT); n.sizeT = setTimeout(function () { n.style.height = ''; n.style.overflow = ''; }, 320);
+  } else { n.hidden = false; n.classList.remove('out'); }
   noticeTimer = setTimeout(hideNotice, NOTICE_MS);
 }
 function hideNotice() {
@@ -1690,8 +1699,11 @@ function hideNotice() {
   clearTimeout(noticeTimer); clearInterval(noticeTick);
   if (n.hidden) return;
   if (still()) { n.hidden = true; return; }
-  n.classList.add('out');
-  noticeTimer = setTimeout(function () { n.hidden = true; n.classList.remove('out'); }, 210);
+  // folds: from its height to nothing, fading, then gone (the reverse of opening)
+  clearTimeout(n.sizeT);
+  n.style.height = n.offsetHeight + 'px'; n.style.overflow = 'hidden'; void n.offsetHeight;
+  n.classList.add('out'); n.style.height = '0px';
+  noticeTimer = setTimeout(function () { n.hidden = true; n.classList.remove('out'); n.style.height = ''; n.style.overflow = ''; }, 320);
 }
 
 // Closing or reloading the page: tell TYAGA. If no page comes back, it finishes
@@ -1916,8 +1928,13 @@ function updateRow(r, j) {
   // (the fish may keep it open longer while it swims the last stretch: look again then)
   if (t.until > now) { clearTimeout(r.untilT); r.untilT = setTimeout(function () { if (r.j) updateRow(r, r.j); }, t.until - now + 30); }
   if (waiting && !t.wait) t.waitAt = now; // YouTube's pause began: count it down from now
-  t.p = j.progress; t.status = j.status; t.wait = waiting ? j.wait : 0; t.speed = j.speed;
-  t.ind = ind; t.conv = conv; t.pos = j.pos; t.of = j.of;
+  // A playlist: the line is the track it's on, 0 → 100 % each time (the owner: across 92 tracks
+  // the fish crept a pixel a track and turned somersaults in place). How far the whole list is
+  // stays in words ("track 2 of 92 · 1 %"), the title and the taskbar.
+  var perTrack = !!(j.list && j.of > 1 && j.pos > 0);
+  t.p = perTrack ? Math.max(0, Math.min(100, (j.progress / 100 * j.of - (j.pos - 1)) * 100)) : j.progress;
+  t.status = j.status; t.wait = waiting ? j.wait : 0; t.speed = j.speed;
+  t.ind = ind; t.conv = conv; t.pos = j.pos; t.of = j.of; t.list = perTrack;
   var open = running || now < (t.until || 0);
   if (r.laneOpen !== open) {
     var animate = r.laneOpen !== undefined && !still();
@@ -2298,7 +2315,7 @@ function openHeight() { // the open list card's natural height, measured without
     e.style.height = e.style.paddingTop = e.style.paddingBottom = '';
   });
   var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + mainPad();
-  list.querySelectorAll('.job.lining .lane').forEach(function (l) { n += (l.classList.contains('shut') ? 0 : 24) - l.offsetHeight; });
+  list.querySelectorAll('.job.lining .lane').forEach(function (l) { n += (l.classList.contains('shut') ? 0 : 30) - l.offsetHeight; });
   moving.forEach(function (m) { m[0].style.height = m[1]; m[0].style.paddingTop = m[2]; m[0].style.paddingBottom = m[3]; m[0].hidden = m[4]; });
   card.hidden = was[0]; card.className = was[1]; card.style.height = was[2];
   return Math.ceil(n);
@@ -2485,6 +2502,8 @@ var waveTarget = {}, waveState = {};
     cx.beginPath(); cx.arc(.58, -.26, .12, 0, 2 * Math.PI); cx.fill();
     cx.restore();
   }
+  // Where the fish is on the line at a given progress (the same sum as in draw).
+  function x0Of(cv, shown) { var w = cv.clientWidth, a = 2 + S * 1.5, b = w - S - 3; return a + Math.max(0, b - a) * shown / 100; }
   function splash(st, x, y, n, pw) {
     for (var i = 0; i < n; i++) st.parts.push({ k: 'd', x: x, y: y, vx: (Math.random() - .5) * pw * 1.6, vy: -pw * (.6 + Math.random() * .6), life: 0, max: .6, r: 1.1 });
   }
@@ -2519,11 +2538,27 @@ var waveTarget = {}, waveState = {};
     }
     var tm = (now - st.at) / 1000;
 
+    // A playlist, a new track: the one before is caught (the fish leaps where it got to, the
+    // line pulls straight), then the line is cast again from the start and the fish drops onto
+    // it. Nothing goes back: it's a new line, said by the leap and the cast.
+    var catchK = -1;
+    if (t.list && t.pos > (st.trk || 0)) {
+      if (st.trk && t.status === 'running' && !still) { st.catchAt = now; st.caughtAt = st.shown; splash(st, x0Of(cv, st.shown), MID, 6, 26); }
+      st.trk = t.pos;
+    }
+    if (st.catchAt) {
+      catchK = (now - st.catchAt) / 700;
+      if (catchK >= 1) { // caught: a new cast
+        st.catchAt = 0; catchK = -1; st.shown = 0; st.vel = 0; st.born = now; st.dropped = 0; st.from = null;
+      }
+    }
+
     // The spring, in small steps (a long frame must not make it overshoot).
     var target = finishing ? 100 : t.p; // converting mid-playlist: where it is
     if (mode === 'err' || mode === 'cancel') { target = st.shown; st.vel = 0; } // over: it stays where it got to
-    if (t.p < st.shown - 5 && mode !== 'done') { st.shown = t.p; st.vel = 0; }
-    if (still) st.shown = target;
+    if (catchK >= 0) target = st.shown; // mid-catch: it stays where it got to
+    else if (t.p < st.shown - 5 && mode !== 'done' && !t.list) { st.shown = t.p; st.vel = 0; }
+    if (still) st.shown = t.list && st.catchAt ? st.shown : target;
     else for (var left = dt; left > 1e-4; left -= 1 / 60) {
       var d = Math.min(1 / 60, left), sp = finishing ? [60, 2 * Math.sqrt(60)] : spring(target - st.shown); // the last stretch: briskly to the very end
       st.vel += (sp[0] * (target - st.shown) - sp[1] * st.vel) * d;
@@ -2591,14 +2626,15 @@ var waveTarget = {}, waveState = {};
     }
     if (still) { dy = mode === 'err' ? -2 : 0; rot = mode === 'err' ? Math.PI : 0; dir = 1; A = 0; op = mode === 'cancel' ? 0 : 1; lineOp = trackOp = 1; st.parts = []; if (mode === 'done' || mode === 'conv') ampK = mode === 'done' ? 0 : .35; }
 
-    // A playlist: a dot where each video starts (up to 20 of them); a leap at each new one.
-    var of = t.of > 1 ? t.of : 0, hop = 0;
-    if (of && t.pos > st.pos && st.pos > 0 && t.status === 'running' && !still) { st.hopAt = now; st.landed = 0; splash(st, fx, wy(fx), 4, 18); }
-    if (t.pos) st.pos = t.pos;
-    if (st.hopAt) {
-      var hk = (now - st.hopAt) / 550;
-      if (hk < 1) { hop = Math.sin(hk * Math.PI) * 8; hopRot = -.65 * Math.cos(hk * Math.PI); }
-      else if (!st.landed) { st.landed = 1; splash(st, fx, wy(fx), 3, 14); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .7 }); }
+    // A playlist's catch: the line pulls straight, the fish leaps up with a flip and is gone
+    // (the new cast brings it back at the start). Other lists (a channel looked at whole) keep a
+    // dot where each video starts, up to 20.
+    var of = !t.list && t.of > 1 ? t.of : 0, hop = 0;
+    if (catchK >= 0) {
+      ampK *= 1 - ease(catchK / .3); level = true; F = 1.6; A = .12;
+      hop = Math.sin(Math.min(1, catchK / .8) * Math.PI) * 13; hopRot = -easeIO(Math.min(1, catchK / .8)) * 2 * Math.PI;
+      op *= 1 - ease((catchK - .7) / .3);
+      moving = true;
     }
 
     if (rot === null) rot = hopRot !== null ? hopRot : level ? 0 : Math.atan(slope(fx)) * .6 * dir * Math.min(1, Math.abs(st.vel) / 2.5);

@@ -205,9 +205,12 @@ func runWindow(token string) bool {
 	// taskbar takes the focus back for a moment right after the click; neither may close it.
 	var menuShown atomic.Int64
 	menuWin.OnWindowEvent(events.Common.WindowLostFocus, func(*application.WindowEvent) {
-		if time.Since(time.UnixMilli(menuShown.Load())) > 500*time.Millisecond {
-			menuWin.Hide()
-		}
+		// A moment later: the menu fades its card out first (menu.html, away), then it's hidden.
+		time.AfterFunc(120*time.Millisecond, func() {
+			if time.Since(time.UnixMilli(menuShown.Load())) > 500*time.Millisecond {
+				menuWin.Hide()
+			}
+		})
 	})
 	showMenu := func() {
 		if time.Since(time.UnixMilli(menuShown.Load())) < 400*time.Millisecond {
