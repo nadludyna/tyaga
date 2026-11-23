@@ -25,14 +25,22 @@ type Facts struct {
 	Duration  float64 `json:"duration"`
 	Thumb     string  `json:"thumb"`
 	Chapters  int     `json:"chapters"`
-	Music     bool    `json:"music"`   // YouTube Music, an artist's "- Topic" channel, or the Music category
-	Heights   []int   `json:"heights"` // the video heights there are, biggest first
+	Parts     []Part  `json:"parts,omitempty"` // the chapters themselves: picked in the fragment drop-down
+	Music     bool    `json:"music"`           // YouTube Music, an artist's "- Topic" channel, or the Music category
+	Heights   []int   `json:"heights"`         // the video heights there are, biggest first
 	ListTitle string  `json:"listTitle"`
 	ListCount int     `json:"listCount"`
 	Ads       int     `json:"ads"`    // SponsorBlock: sponsor, self-promotion and "subscribe!" bits
 	AdsSec    float64 `json:"adsSec"` // how long they are together
 	Offtopic  float64 `json:"offtopic"`
 	Error     string  `json:"error,omitempty"`
+}
+
+// Part is one chapter of a video: where it starts and ends, in seconds, and its name.
+type Part struct {
+	Title string  `json:"title"`
+	Start float64 `json:"start"`
+	End   float64 `json:"end"`
 }
 
 var (
@@ -119,8 +127,12 @@ func lookup(link string, flat bool) Facts {
 		Duration   float64
 		Thumbnail  string
 		Categories []string
-		Chapters   []json.RawMessage
-		Formats    []struct {
+		Chapters   []struct {
+			Title     string
+			StartTime float64 `json:"start_time"`
+			EndTime   float64 `json:"end_time"`
+		}
+		Formats []struct {
 			Height int
 			Vcodec string
 		}
@@ -131,6 +143,16 @@ func lookup(link string, flat bool) Facts {
 		return Facts{Error: "couldn't read what yt-dlp said"}
 	}
 	f := Facts{ID: v.ID, Title: v.Title, Channel: v.Channel, Duration: v.Duration, Thumb: v.Thumbnail, Chapters: len(v.Chapters)}
+	for i, c := range v.Chapters {
+		end := c.EndTime
+		if end <= c.StartTime { // not given: up to the next chapter, or the end of the video
+			end = v.Duration
+			if i+1 < len(v.Chapters) {
+				end = v.Chapters[i+1].StartTime
+			}
+		}
+		f.Parts = append(f.Parts, Part{Title: c.Title, Start: c.StartTime, End: end})
+	}
 	if f.Channel == "" {
 		f.Channel = v.Uploader
 	}

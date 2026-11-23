@@ -101,7 +101,7 @@
       if (!seen(row)) return;
       var mids = [];
       row.querySelectorAll('span,button,.kind,.nums,.ovr,.st').forEach(function (e) {
-        if (!seen(e) || e.closest('.menu') || ![].some.call(e.childNodes, function (n) { return n.nodeType === 3 && n.textContent.trim(); })) return;
+        if (!seen(e) || e.closest('.menu,.fly') || ![].some.call(e.childNodes, function (n) { return n.nodeType === 3 && n.textContent.trim(); })) return;
         var c = capMid(e);
         if (c !== null) mids.push([c, e]);
       });

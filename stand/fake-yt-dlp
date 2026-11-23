@@ -23,10 +23,16 @@ if '-J' in a:
                           'playlist_count': 3, 'entries': [{'id': 'Ab3dEf5Gh7J', 'title': 'Rotten Apple Juice'}, {'id': 'Kl9mNo1Pq3R', 'title': 'Digital Love'}, {'id': 'St5uVw7Xy9Z', 'title': 'Nice Little Penguin'}]})); sys.exit(0)
     vid = (link.split('v=')[-1] if 'v=' in link else link.rstrip('/').split('/')[-1])[:11]
     chap = 'CHAP' in link
+    # The real album's tracks with their real lengths, as yt-dlp gives chapters (start, end, title).
+    T = [('Speak to Me', 67), ('Breathe (In the Air)', 169), ('On the Run', 225), ('Time', 413), ('The Great Gig in the Sky', 276),
+         ('Money', 382), ('Us and Them', 469), ('Any Colour You Like', 206), ('Brain Damage', 226), ('Eclipse', 147)]
+    ALBUM, t0 = [], 0
+    for name, sec in T:
+        ALBUM.append({'start_time': float(t0), 'end_time': float(min(t0 + sec, 2580)), 'title': name}); t0 += sec
     info = {'id': vid, 'title': 'Pink Floyd - The Dark Side of the Moon (Full Album)' if chap else 'Rotten Apple Juice',
             'channel': 'Pink Floyd' if chap else 'Pilotredsky', 'duration': 2580 if chap else 200,
             'thumbnail': '', 'categories': ['Music'] if (chap or 'MUSIC' in link) else ['Entertainment'],
-            'chapters': [{'title': f'Part {i}', 'start_time': i * 258} for i in range(10)] if chap else [],
+            'chapters': ALBUM if chap else [],
             'formats': [{'height': h, 'vcodec': 'avc1'} for h in ([720, 480, 360] if 'HD720' in link else [2160, 1440, 1080, 720, 480])] + [{'height': None, 'vcodec': 'none'}]}
     print(json.dumps(info)); sys.exit(0)
 audio = '-x' in a
