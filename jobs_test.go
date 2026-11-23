@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -477,5 +478,21 @@ func TestFakeSponsorBlock(t *testing.T) {
 	}
 	if n, _, _ := sponsorSegments("Ab3dEf5Gh7J"); n != 0 {
 		t.Fatalf("plain: %d ads", n)
+	}
+}
+
+// Downloads are sorted into Видео / Аудио (Video / Audio in English); a folder that's already
+// there wins, so switching the language doesn't start a second pair.
+func TestTypeDir(t *testing.T) {
+	root := t.TempDir()
+	if got := typeDir(root, true, "ru"); got != filepath.Join(root, "Аудио") {
+		t.Errorf("audio, ru: %s", got)
+	}
+	if got := typeDir(root, false, "en"); got != filepath.Join(root, "Video") {
+		t.Errorf("video, en: %s", got)
+	}
+	os.Mkdir(filepath.Join(root, "Audio"), 0o755)
+	if got := typeDir(root, true, "ru"); got != filepath.Join(root, "Audio") {
+		t.Errorf("audio, ru, with Audio already there: %s", got)
 	}
 }

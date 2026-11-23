@@ -33,6 +33,27 @@ type Options struct {
 	Sponsors bool   `json:"sponsors"` // cut sponsor segments (and non-music parts of music videos)
 	From     string `json:"from"`     // fragment: download only from…to ("1:20", "0:45", "1:02:03"); empty = start/end
 	To       string `json:"to"`
+	Lang     string `json:"lang"` // the page's language: the Video / Audio folder is named in it
+}
+
+// typeDir is where one download goes inside the downloads folder: Видео or Аудио (Video or Audio
+// when the page is in English), so it's sorted already (the owner). A playlist or an album gets
+// its own folder inside it, as before. Whichever of the two names already exists is used, so
+// switching the page's language doesn't start a second pair of folders.
+func typeDir(root string, audio bool, lang string) string {
+	names := [2]string{"Видео", "Video"}
+	if audio {
+		names = [2]string{"Аудио", "Audio"}
+	}
+	if lang == "en" {
+		names[0], names[1] = names[1], names[0]
+	}
+	for _, n := range names {
+		if fi, err := os.Stat(filepath.Join(root, n)); err == nil && fi.IsDir() {
+			return filepath.Join(root, n)
+		}
+	}
+	return filepath.Join(root, names[0])
 }
 
 // parseTime reads "1:02:03", "1:20", "80", "80.5" or "1:20.5" as seconds.
@@ -127,6 +148,7 @@ type Job struct {
 	Files    []string `json:"files"`    // names of finished files
 	Already  bool     `json:"already"`  // done without downloading anything: it was all in the folder already
 
+	dir      string          // the folder it downloads into (typeDir), fixed when it starts
 	mix      bool            // a YouTube Mix: only the first mixLimit videos
 	listName string          // the playlist's own name, for the finished row
 	failed   int             // how many errors yt-dlp reported (in a playlist: videos it skipped)
@@ -230,6 +252,14 @@ func classify(link string, playlist bool) (fixed string, list, mix bool) {
 }
 
 // buildArgs builds the yt-dlp command line for a download.
+// folder is the job's download folder: set when it starts; before that (tests) worked out now.
+func (j *Job) folder() string {
+	if j.dir == "" {
+		return typeDir(outDir, j.Mode == "audio", j.Lang)
+	}
+	return j.dir
+}
+
 func buildArgs(j *Job) []string {
 	args := []string{
 		// Ignore any yt-dlp settings on the computer, use only what's set here.
@@ -257,7 +287,7 @@ func buildArgs(j *Job) []string {
 		// --print turns on quiet mode, which hides what yt-dlp is doing ("[youtube] …",
 		// "[download] Destination: …"). The page shows those lines as a log, so back on.
 		"--no-quiet",
-		"-P", outDir,
+		"-P", j.folder(),
 	}
 	// YouTube requires running its JavaScript; yt-dlp needs Deno for that.
 	if tools.deno != "" {
@@ -790,7 +820,8 @@ func pump() {
 		return
 	}
 
-	os.MkdirAll(outDir, 0o755)
+	j.dir = typeDir(outDir, j.Mode == "audio", j.Lang) // (mu is held here: not downloadsDir, which takes it)
+	os.MkdirAll(j.dir, 0o755)
 	j.Status = "running"
 	cmd := exec.Command(tools.ytdlp, buildArgs(j)...)
 	cmd.Env = append(os.Environ(), "PYTHONIOENCODING=utf-8", "PYTHONUTF8=1") // non-Latin titles without mojibake

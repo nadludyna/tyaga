@@ -1474,6 +1474,7 @@ function options(link) {
     text: link, mode: mode(), format: format(), quality: +quality(), edit: $('edit').checked,
     playlist: o.whole, split: o.split, merge: o.merge, sponsors: o.sponsors,
     from: cut ? timeOf('cutFrom') : '', to: cut ? timeOf('cutTo') : '',
+    lang: LANG, // the Video / Audio folder is named in the page's language
   };
 }
 

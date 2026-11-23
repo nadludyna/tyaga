@@ -70,7 +70,9 @@ var (
 func main() {
 	consoleUTF8()
 	home, _ := os.UserHomeDir()
-	out := flag.String("out", filepath.Join(home, "Downloads", "YouTube"), "folder for downloads")
+	// The downloads folder: one of its own, named after the program (sorted into Видео and Аудио
+	// inside it, see typeDir). Until build 28 it was Downloads\YouTube.
+	out := flag.String("out", filepath.Join(home, "Downloads", "ТЯГА"), "folder for downloads")
 	noBrowser := flag.Bool("no-browser", false, "no window and no browser: just the server, its address is in the log")
 	loginWin := flag.Bool("login", false, "only the window for signing in to YouTube (the page opens it)")
 	flag.Parse()
@@ -86,7 +88,9 @@ func main() {
 	// A folder picked on the page (settings.json) counts, unless -out was given (the stand).
 	outGiven := false
 	flag.Visit(func(f *flag.Flag) { outGiven = outGiven || f.Name == "out" })
-	if s := loadSettings(); !outGiven && s.Out != "" && filepath.IsAbs(s.Out) {
+	// The old default (Downloads\YouTube) remembered as if picked counts as not picked: it moves
+	// to the new one. What's in the old folder stays there.
+	if s := loadSettings(); !outGiven && s.Out != "" && filepath.IsAbs(s.Out) && !strings.EqualFold(filepath.Clean(s.Out), filepath.Join(home, "Downloads", "YouTube")) {
 		outDir = s.Out
 	}
 
