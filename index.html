@@ -191,8 +191,14 @@ label:hover{color:var(--fg)}
 /* The lane opens when the download starts and folds after its last moment (the catch, the
    snapped line); the canvas is taller than the lane, so the fish can jump without the row
    growing, and never takes the mouse. */
-.lane{flex:0 0 100%;position:relative;height:30px;transition:height .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
-.lane.shut{height:0;opacity:0;overflow:hidden}
+.lane{flex:0 0 100%;position:relative;height:30px;transition:height .32s cubic-bezier(.2,.8,.2,1)}
+.lane.shut{height:0}
+/* The line and the fish go as one: the picture fades out first, then the place folds (cutting
+   the canvas with the folding edge showed half a fish and a stub of line: the owner); opening,
+   the place opens first, then the picture fades in. */
+.wave{transition:opacity .16s ease .12s}
+.lane.shut .wave{opacity:0;transition:opacity .12s ease}
+.lane.shut{transition:height .32s cubic-bezier(.2,.8,.2,1) .1s}
 .wave{position:absolute;left:0;top:-2px;width:100%;height:40px;display:block;pointer-events:none}
 .acts{flex:none;display:flex;gap:6px;margin-left:auto}
 .acts .btn{height:28px;padding:0 10px 0 8px;font-size:12.5px;gap:6px}
@@ -1943,7 +1949,7 @@ function updateRow(r, j) {
     if (animate) {
       r.row.classList.add('lining');
       clearTimeout(r.laneT);
-      r.laneT = setTimeout(function () { r.row.classList.remove('lining'); fitLater(); }, 360);
+      r.laneT = setTimeout(function () { r.row.classList.remove('lining'); fitLater(); }, 460); // (a fold waits .1 s for the picture to fade: see .lane.shut)
       fitLater(); // opening: the window grows ahead (it's transparent below the cards)
     }
   }
