@@ -92,7 +92,16 @@ async function paste(pg, text) {
   }
   if (problems.length) {
     console.error(`\n${problems.length} problem(s):\n` + problems.map(p => '- ' + p).join('\n'));
+    annotate(problems);
     process.exit(1);
   }
   console.log('\nAll layout checks are clean.');
-})().catch(e => { console.error(e); process.exit(1); });
+})().catch(e => { console.error(e); annotate([String(e && e.stack || e)]); process.exit(1); });
+
+// On GitHub the problems also go up as an annotation on the run: seen on the pull request
+// without opening (or signing in to read) the log.
+function annotate(list) {
+  if (!process.env.GITHUB_ACTIONS) return;
+  const text = `${list.length} problem(s):\n` + list.slice(0, 40).map(p => '- ' + p).join('\n');
+  console.log('::error title=Layout checks::' + text.replace(/%/g, '%25').replace(/\r/g, '').replace(/\n/g, '%0A'));
+}
