@@ -604,7 +604,7 @@ html.app body.solo .card.form::after,html.app #jobsCard::after{content:"";positi
 html.app #jobsCard.folded::after{display:none}
 /* ТЯГА's window (650): the short quality word, no arrow on the folder. */
 @media (max-width:700px){.dd.plain .chev{display:none}.dd.plain{padding:0 6px}}
-@media (max-width:560px){.acts .btn>.tw{display:none}.acts .btn{width:28px;padding:0;justify-content:center}/* a narrow window: Show file is its icon (holding both languages' words, it pushed the row's buttons onto a second line) */.dd .chev{display:none}.dd{padding:0 10px}.dd.plain{padding:0 6px}.opts{gap:6px}.opts .seg button>span{display:none}.dd.plain>span{display:none}.input{flex-direction:row}.go{min-width:0;padding:0 16px}.go>span{display:none}.pvp{width:96px;height:54px}}
+@media (max-width:560px){.flist{max-width:210px}/* the format list wraps its hints instead of sticking out of the window (found by CI's layout check, Russian) */.acts .btn>.tw{display:none}.acts .btn{width:28px;padding:0;justify-content:center}/* a narrow window: Show file is its icon (holding both languages' words, it pushed the row's buttons onto a second line) */.dd .chev{display:none}.dd{padding:0 10px}.dd.plain{padding:0 6px}.opts{gap:6px}.opts .seg button>span{display:none}.dd.plain>span{display:none}.input{flex-direction:row}.go{min-width:0;padding:0 16px}.go>span{display:none}.pvp{width:96px;height:54px}}
 /* ——— Build 07 notes (22.11) ——— */
 /* Quality and format share one slot of one width: switching video/audio moves nothing. */
 
@@ -1931,7 +1931,7 @@ function updateRow(r, j) {
   // the snapped line, the fish going belly up). It opens and folds smoothly; the window is
   // fitted once, not every frame (see .lining in windowFit).
   if (r.status === 'running' && /^(done|cancelled|error)$/.test(j.status) && !still()) {
-    t.until = now + (j.status === 'done' ? 2600 : 1800); // its last moment (done: it may swim the rest of the way first) plays out (the catch, RIP, the snapped line), then the lane folds
+    t.until = now + (j.status === 'done' ? 1700 : 1800); // its last moment (done: it may swim the rest of the way first) plays out (the catch, RIP, the snapped line), then the lane folds
   }
   // (the fish may keep it open longer while it swims the last stretch: look again then)
   if (t.until > now) { clearTimeout(r.untilT); r.untilT = setTimeout(function () { if (r.j) updateRow(r, r.j); }, t.until - now + 30); }
@@ -2437,15 +2437,16 @@ function pollDelay() {
 // is a gentle wave the whole length, grey ahead and orange where the fish has been, and the
 // fish says what's going on without words:
 // - starting (no number yet): once the lane is open the line runs out from the left and the
-//   fish drops onto it with a splash; it waits there, level, tail going;
+//   fish swims in over the left edge; it waits there, level, tail going;
 // - downloading: it swims along, its tail beating faster the faster the bytes come;
 // - YouTube's pause: it goes grey and floats, level (the seconds count down);
 // (No bubbles or drops trailing behind it: the owner found them noise, 22.11.)
 // - nothing comes for 10 s: it stops, looks around, a "?" over it;
-// - a playlist: a dot on the line where each video starts (up to 20); it leaps at each one;
+// - a playlist: the line is the track; at each new one the fish swims on, out over the right
+//   edge, and the next cast brings it in from the left (seamless: the owner, 23.11);
 // - converting (100 %): it turns somersaults at the end and a glint runs along the line;
-// - done: the line pulls straight and it leaps straight up with one flip, lands with a ring,
-//   bobs once (then the lane folds and the row shows the file);
+// - done: the line pulls straight and the fish swims on, out over the right edge (then the
+//   lane folds and the row shows the file);
 // A change of state never snaps: colour, tilt and wave height grow out of the last look.
 // - failed: grey, belly up, RIP; cancelled: the line snaps and it swims off.
 // The bar follows the progress with a soft spring (progress comes in steps every 0.7 s; a
@@ -2536,13 +2537,14 @@ var waveTarget = {}, waveState = {};
     if (finishing && st.shown < 99.3 && !still) {
       mode = 'move';
       // The lane stays open until it's there and the catch has played (it folded with the fish short of the end).
-      if (t.status === 'done') t.until = Math.max(t.until || 0, now + 2000);
+      if (t.status === 'done') t.until = Math.max(t.until || 0, now + 1400);
     }
     if (mode !== st.mode) {
       var over = /^(done|err|cancel)$/.test(mode);
       if (mode === 'start' && /^(err|cancel)$/.test(st.mode)) { st.born = now + 350; st.dropped = 0; } // Retry: the lane opens again, it drops in again
       st.from = st.mode && st.last ? st.last : null; // the look it had: the new one grows out of it
       st.mode = mode; st.ev = {}; st.acc = 0;
+      if (!over) st.gone = 0; // (Retry: the fish is back)
       st.at = over && st.born < now - 9e4 ? now - 1e5 : now; // over before the page saw it: its last look at once
     }
     var tm = (now - st.at) / 1000;
@@ -2552,12 +2554,12 @@ var waveTarget = {}, waveState = {};
     // it. Nothing goes back: it's a new line, said by the leap and the cast.
     var catchK = -1;
     if (t.list && t.pos > (st.trk || 0)) {
-      if (st.trk && t.status === 'running' && !still) { st.catchAt = now; st.caughtAt = st.shown; splash(st, x0Of(cv, st.shown), MID, 6, 26); }
+      if (st.trk && t.status === 'running' && !still) { st.catchAt = now; st.caughtAt = st.shown; }
       st.trk = t.pos;
     }
     if (st.catchAt) {
-      catchK = (now - st.catchAt) / 700;
-      if (catchK >= 1 && mode === 'done') { st.catchAt = 0; catchK = -1; } // over: no new cast, the fish stays where it is
+      catchK = (now - st.catchAt) / 800;
+      if (catchK >= 1 && mode === 'done') { st.catchAt = 0; catchK = -1; st.gone = 1; } // over: no new cast, the fish stays where it is
       else if (catchK >= 1) { // caught: a new cast
         st.catchAt = 0; catchK = -1; st.shown = 0; st.vel = 0; st.born = now; st.dropped = 0; st.from = null;
       }
@@ -2606,16 +2608,13 @@ var waveTarget = {}, waveState = {};
       var cyc = tm % 1, sk = Math.min(1, cyc / .55);
       rot = -easeIO(sk) * 2 * Math.PI;
     } else if (mode === 'done') {
-      // The line pulls straight, the fish crouches a little, leaps straight up with one clean
-      // flip, lands with a splash and a ring, bobs once and lies still.
-      ampK = 1 - ease(tm / .4); F = 1.6; A = .12 * (1 - ease(tm / .3)); level = true;
-      var jk = (tm - .3) / .7;
-      if (jk < 0) dy = ease(tm / .3) * 1.5;
-      else if (jk < 1) { dy = 1.5 * (1 - ease(jk * 4)) - Math.sin(jk * Math.PI) * 13; rot = -easeIO(jk) * 2 * Math.PI; }
-      else { var bk = tm - 1; dy = Math.sin(bk * 14) * 1.6 * Math.exp(-bk * 6); rot = 0; }
-      if (jk > 0 && !st.ev.up) { st.ev.up = 1; if (tm < 2) splash(st, fx, wy(fx), 7, 30); }
-      if (jk >= 1 && !st.ev.down) { st.ev.down = 1; if (tm < 2) { splash(st, fx, wy(fx), 5, 20); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .7 }); } }
-      moving = moving && tm < 1.8;
+      // The line pulls straight and the fish swims on, faster and faster, out over the right
+      // edge, and is gone; the lane then folds with the line (the owner: seamless, 23.11).
+      ampK = 1 - ease(tm / .4); F = 3; A = .3; level = true;
+      var ok = Math.min(1, tm / .9);
+      fx = x + (w + 2 * S - x) * ok * ok;
+      if (st.gone || ok >= 1) { op = 0; st.gone = 1; }
+      moving = moving && tm < 1;
     } else if (mode === 'err') {
       g = gl = 1; A = 0;
       var e = ease(tm / .7);
@@ -2636,14 +2635,16 @@ var waveTarget = {}, waveState = {};
     }
     if (still) { dy = mode === 'err' ? -2 : 0; rot = mode === 'err' ? Math.PI : 0; dir = 1; A = 0; op = mode === 'cancel' ? 0 : 1; lineOp = trackOp = 1; st.parts = []; if (mode === 'done' || mode === 'conv') ampK = mode === 'done' ? 0 : .35; }
 
-    // A playlist's catch: the line pulls straight, the fish leaps up with a flip and is gone
-    // (the new cast brings it back at the start). Other lists (a channel looked at whole) keep a
-    // dot where each video starts, up to 20.
+    // A playlist, a track done: the fish swims on, faster and faster, the line filling behind it,
+    // out over the right edge (the new cast brings it in from the left). Other lists (a channel
+    // looked at whole) keep a dot where each video starts, up to 20.
     var of = !t.list && t.of > 1 ? t.of : 0, hop = 0;
     if (catchK >= 0) {
-      ampK *= 1 - ease(catchK / .3); level = true; F = 1.6; A = .12;
-      hop = Math.sin(Math.min(1, catchK / .8) * Math.PI) * 13; hopRot = -easeIO(Math.min(1, catchK / .8)) * 2 * Math.PI;
-      if (mode !== 'done') op *= 1 - ease((catchK - .7) / .3); // over mid-catch: the fish stays, and goes with the line (the owner)
+      var pOut = 100 * (w + 2 * S - x0) / Math.max(1, end - x0), pv = st.caughtAt + (pOut - st.caughtAt) * catchK * catchK;
+      st.shown = Math.max(st.shown, Math.min(100, pv));
+      x = x0 + Math.max(0, end - x0) * st.shown / 100;
+      fx = x0 + Math.max(0, end - x0) * pv / 100;
+      level = true; F = 3; A = .3; dy = 0; rot = 0; g = 0;
       moving = true;
     }
 
@@ -2658,11 +2659,11 @@ var waveTarget = {}, waveState = {};
     }
     st.last = { ampK: ampK, rot: rot, dy: dy, g: g, gl: gl, A: A };
     var col = g ? mix(acc, dim, g) : acc, lineCol = gl ? mix(acc, dim, gl) : acc;
-    // The very start: the line runs out from the left and the fish drops in with a splash.
-    var reveal = still ? 1 : ease(born / .5), drop = still ? 1 : ease(born / .4);
-    if (drop < 1) { dy -= (1 - drop) * 12; op *= Math.min(1, born / .12); }
-    if (!still && !st.dropped && born >= .4) { st.dropped = 1; if (born < 1) { splash(st, fx, wy(fx), 4, 16); st.parts.push({ k: 'r', x: fx, y: wy(fx), life: 0, max: .6 }); } }
-    if (reveal < 1 || drop < 1) moving = true;
+    // Coming in (the start, each new track, Retry): the line runs out from the left and the fish
+    // swims in over the left edge, the way it left over the right one.
+    var reveal = still ? 1 : ease(born / .5), swim = still ? 1 : ease(born / .6);
+    if (swim < 1) fx = -2 * S + (fx + 2 * S) * swim;
+    if (reveal < 1 || swim < 1) moving = true;
     var fy = wy(fx) + dy - hop;
     st.phase += F * 2 * Math.PI * dt;
     var tail = still ? 0 : Math.sin(st.phase) * A;

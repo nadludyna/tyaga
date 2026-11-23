@@ -88,9 +88,14 @@ Updated at the end of every work session.
 - **Quality lists only the heights the video has**; with no link or several links, all of them.
 - **Downloads go to `Downloads\ТЯГА\Видео|Аудио`** (folder names in the page's language; an
   existing one wins). The old default `Downloads\YouTube` moves over; its files stay.
-- **A playlist's line is the current track**, 0 → 100 % each, with a catch and a new cast per
-  track; how far the whole list is stays in words. Rejected: one line for the whole list (the
-  fish crept a pixel per track).
+- **A playlist's line is the current track**, 0 → 100 % each: at each new track the fish swims
+  on, out over the right edge, and comes back in from the left (seamless); how far the whole
+  list is stays in words. A single download: the fish swims out and that's it. Rejected: one
+  line for the whole list (the fish crept a pixel per track), a leap at each track (it went
+  over the row above and vanished before the line).
+- **CI checks the page too**: its script compiles (`stand/syntax.js`), and the stand's layout
+  checks run in a browser without a window in every state, both themes, both languages, both
+  widths (`stand/ci.js`). Before, a typo that killed the page passed CI green.
 - **The line and the fish go away as one**: the picture fades, then its place folds; nothing
   over the fish (a leap, "?", splashes) reaches the row above, and the water scene under the
   list ends where the fish ends. The sky over the header got clouds.
