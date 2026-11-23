@@ -580,7 +580,7 @@ body.solo .area{min-height:184px;display:flex;flex-direction:column;justify-cont
 /* Background: calm, still, on theme — faint water lines along the bottom of the window. No glow. */
 html.app .card.form{background:var(--card)}
 .card.form>*{position:relative;z-index:1}
-.card.form>header{z-index:6} /* the folder menu hangs over the links box and the options */
+.card.form>header{z-index:6}
 .card.form>.opts{z-index:4}  /* its drop-downs hang over what is under it */
 html.app body.solo .card.form::after,html.app #jobsCard::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;pointer-events:none;z-index:0;border-radius:0 0 15px 15px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='24'%3E%3Cpath d='M0 12c20-8 40-8 60 0s40 8 60 0 30-6 40-3' fill='none' stroke='%23ff6b2c' stroke-opacity='.08' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 0 100%/160px 24px,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='30'%3E%3Cpath d='M0 15c27-10 55-10 82 0s55 10 82 0 40-7 56-4' fill='none' stroke='%23ff6b2c' stroke-opacity='.055' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 40px calc(100% - 16px)/220px 30px}
 html.app #jobsCard.folded::after{display:none}
@@ -600,15 +600,16 @@ html.app #jobsCard.folded::after{display:none}
 .opts .gow{flex:none}
 .opts .go{height:32px;min-width:0;padding:0 16px;font-size:14px;border-radius:8px}
 .opts .go .goi{width:17px;height:17px}
-header .ddw.destw{margin-left:auto;align-self:flex-start;flex:0 1 auto;min-width:0;max-width:40%;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
-header .ddw.destw+.hpair{margin-left:6px}
-header #dest{height:30px;max-width:100%;border-color:transparent;color:var(--dim);font-size:13px;padding:0 8px}
-header #dest:hover{border-color:transparent;background:color-mix(in srgb,var(--fg) 7%,transparent)}
-header #dest[aria-expanded=true]{background:color-mix(in srgb,var(--fg) 10%,transparent)}
+/* The folder: next to Download, where the files will go right before you send them there (the
+   owner, build 14). A plain option button like the others; its menu opens down like theirs. */
+.opts .ddw.destw{flex:0 1 auto;min-width:0}
+.opts #dest{max-width:180px}
 #destT{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-header #destT{color:var(--fg)}
-#destMenu{left:auto;right:0}
-@media (max-width:560px){.opts .go>span{display:none}.opts .go{padding:0 12px}header #destT{display:none}header .ddw.destw{max-width:none}}
+#destMenu{top:calc(100% + 8px);bottom:auto;left:auto;right:0}
+#destMenu.up{top:auto;bottom:calc(100% + 8px)}
+/* Room above the name (the owner: it was pressed against the top); the window buttons stay in the corner. */
+html.app header .logo,html.app header .title{margin-top:8px}
+@media (max-width:560px){.opts .go>span{display:none}.opts .go{padding:0 12px}#destT{display:none}}
 /* The fragment: says what to do, "from" above "to" with the fields in one column, and Reset as
    a button across the bottom (tonal: solid orange stays for Download). */
 #cutFly{width:244px}
@@ -631,8 +632,6 @@ html.app .card.form:has(+#jobsCard:not([hidden])){padding-bottom:14px}
 #editW{width:32px}
 .dd.icon[aria-pressed=true]{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 #dest>svg:first-child{color:var(--folder)}
-#dest .dk{color:var(--dim);font-weight:400}
-@media (max-width:560px){#dest .dk{display:none}}
 .fh{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:4px 6px 10px}
 .fly .times .tl{font-size:12.5px;color:var(--dim);margin:0 4px 0 2px}
 .fly .times .tl~.tl{margin-left:12px}
@@ -661,8 +660,6 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
     </g>
   </svg><span class="badge" id="badge" aria-hidden="true"></span></button>
   <div class="title"><small class="motto" data-t="Reel it in.">Reel it in.</small><h1>ТЯГА</h1></div>
-  <div class="ddw destw"><button class="dd" id="dest" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="destT"></span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
-      <div class="fly menu" id="destMenu" role="menu" hidden><button id="open" role="menuitem"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open">Open</span></button><button id="pick" role="menuitem" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change…">Change…</span></button></div></div>
   <div class="hpair"><button class="tbtn pin" id="pin" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pinb" d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></svg></button><button class="tbtn lang" id="lang" aria-label="Language"></button><button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button></div>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Close to tray" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
 </header>
@@ -671,7 +668,7 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
 
 <div class="card form">
   <div class="input">
-    <textarea id="links" rows="2" data-ph="Paste links. Each goes on its own line by itself"></textarea>
+    <textarea id="links" rows="2" data-ph="Paste links, each goes on a new line"></textarea>
   </div>
   <div class="row opts">
     <div class="seg" id="mode"><button data-v="video"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="m10 9.5 4.5 2.5-4.5 2.5z"/></svg><span data-t="Video">Video</span></button><button data-v="audio" class="on"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span data-t="Audio">Audio</span></button></div>
@@ -685,6 +682,8 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
         <button class="cutoff" id="cutOff"><span data-t="Reset">Reset</span></button></div></div>
     <div class="ddw" id="editW"><button class="dd icon" id="editB" aria-pressed="false" title="For editing: H.264 + AAC, opens in any editor. Up to 1080p"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></button><input type="checkbox" id="edit" hidden></div>
     <span class="sp"></span>
+    <div class="ddw destw"><button class="dd" id="dest" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="destT"></span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
+        <div class="fly menu" id="destMenu" role="menu" hidden><button id="open" role="menuitem"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open">Open</span></button><button id="pick" role="menuitem" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change…">Change…</span></button></div></div>
     <div class="gow"><button class="go" id="go"><svg class="goi" viewBox="0 0 24 24" aria-hidden="true"><g class="ga"><path d="M12 3.5v11.5"/><path d="M7 10l5 5 5-5"/></g><path d="M5 20h14"/></svg><span id="goT">Download</span></button><b class="gon" id="goN" hidden></b></div>
   </div>
   <div class="msg" id="msg"></div>
@@ -773,7 +772,7 @@ var RU = {
   "Not signed in to YouTube. Some videos need it, and sometimes YouTube asks to prove you're not a bot. Click to sign in": 'Вход в YouTube не выполнен. Некоторым видео он нужен, а иногда YouTube просит доказать, что ты не бот. Нажми, чтобы войти',
   'Done ✓': 'Готово ✓',
   "Nothing on the hook yet. Cast a link above.": "На крючке пусто. Закинь ссылку сверху.",
-  "Paste links. Each goes on its own line by itself": "Вставляй ссылки — каждая сама встанет на новую строку",
+  "Paste links, each goes on a new line": "Вставляй ссылки, каждая встанет на новую строку",
   "Video quality": "Качество видео",
   "Best quality": "Лучшее качество",
   "Audio format": "Формат звука",
@@ -789,10 +788,9 @@ var RU = {
   "More options": "Ещё настройки",
   "H.264 + AAC: opens in any editor. Up to 1080p": "H.264 + AAC: откроется в любом редакторе. До 1080p",
   "Open": "Открыть",
-  "Folder:": "Папка:",
   "For editing: H.264 + AAC, opens in any editor. Up to 1080p": "Для монтажа: H.264 + AAC, откроется в любом редакторе. До 1080p",
-  "Keep on top of other windows": "Поверх всех окон",
-  "Stop keeping on top": "Больше не поверх всех окон",
+  "Pin on top": "Закрепить поверх окон",
+  "Unpin": "Открепить",
   "Change…": "Сменить…",
   "Close to tray": "Свернуть в трей",
   "Copy all files": "Копировать все файлы",
@@ -1339,7 +1337,7 @@ var INAPP = document.documentElement.classList.contains('app'); // (APP itself i
 function setPin(on) {
   $('pin').classList.toggle('on', on);
   $('pin').setAttribute('aria-pressed', on);
-  $('pin').dataset.tip = on ? 'Stop keeping on top' : 'Keep on top of other windows';
+  $('pin').dataset.tip = on ? 'Unpin' : 'Pin on top';
   if (INAPP) api('/api/window', { text: 'top', n: on ? 1 : 0 }).catch(function () {});
 }
 $('pin').hidden = !INAPP;
@@ -1348,7 +1346,7 @@ $('pin').onclick = function () {
   try { localStorage.setItem('tyaga-top', on ? '1' : ''); } catch (e) {}
   setPin(on);
 };
-(function () { var on = false; try { on = localStorage.getItem('tyaga-top') === '1'; } catch (e) {} if (on || !INAPP) setPin(on); else $('pin').dataset.tip = 'Keep on top of other windows'; })();
+(function () { var on = false; try { on = localStorage.getItem('tyaga-top') === '1'; } catch (e) {} if (on || !INAPP) setPin(on); else $('pin').dataset.tip = 'Pin on top'; })();
 // The fish is cast as soon as a link goes in (add() checks it's not empty).
 
 // Ctrl+A anywhere outside a text field selects the links, not the whole page.
@@ -1825,15 +1823,18 @@ $('acct').onclick = function () {
   setTimeout(renderAcct, 3050);
 };
 
-// The sky over the header sits in the middle of the gap between the name and the folder button,
-// or not at all when the gap is too small for it (a long folder name, a narrow window).
+// The sky over the header sits in the middle of the gap between the name and the header buttons,
+// or not at all when the gap is too small for it (a narrow window).
 function placeSky() {
   var card = document.querySelector('.card.form'), c = card.getBoundingClientRect();
-  var l = document.querySelector('header .title').getBoundingClientRect().right, r = $('dest').getBoundingClientRect().left;
-  var fits = r - l >= 88 + 8;
+  var l = document.querySelector('header .title').getBoundingClientRect().right, r = document.querySelector('header .hpair').getBoundingClientRect().left;
+  var fits = c.width > 0 && r - l >= 88 + 16;
   card.style.setProperty('--sky', fits ? 'block' : 'none');
   if (fits) card.style.setProperty('--skyx', Math.round((l + r) / 2 - 44 - c.left) + 'px');
 }
+// Placed again whenever the header changes size: ТЯГА's window starts hidden (zero size), and
+// a placement made then hid the sky for good (build 13, the owner's PC).
+if (window.ResizeObserver) new ResizeObserver(function () { placeSky(); }).observe(document.querySelector('header'));
 addEventListener('resize', function () { placeSky(); });
 if (document.fonts) document.fonts.ready.then(function () { placeSky(); });
 function setText(e, t) { if (e.textContent !== t) e.textContent = t; }
@@ -1848,9 +1849,10 @@ function render() {
   // there is nothing for it to clear.
   $('clear').hidden = !(state.jobs || []).some(function (j) { return j.status !== 'queued' && j.status !== 'running'; });
   // Just the folder's own name on the button (the narrower window: the full path is in its hint).
-  // "Folder: YouTube": says what the button is (its name alone looked like a link to YouTube).
+  // Just the name: next to Download, with the folder icon and a frame, the button says it's the
+  // folder (the "Folder:" in front was for the header, where its name alone looked like a link).
   var dn = state.outName ? state.outName.split(' › ').pop() : T('Downloads');
-  if ($('destT').dataset.n !== dn + LANG) { $('destT').dataset.n = dn + LANG; $('destT').innerHTML = ''; $('destT').append(el('span', 'dk', T('Folder:') + ' '), dn); }
+  if ($('destT').dataset.n !== dn + LANG) { $('destT').dataset.n = dn + LANG; $('destT').innerHTML = ''; $('destT').append(dn); }
   placeSky();
   $('dest').dataset.tip = state.outName ? 'Downloads folder: ' + state.outName : '';
 
