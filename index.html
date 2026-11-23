@@ -534,6 +534,7 @@ html.app .fly{background:var(--card)}
 .qgrid{display:grid;grid-template-columns:repeat(3,76px);gap:4px}
 .qgrid button,.flist button,.menu button{border:0;border-radius:6px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;cursor:pointer;font-variant-numeric:tabular-nums;transition:background .12s ease}
 .qgrid button{height:32px;display:flex;align-items:center;justify-content:center}
+.qgrid button[hidden]{display:none}
 .qgrid button>span{text-box:trim-both cap alphabetic}
 .qgrid button.wide{grid-column:1/-1}
 .qgrid button:hover,.flist button:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
@@ -1211,7 +1212,7 @@ function renderPv() {
   $('empty').hidden = !!links.length || !document.body.classList.contains('solo');
 }
 // The drop-downs follow the links: a fragment is for one video; the qualities are the ones
-// that video has (the rest greyed out).
+// that video has (the rest hidden).
 // The time a YouTube link starts at: ?t=90, t=90s, t=1m30s, t=1h2m3s (or start=90), in seconds.
 var fromLink = {};
 function linkStart(link) {
@@ -1242,8 +1243,10 @@ function syncBoxes() {
   var top = topHeight();
   document.querySelectorAll('#quality button').forEach(function (b) {
     var h = +b.dataset.v;
-    b.disabled = !!(top && h && h > top);
-    if (b.disabled && b.classList.contains('on')) quality('0');
+    // Only what this video has (the owner: greyed-out ones were noise); with no link, several or
+    // a playlist nothing is known, so all of them.
+    b.hidden = !!(top && h && h > top);
+    if (b.hidden && b.classList.contains('on')) quality('0');
   });
   optLabels();
   renderPv();
