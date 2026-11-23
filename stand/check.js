@@ -167,6 +167,11 @@
       if (!seen(f)) return;
       var r = f.getBoundingClientRect();
       if (r.top < 0 || r.left < 0 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5) bad.push('drop-down outside the window: ' + name(f));
+      // ТЯГА's window ends where its last card ends (the stand's page is taller and hid this:
+      // the fragment drop-down sat on the window's bottom edge, build 16). Keep 12 px clear of it.
+      var cards = [].filter.call(document.querySelectorAll('main>.card'), seen);
+      var last = cards.length && cards[cards.length - 1].getBoundingClientRect();
+      if (last && r.bottom > last.bottom - 12 + 0.5) bad.push('drop-down too close to the window\'s bottom edge (' + (last.bottom - r.bottom).toFixed(1) + ' px): ' + name(f));
     });
     return bad;
   };

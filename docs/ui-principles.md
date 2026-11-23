@@ -34,7 +34,8 @@ bottom edge; a button that doesn't fit its card in a narrow window; a button lyi
 neighbour because the box around it shrank and it didn't (the folder under Download); a page
 whose script failed to load (a syntax error) and so did nothing while every layout check passed.
 Buttons that changed size or place when the language was switched ("Video" and "Видео" are
-not one length: a button holds both words, the other one invisible). Test with real-looking data: the stand's folder is called "out", three letters, and hid how a
+not one length: a button holds both words, the other one invisible). A drop-down on the window's bottom edge or past it: the stand's page is taller than ТЯГА's
+window, which ends under its last card, so the check measures against that card. Test with real-looking data: the stand's folder is called "out", three letters, and hid how a
 longer name behaves.
 
 ### Before every build, measured, not by eye

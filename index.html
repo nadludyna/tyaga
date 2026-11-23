@@ -298,6 +298,11 @@ html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column
 /* Room under the last row for the water lines at the card's bottom: they lie under the rows, not
    behind their text and progress line (the owner). On the list, not the card: folded stays as it is. */
 html.app #list{padding-bottom:38px}
+/* The open list is never lower than the empty window: the tallest drop-down (the fragment) fits
+   under the options row with one download in the list too, the same as with none (build 16).
+   The list stretches, so the water stays at the bottom. */
+html.app #jobsCard:not(.folded){min-height:180px}
+html.app #jobsCard:not(.folded) #list{flex-grow:1}
 html.app #jobsCard>*{position:relative;z-index:1}
 html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;scrollbar-gutter:stable;padding:0 7px;margin-left:-7px;margin-right:-17px} /* room for a row's glow, both sides */
 html.app .bg{display:none}
@@ -581,7 +586,7 @@ body.solo .area{min-height:184px;display:flex;flex-direction:column;justify-cont
 html.app .card.form{background:var(--card)}
 .card.form>*{position:relative;z-index:1}
 .card.form>header{z-index:6}
-.card.form>.opts{z-index:4}  /* its drop-downs hang over what is under it */
+.card.form>.opts{z-index:7}  /* its drop-downs hang over what is under it, and over the header when they open upwards (a folded list) */
 html.app body.solo .card.form::after,html.app #jobsCard::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;pointer-events:none;z-index:0;border-radius:0 0 15px 15px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='24'%3E%3Cpath d='M0 12c20-8 40-8 60 0s40 8 60 0 30-6 40-3' fill='none' stroke='%23ff6b2c' stroke-opacity='.08' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 0 100%/160px 24px,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='30'%3E%3Cpath d='M0 15c27-10 55-10 82 0s55 10 82 0 40-7 56-4' fill='none' stroke='%23ff6b2c' stroke-opacity='.055' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 40px calc(100% - 16px)/220px 30px}
 html.app #jobsCard.folded::after{display:none}
 /* ТЯГА's window (650): the short quality word, no arrow on the folder. */
@@ -623,12 +628,12 @@ html.app header{padding-left:6px}
 .tw>.ghost{visibility:hidden}
 /* The fragment: says what to do, "from" above "to" with the fields in one column, and Reset as
    a button across the bottom (tonal: solid orange stays for Download). */
-#cutFly{width:244px}
-#cutFly .fh{display:block;font-size:13px;line-height:1.35;color:var(--fg);padding:4px 6px 12px}
+#cutFly{width:296px} /* the line on top fits on one line: the drop-down is low enough for the empty window (the owner, build 16) */
+#cutFly .fh{display:block;box-sizing:border-box;height:30px;white-space:nowrap;font-size:13px;line-height:1.35;color:var(--fg);padding:4px 6px 8px}
 #cutFly .times{display:grid;grid-template-columns:auto 1fr auto 1fr;column-gap:6px;row-gap:8px;padding:0 6px}
 #cutFly .times .tl,#cutFly .times .tl~.tl{margin:0 4px 0 0}
 #cutFly .times input{width:100%}
-.cutoff{display:flex;align-items:center;justify-content:center;width:calc(100% - 12px);height:34px;margin:14px 6px 4px;border:0;border-radius:10px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--tonal);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}
+.cutoff{display:flex;align-items:center;justify-content:center;width:calc(100% - 12px);height:32px;margin:10px 6px 4px;border:0;border-radius:10px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--tonal);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}
 .cutoff:hover{background:color-mix(in srgb,var(--acc) 22%,transparent)}
 .cutoff:active{background:color-mix(in srgb,var(--acc) 28%,transparent)}
 .cutoff>span{text-box:trim-both cap alphabetic}
@@ -1198,7 +1203,10 @@ function openFly(btn, fly) {
     // A narrow window: neither under its left edge nor its right one fits. Pull it in from the right.
     if (fly.getBoundingClientRect().left < 8) { fly.classList.remove('end'); fly.style.left = (innerWidth - 8 - r.width - r.left) + 'px'; }
   }
-  if (r.bottom > innerHeight - 8 && b.top - r.height - 8 > 4) fly.classList.add('up');
+  // Where ТЯГА's window really ends: under its last card (a browser's page may go on further).
+  var cards = [].filter.call(document.querySelectorAll('main>.card'), function (c) { return !c.hidden && c.offsetParent; });
+  var bottom = Math.min(innerHeight, cards.length ? cards[cards.length - 1].getBoundingClientRect().bottom : innerHeight);
+  if (r.bottom > bottom - 12 && b.top - r.height - 8 >= 4) fly.classList.add('up');
   clipFor(fly);
   btn.setAttribute('aria-expanded', 'true');
   flyOpen = { btn: btn, fly: fly };
