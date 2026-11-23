@@ -63,17 +63,17 @@ main>.card:nth-of-type(2){animation-delay:.08s}main>.card:nth-of-type(3){animati
 .note{border-color:var(--acc);font-size:14px;white-space:pre-line}
 .note.err{border-color:var(--err);color:var(--err)}
 
-textarea{width:100%;min-height:90px;resize:vertical;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+textarea{width:100%;min-height:90px;resize:vertical;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;outline:none;transition:border-color .1s,box-shadow .1s,background .1s}
 body.drop textarea{border-color:var(--acc);border-style:dashed;box-shadow:0 0 0 4px var(--glow)}
 textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--glow);background:transparent}
 .row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:14px}
 .seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;background:transparent}
-.seg button{border:0;background:transparent;color:inherit;height:32px;padding:0 12px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:500;transition:background .15s ease,color .15s ease,transform .1s ease}
+.seg button{border:0;background:transparent;color:inherit;height:32px;padding:0 12px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:500;transition:background .08s ease,color .08s ease,transform .06s ease}
 .seg button:hover:not(.on){background:rgba(127,127,127,.12)}
 .seg button:active{transform:scale(.97)}
 /* Selected: a tonal orange (Material 3's secondary container), so only Download is solid orange. */
 .seg button.on{background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal);font-weight:600}
-label{color:var(--dim);cursor:pointer;user-select:none;transition:color .2s}
+label{color:var(--dim);cursor:pointer;user-select:none;transition:color .1s}
 label:hover{color:var(--fg)}
 /* Options: switches on one line (pushed to both edges), checkboxes as chips that fill the width. */
 /* Both switches stretch to fill the line, every button the same width (grow = number of buttons). */
@@ -91,13 +91,13 @@ label:hover{color:var(--fg)}
 .chips.calm>.chip{transition:none}
 @media (max-width:560px){.opts{grid-template-columns:1fr}.chips{display:grid;grid-auto-flow:row;grid-template-columns:1fr 1fr}.foot .btn.clear{margin-left:0}}
 @media (max-width:430px){.motto{display:none}}
-.chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 28px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
+.chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 28px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .08s ease,background .08s ease,color .08s ease,transform .06s ease}
 .chip:hover{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.1)}
 /* Filter chips like Material 3: no checkbox square, a check mark when on. Its place is always
    kept (and balanced on the right), so the words never move when it's ticked. */
 .chip{position:relative}
 .chip input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
-.chip::before{content:"";position:absolute;left:9px;top:50%;margin-top:-9px;width:18px;height:18px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.4);transition:opacity .15s ease,transform .2s cubic-bezier(.2,.8,.2,1)}
+.chip::before{content:"";position:absolute;left:9px;top:50%;margin-top:-9px;width:18px;height:18px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.4);transition:opacity .08s ease,transform .1s cubic-bezier(.2,.8,.2,1)}
 .chip:has(input:checked)::before{opacity:1;transform:none}
 .chip:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:2px}
 .chip:active{transform:scale(.97)}
@@ -110,7 +110,7 @@ label:hover{color:var(--fg)}
 @media (max-width:560px){.input{flex-direction:column}.input .go{flex-direction:row;padding:12px}.chips>.chip.away{display:none}}
 /* Every button answers the same calm way: a little lighter under the mouse, a little smaller
    while pressed. No jumps, no flashes. */
-.go{flex:none;min-width:132px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:filter .15s ease,transform .1s ease}
+.go{flex:none;min-width:132px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:filter .08s ease,transform .06s ease}
 .go:hover{filter:brightness(1.08)}
 .go{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:15.5px;box-shadow:0 8px 22px -8px var(--glow),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.08)}
 .go .goi{width:24px;height:24px;flex:none;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
@@ -166,7 +166,7 @@ label:hover{color:var(--fg)}
 .st.pop{animation:pop .35s ease}
 @keyframes pop{0%{opacity:0}100%{opacity:1}}
 /* Small icon buttons in a row: cancel, copy the file. */
-.ibtn{flex:none;width:28px;height:28px;margin:-2px -4px -2px 0;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s,transform .1s}
+.ibtn{flex:none;width:28px;height:28px;margin:-2px -4px -2px 0;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .08s,color .08s,transform .06s}
 .ibtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ibtn:hover{background:color-mix(in srgb,var(--fg) 11%,transparent);color:var(--fg)}
 .ibtn:active{transform:scale(.92);background:color-mix(in srgb,var(--fg) 17%,transparent)}
@@ -197,7 +197,7 @@ label:hover{color:var(--fg)}
 .sub.err{color:var(--err)}
 .foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 /* Buttons: soft pills with an icon; the accent one is for the thing you most likely want. */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 13px 0 11px;border:1px solid var(--line2);border-radius:8px;background:color-mix(in srgb,var(--fg) 4%,transparent);color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 13px 0 11px;border:1px solid var(--line2);border-radius:8px;background:color-mix(in srgb,var(--fg) 4%,transparent);color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .08s ease,background .08s ease,color .08s ease,transform .06s ease}
 .btn svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 /* Icons with a meaning get a quiet colour of it: folders, copying; clearing turns red on hover. */
 #open svg{color:var(--folder)}#pick svg{color:var(--info)}.btn.copyall svg{color:var(--ok)}
@@ -213,14 +213,14 @@ label:hover{color:var(--fg)}
 .empty{color:var(--dim);text-align:center;padding:26px 0 18px}
 .empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35}
 .times{color:var(--dim);display:inline-flex;gap:6px;align-items:center;animation:rise .3s both}
-.times input{width:58px;background:rgba(127,127,127,.06);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 4px 5px 8px;font:inherit;font-variant-numeric:tabular-nums;outline:none;transition:border-color .2s,box-shadow .2s}
+.times input{width:58px;background:rgba(127,127,127,.06);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 4px 5px 8px;font:inherit;font-variant-numeric:tabular-nums;outline:none;transition:border-color .1s,box-shadow .1s}
 .times input:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--glow)}
 .times b{font-weight:400;margin:0 -3px}
 .form{z-index:2}
 /* Hints, only where the label doesn't say it all (the page turns title="" into data-tip): one
    bubble for the whole page (#tip), placed by the script below or above the thing so it always
    fits in the window, a solid plate like Material 3's plain tooltip. */
-#tip{position:fixed;left:0;top:0;z-index:60;max-width:280px;padding:7px 10px;border-radius:8px;background:#2b2b2e;color:#f1f1f1;box-shadow:0 8px 24px -8px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);font:12.5px/1.45 Onest,system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .15s ease,transform .15s cubic-bezier(.2,.8,.2,1);will-change:transform,opacity}
+#tip{position:fixed;left:0;top:0;z-index:60;max-width:280px;padding:7px 10px;border-radius:8px;background:#2b2b2e;color:#f1f1f1;box-shadow:0 8px 24px -8px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);font:12.5px/1.45 Onest,system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .08s ease,transform .08s cubic-bezier(.2,.8,.2,1);will-change:transform,opacity}
 #tip.on{opacity:1}
 :root[data-theme=light] #tip{background:#2f2f33}
 .seg{overflow:visible}.seg button:first-child{border-radius:7px 0 0 7px}.seg button:last-child{border-radius:0 7px 7px 0}
@@ -235,7 +235,7 @@ header{position:relative;z-index:5} /* above the options row: the folder menu ha
 .logob:not(.can){cursor:default}
 .logob:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
 .logob:active .logo{transform:scale(.94)}
-.badge{position:absolute;right:-5px;bottom:-5px;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;color:#fff;background:#7d7d82;box-shadow:0 0 0 2.5px var(--card);transform:scale(0);transition:transform .3s cubic-bezier(.3,1.6,.5,1),background .2s ease}
+.badge{position:absolute;right:-5px;bottom:-5px;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;color:#fff;background:#7d7d82;box-shadow:0 0 0 2.5px var(--card);transform:scale(0);transition:transform .3s cubic-bezier(.3,1.6,.5,1),background .1s ease}
 .logob.can .badge{transform:none}
 .badge svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .logob.in .badge{background:var(--ok);color:#0d2a12}
@@ -270,7 +270,7 @@ html.app header .logo{width:46px;height:46px;border-radius:12px;app-region:no-dr
 html.app header h1{font-size:22px}
 html.app .wbtns{display:flex;gap:2px;margin-left:auto;align-self:flex-start}
 /* The theme button: a sun that turns into a moon (its bite slides in, the rays draw in). */
-.tbtn{flex:none;align-self:flex-start;margin-left:6px;font:inherit;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s,transform .1s;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
+.tbtn{flex:none;align-self:flex-start;margin-left:6px;font:inherit;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .08s,color .08s,transform .06s;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
 .tbtn.lang{margin-left:auto}
 .tbtn:hover{background:var(--line);color:var(--fg)}
 .tbtn:active{transform:scale(.92)}
@@ -289,9 +289,9 @@ html.app .wbtns::before{content:"";width:1px;height:16px;margin:7px 6px 0 0;back
 /* Switching the theme: the new one spreads in a circle from the button (the View Transitions
    API: one snapshot, then the graphics card animates it). */
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
-::view-transition-new(root){animation:themein .55s cubic-bezier(.4,0,.2,1)}
+::view-transition-new(root){animation:themein .35s cubic-bezier(.4,0,.2,1)}
 @keyframes themein{from{clip-path:circle(0 at var(--tx,90%) var(--ty,40px))}to{clip-path:circle(var(--tr,150%) at var(--tx,90%) var(--ty,40px))}}
-.wbtns button{app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:default;transition:background .15s,color .15s}
+.wbtns button{app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:default;transition:background .08s,color .08s}
 .wbtns button:hover{background:var(--line);color:var(--fg)}
 .wbtns button.x:hover{background:#c42b1c;color:#fff}
 .wbtns svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3}
@@ -471,7 +471,7 @@ h1,html.app header h1{font-size:24px;line-height:1;letter-spacing:.08em;font-wei
 .hpair{margin-left:auto;align-self:flex-start;display:flex;gap:2px;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
 .hpair .tbtn{margin:0;width:34px;height:30px;padding:0;align-self:auto}
 .tbtn.pin svg,.tbtn.lang svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tbtn.pin .pinb{transition:fill .15s ease}
+.tbtn.pin .pinb{transition:fill .08s ease}
 .tbtn.pin.on{color:var(--tonal);background:color-mix(in srgb,var(--acc) 18%,transparent)}
 .tbtn.pin.on .pinb{fill:currentColor}
 .tbtn.pin.on:hover{background:color-mix(in srgb,var(--acc) 26%,transparent);color:var(--tonal)}
@@ -480,8 +480,8 @@ h1,html.app header h1{font-size:24px;line-height:1;letter-spacing:.08em;font-wei
 html.app .hpair+.wbtns{margin-left:10px}
 html.app .wbtns::before{display:none} /* no divider (the owner): a wider gap keeps the two groups apart */
 /* Switching the language: the window cross-fades to the new words (like the theme's circle). */
-html.vt-lang::view-transition-old(root){animation:vtout .13s ease-in both}
-html.vt-lang::view-transition-new(root){animation:fadein .2s ease-out .11s both} /* after the old words are gone: never both at once */
+html.vt-lang::view-transition-old(root){animation:vtout .08s ease-in both}
+html.vt-lang::view-transition-new(root){animation:fadein .12s ease-out .07s both} /* after the old words are gone: never both at once */
 @keyframes vtout{to{opacity:0}}
 #tip{white-space:pre-line}
 /* The links box grows with the links (up to a few lines, then scrolls); Download keeps its size. */
@@ -502,10 +502,10 @@ textarea{resize:none;min-height:68px;height:68px;max-height:150px;padding:10px 1
 .opts .seg button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
 .ddw{position:relative;flex:none;display:flex}
 .ddw.destw{flex:0 1 auto;min-width:0}
-.dd{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 8px 0 10px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
+.dd{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 8px 0 10px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .08s ease,background .08s ease,color .08s ease,transform .06s ease}
 .dd>span{min-width:0;overflow:hidden;text-overflow:ellipsis;text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em;font-variant-numeric:tabular-nums}
 .dd svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.dd .chev{width:14px;height:14px;color:var(--dim);transition:transform .2s ease}
+.dd .chev{width:14px;height:14px;color:var(--dim);transition:transform .1s ease}
 .dd[aria-expanded=true]{border-color:var(--acc);color:var(--tonal)}
 .dd[aria-expanded=true] .chev{transform:rotate(180deg);color:inherit}
 .dd:hover{border-color:color-mix(in srgb,var(--fg) 32%,transparent);background:color-mix(in srgb,var(--fg) 7%,transparent)}
@@ -559,7 +559,7 @@ html.app .fly{background:var(--card)}
 .frow:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}
 .frow b{display:block;font-weight:500;margin-bottom:3px}
 .frow input{position:absolute;opacity:0;pointer-events:none}
-.frow .box{flex:none;width:18px;height:18px;margin-top:1px;border-radius:5px;border:1.5px solid var(--line2);display:grid;place-items:center;transition:background .15s,border-color .15s}
+.frow .box{flex:none;width:18px;height:18px;margin-top:1px;border-radius:5px;border:1.5px solid var(--line2);display:grid;place-items:center;transition:background .08s,border-color .08s}
 .frow input:checked+.box{background:var(--acc);border-color:var(--acc)}
 .frow input:checked+.box::after{content:"";width:10px;height:6px;border-left:2px solid #1a0c04;border-bottom:2px solid #1a0c04;transform:translateY(-1px) rotate(-45deg)}
 .frow input:focus-visible+.box{outline:2px solid var(--acc);outline-offset:2px}
@@ -642,6 +642,25 @@ body.solo .area{box-sizing:border-box;padding-bottom:30px}
 @media (max-width:560px){.opts .seg button{width:40px}#qualB,#fmtB,#cutB,#dest,#editB{width:40px}.opts .go{width:48px}}
 /* The logo and the name a little in from the edge (the owner). */
 html.app header{padding-left:6px}
+/* The drop-down's surface: a step lighter than the card in the dark theme, white in the light. */
+html.app{--menu:#fff}
+html.app[data-theme=dark]{--menu:#242427}
+@media (prefers-color-scheme:dark){html.app:not([data-theme=light]){--menu:#242427}}
+/* A drop-down grows out of its button (the owner, build 22: they floated 8 px under it and slid
+   in; then an orange outline round it all was heavy): the open button takes the drop-down's
+   surface and loses its bottom edge, the drop-down starts right under it, one shape with one thin
+   neutral outline; it unrolls from the button in 0.12 s and moves nowhere. */
+.opts .fly{top:calc(100% - 1px);background:var(--menu);border-color:var(--line2);border-top-left-radius:0;box-shadow:0 18px 40px -16px rgba(0,0,0,.5);animation:unroll .12s cubic-bezier(.2,.8,.2,1) both}
+.opts .fly.end{border-top-left-radius:10px;border-top-right-radius:0}
+.opts .fly.up{top:auto;bottom:calc(100% - 1px);border-radius:10px 10px 10px 0;animation-name:unrollup}
+.opts .fly.up.end{border-radius:10px 10px 0 10px}
+#destMenu{top:calc(100% - 1px)}
+#destMenu.up{top:auto;bottom:calc(100% - 1px)}
+.opts .dd[aria-expanded=true]{position:relative;z-index:41;background:var(--menu);border-color:var(--line2);border-bottom-color:transparent;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.opts .ddw:has(>.fly.up:not([hidden]))>.dd[aria-expanded=true]{border-radius:0 0 8px 8px;border-bottom-color:var(--line2);border-top-color:transparent}
+@keyframes unroll{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(-60px)}}
+@keyframes unrollup{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(-60px)}}
+@media (prefers-reduced-motion:reduce){.opts .fly{animation:none}}
 /* Icons in the row bigger and bolder (the owner: they didn't read at a glance). */
 .opts .dd svg,.opts .dd.icon svg{width:18px;height:18px;stroke-width:2}
 .opts .dd .chev{width:14px;height:14px}
@@ -661,7 +680,7 @@ html.app[data-theme=light] .card.form::before,html.app[data-theme=light] body.so
 #cutFly .times{display:grid;grid-template-columns:auto 1fr auto 1fr;column-gap:6px;row-gap:8px;padding:0 6px}
 #cutFly .times .tl,#cutFly .times .tl~.tl{margin:0 4px 0 0}
 #cutFly .times input{width:100%}
-.cutoff{display:flex;align-items:center;justify-content:center;width:calc(100% - 12px);height:32px;margin:10px 6px 4px;border:0;border-radius:10px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--tonal);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}
+.cutoff{display:flex;align-items:center;justify-content:center;width:calc(100% - 12px);height:32px;margin:10px 6px 4px;border:0;border-radius:10px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--tonal);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .08s}
 .cutoff:hover{background:color-mix(in srgb,var(--acc) 22%,transparent)}
 .cutoff:active{background:color-mix(in srgb,var(--acc) 28%,transparent)}
 .cutoff>span{text-box:trim-both cap alphabetic}
@@ -681,7 +700,7 @@ html.app .card.form:has(+#jobsCard:not([hidden])){padding-bottom:14px}
 .fly .times .tl~.tl{margin-left:12px}
 .fly .times input::placeholder{color:color-mix(in srgb,var(--fg) 35%,transparent)}
 /* Switching the language: every word slides in (no fading out the whole window first). */
-html.lang-swap :is([data-t],#goT,#qualT,#fmtT,#cutT,#dest>span,#lsum,.kind,.nums,.st,.pvf,.pvch span,.ovr){animation:langin .3s cubic-bezier(.2,.8,.2,1) both}
+html.lang-swap :is([data-t],#goT,#qualT,#fmtT,#cutT,#dest>span,#lsum,.kind,.nums,.st,.pvf,.pvch span,.ovr){animation:langin .18s cubic-bezier(.2,.8,.2,1) both}
 @keyframes langin{from{opacity:0;transform:translateY(5px)}}
 /* Still decorations on the water at the window's bottom: reeds, a float, a few fish, bubbles. */
 html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='86' viewBox='0 0 640 86'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M0 62c22-8 44-8 66 0s44 8 66 0 44-8 66 0 44 8 66 0 44-8 66 0 44 8 66 0 44-8 66 0 44 8 66 0 44-8 66 0 44 8 50 2' stroke-opacity='.18' stroke-width='1.5'/%3E%3Cpath d='M30 76c26-7 52-7 78 0s52 7 78 0 52-7 78 0 52 7 78 0 52-7 78 0 52 7 78 0 52-7 78 0' stroke-opacity='.11' stroke-width='1.5'/%3E%3Cg stroke-opacity='.29' stroke-width='1.6' transform='translate(0 22)'%3E%3Cpath d='M18 86V40M28 86V28M38 86V46M24 60c-6-6-8-14-6-22M34 64c5-6 9-12 9-20'/%3E%3Crect x='25' y='14' width='6' height='16' rx='3' fill='%23ff6b2c' fill-opacity='.22'/%3E%3C/g%3E%3Cg stroke-opacity='.32' stroke-width='1.5'%3E%3Cpath d='M560 0v40' stroke-dasharray='2 4'/%3E%3Cpath d='M560 40v-6M553 54a7 7 0 0 0 14 0z' /%3E%3Cpath d='M553 54a7 7 0 0 1 14 0' fill='%23ff6b2c' fill-opacity='.45'/%3E%3Cpath d='M546 62c6 3 22 3 28 0' stroke-opacity='.22'/%3E%3C/g%3E%3Cg fill='%23ff6b2c' fill-opacity='.16' stroke='none'%3E%3Cpath d='M210 74c6-6 16-6 22 0-6 6-16 6-22 0zm-8-5 8 5-8 5z'/%3E%3Cpath d='M400 80c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z'/%3E%3Cpath d='M470 70c4-4 10-4 14 0-4 4-10 4-14 0zm-5-3 5 3-5 3z' fill-opacity='.13'/%3E%3C/g%3E%3Cg stroke-opacity='.22' stroke-width='1.2'%3E%3Ccircle cx='244' cy='64' r='2.2'/%3E%3Ccircle cx='250' cy='55' r='1.6'/%3E%3Ccircle cx='428' cy='70' r='1.8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat center bottom/640px 86px}
@@ -1388,7 +1407,7 @@ $('lang').onclick = function () {
   apply();
   if (still()) return;
   root.classList.remove('lang-swap'); void root.offsetWidth; root.classList.add('lang-swap');
-  clearTimeout(window.langT); window.langT = setTimeout(function () { root.classList.remove('lang-swap'); }, 400);
+  clearTimeout(window.langT); window.langT = setTimeout(function () { root.classList.remove('lang-swap'); }, 250);
 };
 // The pin: ТЯГА's window stays over all the others (remembered; ТЯГА's window only).
 var INAPP = document.documentElement.classList.contains('app'); // (APP itself is set further down)

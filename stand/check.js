@@ -185,6 +185,9 @@
     document.querySelectorAll('.opts .dd,header .dd').forEach(function (b) {
       if (!seen(b)) return;
       b.click();
+      // Measured where it ends up: a drop-down that unrolls is clipped (and not hit) while it does.
+      var fo = document.querySelector('.fly:not([hidden])');
+      if (fo && fo.getAnimations) fo.getAnimations().forEach(function (x) { x.finish(); });
       var h = document.querySelector('main').scrollHeight;
       // the open drop-down is really on top: nothing covers or clips any of its corners
       var f = document.querySelector('.fly:not([hidden])');

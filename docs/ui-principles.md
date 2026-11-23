@@ -82,7 +82,8 @@ by themselves while you look at them, and nothing moves when you click.
 
 **1a. Every change of state moves, briefly.** Nothing pops in or vanishes: what appears fades
 or slides in, what goes away folds up or fades out, a switch between two views cross-fades,
-and the neighbours glide to their new place. Short (0.15–0.35 s), the same easing everywhere,
+and the neighbours glide to their new place. Snappy (the owner): hover and press 0.06–0.1 s, a
+drop-down unrolls out of its button in 0.12 s, a view or a row 0.15–0.35 s; the same easing everywhere,
 never a bounce or a show. A missing or abrupt transition is a bug, the same as a wrong number.
 Before a build, list every state change the work touches (appear, disappear, expand,
 collapse, switch views, clear, hover, press, the mouse leaving and coming back) and watch each
