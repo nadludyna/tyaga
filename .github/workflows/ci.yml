@@ -78,8 +78,7 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
           url=$(stand/run.sh)
           echo "stand: $url"
-          if [ -z "$url" ]; then echo "::error title=Stand::ТЯГА didn't start: $(tail -c 1500 /tmp/tyaga-stand/app.log | tr '
-' ' ')"; exit 1; fi
+          if [ -z "$url" ]; then echo "::error title=Stand::the stand did not start: $(tail -c 1500 /tmp/tyaga-stand/app.log | tr -s '[:space:]' ' ')"; exit 1; fi
           node stand/ci.js "$url"
 
       - name: The stand's log (when something failed)
