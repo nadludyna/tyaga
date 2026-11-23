@@ -292,7 +292,7 @@ func runWindow(token string) bool {
 }
 
 // The window's size: the page's cards plus a little room for their shadows.
-const winWidth, winHeight = 628, 800 // as wide as the options row (and a double gap before the folder): no empty stretch in it (the owner, 23.11)
+const winWidth, winHeight = 653, 800 // exactly the options row, the same 8 px between every button (the owner); the page gets ~10 px less than this (Windows' edges, measured on the owner's PC, 23.11)
 
 // The tray menu's window: the menu card (menu.html) plus room for its shadow.
 const menuWidth, menuHeight = 288, 236 // measured: the card is 220 high with the "what's going on" line, plus 16 for the shadow

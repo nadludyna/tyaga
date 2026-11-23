@@ -32,7 +32,10 @@
   }
   function textEl(b) {
     var s = [].slice.call(b.querySelectorAll('span')).filter(function (x) { return x.textContent.trim() && seen(x); })[0];
-    return s || (b.textContent.trim() ? b : null);
+    // The button's own text only if it has some outside its spans (a narrow window hides a label
+    // in a span: then there's no label to measure, not the button's hidden words).
+    var own = [].some.call(b.childNodes, function (n) { return n.nodeType === 3 && n.textContent.trim(); });
+    return s || (own ? b : null);
   }
   window.tyagaCheck = function () {
     var bad = [];

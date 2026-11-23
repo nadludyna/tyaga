@@ -622,6 +622,23 @@ html.app header .logo,html.app header .title{margin-top:8px}
 .opts .seg button{width:88px;justify-content:center}
 #qualB,#fmtB,#cutB,#dest,#editB{width:56px;padding:0;justify-content:center}
 .opts .go{width:136px;padding:0;justify-content:center}
+/* Every control in the row one form (the owner, build 19): 32 px tall, the icon ones 56 wide
+   (the switch's frame made it 1.6 px taller; "for editing" was 32 wide). Nothing in the row
+   shrinks: a window a little narrower squeezed the folder button. */
+.opts .seg{height:32px;box-sizing:border-box}
+.opts .seg button{height:100%}
+.opts>*:not(.sp){flex-shrink:0}
+.opts .ddw.destw{flex:none;margin-left:auto}
+.opts>.sp{display:none} /* an empty item takes a gap of its own: 16 px before the folder instead of 8 */
+/* The empty list: the hook hangs on a line from the top edge, a little higher than the middle,
+   its caption at an even step under it (the owner: it hung by itself). */
+.area:has(>#empty:not([hidden])){justify-content:flex-start}
+.hook0{gap:0}
+.hook0 .hline{display:block;width:1.5px;height:40px;margin-bottom:-4px;transform:translateX(7.5px);background:color-mix(in srgb,var(--acc) 40%,var(--dim));opacity:.7}
+.hook0>span{margin-top:14px}
+/* What's in the area (the preview, the hook) is centred over the part above the water at the
+   bottom, not over the whole: the preview's lower edge sat on the waves. */
+body.solo .area{box-sizing:border-box;padding-bottom:30px}
 @media (max-width:560px){.opts .seg button{width:40px}#qualB,#fmtB,#cutB,#dest,#editB{width:40px}.opts .go{width:48px}}
 /* The logo and the name a little in from the edge (the owner). */
 html.app header{padding-left:6px}
@@ -647,7 +664,7 @@ html.app .card.form::before{content:"";position:absolute;top:22px;left:var(--sky
 html.app .card.form .opts{margin-top:14px}
 html.app .card.form:has(+#jobsCard:not([hidden])){padding-bottom:14px}
 .opts .seg button.on{font-weight:500} /* bold made the picked word wider: the row moved by a pixel on every switch */
-#editW{width:32px}
+#editW{flex:none}
 .dd.icon[aria-pressed=true]{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 #dest>svg:first-child{color:var(--folder)}
 .fh{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:4px 6px 10px}
@@ -707,7 +724,7 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
   <div class="msg" id="msg"></div>
   <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB"><span id="noticeBT">Undo</span></button><i class="ntime" id="ntime" hidden></i></div>
   <div class="area" id="area">
-    <div class="hook0" id="empty" hidden><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg><span data-t="Nothing on the hook yet. Cast a link above.">Nothing on the hook yet. Cast a link above.</span></div>
+    <div class="hook0" id="empty" hidden><i class="hline" aria-hidden="true"></i><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg><span data-t="Nothing on the hook yet. Cast a link above.">Nothing on the hook yet. Cast a link above.</span></div>
     <div class="pv" id="pv" hidden></div>
   </div>
 </div>
@@ -807,6 +824,7 @@ var RU = {
   "H.264 + AAC: opens in any editor. Up to 1080p": "H.264 + AAC: откроется в любом редакторе. До 1080p",
   "Open": "Открыть",
   "For editing: H.264 + AAC, opens in any editor. Up to 1080p": "Для монтажа: H.264 + AAC, откроется в любом редакторе. До 1080p",
+  "For editing: only for video": "Для монтажа: только для видео",
   "Pin on top": "Закрепить поверх окон",
   "Unpin": "Открепить",
   "Change…": "Сменить…",
@@ -1170,7 +1188,12 @@ function optLabels() {
   $('cutB').dataset.tip = !$('cutB').dataset.canCut ? 'A fragment is for one video at a time'
     : on ? 'Only a part of it' + '\n' + part : 'Download only part of the video';
   $('editB').setAttribute('aria-pressed', $('edit').checked);
-  $('editW').style.visibility = mode() === 'video' ? '' : 'hidden'; // its place stays in audio: nothing moves
+  // In audio it stays in its place, greyed out (hidden, it left a hole in the row: build 19);
+  // it says why in its hint. Nothing moves when switching.
+  var vid = mode() === 'video';
+  $('editB').setAttribute('aria-disabled', vid ? 'false' : 'true');
+  $('editB').dataset.tip = vid ? 'For editing: H.264 + AAC, opens in any editor. Up to 1080p' : 'For editing: only for video';
+  if (!vid) $('editB').setAttribute('aria-pressed', 'false');
 }
 // Drop-downs: one open at a time; under the button, or above it when there's no room below in
 // the window (the window never grows for one); at the right edge they open leftwards.
@@ -1225,7 +1248,7 @@ function openFly(btn, fly) {
 addEventListener('click', function (e) { if (flyOpen && !flyOpen.fly.contains(e.target)) closeFly(); });
 addEventListener('keydown', function (e) { if (e.key === 'Escape' && flyOpen) { var b = flyOpen.btn; closeFly(); b.focus(); } });
 addEventListener('resize', function () { closeFly(); optLabels(); });
-$('editB').onclick = function () { $('edit').checked = !$('edit').checked; $('edit').dispatchEvent(new Event('change')); };
+$('editB').onclick = function () { if (this.getAttribute('aria-disabled') === 'true') return; $('edit').checked = !$('edit').checked; $('edit').dispatchEvent(new Event('change')); };
 $('cutOff').onclick = function () { TIMES.forEach(function (id) { $(id).value = ''; }); optLabels(); closeFly(); };
 $('edit').addEventListener('change', optLabels);
 $('links').addEventListener('input', syncBoxes);
