@@ -17,7 +17,8 @@ he has to guess what's going on or wait without knowing why, is a bug to fix bef
 The owner's words, after fixing the same things twice: a build that breaks what worked costs
 him more than one that adds nothing. So, before **every** build, however small the change:
 
-- `tyagaCheck()`, `tyagaFlyCheck()` and `tyagaModeCheck()` all come back empty, in the empty
+- `tyagaCheck()`, `tyagaFlyCheck()`, `tyagaModeCheck()` and `tyagaLangCheck()` (async: switching
+  the language moves and resizes nothing) all come back empty, in the empty
   window, with a link pasted, and with a list (queued, downloading, done); English and Russian,
   dark and light, 680 px and ~440 px. Run them once the theme has finished switching: its
   circle covers the page for a moment and the corner check then reports false alarms. In a
@@ -32,7 +33,8 @@ moving inside an opening drop-down; the link count off-centre in its badge; text
 bottom edge; a button that doesn't fit its card in a narrow window; a button lying over its
 neighbour because the box around it shrank and it didn't (the folder under Download); a page
 whose script failed to load (a syntax error) and so did nothing while every layout check passed.
-Test with real-looking data: the stand's folder is called "out", three letters, and hid how a
+Buttons that changed size or place when the language was switched ("Video" and "Видео" are
+not one length: a button holds both words, the other one invisible). Test with real-looking data: the stand's folder is called "out", three letters, and hid how a
 longer name behaves.
 
 ### Before every build, measured, not by eye

@@ -213,4 +213,35 @@
     was.click();
     return out;
   };
+  // Switching the language moves nothing (the owner, build 15): every control in the header, the
+  // options row, the list bar and the rows keeps its place and size. Async: it switches the
+  // language, waits for the words to swap, measures, and switches back.
+  //   tyagaLangCheck().then(console.log)
+  window.tyagaLangCheck = function () {
+    var sel = 'header button, .opts button, .opts .dd, .lbar .btn, .job .acts button, .job .btn';
+    function snap() {
+      var m = {};
+      document.querySelectorAll(sel).forEach(function (e) {
+        if (!e.id && !e.className) return;
+        var r = e.getBoundingClientRect();
+        if (!r.width) return;
+        var k = (e.id || e.className) + '#' + [].indexOf.call(document.querySelectorAll(sel), e);
+        m[k] = [r.left, r.top, r.width, r.height];
+      });
+      return m;
+    }
+    var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+    var a = snap(), out = [];
+    document.getElementById('lang').click();
+    return wait(700).then(function () {
+      var b = snap();
+      Object.keys(a).forEach(function (k) {
+        if (!b[k]) return;
+        var d = a[k].map(function (v, i) { return Math.abs(v - b[k][i]); });
+        if (Math.max.apply(null, d) > 0.5) out.push('moves with the language: ' + k + ' (' + a[k].map(Math.round) + ' → ' + b[k].map(Math.round) + ')');
+      });
+      document.getElementById('lang').click();
+      return wait(700);
+    }).then(function () { return out; });
+  };
 })();

@@ -449,7 +449,7 @@ html.app #jobsCard.folded .lchev svg{transform:rotate(180deg)}
    was 1.2 px above the icons' middle (1–2 screen pixels at 125 %). */
 button.chip{font-family:inherit}
 .seg button,.notice .btn{text-box:trim-both cap alphabetic}
-.btn>span,.chip>span,.go>span,.menu button>span,.tbtn.lang>span,.st,.lhead #lsum{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
+.btn>span:not(.tw),.btn .tw>span,.chip>span,.go>span,.menu button>span,.tbtn.lang>span,.st,.lhead #lsum{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
 /* (the same room above and below the letters: where a long label is cut with "…", the tails
    of у, р, g stay whole; the middle stays where it was) */
 /* Narrow: More and the list's actions keep only their icons (the hint still says the word),
@@ -610,6 +610,17 @@ html.app #jobsCard.folded::after{display:none}
 /* Room above the name (the owner: it was pressed against the top); the window buttons stay in the corner. */
 html.app header .logo,html.app header .title{margin-top:8px}
 @media (max-width:560px){.opts .go>span{display:none}.opts .go{padding:0 12px}}
+/* Fixed widths (the owner, build 15): switching the language moves nothing (Video and Видео,
+   Download and Скачать are not one length), and the icon buttons are all one size. */
+.opts .seg button{width:88px;justify-content:center}
+#qualB,#fmtB,#cutB,#dest,#editB{width:56px;padding:0;justify-content:center}
+.opts .go{width:136px;padding:0;justify-content:center}
+@media (max-width:560px){.opts .seg button{width:40px}#qualB,#fmtB,#cutB,#dest,#editB{width:40px}.opts .go{width:48px}}
+/* The logo and the name a little in from the edge (the owner). */
+html.app header{padding-left:6px}
+.tw{display:inline-grid;justify-items:center}
+.tw>*{grid-area:1/1}
+.tw>.ghost{visibility:hidden}
 /* The fragment: says what to do, "from" above "to" with the fields in one column, and Reset as
    a button across the bottom (tonal: solid orange stays for Download). */
 #cutFly{width:244px}
@@ -696,8 +707,8 @@ html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+
 
 <div class="card" id="jobsCard" hidden>
   <div class="lbar" id="lbar"><div class="lhead" id="lhead"><span id="lsum"></span></div>
-    <button class="btn ghost sm copyall" id="copyall" hidden title="Copy all files"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span id="copyallT" data-t="Copy all files">Copy all files</span></button>
-    <button class="btn ghost sm clear" id="clear" title="Clear finished. Files stay on disk"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg><span data-t="Clear finished">Clear finished</span></button>
+    <button class="btn ghost sm copyall" id="copyall" hidden title="Copy all files"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="tw"><span id="copyallT" data-t="Copy all files">Copy all files</span><span class="ghost" data-t2="Copy all files" aria-hidden="true"></span></span></button>
+    <button class="btn ghost sm clear" id="clear" title="Clear finished. Files stay on disk"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg><span class="tw"><span data-t="Clear finished">Clear finished</span><span class="ghost" data-t2="Clear finished" aria-hidden="true"></span></span></button>
     <button class="lchev" id="lchev" aria-label="Hide downloads list"><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button></div>
   <div id="list"></div>
 </div>
@@ -843,6 +854,7 @@ function applyLang() {
   document.documentElement.lang = LANG;
   document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = T(e.dataset.t); });
   document.querySelectorAll('[data-ph]').forEach(function (e) { e.placeholder = T(e.dataset.ph); });
+  document.querySelectorAll('[data-t2]').forEach(function (e) { e.textContent = otherLang(e.dataset.t2); });
   var b = document.getElementById('lang');
   if (b) { b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>'; b.dataset.tip = LANG === 'ru' ? 'Переключить на английский' : 'Switch to Russian'; }
 }
@@ -1139,11 +1151,9 @@ function optLabels() {
   setText($('qualT'), q === '0' ? T('Best') : q + 'p'); // narrow: the short word
   setText($('qBest'), T('Best') + (top ? ' (' + top + 'p)' : ''));
   setText($('fmtT'), format() === 'mp3' ? 'MP3' : T('Original'));
-  // The icons alone (the owner): the picked value is in the hint, and anything but the default
-  // lights the button up, so a changed setting still shows at a glance.
-  $('qualB').classList.toggle('on', q !== '0');
+  // The icons alone (the owner): the picked value is in the hint. They look the same whatever is
+  // picked (lighting up a changed one was tried in build 15: the owner said no).
   $('qualB').dataset.tip = 'Video quality\n' + (q === '0' ? 'Best' : q + 'p');
-  $('fmtB').classList.toggle('on', format() === 'mp3');
   $('fmtB').dataset.tip = 'Audio format\n' + (format() === 'mp3' ? 'MP3' : 'Original');
   var on = cutOn(), lk = linksIn($('links').value), ff = lk.length === 1 && facts[lk[0]], dur = ff && ff.duration ? Math.round(ff.duration) : 0;
   $('toM').placeholder = dur ? Math.floor(dur / 60) : '–'; $('toS').placeholder = dur ? pad(dur % 60) : '––';
@@ -1530,7 +1540,19 @@ var rowWatch = window.ResizeObserver ? new ResizeObserver(function (en) {
 }) : null;
 
 // An icon and a word; the word goes in a span so it can sit in the middle by its letters (.btn>span).
-function iconText(html) { return html.replace(/(<\/svg>)([^<]+)$/, '$1<span>$2</span>'); }
+// A button's word in both languages, the other one invisible in the same place: the button is as
+// wide as the longer of the two, so switching the language changes no size (the owner, build 15).
+function iconText(html) {
+  return html.replace(/(<\/svg>)([^<]+)$/, function (m, svg, t) {
+    return svg + '<span class="tw"><span>' + t + '</span><span class="ghost" aria-hidden="true">' + otherLang(t) + '</span></span>';
+  });
+}
+// The same words in the language not shown now (from an English key or from the Russian shown).
+function otherLang(t) {
+  if (LANG !== 'ru') return Object.prototype.hasOwnProperty.call(RU, t) ? RU[t] : t;
+  for (var k in RU) if (RU[k] === t) return k;
+  return t;
+}
 function button(cls, label, title, onclick) {
   var b = el('button', 'btn ' + cls);
   b.innerHTML = iconText(label);
