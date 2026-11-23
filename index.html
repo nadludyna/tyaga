@@ -191,7 +191,7 @@ label:hover{color:var(--fg)}
 /* The lane opens when the download starts and folds after its last moment (the catch, the
    snapped line); the canvas is taller than the lane, so the fish can jump without the row
    growing, and never takes the mouse. */
-.lane{flex:0 0 100%;position:relative;height:30px;transition:height .32s cubic-bezier(.2,.8,.2,1)}
+.lane{flex:0 0 100%;position:relative;height:40px;transition:height .32s cubic-bezier(.2,.8,.2,1)}
 .lane.shut{height:0}
 /* The line and the fish go as one: the picture fades out first, then the place folds (cutting
    the canvas with the folding edge showed half a fish and a stub of line: the owner); opening,
@@ -199,7 +199,7 @@ label:hover{color:var(--fg)}
 .wave{transition:opacity .16s ease .12s}
 .lane.shut .wave{opacity:0;transition:opacity .12s ease}
 .lane.shut{transition:height .32s cubic-bezier(.2,.8,.2,1) .1s}
-.wave{position:absolute;left:0;top:-2px;width:100%;height:40px;display:block;pointer-events:none}
+.wave{position:absolute;left:0;top:6px;width:100%;height:40px;display:block;pointer-events:none}
 .acts{flex:none;display:flex;gap:6px;margin-left:auto}
 .acts .btn{height:28px;padding:0 10px 0 8px;font-size:12.5px;gap:6px}
 .acts .btn svg{width:15px;height:15px}
@@ -309,14 +309,14 @@ html.app .wbtns::before{content:"";width:1px;height:16px;margin:7px 6px 0 0;back
 html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 /* Room under the last row for the water lines at the card's bottom: they lie under the rows, not
    behind their text and progress line (the owner). On the list, not the card: folded stays as it is. */
-html.app #list{padding-bottom:38px}
+/* (the room itself is in the padding of the #list rule below: a padding-bottom here was overwritten by its "padding" and never applied: the line lay on the water) */
 /* The open list is never lower than the empty window: the tallest drop-down (the fragment) fits
    under the options row with one download in the list too, the same as with none (build 16).
    The list stretches, so the water stays at the bottom. */
 html.app #jobsCard:not(.folded){min-height:180px}
 html.app #jobsCard:not(.folded) #list{flex-grow:1}
 html.app #jobsCard>*{position:relative;z-index:1}
-html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;scrollbar-gutter:stable;padding:0 7px;margin-left:-7px;margin-right:-17px} /* room for a row's glow, both sides */
+html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;scrollbar-gutter:stable;padding:0 7px 44px;margin-left:-7px;margin-right:-17px} /* room for a row's glow, both sides */
 html.app .bg{display:none}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
@@ -2321,7 +2321,7 @@ function openHeight() { // the open list card's natural height, measured without
     e.style.height = e.style.paddingTop = e.style.paddingBottom = '';
   });
   var n = card.offsetTop + card.offsetHeight - list.clientHeight + list.scrollHeight + mainPad();
-  list.querySelectorAll('.job.lining .lane').forEach(function (l) { n += (l.classList.contains('shut') ? 0 : 30) - l.offsetHeight; });
+  list.querySelectorAll('.job.lining .lane').forEach(function (l) { n += (l.classList.contains('shut') ? 0 : 40) - l.offsetHeight; });
   moving.forEach(function (m) { m[0].style.height = m[1]; m[0].style.paddingTop = m[2]; m[0].style.paddingBottom = m[3]; m[0].hidden = m[4]; });
   card.hidden = was[0]; card.className = was[1]; card.style.height = was[2];
   return Math.ceil(n);
@@ -2397,11 +2397,12 @@ function setFold(on, animate) {
       card.classList.remove('folded');
       card.style.height = '';
       var to = card.offsetHeight;
+      card.style.minHeight = '0'; // else the open card's min-height snaps it to 180 px at once, and there's little left to slide (the owner: no unfolding animation)
       card.style.height = from + 'px';
       void card.offsetHeight;
       card.classList.add('anim');
       card.style.height = to + 'px';
-      setTimeout(function () { if (!fold.on) { card.classList.remove('anim'); card.style.height = ''; windowFit(); } }, 260);
+      setTimeout(function () { card.style.minHeight = ''; if (!fold.on) { card.classList.remove('anim'); card.style.height = ''; windowFit(); } }, 260);
     });
   }
 }
