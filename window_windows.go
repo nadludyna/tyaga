@@ -295,7 +295,7 @@ func runWindow(token string) bool {
 const winWidth, winHeight = 653, 800 // exactly the options row, the same 8 px between every button (the owner); the page gets ~10 px less than this (Windows' edges, measured on the owner's PC, 23.11)
 
 // The tray menu's window: the menu card (menu.html) plus room for its shadow.
-const menuWidth, menuHeight = 288, 236 // measured: the card is 220 high with the "what's going on" line, plus 16 for the shadow
+const menuWidth, menuHeight = 264, 220 // measured: the card is 248×203 with the "what's going on" line and the water at its bottom, plus 16 for the shadow
 
 // lightWebview: WebView2 is Edge inside, and by itself it downloads Edge's add-ons into its
 // data folder (DRM for Netflix, speech recognition, ad-block lists: some 60 MB) and phones home.

@@ -15,12 +15,12 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;height:100%;background:transparent;overflow:hidden;-webkit-user-select:none;user-select:none;cursor:default}
-body{font:13.5px/1.3 Onest,system-ui,sans-serif;color:var(--fg);padding:8px;display:flex;align-items:flex-end}
-.menu{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 6px 18px -6px rgba(0,0,0,.55);animation:in .14s ease-out both}
+body{font:13px/1.3 Onest,system-ui,sans-serif;color:var(--fg);padding:8px;display:flex;align-items:flex-end}
+.menu{position:relative;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px 5px 16px;box-shadow:0 6px 18px -6px rgba(0,0,0,.55);animation:in .14s ease-out both}
 @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 /* On top: what's going on. An icon in the same style as the window's states, the download
    now (or that nothing is), and a line under it: how far, how many are left. */
-.now{position:relative;display:flex;align-items:center;gap:10px;padding:8px 10px 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+.now{position:relative;display:flex;align-items:center;gap:10px;padding:6px 9px 8px;margin-bottom:3px;border-bottom:1px solid var(--line)}
 .now svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--dim)}
 .now.busy svg{color:var(--acc)}
 .nt{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}
@@ -29,7 +29,7 @@ body{font:13.5px/1.3 Onest,system-ui,sans-serif;color:var(--fg);padding:8px;disp
 .now.busy .nt span{color:var(--acc)}
 .bar{position:absolute;left:10px;right:10px;bottom:-1px;height:2px;border-radius:2px;background:transparent}
 .bar i{display:block;height:100%;width:0;border-radius:2px;background:var(--acc)}
-button{display:flex;align-items:center;gap:10px;width:100%;height:34px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;font-weight:500;text-align:left;cursor:default;transition:background .12s ease,color .12s ease,transform .1s ease}
+button{position:relative;z-index:1;display:flex;align-items:center;gap:10px;width:100%;height:30px;padding:0 9px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;font-weight:500;text-align:left;cursor:default;transition:background .12s ease,color .12s ease,transform .1s ease}
 button:hover,button:focus-visible{background:var(--hover);outline:none}
 button:active{transform:scale(.98)}
 button svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -37,7 +37,12 @@ button>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowra
 /* The words sit in the middle by the letters themselves, like in the main window. */
 button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em} /* room for the tails of у, р, g where a label is cut with "…" */
 #open svg{color:var(--acc)}#folder svg{color:var(--folder)}#pick svg{color:var(--info)}.quit svg{color:var(--dim)}
-.sep{height:1px;background:var(--line);margin:4px 6px}
+.sep{height:1px;background:var(--line);margin:3px 6px}
+/* The water from the main window along the menu's bottom: reeds, a fish, the float, two waves.
+   Still, drawn once (nothing moves by itself). */
+.menu::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34px;border-radius:0 0 11px 11px;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='248' height='34' viewBox='0 0 248 34'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.4'%3E%3Cpath stroke-opacity='.3' d='M0 22c20-7 40-7 62 0s42 7 62 0 42-7 62 0 42 7 62 0'/%3E%3Cpath stroke-opacity='.18' d='M-10 29c26-6 52-6 78 0s52 6 78 0 52-6 78 0 40 6 40 3'/%3E%3Cpath stroke-opacity='.35' d='M12 33V14M17 33c0-6 2-10 5-13M8 33c0-5-2-8-4-10'/%3E%3Cpath stroke-opacity='.35' stroke-dasharray='2 2.5' d='M214 2v12'/%3E%3C/g%3E%3Cg fill='%23ff6b2c'%3E%3Crect fill-opacity='.4' x='10' y='7' width='4' height='9' rx='2'/%3E%3Ccircle fill-opacity='.55' cx='214' cy='19' r='4'/%3E%3Cpath fill-opacity='.28' d='M128 26c3-3 8-3 11 0-3 3-8 3-11 0zm0 0-4-2.5v5z'/%3E%3C/g%3E%3C/svg%3E") no-repeat 0 100%/100% 34px}
+:root[data-theme=light] .menu::after{filter:drop-shadow(0 0 0 #c2410c)}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]) .menu::after{filter:drop-shadow(0 0 0 #c2410c)}}
 .quit:hover,.quit:focus-visible{color:var(--err);background:color-mix(in srgb,var(--err) 12%,transparent)}
 .quit:hover svg,.quit:focus-visible svg{color:var(--err)}
 /* Quitting while something downloads: the question takes the menu's place, same size. */
@@ -55,7 +60,7 @@ button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.
     <div class="now" id="now"><svg id="ni" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/></svg><div class="nt"><b id="nt">&nbsp;</b><span id="ns">&nbsp;</span></div><div class="bar"><i id="nb"></i></div></div>
     <button id="open"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg><span data-t="Open ТЯГА">Open ТЯГА</span></button>
     <button id="folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="folderT">Open the downloads folder</span></button>
-    <button id="pick"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Save downloads elsewhere…">Save downloads elsewhere…</span></button>
+    <button id="pick"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change the folder…">Change the folder…</span></button>
     <div class="sep"></div>
     <button id="quit" class="quit"><svg viewBox="0 0 24 24"><path d="M12 3v8M7 6a8 8 0 1 0 10 0"/></svg><span data-t="Quit ТЯГА">Quit ТЯГА</span></button>
   </div>
@@ -68,7 +73,7 @@ button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.
 var TOKEN = new URLSearchParams(location.search).get('t'), busy = false;
 function $(id) { return document.getElementById(id); }
 // The language the main window's button picked (tyaga-lang), else Windows' own.
-var RU = { 'Open ТЯГА': 'Открыть ТЯГУ', 'Save downloads elsewhere…': 'Сохранять в другую папку…',
+var RU = { 'Open ТЯГА': 'Открыть ТЯГУ', 'Change the folder…': 'Сменить папку…',
   'Quit ТЯГА': 'Выйти из ТЯГИ', 'Something is still downloading.': 'Ещё что-то качается.',
   'Quit anyway? Unfinished files resume when you download them again.': 'Всё равно выйти? Недокачанное докачается, когда скачаешь снова.',
   'Keep going': 'Пусть качает', 'Quit': 'Выйти' }, ru = false;
@@ -96,9 +101,10 @@ function showNow(s) {
     : ru ? 'Ничего не качается' : 'Nothing is downloading';
   $('ns').textContent = busy
     ? (ru ? 'Скачивается · ' + p + '%' + (left ? ' · ещё ' + left : '') : 'Downloading · ' + p + '%' + (left ? ' · ' + left + ' more' : ''))
-    : (s.folder ? (ru ? 'Файлы — в папке ' + s.folder : 'Files go to ' + s.folder) : '');
+    : (s.folder ? (ru ? 'Папка: ' + s.folder : 'Folder: ' + s.folder) : '');
   $('nb').style.width = busy ? p + '%' : '0';
-  $('folderT').textContent = s.folder ? (ru ? 'Открыть папку ' + s.folder : 'Open ' + s.folder) : (ru ? 'Открыть папку загрузок' : 'Open the downloads folder');
+  // (the folder's name is in the line above: here it made the label too long for the menu)
+  $('folderT').textContent = ru ? 'Открыть папку загрузок' : 'Open the downloads folder';
   $('pick').hidden = s.canPick === false;
 }
 // Every time the menu shows: what's going on now, and the plain menu (not the question).
