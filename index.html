@@ -171,6 +171,7 @@ label:hover{color:var(--fg)}
 .ibtn:hover{background:color-mix(in srgb,var(--fg) 11%,transparent);color:var(--fg)}
 .ibtn:active{transform:scale(.92);background:color-mix(in srgb,var(--fg) 17%,transparent)}
 .ibtn.x:hover{color:var(--err);background:color-mix(in srgb,var(--err) 12%,transparent)}
+.ibtn.acc{color:var(--tonal)}.ibtn.acc:hover{color:var(--tonal);background:color-mix(in srgb,var(--acc) 16%,transparent)} /* Retry: the way out of a failure */
 .ibtn.x{overflow:hidden;transition:width .25s cubic-bezier(.2,.8,.2,1),margin .25s cubic-bezier(.2,.8,.2,1),opacity .15s ease,background .15s,color .15s}
 .ibtn.x.off{width:0;margin:-2px 0 -2px -10px;opacity:0;pointer-events:none}
 .ibtn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
@@ -459,7 +460,7 @@ button.chip{font-family:inherit}
    of у, р, g stay whole; the middle stays where it was) */
 /* Narrow: More and the list's actions keep only their icons (the hint still says the word),
    so the folder stays on its row and the list's summary isn't cut. */
-@media (max-width:560px){.opts:has(.morebox:not([hidden])){flex-wrap:wrap}.morew{display:contents}.morebox{flex-basis:100%;flex-wrap:wrap}.opts{flex-wrap:nowrap}.job.error .line2 .acts{flex-basis:100%;margin-left:0}#moreB>span,.lbar .btn>span{display:none}#moreB,.lbar .btn{padding:0 8px}.destw{flex:0 1 auto}.dest{max-width:100%}.pvp{width:72px;height:40.5px}}
+@media (max-width:560px){.opts:has(.morebox:not([hidden])){flex-wrap:wrap}.morew{display:contents}.morebox{flex-basis:100%;flex-wrap:wrap}.opts{flex-wrap:nowrap}#moreB>span,.lbar .btn>span{display:none}#moreB,.lbar .btn{padding:0 8px}.destw{flex:0 1 auto}.dest{max-width:100%}.pvp{width:72px;height:40.5px}}
 /* ——— The approved layout (22.11) ——— */
 /* The name: solid, the motto small above it; the version is in the logo's hint. */
 html.app header .title{gap:2px}
@@ -1562,6 +1563,15 @@ function otherLang(t) {
   for (var k in RU) if (RU[k] === t) return k;
   return t;
 }
+// A button that is only an icon, its name in the hint (like the copy icon next to Show file).
+function ibtn(cls, icon, tip, onclick) {
+  var b = el('button', 'ibtn' + (cls ? ' ' + cls : ''));
+  b.innerHTML = icon;
+  b.dataset.tip = tip;
+  b.setAttribute('aria-label', T(tip));
+  b.onclick = onclick;
+  return b;
+}
 function button(cls, label, title, onclick) {
   var b = el('button', 'btn ' + cls);
   b.innerHTML = iconText(label);
@@ -1743,15 +1753,18 @@ function updateRow(r, j) {
     // Failed or cancelled: back into the queue. What's already downloaded is skipped.
     if (j.status === 'error' || j.status === 'cancelled') {
       if (needIn) r.acts.append(button('acc', ICON.user + T('Sign in'), null, signIn));
-      r.acts.append(button(needIn ? '' : 'acc', ICON.retry + T('Retry'), null,
+      // Retry and Copy error are icons (the owner: their words said nothing the icons don't); the
+      // words are in their hints. One line with the error, like Show file and its copy icon.
+      r.acts.append(ibtn(needIn ? '' : 'acc', ICON.retry, 'Retry',
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
       // The full technical error, to send to someone (the page shows the plain-words version).
       if (j.status === 'error') {
-        var copy = button('', ICON.copy + T('Copy error'), null, function () {
+        var copy = ibtn('', ICON.copy, 'Copy error', function () {
           var text = 'ТЯГА ' + (state.version || '') + '\nLink: ' + j.url + '\n' + (j.errorRaw || j.error || '');
           var done = function (ok) {
-            copy.innerHTML = iconText(ok ? ICON.check + T('Copied') : ICON.copy + T("Couldn't copy"));
-            setTimeout(function () { copy.innerHTML = iconText(ICON.copy + T('Copy error')); }, 1600);
+            copy.innerHTML = ok ? ICON.check : ICON.copy;
+            copy.dataset.tip = ok ? 'Copied' : "Couldn't copy";
+            setTimeout(function () { copy.innerHTML = ICON.copy; copy.dataset.tip = 'Copy error'; }, 1600);
           };
           try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); }
           catch (e) { done(false); }
@@ -1761,7 +1774,7 @@ function updateRow(r, j) {
     }
     // A playlist with skipped videos: try just those again.
     if (j.status === 'done' && j.error) {
-      r.acts.append(button('', ICON.retry + T('Retry'), null,
+      r.acts.append(ibtn('', ICON.retry, 'Retry',
         function () { api('/api/retry', { id: j.id }).then(refresh); }));
     }
     if (j.status === 'done' && j.files.length) {
