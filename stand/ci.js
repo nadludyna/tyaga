@@ -31,6 +31,8 @@ async function open(browser, o) {
   pg.on('pageerror', e => problems.push(`${where}: page error: ${e.message}`));
   await pg.goto(page);
   await pg.waitForFunction(() => typeof window.LANG !== 'undefined' && document.fonts && document.fonts.status === 'loaded', null, { timeout: 30000 });
+  // Linux draws fonts a little differently from Windows: measures by the letters get 1 px, not 0.5.
+  if (process.platform === 'linux') await pg.evaluate(() => { window.TYAGA_TEXT_TOL = 1; });
   await pg.addScriptTag({ path: CHECK });
   return { ctx, pg, where };
 }
@@ -102,6 +104,14 @@ async function paste(pg, text) {
 // without opening (or signing in to read) the log.
 function annotate(list) {
   if (!process.env.GITHUB_ACTIONS) return;
-  const text = `${list.length} problem(s):\n` + list.slice(0, 40).map(p => '- ' + p).join('\n');
+  // The same problem in many looks is one line, with where it was seen first and how often.
+  const kinds = new Map();
+  for (const p of list) {
+    const i = p.indexOf(': '), what = i < 0 ? p : p.slice(i + 2);
+    const k = kinds.get(what) || { n: 0, first: i < 0 ? '' : p.slice(0, i) };
+    k.n++; kinds.set(what, k);
+  }
+  const text = `${list.length} problem(s), ${kinds.size} kind(s):\n` + [...kinds].slice(0, 60)
+    .map(([what, k]) => `- ${what} (${k.n}×, first: ${k.first})`).join('\n');
   console.log('::error title=Layout checks::' + text.replace(/%/g, '%25').replace(/\r/g, '').replace(/\n/g, '%0A'));
 }

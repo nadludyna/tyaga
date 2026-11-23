@@ -8,6 +8,10 @@
 // - in Russian, a label still in English; a label not in Onest (a button's own font);
 // - words side by side in a row not standing on one line.
 (function () {
+  // How far a measure made by the letters themselves may be off: half a pixel on Windows (what
+  // ТЯГА runs on). CI runs on Linux, whose fonts are drawn a little differently (a label came out
+  // 0.78 px higher there, centred on Windows): it sets window.TYAGA_TEXT_TOL to 1.
+  var TEXT = window.TYAGA_TEXT_TOL || 0.5;
   var cv = document.createElement('canvas').getContext('2d');
   function seen(e) {
     if (!e.isConnected || e.closest('[hidden]')) return false;
@@ -58,7 +62,7 @@
       if (ir && ir.bottom < c) icon = null;
       if (icon) {
         var d = c - (ir.top + ir.bottom) / 2;
-        if (Math.abs(d) > 0.5) bad.push('label vs icon ' + d.toFixed(2) + ' px: ' + name(b));
+        if (Math.abs(d) > TEXT) bad.push('label vs icon ' + d.toFixed(2) + ' px: ' + name(b));
       } else if (b.getBoundingClientRect().height <= 40) {
         var br = b.getBoundingClientRect(), d2 = c - (br.top + br.bottom) / 2;
         if (Math.abs(d2) > 0.75) bad.push('label vs button ' + d2.toFixed(2) + ' px: ' + name(b));
@@ -74,7 +78,7 @@
       cv.font = getComputedStyle(t).fontWeight + ' ' + getComputedStyle(t).fontSize + ' ' + getComputedStyle(t).fontFamily;
       var m = cv.measureText(t.textContent), base = tr.top + (tr.height - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
       var mid = base - m.actualBoundingBoxAscent / 2, d = mid - (gr.top + gr.bottom) / 2;
-      if (Math.abs(d) > 0.5) bad.push('number vs its circle ' + d.toFixed(2) + ' px: ' + name(g));
+      if (Math.abs(d) > TEXT) bad.push('number vs its circle ' + d.toFixed(2) + ' px: ' + name(g));
     });
     // 2. Nothing overlaps in a row.
     document.querySelectorAll('.row,.opts,.lbar,.top,.line2,header,.pvc,.input').forEach(function (row) {
@@ -137,7 +141,7 @@
       if (!t.height) return;
       cv.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
       var m = cv.measureText('уgр'), base = t.top + (t.height - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
-      if (base + m.actualBoundingBoxDescent > b.bottom + 0.5) bad.push('letters cut at the bottom: ' + name(e));
+      if (base + m.actualBoundingBoxDescent > b.bottom + TEXT) bad.push('letters cut at the bottom: ' + name(e));
     });
     // 3. Nothing sticks out sideways.
     var se = document.scrollingElement;
