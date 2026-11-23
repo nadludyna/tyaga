@@ -610,8 +610,9 @@ html.app #jobsCard.folded::after{display:none}
 .opts .ddw.destw{flex:0 1 auto;min-width:0}
 .opts #dest{max-width:180px}
 #destT{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#destMenu{top:calc(100% + 8px);bottom:auto;left:auto;right:0}
+#destMenu{top:calc(100% + 8px);bottom:auto;left:0;right:auto} /* from the button's left edge, like the other drop-downs (the owner) */
 #destMenu.up{top:auto;bottom:calc(100% + 8px)}
+#destMenu.end{left:auto;right:0}
 /* Room above the name (the owner: it was pressed against the top); the window buttons stay in the corner. */
 html.app header .logo,html.app header .title{margin-top:8px}
 @media (max-width:560px){.opts .go>span{display:none}.opts .go{padding:0 12px}}
