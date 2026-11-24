@@ -82,3 +82,23 @@ func TestLeftovers(t *testing.T) {
 		t.Errorf("a finished file or one outside the folder would go: %v", got)
 	}
 }
+
+// The video id as a link shows it: what the preview's picture and SponsorBlock start from at once.
+func TestVideoID(t *testing.T) {
+	for link, want := range map[string]string{
+		"https://youtu.be/dQw4w9WgXcQ":                              "dQw4w9WgXcQ",
+		"https://youtu.be/dQw4w9WgXcQ?t=60":                         "dQw4w9WgXcQ",
+		"https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLx&si=a": "dQw4w9WgXcQ",
+		"https://m.youtube.com/watch?v=dQw4w9WgXcQ":                 "dQw4w9WgXcQ",
+		"https://music.youtube.com/watch?v=dQw4w9WgXcQ":             "dQw4w9WgXcQ",
+		"https://youtube.com/shorts/dQw4w9WgXcQ?si=x":               "dQw4w9WgXcQ",
+		"https://www.youtube.com/live/dQw4w9WgXcQ":                  "dQw4w9WgXcQ",
+		"https://www.youtube.com/playlist?list=PLx":                 "",
+		"https://www.youtube.com/@someone":                          "",
+		"https://vimeo.com/76979871":                                "",
+	} {
+		if got := videoID(link); got != want {
+			t.Errorf("videoID(%s) = %q, want %q", link, got, want)
+		}
+	}
+}

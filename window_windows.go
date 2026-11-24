@@ -159,6 +159,17 @@ func runWindow(token string) bool {
 			win.Minimise()
 		case "close":
 			toTray()
+		case "drag": // the page got a press on the header that Windows didn't take as the title bar
+			// WebView2 tells Windows which parts of the page drag the window (app-region). With
+			// a scrolling links box it stopped doing so (builds 38, 39: ten links pasted, the
+			// window couldn't be moved), so the page asks, and the drag starts the way Windows'
+			// own title bars start it (as Wails does for its --wails-draggable).
+			application.InvokeSync(func() {
+				if h := w32.HWND(uintptr(win.NativeWindow())); h != 0 {
+					w32.ReleaseCapture()
+					w32.PostMessage(h, w32.WM_NCLBUTTONDOWN, w32.HTCAPTION, 0)
+				}
+			})
 		case "top": // the pin: ТЯГА stays over every other window (or not), as the page asks
 			win.SetAlwaysOnTop(n == 1)
 		case "full":

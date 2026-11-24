@@ -293,6 +293,9 @@ func handler(token string) http.Handler {
 			}
 			writeJSON(w, inspect(u.String()))
 			return
+		case "/api/peek": // a link's title and channel in a moment, before the full look (inspect.go)
+			writeJSON(w, peek(strings.TrimSpace(body.Text)))
+			return
 		case "/api/cancel":
 			cancelJob(body.ID)
 		case "/api/retry":

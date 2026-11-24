@@ -1118,13 +1118,31 @@ $('edit').addEventListener('change', save);
 var facts = {}, picks = {}, pvRows = {}, lookT = 0, TIMES = ['cutFrom', 'cutTo'];
 function tr(en, ru) { return LANG === 'ru' ? ru : en; }
 function isListLink(l) { return /youtube\.com\/(playlist\?|@|channel\/|c\/|user\/)/.test(l); }
+// A link's preview fills in as fast as each part can be had: the picture at once (its address
+// is the video's id), the title and channel in a moment (YouTube's oEmbed, /api/peek), the rest
+// (length, chapters, qualities, ads) when yt-dlp has looked: that takes seconds, 2.5 of them
+// just for it to start. At most LOOKS of those at a time, in the order pasted: ten at once
+// made each slower and took every connection the page has to ТЯГА (the owner: it choked).
+var LOOKS = 4, looking = 0, toLook = [];
 function look(link) {
   if (facts[link]) return;
-  facts[link] = { looking: true };
-  api('/api/inspect', { text: link }).then(function (f) {
-    facts[link] = f.error ? { failed: true } : f;
+  var v = /(?:[?&]v=|youtu\.be\/|shorts\/|live\/)([\w-]{11})/.exec(link);
+  facts[link] = { looking: true, id: v ? v[1] : '' };
+  api('/api/peek', { text: link }).then(function (p) {
+    var f = facts[link];
+    if (!f || !f.looking || !p.title) return;
+    f.title = p.title; f.channel = p.channel;
     syncBoxes();
-  }, function () { facts[link] = { failed: true }; syncBoxes(); });
+  }, function () {});
+  toLook.push(link);
+  nextLook();
+}
+function nextLook() {
+  while (looking < LOOKS && toLook.length) (function (link) {
+    looking++;
+    var done = function (f) { looking--; facts[link] = f; syncBoxes(); nextLook(); };
+    api('/api/inspect', { text: link }).then(function (f) { done(f.error ? { failed: true } : f); }, function () { done({ failed: true }); });
+  })(toLook.shift());
 }
 function plan(link, m) {
   var f = facts[link] || { looking: true }, p = picks[link] || {}, audio = (m || mode()) === 'audio';
@@ -1691,6 +1709,7 @@ function putLinks(add) {
   var all = have.concat(add.filter(function (l) { var k = linkKey(l); if (keys.indexOf(k) >= 0) return false; keys.push(k); return true; }));
   addMsg('');
   box.value = all.join('\n') + '\n';
+  all.forEach(look); // pasted links are whole: looked up now, not after the pause kept for typing
   box.focus();
   box.selectionStart = box.selectionEnd = box.value.length;
   box.scrollTop = box.scrollHeight;
@@ -2287,6 +2306,18 @@ function keepInView(row, wait) {
     if (to !== null) l.scrollTo({ top: to, behavior: still() ? 'auto' : 'smooth' });
   }
 }
+
+// Dragging the window by its header (or the empty space around the cards) also when Windows
+// doesn't: a press there that reaches the page wasn't taken as the title bar, so ТЯГА is asked
+// to start the drag itself. (With ten links pasted, WebView2 stopped telling Windows where the
+// title bar is: the window couldn't be moved, buttons and scrolling still worked. The owner.)
+document.addEventListener('mousedown', function (e) {
+  if (!APP || e.button !== 0 || e.detail > 1) return;
+  var t = e.target;
+  var bare = t === document.body || t === document.documentElement || t.tagName === 'MAIN' || t.closest('header');
+  if (!bare || t.closest('button,a,input,textarea,select,[contenteditable],.logob,.hpair,.wbtns,[role="button"]')) return;
+  api('/api/window', { text: 'drag' }).catch(function () {});
+});
 
 // The list card's fold (ТЯГА's window only, see .lhead in the styles).
 var APP = document.documentElement.classList.contains('app');

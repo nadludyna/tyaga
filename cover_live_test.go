@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 // TestLiveCovers asks the real Apple Music catalogue which cover each song gets.
@@ -41,4 +42,17 @@ func TestLiveCovers(t *testing.T) {
 			t.Errorf("%s: want the cover %s", c.title, c.want)
 		}
 	}
+}
+
+// peek against the real YouTube: a title and channel in well under the time yt-dlp takes.
+func TestLivePeek(t *testing.T) {
+	if os.Getenv("TYAGA_LIVE") == "" {
+		t.Skip("TYAGA_LIVE=1 to ask the real YouTube")
+	}
+	t0 := time.Now()
+	f := peek("https://youtu.be/fJ9rUzIMcZQ?si=x")
+	if f.Title == "" || f.Channel == "" || f.ID != "fJ9rUzIMcZQ" {
+		t.Fatalf("no title from oEmbed: %+v", f)
+	}
+	t.Logf("%q by %q in %v", f.Title, f.Channel, time.Since(t0))
 }
