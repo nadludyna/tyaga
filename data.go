@@ -18,8 +18,11 @@ package main
 //	                  page (the switches live in the window's own storage), and that the
 //	                  "ТЯГА is in the tray" notice was shown (once is enough: every time annoys)
 //
-// Downloads go to Downloads\ТЯГА unless another folder was picked. Only when the program's folder can't be
-// written to (Program Files) is the data kept in the user's own app data folder instead.
+// Downloads go to Windows' Music and Videos unless another folder was picked (dirFor in jobs.go).
+// The tools ТЯГА runs keep their own caches here too, not in the user's profile:
+//	cache\yt-dlp\      yt-dlp's (YouTube's player code it worked out), --cache-dir
+//	cache\deno\        Deno's (yt-dlp runs it for YouTube's JavaScript), DENO_DIR
+// (Without them yt-dlp wrote to %USERPROFILE%\.cache\yt-dlp and Deno to %LOCALAPPDATA%\deno.)
 
 import (
 	"crypto/sha256"
@@ -31,19 +34,15 @@ import (
 	"sync"
 )
 
+// makeDataDir makes tyaga-data next to the program. Nowhere else: a folder ТЯГА can't write to
+// (Program Files) is said plainly at start, instead of keeping things in AppData (the owner:
+// nothing of ТЯГА outside its own folder). See fail in main.go.
 func makeDataDir() string {
 	d := filepath.Join(appDir, "tyaga-data")
 	if err := os.MkdirAll(d, 0o755); err != nil || !writable(d) {
-		base, err := os.UserCacheDir() // %LOCALAPPDATA% on Windows
-		if err != nil {
-			base = os.TempDir()
-		}
-		d = filepath.Join(base, "TYAGA", folderID())
-		os.MkdirAll(d, 0o755)
+		fail("ТЯГА can't write in its own folder:\n" + appDir + "\n\nMove tyaga.exe into a folder of your own (Desktop, Documents, a folder on another drive) and start it from there.")
 	}
-	if filepath.Dir(d) == appDir {
-		hideDataDir(d)
-	}
+	hideDataDir(d)
 	moveOldData(d)
 	return d
 }

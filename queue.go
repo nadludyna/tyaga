@@ -8,6 +8,7 @@ package main
 
 import (
 	"encoding/json"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -94,9 +95,11 @@ func loadQueue() {
 	mu.Lock()
 	defer mu.Unlock()
 	for _, x := range s {
-		if x.URL == "" {
-			continue
+		u, err := url.Parse(x.URL)
+		if x.URL == "" || err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+			continue // only what Download itself would take (a hand-edited file can't add more)
 		}
+		x.Options = cleanOptions(x.Options)
 		jobs = append(jobs, &Job{ID: nextID, URL: x.URL, Options: x.Options, List: x.List, mix: x.Mix, Note: x.Note,
 			Title: x.Title, Channel: x.Channel, Thumb: x.Thumb, Status: "cancelled", Stopped: true, Files: []string{}})
 		nextID++

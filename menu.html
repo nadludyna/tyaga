@@ -38,8 +38,11 @@ button svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke
 button>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* The words sit in the middle by the letters themselves, like in the main window. */
 button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em} /* room for the tails of у, р, g where a label is cut with "…" */
-button svg{color:var(--dim);transition:color .12s ease}
-button:hover svg,button:focus-visible svg{color:var(--fg)}
+/* Each action its own colour, the same as in the main window: it says at a glance which is which
+   (the owner: one quiet colour made them harder to tell apart, and duller). */
+button svg{transition:filter .12s ease}
+#open svg{color:var(--acc)}#folder svg{color:var(--folder)}#pick svg{color:var(--info)}.quit svg{color:var(--dim)}
+button:hover svg,button:focus-visible svg{filter:brightness(1.15)}
 .sep{height:1px;background:var(--line);margin:3px 6px}
 /* The water from the main window along the menu's bottom: reeds, a fish, the float, two waves,
    fading out at both ends; still, drawn once (nothing moves by itself). */

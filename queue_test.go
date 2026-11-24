@@ -124,3 +124,18 @@ func TestDirFor(t *testing.T) {
 		t.Errorf("audio, picked: %s", got)
 	}
 }
+
+// Security: only sound and video open on a double-click (a downloaded .exe or .bat would run),
+// and options from the page or queue.json keep to the known values.
+func TestOnlyMediaAndKnownOptions(t *testing.T) {
+	for p, want := range map[string]bool{`C:\M\song.m4a`: true, `C:\M\clip.MP4`: true, `C:\M\a.mp3`: true,
+		`C:\M\setup.exe`: false, `C:\M\x.bat`: false, `C:\M\x.cmd`: false, `C:\M\x.lnk`: false, `C:\M\x.ps1`: false, `C:\M\x.mp4.exe`: false} {
+		if isMedia(p) != want {
+			t.Errorf("isMedia(%s) = %v", p, !want)
+		}
+	}
+	o := cleanOptions(Options{Mode: "--exec calc", Format: "exe", Quality: 9999, Lang: "../x", From: "rm", To: "-rf"})
+	if o.Mode != "video" || o.Format != "m4a" || o.Quality != 0 || o.Lang != "ru" || o.From != "" || o.To != "" {
+		t.Errorf("unknown values got through: %+v", o)
+	}
+}

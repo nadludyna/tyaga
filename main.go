@@ -63,6 +63,7 @@ var (
 	appDir      string // folder the program lives in
 	dataDir     string // everything ТЯГА keeps (data.go)
 	binDir      string // yt-dlp, ffmpeg and Deno get downloaded here
+	cacheDir    string // the caches of yt-dlp and Deno (toolEnv, --cache-dir): in tyaga-data, not the profile
 	cookiesFile string // youtube-cookies.txt: from the sign-in window, or put next to the program by hand
 	outDir      string // the downloads folder picked (or -out); see dirFor
 	outPicked   bool   // a folder was picked (or -out given): else Windows' Music and Videos
@@ -84,6 +85,7 @@ func main() {
 	appDir = programDir()
 	dataDir = makeDataDir()
 	binDir = filepath.Join(dataDir, "bin")
+	cacheDir = filepath.Join(dataDir, "cache")
 	cookiesFile = filepath.Join(dataDir, "youtube-cookies.txt")
 	if byHand := filepath.Join(appDir, "youtube-cookies.txt"); fileExists(byHand) {
 		cookiesFile = byHand
@@ -158,7 +160,9 @@ func programDir() string {
 // fail shows the error (a message box on Windows, where there's no console) and exits.
 func fail(msg string) {
 	logf("%s", msg)
-	os.Remove(instanceFile())
+	if dataDir != "" { // (not made yet: a folder ТЯГА can't write to)
+		os.Remove(instanceFile())
+	}
 	showError(msg)
 	os.Exit(1)
 }
@@ -276,16 +280,7 @@ func handler(token string) http.Handler {
 					return
 				}
 			}
-			o := body.Options // only known values get through
-			if o.Mode != "audio" {
-				o.Mode = "video"
-			}
-			if o.Format != "mp3" {
-				o.Format = "m4a"
-			}
-			if !slices.Contains([]int{4320, 2160, 1440, 1080, 720, 480, 360, 240, 144}, o.Quality) {
-				o.Quality = 0
-			}
+			o := cleanOptions(body.Options) // only known values get through
 			if _, _, ok := cutRange(o.From, o.To); !ok {
 				writeJSON(w, map[string]string{"error": "The fragment times look wrong. Examples: 1:20, 0:45, 1:02:03; \"to\" after \"from\"."})
 				return
@@ -346,7 +341,9 @@ func handler(token string) http.Handler {
 				revealFile(path)
 			}
 		case "/api/play": // double-click on a finished row: the file opens in its player
-			if path, ok := jobFile(body.ID, body.N); ok && fileExists(path) {
+			// Only sound and video: yt-dlp also takes plain links to any file, and a "song" that's
+			// really an .exe or a .bat would run (security check, build 47). Others: Show file.
+			if path, ok := jobFile(body.ID, body.N); ok && fileExists(path) && isMedia(path) {
 				openFile(path)
 			}
 		case "/api/copyall": // every finished file onto the clipboard at once
@@ -363,6 +360,36 @@ func handler(token string) http.Handler {
 		}
 		writeJSON(w, map[string]bool{"ok": true})
 	})
+}
+
+// cleanOptions keeps only the values ТЯГА knows: what comes from the page (or from queue.json)
+// can't put anything else on yt-dlp's command line. The fragment times are checked by cutRange.
+func cleanOptions(o Options) Options {
+	if o.Mode != "audio" {
+		o.Mode = "video"
+	}
+	if o.Format != "mp3" {
+		o.Format = "m4a"
+	}
+	if !slices.Contains([]int{4320, 2160, 1440, 1080, 720, 480, 360, 240, 144}, o.Quality) {
+		o.Quality = 0
+	}
+	if o.Lang != "en" {
+		o.Lang = "ru"
+	}
+	if _, _, ok := cutRange(o.From, o.To); !ok {
+		o.From, o.To = "", ""
+	}
+	return o
+}
+
+// isMedia: a file a player opens (what yt-dlp makes of a video or a song), not a program.
+func isMedia(path string) bool {
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".mp4", ".m4a", ".mp3", ".webm", ".mkv", ".mov", ".opus", ".ogg", ".oga", ".flac", ".wav", ".aac", ".m4v":
+		return true
+	}
+	return false
 }
 
 // downloadsDir is where downloads go now (it can change while ТЯГА runs).

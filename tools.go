@@ -127,6 +127,22 @@ func ffmpegAsset() (asset, bool) {
 	return asset{}, false
 }
 
+// toolEnv is the environment yt-dlp runs in: UTF-8 (non-Latin titles without mojibake), and
+// every cache in tyaga-data: Deno's (DENO_DIR; yt-dlp runs Deno) and anything that goes by the
+// usual cache folder (XDG_CACHE_HOME). yt-dlp's own is set with --cache-dir (cacheArgs).
+func toolEnv() []string {
+	return append(os.Environ(), "PYTHONIOENCODING=utf-8", "PYTHONUTF8=1",
+		"DENO_DIR="+filepath.Join(cacheDir, "deno"), "XDG_CACHE_HOME="+cacheDir)
+}
+
+// cacheArgs: yt-dlp's cache (what it worked out of YouTube's player code) in tyaga-data.
+func cacheArgs() []string {
+	if cacheDir == "" {
+		return nil
+	}
+	return []string{"--cache-dir", filepath.Join(cacheDir, "yt-dlp")}
+}
+
 // installHint is what to tell the user if a program couldn't be obtained.
 func installHint(name string) string {
 	if runtime.GOOS != "windows" {
@@ -176,7 +192,8 @@ func setupTools() {
 	// (from PATH) is left alone; the unpacked one was brought up to date above.
 	if tools.ytdlp == filepath.Join(binDir, exeName("yt-dlp")) {
 		tools.setStatus("Checking for yt-dlp updates…")
-		cmd := exec.Command(tools.ytdlp, "-U")
+		cmd := exec.Command(tools.ytdlp, append(cacheArgs(), "-U")...)
+		cmd.Env = toolEnv()
 		hideWindow(cmd)
 		cmd.Run()
 	}

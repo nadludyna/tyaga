@@ -176,7 +176,8 @@ func lookup(link string, flat bool) Facts {
 	} else if fileExists(cookiesFile) {
 		args = append(args, "--cookies", cookiesFile)
 	}
-	cmd := exec.CommandContext(ctx, tools.ytdlp, append(args, "--", link)...)
+	cmd := exec.CommandContext(ctx, tools.ytdlp, append(append(cacheArgs(), args...), "--", link)...)
+	cmd.Env = toolEnv()
 	hideWindow(cmd)
 	out, err := cmd.Output()
 	if err != nil {

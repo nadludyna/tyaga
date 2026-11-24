@@ -856,8 +856,8 @@ func pump() {
 	j.dir = dirFor(j.Mode == "audio", j.Lang)
 	os.MkdirAll(j.dir, 0o755)
 	j.Status = "running"
-	cmd := exec.Command(tools.ytdlp, buildArgs(j)...)
-	cmd.Env = append(os.Environ(), "PYTHONIOENCODING=utf-8", "PYTHONUTF8=1") // non-Latin titles without mojibake
+	cmd := exec.Command(tools.ytdlp, append(cacheArgs(), buildArgs(j)...)...)
+	cmd.Env = toolEnv()
 	hideWindow(cmd)
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()

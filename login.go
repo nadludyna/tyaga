@@ -140,7 +140,8 @@ func browserSignedIn(b string) (in, ok bool) {
 	defer os.Remove(tmp)
 	// No link: yt-dlp complains that a link is missing, but it still reads the cookies and
 	// saves them to the --cookies file on the way out.
-	cmd := exec.Command(tools.ytdlp, "--cookies-from-browser", b, "--cookies", tmp)
+	cmd := exec.Command(tools.ytdlp, append(cacheArgs(), "--cookies-from-browser", b, "--cookies", tmp)...)
+	cmd.Env = toolEnv()
 	hideWindow(cmd)
 	out, _ := cmd.CombinedOutput()
 	s := string(out)
@@ -188,7 +189,8 @@ func takeCookies() string {
 	os.Remove(tmp)
 	// No link: yt-dlp complains that a link is missing, but it still reads the cookies and
 	// saves them to the --cookies file on the way out.
-	cmd := exec.Command(tools.ytdlp, "--cookies-from-browser", "chrome:"+loginProfile(), "--cookies", tmp)
+	cmd := exec.Command(tools.ytdlp, append(cacheArgs(), "--cookies-from-browser", "chrome:"+loginProfile(), "--cookies", tmp)...)
+	cmd.Env = toolEnv()
 	hideWindow(cmd)
 	out, _ := cmd.CombinedOutput()
 	data, _ := os.ReadFile(tmp)
