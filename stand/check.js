@@ -56,6 +56,18 @@
       if (last) need = last.getBoundingClientRect().bottom - lst.getBoundingClientRect().top + lst.scrollTop + parseFloat(getComputedStyle(lst).paddingBottom);
       if (need <= lst.clientHeight + 1) bad.push('the list scrolls with nothing to scroll to (' + (lst.scrollHeight - lst.clientHeight) + ' px)');
     }
+    // 0c. The sky over the header shows whenever there's room for it (a fixed width hid it for
+    // good once two header buttons were added: 1.5 px short, the owner never saw it).
+    var form = document.querySelector('html.app .card.form'), tl = document.querySelector('header .title'), hp = document.querySelector('header .hpair');
+    if (form && tl && hp && seen(form) && hp.getBoundingClientRect().left - tl.getBoundingClientRect().right >= 166 &&
+        getComputedStyle(form, '::before').display === 'none') bad.push('the sky is hidden though there is room for it');
+    // 0d. The water under the list fades out at both ends instead of being cut by the card's round
+    // corners (the owner: the reeds and the float were cut off).
+    var jc = document.querySelector('html.app #jobsCard:not(.folded)');
+    if (jc && seen(jc)) {
+      var ws = getComputedStyle(jc, '::after');
+      if (ws.display !== 'none' && (ws.maskImage || ws.webkitMaskImage || 'none') === 'none') bad.push('the water under the list has hard ends (no fade): the corners cut it');
+    }
     // 1. Labels in the middle.
     document.querySelectorAll('button,.chip,.seg button').forEach(function (b) {
       if (!seen(b)) return;
