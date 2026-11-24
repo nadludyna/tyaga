@@ -44,8 +44,8 @@ The owner kept finding things the eye skips: a label 1–2 pixels above its icon
 the wrong font, a window that blinked. So these are measured, every time, before a build:
 
 1. **The layout check** (`stand/check.js`): load it in the stand's page and run
-   `tyagaCheck()` in every state the change touches (empty, a link pasted and looked at, More
-   open, the folder menu open, downloading, done, failed; English and Russian; dark and light;
+   `tyagaCheck()` in every state the change touches (empty, a link pasted and looked at, a
+   drop-down open, the folder menu open, downloading, done, failed; English and Russian; dark and light;
    wide and ~440 px). It must return an empty list: labels in the middle of their icons and
    buttons by the letters themselves (±0.5 px), words in one row on one line (±1 px), Onest
    everywhere, nothing overlapping, nothing sticking out, nothing left in English in Russian.
@@ -103,7 +103,7 @@ call: compact, but predictable):
    per download, up to about five rows, then scrolls inside.
 4. Finished downloads are cleared, or the list is folded or unfolded: it shrinks or grows.
 
-Opening the quality or fragment picker, More, the folder menu, a tooltip, hovering or
+Opening the quality, format or fragment drop-down, the folder menu, a tooltip, hovering or
 switching an option never changes the window's size. The pickers are flyouts over the preview
 card (they only exist while there is one, and it is taller than them). Every grow is the exact
 reverse of its shrink: same duration, same easing. The see-through part of the window never

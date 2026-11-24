@@ -40,7 +40,7 @@ async function open(browser, o) {
 // Waits until nothing in the list is opening, folding or animating, so the checks measure the
 // settled page (they report false alarms mid-animation).
 async function settle(pg) {
-  await pg.waitForFunction(() => !document.querySelector('.job.grow,.job.bye,.job.lining,.notice.anim') &&
+  await pg.waitForFunction(() => !document.querySelector('.job.grow,.job.bye,.job.lining') &&
     !document.getAnimations().some(a => a.playState === 'running' && !(a.effect && a.effect.getTiming().iterations === Infinity)), null, { timeout: 15000 }).catch(() => {});
   await sleep(300);
 }

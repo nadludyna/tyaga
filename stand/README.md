@@ -12,8 +12,9 @@ Use it to look at the page in every state **before** showing a change to anyone:
 no network, the same run every time.
 
 ```sh
-stand/run.sh                               # builds and starts it, prints the page address
-python stand/record.py audio-list 55 /tmp/r # records a run: screenshots, video, wave numbers
+stand/run.sh                                    # builds and starts it, prints the page address
+node stand/snapshot.js <address> <dir>          # every state as a picture (a fixed state, motion reduced)
+node stand/snapshot.js <address> <dir> --compare <before>   # …and every pixel that differs
 ```
 
 The layout check: paste `stand/check.js` into the page (devtools console, or a test tool's
@@ -38,5 +39,10 @@ ffplay.exe` and `taskkill /IM tyaga-stand.exe`.
 On Windows (Git Bash): `stand/run-windows.sh` does the same with a little `yt-dlp.exe` that runs
 the fake with `py` (stand/winshim).
 
-Needs Go, Python 3, ffmpeg in PATH; `record.py` also needs Playwright
-(`pip install playwright && playwright install chromium`).
+Needs Go, Python 3 (the fake yt-dlp is a Python script) and ffmpeg in PATH; the Node scripts
+(`ci.js`, `scenarios.js`, `snapshot.js`) need Playwright (`npm i playwright`,
+`npx playwright install chromium`, or `CHROME=<path to a Chromium browser>`).
+
+A clean-up or a refactor that must not change how anything looks: `snapshot.js` before it and
+after it with `--compare`: 172 pictures (both themes, both languages, wide and narrow, every kind
+of row, the drop-downs, the tray menu, every kind of button under the mouse), pixel by pixel.
