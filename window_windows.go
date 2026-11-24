@@ -280,7 +280,9 @@ func runWindow(token string) bool {
 			showWin()
 		case "folder":
 			menuWin.Hide()
-			dir := downloadsDir()
+			mu.Lock()
+			dir := dirFor(lastAudio, lastLang)
+			mu.Unlock()
 			os.MkdirAll(dir, 0o755)
 			openFolder(dir)
 		case "pick":

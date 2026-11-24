@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -100,5 +101,26 @@ func TestVideoID(t *testing.T) {
 		if got := videoID(link); got != want {
 			t.Errorf("videoID(%s) = %q, want %q", link, got, want)
 		}
+	}
+}
+
+// Not picked: audio to Windows' Music, video to Videos. Picked: that folder, sorted.
+func TestDirFor(t *testing.T) {
+	if mediaDir(true) == "" {
+		t.Skip("Windows' own folders: Windows only")
+	}
+	oldOut, oldPicked := outDir, outPicked
+	defer func() { outDir, outPicked = oldOut, oldPicked }()
+	outDir, outPicked = t.TempDir(), false
+	if got := dirFor(true, "ru"); got != mediaDir(true) || !strings.HasSuffix(strings.ToLower(got), "music") && !strings.Contains(got, "Муз") {
+		t.Errorf("audio, not picked: %s", got)
+	}
+	if got := dirFor(false, "ru"); got != mediaDir(false) {
+		t.Errorf("video, not picked: %s", got)
+	}
+	t.Logf("Music: %s, Videos: %s", mediaDir(true), mediaDir(false))
+	outPicked = true
+	if got := dirFor(true, "ru"); got != filepath.Join(outDir, "Аудио") {
+		t.Errorf("audio, picked: %s", got)
 	}
 }

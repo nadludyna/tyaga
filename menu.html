@@ -102,6 +102,7 @@ function showNow(s) {
     : ru ? 'Ничего не качается' : 'Nothing is downloading';
   $('ns').textContent = busy
     ? (ru ? 'Скачивается · ' + p + '%' + (left ? ' · ещё ' + left : '') : 'Downloading · ' + p + '%' + (left ? ' · ' + left + ' more' : ''))
+    : s.std ? (ru ? 'Папки: Музыка и Видео' : 'Folders: Music and Videos')
     : (s.folder ? (ru ? 'Папка: ' + s.folder : 'Folder: ' + s.folder) : '');
   $('nb').style.width = busy ? p + '%' : '0';
   // (the folder's name is in the line above: here it made the label too long for the menu)

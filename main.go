@@ -64,14 +64,18 @@ var (
 	dataDir     string // everything ТЯГА keeps (data.go)
 	binDir      string // yt-dlp, ffmpeg and Deno get downloaded here
 	cookiesFile string // youtube-cookies.txt: from the sign-in window, or put next to the program by hand
-	outDir      string // where downloads are saved
+	outDir      string // the downloads folder picked (or -out); see dirFor
+	outPicked   bool   // a folder was picked (or -out given): else Windows' Music and Videos
+	lastAudio   = true // what was downloaded last (the tray's "open the folder"), and in which language
+	lastLang    = "ru"
 )
 
 func main() {
 	consoleUTF8()
 	home, _ := os.UserHomeDir()
-	// The downloads folder: one of its own, named after the program (sorted into Видео and Аудио
-	// inside it, see typeDir). Until build 28 it was Downloads\YouTube.
+	// The downloads folder when one is picked or given (sorted into Видео and Аудио inside it, see
+	// typeDir). Not picked: Windows' own Music and Videos (dirFor). Until build 28 the default
+	// was Downloads\YouTube, until build 45 Downloads\ТЯГА.
 	out := flag.String("out", filepath.Join(home, "Downloads", "ТЯГА"), "folder for downloads")
 	noBrowser := flag.Bool("no-browser", false, "no window and no browser: just the server, its address is in the log")
 	loginWin := flag.Bool("login", false, "only the window for signing in to YouTube (the page opens it)")
@@ -91,8 +95,9 @@ func main() {
 	// The old default (Downloads\YouTube) remembered as if picked counts as not picked: it moves
 	// to the new one. What's in the old folder stays there.
 	if s := loadSettings(); !outGiven && s.Out != "" && filepath.IsAbs(s.Out) && !strings.EqualFold(filepath.Clean(s.Out), filepath.Join(home, "Downloads", "YouTube")) {
-		outDir = s.Out
+		outDir, outPicked = s.Out, true
 	}
+	outPicked = outPicked || outGiven
 
 	// The sign-in window (login.go): started by ТЯГА itself, closes when you close it.
 	if *loginWin {
@@ -225,7 +230,8 @@ func handler(token string) http.Handler {
 				defer mu.Unlock()
 				writeJSON(w, map[string]any{
 					"version": version, "ready": ready, "setup": status, "problem": problem,
-					"out": outDir, "outName": folderName(outDir), "canPick": pickFolder != nil,
+					"out": outDir, "outName": folderName(outDir), "picked": outPicked, "canPick": pickFolder != nil,
+					"musicName": folderName(dirFor(true, lastLang)), "videoName": folderName(dirFor(false, lastLang)),
 					"jobs": jobs, "login": loginState(), "hidden": hidden,
 				})
 			case "/api/cover":
@@ -309,6 +315,12 @@ func handler(token string) http.Handler {
 			return
 		case "/api/unclear": // Undo after Clear finished
 			unclear()
+		case "/api/std": // back to Windows' own Music and Videos
+			mu.Lock()
+			outPicked = false
+			mu.Unlock()
+			changeSettings(func(s *settings) { s.Out = "" })
+			logf("Downloads go to Music and Videos again")
 		case "/api/folder": // pick another downloads folder
 			writeJSON(w, map[string]string{"out": chooseFolder()})
 			return
@@ -323,8 +335,10 @@ func handler(token string) http.Handler {
 			writeJSON(w, map[string]bool{"ok": true})
 			go func() { time.Sleep(200 * time.Millisecond); quit() }() // let the answer reach the page first
 			return
-		case "/api/open":
-			dir := downloadsDir()
+		case "/api/open": // the folder of the kind the page is set to (audio: Music, video: Videos)
+			mu.Lock()
+			dir := dirFor(body.Text == "audio", body.Lang)
+			mu.Unlock()
 			os.MkdirAll(dir, 0o755)
 			openFolder(dir)
 		case "/api/reveal":
@@ -370,7 +384,7 @@ func chooseFolder() string {
 		return ""
 	}
 	mu.Lock()
-	outDir = dir
+	outDir, outPicked = dir, true
 	mu.Unlock()
 	changeSettings(func(s *settings) { s.Out = dir })
 	logf("Downloads now go to %s", dir)

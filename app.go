@@ -162,13 +162,14 @@ type trayInfo struct {
 	Title    string  `json:"title"`
 	Progress float64 `json:"progress"`
 	Folder   string  `json:"folder"`
+	Std      bool    `json:"std"` // not picked: Windows' Music and Videos
 	CanPick  bool    `json:"canPick"`
 }
 
 func trayStatus() trayInfo {
-	t := trayInfo{Folder: folderName(outDir), CanPick: pickFolder != nil}
 	mu.Lock()
 	defer mu.Unlock()
+	t := trayInfo{Folder: folderName(outDir), Std: !outPicked && mediaDir(true) != "", CanPick: pickFolder != nil}
 	for _, j := range jobs {
 		switch j.Status {
 		case "running":

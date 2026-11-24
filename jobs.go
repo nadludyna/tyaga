@@ -56,6 +56,18 @@ func typeDir(root string, audio bool, lang string) string {
 	return filepath.Join(root, names[0])
 }
 
+// dirFor is where a download of this kind goes: Windows' own Music folder (audio) or Videos
+// folder (video), the standard places (the owner), unless a folder was picked: then that one,
+// sorted into Видео and Аудио (typeDir). Call with mu held.
+func dirFor(audio bool, lang string) string {
+	if !outPicked {
+		if d := mediaDir(audio); d != "" {
+			return d
+		}
+	}
+	return typeDir(outDir, audio, lang)
+}
+
 // parseTime reads "1:02:03", "1:20", "80", "80.5" or "1:20.5" as seconds.
 func parseTime(s string) (float64, bool) {
 	s = strings.TrimSpace(s)
@@ -260,7 +272,7 @@ func classify(link string, playlist bool) (fixed string, list, mix bool) {
 // folder is the job's download folder: set when it starts; before that (tests) worked out now.
 func (j *Job) folder() string {
 	if j.dir == "" {
-		return typeDir(outDir, j.Mode == "audio", j.Lang)
+		return dirFor(j.Mode == "audio", j.Lang)
 	}
 	return j.dir
 }
@@ -794,6 +806,7 @@ func (j *Job) addLog(line string) {
 // addJobs puts links into the queue.
 func addJobs(links []string, o Options) {
 	mu.Lock()
+	lastAudio, lastLang = o.Mode == "audio", o.Lang // the tray's "open the folder" opens this kind's
 	for _, link := range links {
 		fixed, list, mix := classify(link, o.Playlist)
 		j := &Job{ID: nextID, URL: fixed, Options: o, List: list, mix: mix, Status: "queued", Files: []string{}}
@@ -840,7 +853,7 @@ func pump() {
 		return
 	}
 
-	j.dir = typeDir(outDir, j.Mode == "audio", j.Lang) // (mu is held here: not downloadsDir, which takes it)
+	j.dir = dirFor(j.Mode == "audio", j.Lang)
 	os.MkdirAll(j.dir, 0o755)
 	j.Status = "running"
 	cmd := exec.Command(tools.ytdlp, buildArgs(j)...)
