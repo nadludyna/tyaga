@@ -1,6 +1,6 @@
 package main
 
-// Finding and auto-downloading the programs TYAGA can't work without:
+// Finding and auto-downloading the programs ТЯГА can't work without:
 //   yt-dlp — the downloading itself;
 //   ffmpeg — merging video and audio, converting, covers;
 //   Deno   — yt-dlp uses it to run YouTube's JavaScript.

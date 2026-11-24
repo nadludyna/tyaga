@@ -1,10 +1,10 @@
 package main
 
-// Living without a console window. On Windows TYAGA is built without a console,
+// Living without a console window. On Windows ТЯГА is built without a console,
 // so everything that used to be the console's job is done here:
 //   - messages go to tyaga-data\tyaga.log next to the program;
-//   - in the browser version (the test stand on Linux): a second launch doesn't start a second TYAGA, it opens the page
-//     of the running one, and TYAGA quits by itself when the page is closed and nothing is downloading anymore.
+//   - in the browser version (the test stand on Linux): a second launch doesn't start a second ТЯГА, it opens the page
+//     of the running one, and ТЯГА quits by itself when the page is closed and nothing is downloading anymore.
 // (The Windows window does its own single instance and quitting: window_windows.go.)
 
 import (
@@ -33,10 +33,10 @@ func openLog() {
 	logFile, _ = os.Create(filepath.Join(dataDir, "tyaga.log")) // read-only folder: just no log
 }
 
-// instanceFile holds the address of the running TYAGA, so a second launch can find it.
+// instanceFile holds the address of the running ТЯГА, so a second launch can find it.
 func instanceFile() string { return filepath.Join(dataDir, ".tyaga-running") }
 
-// alreadyRunning: if TYAGA from this folder is already running, open its page and say true.
+// alreadyRunning: if ТЯГА from this folder is already running, open its page and say true.
 func alreadyRunning() bool {
 	data, err := os.ReadFile(instanceFile())
 	if err != nil {
@@ -51,7 +51,7 @@ func alreadyRunning() bool {
 	req.Header.Set("X-Token", u.Query().Get("t"))
 	resp, err := (&http.Client{Timeout: 2 * time.Second}).Do(req)
 	if err != nil {
-		return false // the file is left over from a TYAGA that was killed
+		return false // the file is left over from a ТЯГА that was killed
 	}
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
@@ -118,7 +118,7 @@ func busy() bool {
 }
 
 // quitWhenAbandoned quits when there's no page anymore and nothing to download:
-// close the tab, and TYAGA finishes the downloads and leaves by itself.
+// close the tab, and ТЯГА finishes the downloads and leaves by itself.
 func quitWhenAbandoned() {
 	pageSeen()
 	for range time.Tick(2 * time.Second) {

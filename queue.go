@@ -8,7 +8,6 @@ package main
 
 import (
 	"encoding/json"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -95,8 +94,7 @@ func loadQueue() {
 	mu.Lock()
 	defer mu.Unlock()
 	for _, x := range s {
-		u, err := url.Parse(x.URL)
-		if x.URL == "" || err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		if !isWebLink(x.URL) {
 			continue // only what Download itself would take (a hand-edited file can't add more)
 		}
 		x.Options = cleanOptions(x.Options)
