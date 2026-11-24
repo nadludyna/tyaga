@@ -56,6 +56,13 @@
       if (last) need = last.getBoundingClientRect().bottom - lst.getBoundingClientRect().top + lst.scrollTop + parseFloat(getComputedStyle(lst).paddingBottom);
       if (need <= lst.clientHeight + 1) bad.push('the list scrolls with nothing to scroll to (' + (lst.scrollHeight - lst.clientHeight) + ' px)');
     }
+    // A scrollbar along the bottom: anything that can scroll sideways and is wider than itself
+    // (the row's icons, shifted onto the Download button's edge, made the list 3 px too wide: the owner).
+    document.querySelectorAll('#list,.pv,.card').forEach(function (e) {
+      if (!seen(e)) return;
+      var ox = getComputedStyle(e).overflowX;
+      if ((ox === 'auto' || ox === 'scroll') && e.scrollWidth > e.clientWidth + 1) bad.push('scrolls sideways (' + (e.scrollWidth - e.clientWidth) + ' px): ' + name(e));
+    });
     // 0c. The sky over the header shows whenever there's room for it (a fixed width hid it for
     // good once two header buttons were added: 1.5 px short, the owner never saw it).
     var form = document.querySelector('html.app .card.form'), tl = document.querySelector('header .title'), hp = document.querySelector('header .hpair');

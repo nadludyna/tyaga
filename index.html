@@ -318,7 +318,7 @@ html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column
 html.app #jobsCard:not(.folded){min-height:180px}
 html.app #jobsCard:not(.folded) #list{flex-grow:1}
 html.app #jobsCard>*{position:relative;z-index:1}
-html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;scrollbar-gutter:stable;padding:0 7px 20px;margin-left:-7px;margin-right:-17px} /* room for a row's glow, both sides */
+html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding:0 7px 20px;margin-left:-7px;margin-right:-17px} /* room for a row's glow, both sides */
 html.app .bg{display:none}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
@@ -752,6 +752,15 @@ html.app .lchev{position:relative;left:11px}
 /* The previews end above the water at the first card's bottom (the fourth one peeking out of the
    scrolling box ran into the waves). */
 html.app body.solo .pv{margin-bottom:20px}
+/* The snackbar (Material 3): over the window's bottom edge, the inverse of the window's colours,
+   taking no room. */
+html.app .notice{position:fixed;left:50%;bottom:16px;z-index:60;transform:translateX(-50%);width:max-content;max-width:calc(100% - 40px);margin:0;padding:6px 6px 6px 16px;height:auto;min-height:44px;box-sizing:border-box;border-radius:12px;gap:12px;font-size:13px;line-height:1.35;color:var(--card);background:color-mix(in srgb,var(--fg) 90%,var(--card));box-shadow:0 10px 28px -8px rgba(0,0,0,.55);animation:snackin .2s cubic-bezier(.2,.8,.2,1) both;transition:opacity .18s ease,transform .18s ease}
+html.app .notice.out{opacity:0;transform:translate(-50%,6px)}
+html.app .notice span{flex:none}
+html.app .notice .ntime{display:none}
+html.app .notice .btn{flex:none;height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--acc);font-weight:600}
+html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transparent)}
+@keyframes snackin{from{opacity:0;transform:translate(-50%,8px)}}
 </style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
   <button class="logob" id="acct" type="button" aria-label="YouTube account"><svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
@@ -1753,41 +1762,32 @@ $('copyall').onclick = function () {
     setTimeout(function () { b.textContent = T('Copy all files'); }, 1800);
   });
 };
-// The note under the options (see .notice): a text, and a button if there's a way back.
-// With a way back, it shows how long that's there: a line drains under it and the button
-// counts the seconds ("Undo · 7").
-var noticeTimer = 0, noticeTick = 0, NOTICE_MS = 8000;
+// A short message (Clear finished, a new downloads folder): in ТЯГА's window a snackbar over
+// the bottom edge (see .notice), with "Undo" when there's a way back, for a few seconds. It
+// takes no room: nothing moves when it comes or goes. (It used to open a line in the card under
+// the options, with "Undo · 7" counting down and a line draining under it: the window grew and
+// shrank around it, and it hung there 8 s. The owner: it looked bad.)
+var noticeTimer = 0, NOTICE_MS = 6000;
 function notice(text, undo) {
-  var n = $('notice'), bar = $('ntime'), end = Date.now() + NOTICE_MS;
-  clearTimeout(noticeTimer); clearInterval(noticeTick);
+  var n = $('notice');
+  clearTimeout(noticeTimer);
+  if (APP && n.parentNode !== document.body) document.body.append(n); // over everything, not inside a card
   $('noticeT').textContent = text;
   $('noticeB').hidden = !undo;
-  if (!undo) bar.hidden = true;
-  if (undo) {
-    bar.hidden = true; void bar.offsetWidth; bar.hidden = false; // its draining starts over
-    var label = function () { setText($('noticeBT'), T('Undo') + ' · ' + Math.max(1, Math.ceil((end - Date.now()) / 1000))); };
-    label(); noticeTick = setInterval(label, 250);
-  }
+  setText($('noticeBT'), T('Undo'));
+  $('ntime').hidden = true;
   $('noticeB').onclick = function () { hideNotice(); if (undo) undo(); };
-  if (n.hidden && !still()) { // opens: its place grows from nothing while it fades in
-    n.hidden = false; n.classList.remove('out'); n.style.height = '';
-    var full = n.offsetHeight;
-    n.style.overflow = 'hidden'; n.classList.add('out'); n.style.height = '0px'; void n.offsetHeight;
-    n.classList.remove('out'); n.style.height = full + 'px';
-    clearTimeout(n.sizeT); n.sizeT = setTimeout(function () { n.style.height = ''; n.style.overflow = ''; }, 320);
-  } else { n.hidden = false; n.classList.remove('out'); }
+  n.hidden = false; n.classList.remove('out');
+  n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; // a new one comes in again
   noticeTimer = setTimeout(hideNotice, NOTICE_MS);
 }
 function hideNotice() {
   var n = $('notice');
-  clearTimeout(noticeTimer); clearInterval(noticeTick);
+  clearTimeout(noticeTimer);
   if (n.hidden) return;
   if (still()) { n.hidden = true; return; }
-  // folds: from its height to nothing, fading, then gone (the reverse of opening)
-  clearTimeout(n.sizeT);
-  n.style.height = n.offsetHeight + 'px'; n.style.overflow = 'hidden'; void n.offsetHeight;
-  n.classList.add('out'); n.style.height = '0px';
-  noticeTimer = setTimeout(function () { n.hidden = true; n.classList.remove('out'); n.style.height = ''; n.style.overflow = ''; }, 320);
+  n.classList.add('out');
+  noticeTimer = setTimeout(function () { n.hidden = true; n.classList.remove('out'); }, 200);
 }
 
 // Closing or reloading the page: tell TYAGA. If no page comes back, it finishes
@@ -2007,10 +2007,10 @@ function updateRow(r, j) {
   // the snapped line, the fish going belly up). It opens and folds smoothly; the window is
   // fitted once, not every frame (see .lining in windowFit).
   if (r.status === 'running' && /^(done|cancelled|error)$/.test(j.status) && !still()) {
-    // Its last moment plays out, then the lane folds: done, the fish swims off (0.9 s) while the line
-    // fades, and the lane goes with it (it hung on 1.7 s, a straight orange bar under a finished
+    // Its last moment plays out, then the lane folds: done, the fish swims off (0.6 s) while the line
+    // fades, and the lane folds as it goes, no empty band left behind (it hung on 1.7 s, a straight orange bar under a finished
     // row while the next one ran: the owner); failed or cancelled, RIP or the snapped line is seen.
-    t.until = now + (j.status === 'done' ? 1000 : 1800);
+    t.until = now + (j.status === 'done' ? 600 : 1800);
   }
   // (the fish may keep it open longer while it swims the last stretch: look again then)
   if (t.until > now) { clearTimeout(r.untilT); r.untilT = setTimeout(function () { if (r.j) updateRow(r, r.j); }, t.until - now + 30); }
@@ -2659,7 +2659,7 @@ var waveTarget = {}, waveState = {};
     if (finishing && st.shown < 99.3 && !still) {
       mode = 'move';
       // The lane stays open until it's there and the catch has played (it folded with the fish short of the end).
-      if (t.status === 'done') t.until = Math.max(t.until || 0, now + 1000);
+      if (t.status === 'done') t.until = Math.max(t.until || 0, now + 600);
     }
     if (mode !== st.mode) {
       var over = /^(done|err|cancel)$/.test(mode);
@@ -2750,8 +2750,8 @@ var waveTarget = {}, waveState = {};
       // The line pulls straight and the fish swims on, faster and faster, out over the right
       // edge, and is gone; the lane then folds with the line (the owner: seamless, 23.11).
       ampK = 1 - ease(tm / .4); F = 3; A = .3; level = true;
-      lineOp = trackOp = 1 - ease((tm - .15) / .6); // the line fades as the fish leaves: nothing stays behind
-      var ok = Math.min(1, tm / .9);
+      lineOp = trackOp = 1 - ease((tm - .1) / .45); // the line fades as the fish leaves: nothing stays behind
+      var ok = Math.min(1, tm / .6);
       fx = x + (w + 2 * S - x) * ok * ok;
       if (st.gone || ok >= 1) { op = 0; st.gone = 1; }
       moving = moving && tm < 1;
