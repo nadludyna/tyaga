@@ -48,6 +48,33 @@
     if (typeof window.placeSky !== 'function' || typeof window.optLabels !== 'function') bad.push('the page script did not load (a syntax error?)');
     // Measure things where they end up, not halfway through their appearing (a badge pops in from 30 %).
     document.getAnimations().forEach(function (x) { try { if (x.effect && x.effect.getTiming().iterations !== Infinity) x.finish(); } catch (e) {} });
+    // 0b. The list scrolls only when its rows don't fit: something invisible hanging out of a
+    // row (a folded fishing line's canvas) gave one row a scrollbar (the owner, by eye).
+    var lst = document.getElementById('list');
+    if (lst && seen(lst) && lst.scrollHeight > lst.clientHeight + 1) {
+      var last = lst.lastElementChild, need = 0;
+      if (last) need = last.getBoundingClientRect().bottom - lst.getBoundingClientRect().top + lst.scrollTop + parseFloat(getComputedStyle(lst).paddingBottom);
+      if (need <= lst.clientHeight + 1) bad.push('the list scrolls with nothing to scroll to (' + (lst.scrollHeight - lst.clientHeight) + ' px)');
+    }
+    // A scrollbar along the bottom: anything that can scroll sideways and is wider than itself
+    // (the row's icons, shifted onto the Download button's edge, made the list 3 px too wide: the owner).
+    document.querySelectorAll('#list,.pv,.card').forEach(function (e) {
+      if (!seen(e)) return;
+      var ox = getComputedStyle(e).overflowX;
+      if ((ox === 'auto' || ox === 'scroll') && e.scrollWidth > e.clientWidth + 1) bad.push('scrolls sideways (' + (e.scrollWidth - e.clientWidth) + ' px): ' + name(e));
+    });
+    // 0c. The sky over the header shows whenever there's room for it (a fixed width hid it for
+    // good once two header buttons were added: 1.5 px short, the owner never saw it).
+    var form = document.querySelector('html.app .card.form'), tl = document.querySelector('header .title'), hp = document.querySelector('header .hpair');
+    if (form && tl && hp && seen(form) && hp.getBoundingClientRect().left - tl.getBoundingClientRect().right >= 166 &&
+        getComputedStyle(form, '::before').display === 'none') bad.push('the sky is hidden though there is room for it');
+    // 0d. The water under the list fades out at both ends instead of being cut by the card's round
+    // corners (the owner: the reeds and the float were cut off).
+    [document.querySelector('html.app #jobsCard:not(.folded)'), document.querySelector('html.app body.solo .card.form')].forEach(function (jc) {
+      if (!jc || !seen(jc)) return;
+      var ws = getComputedStyle(jc, '::after');
+      if (ws.display !== 'none' && ws.content !== 'none' && (ws.maskImage || ws.webkitMaskImage || 'none') === 'none') bad.push('the water at the bottom of ' + name(jc) + ' has hard ends (no fade): the corners cut it');
+    });
     // 1. Labels in the middle.
     document.querySelectorAll('button,.chip,.seg button').forEach(function (b) {
       if (!seen(b)) return;

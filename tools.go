@@ -5,7 +5,8 @@ package main
 //   ffmpeg — merging video and audio, converting, covers;
 //   Deno   — yt-dlp uses it to run YouTube's JavaScript.
 //
-// First look in tyaga-data\bin next to the program, then in PATH.
+// First look in tyaga-data\bin next to the program, then in PATH. (yt-dlp on Windows: ТЯГА keeps
+// its own unpacked build, which starts faster, and keeps it up to date: ytdlp_unpacked.go.)
 // On Windows whatever is missing gets downloaded into bin from the official GitHub release
 // pages. Elsewhere (only the test stand and development) they have to be in PATH.
 
@@ -126,6 +127,22 @@ func ffmpegAsset() (asset, bool) {
 	return asset{}, false
 }
 
+// toolEnv is the environment yt-dlp runs in: UTF-8 (non-Latin titles without mojibake), and
+// every cache in tyaga-data: Deno's (DENO_DIR; yt-dlp runs Deno) and anything that goes by the
+// usual cache folder (XDG_CACHE_HOME). yt-dlp's own is set with --cache-dir (cacheArgs).
+func toolEnv() []string {
+	return append(os.Environ(), "PYTHONIOENCODING=utf-8", "PYTHONUTF8=1",
+		"DENO_DIR="+filepath.Join(cacheDir, "deno"), "XDG_CACHE_HOME="+cacheDir)
+}
+
+// cacheArgs: yt-dlp's cache (what it worked out of YouTube's player code) in tyaga-data.
+func cacheArgs() []string {
+	if cacheDir == "" {
+		return nil
+	}
+	return []string{"--cache-dir", filepath.Join(cacheDir, "yt-dlp")}
+}
+
 // installHint is what to tell the user if a program couldn't be obtained.
 func installHint(name string) string {
 	if runtime.GOOS != "windows" {
@@ -147,6 +164,15 @@ func setupTools() {
 	}
 	var problems []string
 	for _, n := range need {
+		// yt-dlp on Windows: its own unpacked copy first (ytdlp_unpacked.go), the old way if that fails.
+		if z := ytdlpZipName(); n.name == "yt-dlp" && z != "" {
+			p, err := setupUnpackedYtdlp(z)
+			if err == nil {
+				*n.dst = p
+				continue
+			}
+			logf("yt-dlp: the unpacked build couldn't be set up (%v): the old way", err)
+		}
 		path := find(n.name)
 		if path == "" {
 			if a, ok := n.asset(); !ok {
@@ -161,11 +187,13 @@ func setupTools() {
 		*n.dst = path
 	}
 
-	// Our own copy of yt-dlp is updated on every start: YouTube changes things often,
-	// and an old yt-dlp stops working. A system one (from PATH) is left alone.
-	if strings.HasPrefix(tools.ytdlp, binDir) {
+	// A one-file yt-dlp of our own (the old way, when the unpacked one couldn't be had) is updated
+	// on every start: YouTube changes things often, and an old yt-dlp stops working. A system one
+	// (from PATH) is left alone; the unpacked one was brought up to date above.
+	if tools.ytdlp == filepath.Join(binDir, exeName("yt-dlp")) {
 		tools.setStatus("Checking for yt-dlp updates…")
-		cmd := exec.Command(tools.ytdlp, "-U")
+		cmd := exec.Command(tools.ytdlp, append(cacheArgs(), "-U")...)
+		cmd.Env = toolEnv()
 		hideWindow(cmd)
 		cmd.Run()
 	}

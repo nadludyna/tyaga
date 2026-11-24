@@ -66,6 +66,15 @@ func inspect(link string) Facts {
 	} else {
 		var lf Facts
 		var wg sync.WaitGroup
+		// SponsorBlock is asked at the same time as yt-dlp, with the id from the link itself: one
+		// after the other added its answer time to every preview.
+		var adsSec, offtopic float64
+		var nAds int
+		id := videoID(link)
+		if id != "" {
+			wg.Add(1)
+			go func() { defer wg.Done(); nAds, adsSec, offtopic = sponsorSegments(id) }()
+		}
 		if inList {
 			wg.Add(1)
 			go func() { defer wg.Done(); full, _, _ := classify(link, true); lf = lookup(full, true) }()
@@ -77,7 +86,11 @@ func inspect(link string) Facts {
 			f.Kind, f.ListTitle, f.ListCount = "inlist", lf.ListTitle, lf.ListCount
 		}
 		if f.Error == "" && f.ID != "" {
-			f.Ads, f.AdsSec, f.Offtopic = sponsorSegments(f.ID)
+			if f.ID == id {
+				f.Ads, f.AdsSec, f.Offtopic = nAds, adsSec, offtopic
+			} else { // the link didn't show its id plainly
+				f.Ads, f.AdsSec, f.Offtopic = sponsorSegments(f.ID)
+			}
 		}
 	}
 	if u, err := url.Parse(link); err == nil && u.Host == "music.youtube.com" {
@@ -89,6 +102,56 @@ func inspect(link string) Facts {
 		factsMu.Unlock()
 	}
 	return f
+}
+
+// videoID: a YouTube video's id as the link shows it (watch?v=, youtu.be/, shorts/, live/), or "".
+func videoID(link string) string {
+	u, err := url.Parse(link)
+	if err != nil {
+		return ""
+	}
+	host := strings.TrimPrefix(strings.TrimPrefix(strings.ToLower(u.Hostname()), "www."), "m.")
+	id := ""
+	switch {
+	case host == "youtu.be":
+		id = strings.Trim(u.Path, "/")
+	case host == "youtube.com" || host == "music.youtube.com":
+		if id = u.Query().Get("v"); id == "" {
+			for _, p := range []string{"/shorts/", "/live/", "/embed/"} {
+				if strings.HasPrefix(u.Path, p) {
+					id = strings.Trim(strings.TrimPrefix(u.Path, p), "/")
+				}
+			}
+		}
+	}
+	if !ytID.MatchString(id) {
+		return ""
+	}
+	return id
+}
+
+// peek: a video's title and channel from YouTube's oEmbed (a small public answer, well under
+// a second), so its preview has them while yt-dlp, which takes seconds just to start, finds
+// the rest. Nothing for other sites or when there's no answer.
+func peek(link string) Facts {
+	id := videoID(link)
+	if id == "" || os.Getenv("TYAGA_SPONSORBLOCK") == "fake" { // (the stand has no network)
+		return Facts{}
+	}
+	c := http.Client{Timeout: 4 * time.Second}
+	resp, err := c.Get("https://www.youtube.com/oembed?format=json&url=" + url.QueryEscape("https://www.youtube.com/watch?v="+id))
+	if err != nil {
+		return Facts{}
+	}
+	defer resp.Body.Close()
+	var o struct {
+		Title      string `json:"title"`
+		AuthorName string `json:"author_name"`
+	}
+	if resp.StatusCode != http.StatusOK || json.NewDecoder(resp.Body).Decode(&o) != nil {
+		return Facts{}
+	}
+	return Facts{ID: id, Title: o.Title, Channel: strings.TrimSuffix(o.AuthorName, " - Topic")}
 }
 
 // lookup runs yt-dlp -J (everything about the link as JSON, nothing downloaded).
@@ -113,7 +176,8 @@ func lookup(link string, flat bool) Facts {
 	} else if fileExists(cookiesFile) {
 		args = append(args, "--cookies", cookiesFile)
 	}
-	cmd := exec.CommandContext(ctx, tools.ytdlp, append(args, "--", link)...)
+	cmd := exec.CommandContext(ctx, tools.ytdlp, append(append(cacheArgs(), args...), "--", link)...)
+	cmd.Env = toolEnv()
 	hideWindow(cmd)
 	out, err := cmd.Output()
 	if err != nil {

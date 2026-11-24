@@ -4,17 +4,25 @@ package main
 // Copy the program somewhere and it starts clean; delete the folder and nothing of ТЯГА is
 // left on the computer. What's in it, and why:
 //
-//	bin\              yt-dlp, ffmpeg and Deno, downloaded once (only if they aren't installed)
+//	bin\              ffmpeg and Deno, downloaded once (only if they aren't installed);
+//	bin\yt-dlp\       yt-dlp unpacked (it starts faster than the one-file one), kept up to
+//	                  date at each start (ytdlp_unpacked.go)
 //	webview\          the window's browser data: the switches you picked (Windows; WebView2
 //	                  can't run without such a folder; its caches are deleted at every start)
 //	login\            ТЯГА's own sign-in window, only for Chrome/Edge users (Windows)
 //	tyaga.log         what happened in the last run, for when something goes wrong
 //	youtube-signin.txt  which browser the YouTube sign-in is read from
-//	settings.json     what was picked on the page and has to outlive the window: the
-//	                  downloads folder (the switches live in the window's own storage)
+//	queue.json        what was still downloading or waiting when ТЯГА closed: it's back in
+//	                  the list next time, to resume (queue.go); gone once nothing is left
+//	settings.json     what has to outlive the window: the downloads folder picked on the
+//	                  page (the switches live in the window's own storage), and that the
+//	                  "ТЯГА is in the tray" notice was shown (once is enough: every time annoys)
 //
-// Downloads go to Downloads\YouTube unless another folder was picked. Only when the program's folder can't be
-// written to (Program Files) is the data kept in the user's own app data folder instead.
+// Downloads go to Windows' Music and Videos unless another folder was picked (dirFor in jobs.go).
+// The tools ТЯГА runs keep their own caches here too, not in the user's profile:
+//	cache\yt-dlp\      yt-dlp's (YouTube's player code it worked out), --cache-dir
+//	cache\deno\        Deno's (yt-dlp runs it for YouTube's JavaScript), DENO_DIR
+// (Without them yt-dlp wrote to %USERPROFILE%\.cache\yt-dlp and Deno to %LOCALAPPDATA%\deno.)
 
 import (
 	"crypto/sha256"
@@ -23,21 +31,18 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
+// makeDataDir makes tyaga-data next to the program. Nowhere else: a folder ТЯГА can't write to
+// (Program Files) is said plainly at start, instead of keeping things in AppData (the owner:
+// nothing of ТЯГА outside its own folder). See fail in main.go.
 func makeDataDir() string {
 	d := filepath.Join(appDir, "tyaga-data")
 	if err := os.MkdirAll(d, 0o755); err != nil || !writable(d) {
-		base, err := os.UserCacheDir() // %LOCALAPPDATA% on Windows
-		if err != nil {
-			base = os.TempDir()
-		}
-		d = filepath.Join(base, "TYAGA", folderID())
-		os.MkdirAll(d, 0o755)
+		fail("ТЯГА can't write in its own folder:\n" + appDir + "\n\nMove tyaga.exe into a folder of your own (Desktop, Documents, a folder on another drive) and start it from there.")
 	}
-	if filepath.Dir(d) == appDir {
-		hideDataDir(d)
-	}
+	hideDataDir(d)
 	moveOldData(d)
 	return d
 }
@@ -81,7 +86,20 @@ func folderID() string {
 
 // settings are kept in tyaga-data/settings.json.
 type settings struct {
-	Out string `json:"out,omitempty"` // the downloads folder, if one was picked
+	Out      string `json:"out,omitempty"`      // the downloads folder, if one was picked
+	TrayTold bool   `json:"trayTold,omitempty"` // the "ТЯГА is in the tray" notice was shown once
+}
+
+var settingsMu sync.Mutex
+
+// changeSettings reads settings.json, changes it and writes it back, so one setting saved
+// doesn't wipe the others.
+func changeSettings(f func(*settings)) {
+	settingsMu.Lock()
+	defer settingsMu.Unlock()
+	s := loadSettings()
+	f(&s)
+	saveSettings(s)
 }
 
 func settingsFile() string { return filepath.Join(dataDir, "settings.json") }

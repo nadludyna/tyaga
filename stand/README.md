@@ -20,6 +20,12 @@ The layout check: paste `stand/check.js` into the page (devtools console, or a t
 "run JavaScript") and run `tyagaCheck()`; an empty list means nothing's off (see
 docs/ui-principles.md, "Before every build").
 
+Scenarios: `node stand/scenarios.js <address>` uses the page the way people do (a chat
+message pasted, the same video twice, ten links, cancel, a failure, Clear finished while
+downloading) and checks what happens; CI runs it after the layout checks. `NEW` in a link
+gives the video a title of its own ("Song" and what follows NEW), so several downloads aren't
+all "already there"; the fake also writes `.part` files while it downloads, like yt-dlp.
+
 Link checks (`-J`, inspect.go): `CHAP` in the link is an album with 10 chapters, `SPON` a video
 with ads (the stand fakes SponsorBlock: `TYAGA_SPONSORBLOCK=fake`), `HD720` goes up to 720p only.
 

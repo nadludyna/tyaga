@@ -4,12 +4,16 @@
 # videos, a jumpy speed. Makes real little files with covers. A link with FAIL in it fails with 403;
 # a playlist link with SKIP in it has a private video in the middle (the rest downloads, exit code 1).
 # Sizes: a link with TINY in it is a short clip (done in a second or two), with LONG a long video
-# in many pieces; anything else is the usual few-minutes size.
+# in many pieces; anything else is the usual few-minutes size. NEW in a video link gives it a title
+# of its own ("Song 07" from the link's last two letters), so several downloads aren't all the
+# same file ("already there").
 import sys, os, time, json, random, subprocess
 a = sys.argv[1:]
 if '-U' in a or '--version' in a:
     print('Latest version: 2026.11.10 from yt-dlp/yt-dlp\nyt-dlp is up to date (2026.11.10 from yt-dlp/yt-dlp)'); sys.exit(0)
 out = a[a.index('-P') + 1] if '-P' in a else '.'
+def vid_of(link): return (link.split('v=')[-1].split('&')[0] if 'v=' in link else link.split('?')[0].rstrip('/').split('/')[-1])[:11]
+def own(link): return 'Song ' + vid_of(link).split('NEW', 1)[1] if 'NEW' in vid_of(link) else None
 # -J: what the link is, no download (inspect.go). Words in the link pick what it is like:
 # CHAP an album with 10 chapters (Music), SPON a video with ads (SponsorBlock, see inspect.go),
 # HD720 only up to 720p, FAIL fails; a playlist link (list=) gives 3 entries with --flat-playlist.
@@ -29,7 +33,7 @@ if '-J' in a:
     ALBUM, t0 = [], 0
     for name, sec in T:
         ALBUM.append({'start_time': float(t0), 'end_time': float(min(t0 + sec, 2580)), 'title': name}); t0 += sec
-    info = {'id': vid, 'title': 'Pink Floyd - The Dark Side of the Moon (Full Album)' if chap else 'Rotten Apple Juice',
+    info = {'id': vid, 'title': 'Pink Floyd - The Dark Side of the Moon (Full Album)' if chap else own(link) or 'Rotten Apple Juice',
             'channel': 'Pink Floyd' if chap else 'Pilotredsky', 'duration': 2580 if chap else 200,
             'thumbnail': '', 'categories': ['Music'] if (chap or 'MUSIC' in link) else ['Entertainment'],
             'chapters': ALBUM if chap else [],
@@ -42,7 +46,7 @@ def say(s, err=False):
     print(s, file=sys.stderr if err else sys.stdout, flush=True)
 SONGS = [('Pilotredsky', 'Rotten Apple Juice', 'Ab3dEf5Gh7J'), ('Daft Punk', 'Digital Love', 'Kl9mNo1Pq3R'),
          ('Lazy Lizard', 'Nice Little Penguin (Official Video)', 'St5uVw7Xy9Z')]
-items = SONGS if playlist else SONGS[:1]
+items = SONGS if playlist else [('Pilotredsky', own(a[-1]), vid_of(a[-1]))] if own(a[-1]) else SONGS[:1]
 n = len(items)
 listname = 'My Wife Is Drink Paint - a very long playlist name that goes on and on'
 folder = os.path.join(out, listname) if playlist else out
@@ -95,6 +99,8 @@ for i, (artist, title, vid) in enumerate(items, 1):
             say('[hlsnative] Downloading m3u8 manifest')
             say(f'[hlsnative] Total fragments: {frags}')
         say(f'[download] Destination: {base}.{ext}')
+        part = f'{base}.{ext}.part'  # like yt-dlp: the file grows as .part, renamed once whole
+        open(part, 'wb').close()
         done, v = 0, 3e6
         while done < total:
             r = random.random()
@@ -108,6 +114,7 @@ for i, (artist, title, vid) in enumerate(items, 1):
             else:
                 say(f'PROG|{int(done)}|{total}|NA|{v}|{eta}|NA|NA')
             time.sleep(0.5 if r >= 0.06 else 1.5)
+        os.remove(part)
         say(f'[download] 100% of {total/1e6:.2f}MiB in 00:00:0{random.randint(2,9)} at {v/1e6:.2f}MiB/s')
     final = f'{base}.{fmt if audio else "mp4"}'
     if audio:

@@ -56,6 +56,18 @@ func typeDir(root string, audio bool, lang string) string {
 	return filepath.Join(root, names[0])
 }
 
+// dirFor is where a download of this kind goes: Windows' own Music folder (audio) or Videos
+// folder (video), the standard places (the owner), unless a folder was picked: then that one,
+// sorted into Видео and Аудио (typeDir). Call with mu held.
+func dirFor(audio bool, lang string) string {
+	if !outPicked {
+		if d := mediaDir(audio); d != "" {
+			return d
+		}
+	}
+	return typeDir(outDir, audio, lang)
+}
+
 // parseTime reads "1:02:03", "1:20", "80", "80.5" or "1:20.5" as seconds.
 func parseTime(s string) (float64, bool) {
 	s = strings.TrimSpace(s)
@@ -147,6 +159,7 @@ type Job struct {
 	ErrorRaw string   `json:"errorRaw"` // yt-dlp's own error line, for "Copy error"
 	Files    []string `json:"files"`    // names of finished files
 	Already  bool     `json:"already"`  // done without downloading anything: it was all in the folder already
+	Stopped  bool     `json:"stopped"`  // left unfinished when ТЯГА closed (queue.go): Retry resumes it
 
 	dir      string          // the folder it downloads into (typeDir), fixed when it starts
 	mix      bool            // a YouTube Mix: only the first mixLimit videos
@@ -162,7 +175,11 @@ type Job struct {
 	had, got bool            // yt-dlp found a file already there / downloaded something itself
 	avgV     float64         // the speed, averaged over the last several seconds (bytes/s)
 	avgAt    time.Time       // when avgV was last updated
+	temps    []string        // files written on the way to the finished one (noteTemp), for a cancel to clean up
 }
+
+// trackRe: the "[2/12] " in front of a playlist video's title.
+var trackRe = regexp.MustCompile(`^\[\d+/\d+\] `)
 
 // splitInfo is what yt-dlp reports about a video that was split by chapters.
 type splitInfo struct {
@@ -255,7 +272,7 @@ func classify(link string, playlist bool) (fixed string, list, mix bool) {
 // folder is the job's download folder: set when it starts; before that (tests) worked out now.
 func (j *Job) folder() string {
 	if j.dir == "" {
-		return typeDir(outDir, j.Mode == "audio", j.Lang)
+		return dirFor(j.Mode == "audio", j.Lang)
 	}
 	return j.dir
 }
@@ -505,6 +522,7 @@ func (j *Job) overall(frac float64) float64 {
 
 // onLine parses one line of yt-dlp output and updates the download. Call with mu held.
 func onLine(j *Job, line string) {
+	noteTemp(j, line)
 	switch {
 	case strings.HasPrefix(line, "ITEM|"):
 		// A new video started. The title may contain "|", so split into at most 3 parts.
@@ -788,9 +806,24 @@ func (j *Job) addLog(line string) {
 // addJobs puts links into the queue.
 func addJobs(links []string, o Options) {
 	mu.Lock()
+	lastAudio, lastLang = o.Mode == "audio", o.Lang // the tray's "open the folder" opens this kind's
 	for _, link := range links {
 		fixed, list, mix := classify(link, o.Playlist)
 		j := &Job{ID: nextID, URL: fixed, Options: o, List: list, mix: mix, Status: "queued", Files: []string{}}
+		// What the link check found (inspect.go): the row shows the title and picture while it waits.
+		factsMu.Lock()
+		f, ok := factsCache[link]
+		factsMu.Unlock()
+		if ok && f.Error == "" {
+			if list {
+				j.Title = f.ListTitle
+			} else {
+				j.Title, j.Channel = f.Title, f.Channel
+			}
+			if !list || f.Kind == "inlist" {
+				j.Thumb = f.Thumb
+			}
+		}
 		if mix {
 			j.Note = fmt.Sprintf("A YouTube Mix never ends, so only the first %d videos.", mixLimit)
 		}
@@ -820,11 +853,11 @@ func pump() {
 		return
 	}
 
-	j.dir = typeDir(outDir, j.Mode == "audio", j.Lang) // (mu is held here: not downloadsDir, which takes it)
+	j.dir = dirFor(j.Mode == "audio", j.Lang)
 	os.MkdirAll(j.dir, 0o755)
 	j.Status = "running"
-	cmd := exec.Command(tools.ytdlp, buildArgs(j)...)
-	cmd.Env = append(os.Environ(), "PYTHONIOENCODING=utf-8", "PYTHONUTF8=1") // non-Latin titles without mojibake
+	cmd := exec.Command(tools.ytdlp, append(cacheArgs(), buildArgs(j)...)...)
+	cmd.Env = toolEnv()
 	hideWindow(cmd)
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
@@ -960,8 +993,19 @@ func pump() {
 				}
 			}
 		}
+		// Cancelled by hand: what it left half-done goes (stopped by Quit: it stays, to resume).
+		var drop []string
+		if j.Status == "cancelled" && !quitting {
+			drop = leftovers(j)
+		}
 		running, current = nil, nil
 		mu.Unlock()
+		for _, p := range drop {
+			os.Remove(p)
+		}
+		if len(drop) > 0 {
+			logf("Cancelled: removed %d unfinished file(s)", len(drop))
+		}
 		pump()
 	}()
 }
@@ -990,8 +1034,8 @@ func jobCover(id int) []byte {
 	return nil
 }
 
-// cancelJob removes a queued download, or stops the running one.
-// The unfinished file stays and resumes if the link is added again.
+// cancelJob removes a queued download, or stops the running one. What it left half-done is
+// removed once yt-dlp has stopped (leftovers): cancelled means not wanted.
 func cancelJob(id int) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -1021,7 +1065,8 @@ func retryJob(id int) {
 			j.Pos, j.Of, j.part, j.lastB, j.failed = 0, 0, 0, 0, 0
 			j.songs = nil
 			j.Log = nil
-			j.had, j.got, j.Already = false, false, false
+			j.had, j.got, j.Already, j.Stopped = false, false, false, false
+			j.temps = nil
 		}
 	}
 	mu.Unlock()

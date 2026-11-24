@@ -135,6 +135,8 @@ func quitWhenAbandoned() {
 // quit stops the download (the unfinished file stays and resumes next time) and exits.
 func quit() {
 	mu.Lock()
+	quitting = true
+	left := unfinished() // written down before it's stopped: it comes back next time (queue.go)
 	for _, j := range jobs {
 		if j.Status == "queued" || j.Status == "running" {
 			j.Status = "cancelled"
@@ -144,6 +146,8 @@ func quit() {
 		killTree(running)
 	}
 	mu.Unlock()
+	last := ""
+	writeQueue(left, &last)
 	os.Remove(instanceFile())
 	if logFile != nil {
 		logFile.Close()
@@ -158,13 +162,14 @@ type trayInfo struct {
 	Title    string  `json:"title"`
 	Progress float64 `json:"progress"`
 	Folder   string  `json:"folder"`
+	Std      bool    `json:"std"` // not picked: Windows' Music and Videos
 	CanPick  bool    `json:"canPick"`
 }
 
 func trayStatus() trayInfo {
-	t := trayInfo{Folder: folderName(outDir), CanPick: pickFolder != nil}
 	mu.Lock()
 	defer mu.Unlock()
+	t := trayInfo{Folder: folderName(outDir), Std: !outPicked && mediaDir(true) != "", CanPick: pickFolder != nil}
 	for _, j := range jobs {
 		switch j.Status {
 		case "running":

@@ -56,6 +56,10 @@ the wrong font, a window that blinked. So these are measured, every time, before
    see-through window.
 3. **Old behaviour still there**: walk the flows that worked before (paste several links,
    Retry, Undo, cancel, fold the list) — a change must not take anything away unasked.
+   `node stand/scenarios.js <stand address>` walks most of them by itself and checks what
+   should happen (a chat message pasted, the same video twice, ten links, cancel, a failure,
+   a playlist with a private video, Clear finished while downloading); CI runs it too. A case
+   found by hand that it misses goes into it.
 4. **The flows, in the real window, start to finish, recorded**: paste a video link →
    preview → change the quality → fragment → Download → done → Show file → Copy; an audio
    link (album with chapters); a playlist link and a video inside a playlist; a failed one →

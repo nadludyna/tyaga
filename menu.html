@@ -16,13 +16,15 @@
 [hidden]{display:none!important}
 html,body{margin:0;height:100%;background:transparent;overflow:hidden;-webkit-user-select:none;user-select:none;cursor:default}
 body{font:13px/1.3 Onest,system-ui,sans-serif;color:var(--fg);padding:8px;display:flex;align-items:flex-end}
-.menu{position:relative;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px 5px 16px;box-shadow:0 6px 18px -6px rgba(0,0,0,.55);animation:in .14s ease-out both}
+.menu{position:relative;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px 5px 40px;box-shadow:0 6px 18px -6px rgba(0,0,0,.55);animation:in .14s ease-out both}
 @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 /* On top: what's going on. An icon in the same style as the window's states, the download
    now (or that nothing is), and a line under it: how far, how many are left. */
 .now{position:relative;display:flex;align-items:center;gap:10px;padding:6px 9px 8px;margin-bottom:3px;border-bottom:1px solid var(--line)}
-.now svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--dim)}
+.now svg{width:20px;height:20px;flex:none;color:var(--dim)}
 .now.busy svg{color:var(--acc)}
+.now:not(.busy) .nt b{font-weight:500;color:var(--dim)}
+#ni{display:grid;flex:none}
 .nt{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}
 .nt b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nt span{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
@@ -36,13 +38,17 @@ button svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke
 button>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* The words sit in the middle by the letters themselves, like in the main window. */
 button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em} /* room for the tails of у, р, g where a label is cut with "…" */
+/* Each action its own colour, the same as in the main window: it says at a glance which is which
+   (the owner: one quiet colour made them harder to tell apart, and duller). */
+button svg{transition:filter .12s ease}
 #open svg{color:var(--acc)}#folder svg{color:var(--folder)}#pick svg{color:var(--info)}.quit svg{color:var(--dim)}
+button:hover svg,button:focus-visible svg{filter:brightness(1.15)}
 .sep{height:1px;background:var(--line);margin:3px 6px}
-/* The water from the main window along the menu's bottom: reeds, a fish, the float, two waves.
-   Still, drawn once (nothing moves by itself). */
-.menu::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34px;border-radius:0 0 11px 11px;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='248' height='34' viewBox='0 0 248 34'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.4'%3E%3Cpath stroke-opacity='.3' d='M0 22c20-7 40-7 62 0s42 7 62 0 42-7 62 0 42 7 62 0'/%3E%3Cpath stroke-opacity='.18' d='M-10 29c26-6 52-6 78 0s52 6 78 0 52-6 78 0 40 6 40 3'/%3E%3Cpath stroke-opacity='.35' d='M12 33V14M17 33c0-6 2-10 5-13M8 33c0-5-2-8-4-10'/%3E%3Cpath stroke-opacity='.35' stroke-dasharray='2 2.5' d='M214 2v12'/%3E%3C/g%3E%3Cg fill='%23ff6b2c'%3E%3Crect fill-opacity='.4' x='10' y='7' width='4' height='9' rx='2'/%3E%3Ccircle fill-opacity='.55' cx='214' cy='19' r='4'/%3E%3Cpath fill-opacity='.28' d='M128 26c3-3 8-3 11 0-3 3-8 3-11 0zm0 0-4-2.5v5z'/%3E%3C/g%3E%3C/svg%3E") no-repeat 0 100%/100% 34px}
-:root[data-theme=light] .menu::after{filter:drop-shadow(0 0 0 #c2410c)}
-@media (prefers-color-scheme:light){:root:not([data-theme=dark]) .menu::after{filter:drop-shadow(0 0 0 #c2410c)}}
+/* The water from the main window along the menu's bottom: reeds, a fish, the float, two waves,
+   fading out at both ends; still, drawn once (nothing moves by itself). */
+.menu::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:44px;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.42' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23ff6b2c' fill-opacity='0.32'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23ff6b2c' fill-opacity='0.32'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.28' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 8px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.50'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23ff6b2c' fill-opacity='0.70' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.45'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23ff6b2c' fill-opacity='0.60' stroke-opacity='0.45'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.25'/%3E%3C/g%3E%3C/svg%3E") right 12px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23ff6b2c'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.26'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.22'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.16'/%3E%3C/g%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.30' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") left 64px bottom 0/150px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.30'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.17'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.09'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x;-webkit-mask:linear-gradient(90deg,transparent 4px,#000 20px,#000 calc(100% - 20px),transparent calc(100% - 4px));mask:linear-gradient(90deg,transparent 4px,#000 20px,#000 calc(100% - 20px),transparent calc(100% - 4px))}
+:root[data-theme=light] .menu::after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.57' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.38' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 8px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.68'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23d9480f' fill-opacity='0.94' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.61'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23d9480f' fill-opacity='0.81' stroke-opacity='0.61'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.34'/%3E%3C/g%3E%3C/svg%3E") right 12px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23d9480f'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.35'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.30'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.22'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.41' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") left 64px bottom 0/150px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.41'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.23'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]) .menu::after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.57' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.38' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 8px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.68'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23d9480f' fill-opacity='0.94' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.61'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23d9480f' fill-opacity='0.81' stroke-opacity='0.61'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.34'/%3E%3C/g%3E%3C/svg%3E") right 12px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23d9480f'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.35'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.30'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.22'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.41' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") left 64px bottom 0/150px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.41'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.23'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x}}
 .quit:hover,.quit:focus-visible{color:var(--err);background:color-mix(in srgb,var(--err) 12%,transparent)}
 .quit:hover svg,.quit:focus-visible svg{color:var(--err)}
 /* Quitting while something downloads: the question takes the menu's place, same size. */
@@ -58,7 +64,7 @@ html.off .menu{opacity:0;animation:none;transition:opacity .08s ease}
 </style></head><body>
 <div class="menu" id="menu">
   <div class="items">
-    <div class="now" id="now"><svg id="ni" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/></svg><div class="nt"><b id="nt">&nbsp;</b><span id="ns">&nbsp;</span></div><div class="bar"><i id="nb"></i></div></div>
+    <div class="now" id="now"><span id="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 7.5 6.8 12l-4.3 4.5z" fill="currentColor"/><ellipse cx="13.6" cy="12" rx="8.4" ry="7" fill="currentColor"/><path d="M11.4 9v6l4.8-3z" fill="var(--card)"/><circle cx="18.4" cy="9.8" r="1" fill="var(--card)"/></svg></span><div class="nt"><b id="nt">&nbsp;</b><span id="ns">&nbsp;</span></div><div class="bar"><i id="nb"></i></div></div>
     <button id="open"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg><span data-t="Open ТЯГА">Open ТЯГА</span></button>
     <button id="folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="folderT">Open the downloads folder</span></button>
     <button id="pick"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change the folder…">Change the folder…</span></button>
@@ -66,7 +72,7 @@ html.off .menu{opacity:0;animation:none;transition:opacity .08s ease}
     <button id="quit" class="quit"><svg viewBox="0 0 24 24"><path d="M12 3v8M7 6a8 8 0 1 0 10 0"/></svg><span data-t="Quit ТЯГА">Quit ТЯГА</span></button>
   </div>
   <div class="ask">
-    <p><b data-t="Something is still downloading.">Something is still downloading.</b><span data-t="Quit anyway? Unfinished files resume when you download them again.">Quit anyway? Unfinished files resume when you download them again.</span></p>
+    <p><b data-t="Something is still downloading.">Something is still downloading.</b><span data-t="Quit anyway? Unfinished downloads stay in the list for next time.">Quit anyway? Unfinished downloads stay in the list for next time.</span></p>
     <div class="row"><button id="keep"><span data-t="Keep going">Keep going</span></button><button id="quit2" class="quit"><span data-t="Quit">Quit</span></button></div>
   </div>
 </div>
@@ -76,32 +82,28 @@ function $(id) { return document.getElementById(id); }
 // The language the main window's button picked (tyaga-lang), else Windows' own.
 var RU = { 'Open ТЯГА': 'Открыть ТЯГУ', 'Change the folder…': 'Сменить папку…',
   'Quit ТЯГА': 'Выйти из ТЯГИ', 'Something is still downloading.': 'Ещё что-то качается.',
-  'Quit anyway? Unfinished files resume when you download them again.': 'Всё равно выйти? Недокачанное докачается, когда скачаешь снова.',
+  'Quit anyway? Unfinished downloads stay in the list for next time.': 'Всё равно выйти? Недокачанное останется в списке до следующего раза.',
   'Keep going': 'Пусть качает', 'Quit': 'Выйти' }, ru = false;
 function langNow() {
   var l = null; try { l = localStorage.getItem('tyaga-lang'); } catch (e) {}
-  ru = l ? l === 'ru' : /^(ru|uk|be)/i.test(navigator.language || '');
+  ru = l === 'ru'; // English until Russian is picked in the main window
   document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = ru && RU[e.dataset.t] || e.dataset.t; });
 }
 function tray(text) {
   return fetch('/api/tray', { method: 'POST', headers: { 'x-token': TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ text: text }) })
     .then(function (r) { return r.json(); });
 }
-var ICON = {
-  busy: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v8M8.5 12.5 12 16l3.5-3.5"/>',
-  idle: '<circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/>'
-};
 // What's going on now: the download, how far it is, how many are left after it.
 function showNow(s) {
   s = s || {};
   busy = s.busy > 0;
   var left = (s.busy || 1) - 1, p = Math.floor(s.progress || 0);
   $('now').classList.toggle('busy', busy);
-  $('ni').innerHTML = busy ? ICON.busy : ICON.idle;
   $('nt').textContent = busy ? (s.title || '').replace(/^\[\d+\/\d+\] /, '').replace(/^https?:\/\/(www\.)?/, '')
     : ru ? 'Ничего не качается' : 'Nothing is downloading';
   $('ns').textContent = busy
     ? (ru ? 'Скачивается · ' + p + '%' + (left ? ' · ещё ' + left : '') : 'Downloading · ' + p + '%' + (left ? ' · ' + left + ' more' : ''))
+    : s.std ? (ru ? 'Папки: Музыка и Видео' : 'Folders: Music and Videos')
     : (s.folder ? (ru ? 'Папка: ' + s.folder : 'Folder: ' + s.folder) : '');
   $('nb').style.width = busy ? p + '%' : '0';
   // (the folder's name is in the line above: here it made the label too long for the menu)

@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"net/url"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
+	"time"
 )
 
 // TestLiveCovers asks the real Apple Music catalogue which cover each song gets.
@@ -41,4 +43,44 @@ func TestLiveCovers(t *testing.T) {
 			t.Errorf("%s: want the cover %s", c.title, c.want)
 		}
 	}
+}
+
+// peek against the real YouTube: a title and channel in well under the time yt-dlp takes.
+func TestLivePeek(t *testing.T) {
+	if os.Getenv("TYAGA_LIVE") == "" {
+		t.Skip("TYAGA_LIVE=1 to ask the real YouTube")
+	}
+	t0 := time.Now()
+	f := peek("https://youtu.be/fJ9rUzIMcZQ?si=x")
+	if f.Title == "" || f.Channel == "" || f.ID != "fJ9rUzIMcZQ" {
+		t.Fatalf("no title from oEmbed: %+v", f)
+	}
+	t.Logf("%q by %q in %v", f.Title, f.Channel, time.Since(t0))
+}
+
+// The real unpacked yt-dlp from GitHub: installed, runs, and a second start downloads nothing.
+func TestLiveUnpackedYtdlp(t *testing.T) {
+	if os.Getenv("TYAGA_LIVE") == "" || ytdlpZipName() == "" {
+		t.Skip("TYAGA_LIVE=1 on Windows to fetch the real yt-dlp")
+	}
+	old := binDir
+	defer func() { binDir = old }()
+	binDir = t.TempDir()
+	t0 := time.Now()
+	exe, err := setupUnpackedYtdlp(ytdlpZipName())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("installed in %v", time.Since(t0))
+	t1 := time.Now()
+	out, err := exec.Command(exe, "--version").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("yt-dlp %s started in %v", strings.TrimSpace(string(out)), time.Since(t1))
+	t2 := time.Now()
+	if _, err := setupUnpackedYtdlp(ytdlpZipName()); err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("the next start's check took %v", time.Since(t2))
 }

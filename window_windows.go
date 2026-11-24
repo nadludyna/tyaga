@@ -141,9 +141,15 @@ func runWindow(token string) bool {
 			win.SetBounds(b)
 		}
 	}
-	// × (or Alt+F4) hides the window to the tray, and says so: downloads go on there.
+	// × (or Alt+F4) hides the window to the tray, and says so the first time only: downloads go
+	// on there. Every time was annoying (the owner).
 	toTray := func() {
 		win.Hide()
+		told := false
+		changeSettings(func(s *settings) { told, s.TrayTold = s.TrayTold, true })
+		if told {
+			return
+		}
 		trayBalloon("ТЯГА is in the tray", "Downloads go on. Click the icon to open ТЯГА; Quit is in its menu.")
 	}
 	windowControl = func(action string, n int) {
@@ -153,6 +159,17 @@ func runWindow(token string) bool {
 			win.Minimise()
 		case "close":
 			toTray()
+		case "drag": // the page got a press on the header that Windows didn't take as the title bar
+			// WebView2 tells Windows which parts of the page drag the window (app-region). With
+			// a scrolling links box it stopped doing so (builds 38, 39: ten links pasted, the
+			// window couldn't be moved), so the page asks, and the drag starts the way Windows'
+			// own title bars start it (as Wails does for its --wails-draggable).
+			application.InvokeSync(func() {
+				if h := w32.HWND(uintptr(win.NativeWindow())); h != 0 {
+					w32.ReleaseCapture()
+					w32.PostMessage(h, w32.WM_NCLBUTTONDOWN, w32.HTCAPTION, 0)
+				}
+			})
 		case "top": // the pin: ТЯГА stays over every other window (or not), as the page asks
 			win.SetAlwaysOnTop(n == 1)
 		case "full":
@@ -263,7 +280,9 @@ func runWindow(token string) bool {
 			showWin()
 		case "folder":
 			menuWin.Hide()
-			dir := downloadsDir()
+			mu.Lock()
+			dir := dirFor(lastAudio, lastLang)
+			mu.Unlock()
 			os.MkdirAll(dir, 0o755)
 			openFolder(dir)
 		case "pick":
@@ -287,6 +306,8 @@ func runWindow(token string) bool {
 	tray.OnRightClick(showMenu)
 
 	go showProgress(win, tray)
+	loadQueue()
+	go keepQueue()
 	go setupTools()
 	if err := app.Run(); err != nil {
 		fail("Could not open the window: " + err.Error())
@@ -298,7 +319,7 @@ func runWindow(token string) bool {
 const winWidth, winHeight = 653, 800 // exactly the options row, the same 8 px between every button (the owner); the page gets ~10 px less than this (Windows' edges, measured on the owner's PC, 23.11)
 
 // The tray menu's window: the menu card (menu.html) plus room for its shadow.
-const menuWidth, menuHeight = 264, 220 // measured: the card is 248×203 with the "what's going on" line and the water at its bottom, plus 16 for the shadow
+const menuWidth, menuHeight = 264, 246 // measured: the card is 248×227 with the "what's going on" lines and the water under the items (build 46), plus room for the shadow
 
 // lightWebview: WebView2 is Edge inside, and by itself it downloads Edge's add-ons into its
 // data folder (DRM for Netflix, speech recognition, ad-block lists: some 60 MB) and phones home.
