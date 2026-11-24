@@ -754,13 +754,23 @@ html.app .lchev{position:relative;left:11px}
 html.app body.solo .pv{margin-bottom:20px}
 /* The snackbar (Material 3): over the window's bottom edge, the inverse of the window's colours,
    taking no room. */
-html.app .notice{position:fixed;left:50%;bottom:16px;z-index:60;transform:translateX(-50%);width:max-content;max-width:calc(100% - 40px);margin:0;padding:6px 6px 6px 16px;height:auto;min-height:44px;box-sizing:border-box;border-radius:12px;gap:12px;font-size:13px;line-height:1.35;color:var(--card);background:color-mix(in srgb,var(--fg) 90%,var(--card));box-shadow:0 10px 28px -8px rgba(0,0,0,.55);animation:snackin .2s cubic-bezier(.2,.8,.2,1) both;transition:opacity .18s ease,transform .18s ease}
+html.app .notice{position:fixed;left:50%;bottom:14px;z-index:60;transform:translateX(-50%);width:max-content;max-width:calc(100% - 40px);margin:0;padding:6px 6px 6px 12px;height:auto;min-height:44px;box-sizing:border-box;border-radius:12px;gap:10px;font-size:13px;line-height:1.35;color:var(--fg);background:color-mix(in srgb,var(--fg) 7%,var(--card));border:1px solid color-mix(in srgb,var(--fg) 13%,transparent);box-shadow:0 12px 32px -6px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.25);animation:snackin .2s cubic-bezier(.2,.8,.2,1) both;transition:opacity .18s ease,transform .18s ease}
 html.app .notice.out{opacity:0;transform:translate(-50%,6px)}
 html.app .notice span{flex:none}
 html.app .notice .ntime{display:none}
+html.app .notice .ni{flex:none;display:grid;place-items:center;width:20px;height:20px;color:var(--dim)}
+html.app .notice .ni svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+html.app .notice .ni.folder{color:var(--folder)}
 html.app .notice .btn{flex:none;height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--acc);font-weight:600}
 html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transparent)}
 @keyframes snackin{from{opacity:0;transform:translate(-50%,8px)}}
+/* The list's header: its summary, then its actions as icons (Copy all files, Clear finished)
+   like the rows' own, and the fold arrow. (Two buttons with words left the summary "7 d…", and
+   the words, sized for Russian, stood apart from their icons in English: the owner.) */
+.lbar .hb{flex:none;width:30px;height:28px;margin:0;position:relative;left:11px}
+.lbar .hb svg{width:16px;height:16px}
+.lbar .hb:hover{color:var(--fg);background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.lbar #clear:hover{color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
 </style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
   <button class="logob" id="acct" type="button" aria-label="YouTube account"><svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
@@ -817,8 +827,8 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
 
 <div class="card" id="jobsCard" hidden>
   <div class="lbar" id="lbar"><div class="lhead" id="lhead"><span id="lsum"></span></div>
-    <button class="btn ghost sm copyall" id="copyall" hidden title="Copy all files"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span class="tw"><span id="copyallT" data-t="Copy all files">Copy all files</span><span class="ghost" data-t2="Copy all files" aria-hidden="true"></span></span></button>
-    <button class="btn ghost sm clear" id="clear" title="Clear finished. Files stay on disk"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg><span class="tw"><span data-t="Clear finished">Clear finished</span><span class="ghost" data-t2="Clear finished" aria-hidden="true"></span></span></button>
+    <button class="ibtn hb" id="copyall" hidden data-tip="Copy all files" aria-label="Copy all files"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
+    <button class="ibtn hb" id="clear" data-tip="Clear finished. Files stay on disk" aria-label="Clear finished"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg></button>
     <button class="lchev" id="lchev" aria-label="Hide downloads list"><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button></div>
   <div id="list"></div>
 </div>
@@ -1743,11 +1753,11 @@ $('links').addEventListener('input', countLinks);
 $('links').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askNotify(); add(); } };
 $('open').onclick = function () { closeFly(); api('/api/open', { text: mode(), lang: LANG }); }; // audio: Music, video: Videos (or the picked folder's Аудио / Видео)
 // Back to Windows' own Music and Videos after a folder was picked.
-$('std').onclick = function () { closeFly(); api('/api/std', {}).then(function () { notice(T('Back to Music and Videos.')); refresh(); }); };
+$('std').onclick = function () { closeFly(); api('/api/std', {}).then(function () { notice(T('Back to Music and Videos.'), null, 'folder'); refresh(); }); };
 // Another downloads folder: Windows' folder dialog (ТЯГА's window only), remembered.
 $('pick').onclick = function () {
   closeFly();
-  api('/api/folder', {}).then(function (r) { if (r.out) notice(T('Downloads now go to ' + r.out + '.')); refresh(); });
+  api('/api/folder', {}).then(function (r) { if (r.out) notice(T('Downloads now go to ' + r.out + '.'), null, 'folder'); refresh(); });
 };
 // Clear finished takes the rows off at once, and says so with an Undo for a few seconds.
 $('clear').onclick = function () {
@@ -1756,15 +1766,17 @@ $('clear').onclick = function () {
     if (r && r.n) notice(LANG === 'ru' ? 'Убрано из списка: ' + r.n + '. Файлы на месте.'
       : 'Cleared ' + r.n + (r.n === 1 ? ' download' : ' downloads') + ' from the list. The files stay.', function () {
       api('/api/unclear', {}).then(refresh);
-    });
+    }, 'clear');
   });
 };
 // Every finished file onto the clipboard at once (Ctrl+V in a chat attaches them all).
 $('copyall').onclick = function () {
   api('/api/copyall', {}).then(function (x) {
-    var b = $('copyallT');
-    b.textContent = x.ok ? (LANG === 'ru' ? 'Скопировано: ' + x.n : 'Copied ' + x.n + ' files') : T("Couldn't copy");
-    setTimeout(function () { b.textContent = T('Copy all files'); }, 1800);
+    // Said on the button itself, the way a row's copy button says it: a tick, and the hint.
+    var b = $('copyall');
+    b.innerHTML = x.ok ? ICON.check : ICON.copy;
+    b.dataset.tip = x.ok ? (LANG === 'ru' ? 'Скопировано: ' + x.n : 'Copied ' + x.n + ' files') : "Couldn't copy";
+    setTimeout(function () { b.innerHTML = ICON.copy; b.dataset.tip = 'Copy all files'; }, 1800);
   });
 };
 // A short message (Clear finished, a new downloads folder): in ТЯГА's window a snackbar over
@@ -1773,10 +1785,13 @@ $('copyall').onclick = function () {
 // the options, with "Undo · 7" counting down and a line draining under it: the window grew and
 // shrank around it, and it hung there 8 s. The owner: it looked bad.)
 var noticeTimer = 0, NOTICE_MS = 6000;
-function notice(text, undo) {
+function notice(text, undo, icon) {
   var n = $('notice');
   clearTimeout(noticeTimer);
   if (APP && n.parentNode !== document.body) document.body.append(n); // over everything, not inside a card
+  var ni = n.querySelector('.ni') || n.insertBefore(el('i', 'ni'), n.firstChild);
+  ni.className = 'ni ' + (icon || ''); ni.innerHTML = icon === 'folder' ? ICON.folder : '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>';
+  ni.hidden = !icon;
   $('noticeT').textContent = text;
   $('noticeB').hidden = !undo;
   setText($('noticeBT'), T('Undo'));
