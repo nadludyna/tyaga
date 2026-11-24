@@ -63,13 +63,13 @@ func TestUnpackedYtdlp(t *testing.T) {
 	read := func(p string) string { b, _ := os.ReadFile(p); return string(b) }
 
 	// The first start: installed; the one-file yt-dlp.exe of before goes.
-	os.WriteFile(filepath.Join(binDir, exeName("yt-dlp")), []byte("old one-file"), 0o755)
+	os.WriteFile(filepath.Join(binDir, "yt-dlp.exe"), []byte("old one-file"), 0o755)
 	release("1")
 	exe, err := setupUnpackedYtdlp("yt-dlp_win.zip")
 	if err != nil || read(exe) != "exe 1" || read(filepath.Join(ytdlpDir(), "_internal", "base_library.zip")) != "lib 1" {
 		t.Fatalf("not installed: %v, %q", err, read(exe))
 	}
-	if fileExists(filepath.Join(binDir, exeName("yt-dlp"))) {
+	if fileExists(filepath.Join(binDir, "yt-dlp.exe")) {
 		t.Error("the old one-file yt-dlp should be gone")
 	}
 	// The next start, no new release: nothing downloaded.

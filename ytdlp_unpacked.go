@@ -116,7 +116,7 @@ func setupUnpackedYtdlp(zipName string) (string, error) {
 	}
 	os.RemoveAll(old)
 	// The one-file yt-dlp.exe ТЯГА used to keep in bin isn't needed any more.
-	os.Remove(filepath.Join(binDir, exeName("yt-dlp")))
+	os.Remove(filepath.Join(binDir, "yt-dlp.exe")) // (Windows only: the unpacked build is Windows's)
 	if have {
 		logf("yt-dlp updated")
 	} else {
