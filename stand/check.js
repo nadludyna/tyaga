@@ -63,11 +63,11 @@
         getComputedStyle(form, '::before').display === 'none') bad.push('the sky is hidden though there is room for it');
     // 0d. The water under the list fades out at both ends instead of being cut by the card's round
     // corners (the owner: the reeds and the float were cut off).
-    var jc = document.querySelector('html.app #jobsCard:not(.folded)');
-    if (jc && seen(jc)) {
+    [document.querySelector('html.app #jobsCard:not(.folded)'), document.querySelector('html.app body.solo .card.form')].forEach(function (jc) {
+      if (!jc || !seen(jc)) return;
       var ws = getComputedStyle(jc, '::after');
-      if (ws.display !== 'none' && (ws.maskImage || ws.webkitMaskImage || 'none') === 'none') bad.push('the water under the list has hard ends (no fade): the corners cut it');
-    }
+      if (ws.display !== 'none' && ws.content !== 'none' && (ws.maskImage || ws.webkitMaskImage || 'none') === 'none') bad.push('the water at the bottom of ' + name(jc) + ' has hard ends (no fade): the corners cut it');
+    });
     // 1. Labels in the middle.
     document.querySelectorAll('button,.chip,.seg button').forEach(function (b) {
       if (!seen(b)) return;

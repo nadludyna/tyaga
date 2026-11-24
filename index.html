@@ -412,7 +412,7 @@ html.app .menu{background:var(--card)}
 .pvt{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pvf{font-size:12.5px;color:var(--dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .pvi.looking .pvf{animation:breathe2 1.6s ease-in-out infinite}
-.pvmore{padding-left:2px}
+html.app .pv{overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;margin-right:-17px;padding-right:7px}
 .pvc{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .pvc .chip{flex:none;height:28px;padding:0 12px 0 30px;font-size:12.5px}
 .pvc .chip::before{left:8px}
@@ -735,8 +735,8 @@ html.app .card.form:has(+#jobsCard:not([hidden])){padding-bottom:14px}
 /* Switching the language: every word slides in (no fading out the whole window first). */
 html.lang-swap :is([data-t],#goT,#qualT,#fmtT,#cutT,#dest>span,#lsum,.kind,.nums,.st,.pvf,.pvch span,.ovr){animation:langin .18s cubic-bezier(.2,.8,.2,1) both}
 @keyframes langin{from{opacity:0;transform:translateY(5px)}}
-/* Still decorations on the water at the window's bottom: reeds, a float, a few fish, bubbles. */
-html.app body.solo .card.form::after{height:86px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='86' viewBox='0 0 640 86'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M0 62c22-8 44-8 66 0s44 8 66 0 44-8 66 0 44 8 66 0 44-8 66 0 44 8 66 0 44-8 66 0 44 8 66 0 44-8 66 0 44 8 50 2' stroke-opacity='.18' stroke-width='1.5'/%3E%3Cpath d='M30 76c26-7 52-7 78 0s52 7 78 0 52-7 78 0 52 7 78 0 52-7 78 0 52 7 78 0 52-7 78 0' stroke-opacity='.11' stroke-width='1.5'/%3E%3Cg stroke-opacity='.29' stroke-width='1.6' transform='translate(0 22)'%3E%3Cpath d='M18 86V40M28 86V28M38 86V46M24 60c-6-6-8-14-6-22M34 64c5-6 9-12 9-20'/%3E%3Crect x='25' y='14' width='6' height='16' rx='3' fill='%23ff6b2c' fill-opacity='.22'/%3E%3C/g%3E%3Cg stroke-opacity='.32' stroke-width='1.5'%3E%3Cpath d='M560 0v40' stroke-dasharray='2 4'/%3E%3Cpath d='M560 40v-6M553 54a7 7 0 0 0 14 0z' /%3E%3Cpath d='M553 54a7 7 0 0 1 14 0' fill='%23ff6b2c' fill-opacity='.45'/%3E%3Cpath d='M546 62c6 3 22 3 28 0' stroke-opacity='.22'/%3E%3C/g%3E%3Cg fill='%23ff6b2c' fill-opacity='.16' stroke='none'%3E%3Cpath d='M210 74c6-6 16-6 22 0-6 6-16 6-22 0zm-8-5 8 5-8 5z'/%3E%3Cpath d='M400 80c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z'/%3E%3Cpath d='M470 70c4-4 10-4 14 0-4 4-10 4-14 0zm-5-3 5 3-5 3z' fill-opacity='.13'/%3E%3C/g%3E%3Cg stroke-opacity='.22' stroke-width='1.2'%3E%3Ccircle cx='244' cy='64' r='2.2'/%3E%3Ccircle cx='250' cy='55' r='1.6'/%3E%3Ccircle cx='428' cy='70' r='1.8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat center bottom/640px 86px}
+/* The empty window (no downloads yet): the same water as under the list, at the first card's bottom. */
+html.app body.solo .card.form::after{height:34px;bottom:4px;border-radius:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='30' viewBox='0 0 34 30'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='.29' stroke-width='1.6'%3E%3Cpath d='M8 27V15M16 27V10M24 27V17'/%3E%3Crect x='13' y='1' width='6' height='12' rx='3' fill='%23ff6b2c' fill-opacity='.22'/%3E%3C/g%3E%3Cpath d='M16 27c-5-4-9-6-13-6' stroke-opacity='.2' stroke-width='1.3'/%3E%3C/g%3E%3C/svg%3E") left 22px bottom 0/34px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='.32' stroke-width='1.5'%3E%3Cpath d='M8 15a7 7 0 0 0 14 0z'/%3E%3Cpath d='M8 15a7 7 0 0 1 14 0' fill='%23ff6b2c' fill-opacity='.45'/%3E%3Cpath d='M1 23c6 3 22 3 28 0' stroke-opacity='.22'/%3E%3C/g%3E%3C/svg%3E") right 26px bottom 0/30px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='30' viewBox='0 0 200 30'%3E%3Cg fill='%23ff6b2c' fill-opacity='.16'%3E%3Cpath d='M16 22c6-6 16-6 22 0-6 6-16 6-22 0zm-8-5 8 5-8 5z'/%3E%3Cpath d='M150 25c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z'/%3E%3C/g%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='.22' stroke-width='1.2'%3E%3Ccircle cx='50' cy='13' r='2.2'/%3E%3Ccircle cx='57' cy='8' r='1.5'/%3E%3Ccircle cx='178' cy='17' r='1.8'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/200px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='30' viewBox='0 0 132 30'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='.18'/%3E%3Cpath d='M-33 25c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='.11'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 30px repeat-x;-webkit-mask:linear-gradient(90deg,transparent 4px,#000 26px,#000 calc(100% - 26px),transparent calc(100% - 4px));mask:linear-gradient(90deg,transparent 4px,#000 26px,#000 calc(100% - 26px),transparent calc(100% - 4px))}
 /* Under the downloads, the water: waves that fade out at both ends, the reeds at the left and the
    float at the right clear of the round corners, two fish in the middle; nothing touches the card's
    edge (the owner: the old one, wider than the card, was cut off at both corners). */
@@ -749,6 +749,9 @@ html.app #jobsCard::after{height:34px;bottom:4px;border-radius:0;background:url(
 html.app .lchev{position:relative;left:11px}
 .ibtn.fold{color:var(--folder)}
 .ibtn.fold:hover{color:var(--folder)}
+/* The previews end above the water at the first card's bottom (the fourth one peeking out of the
+   scrolling box ran into the waves). */
+html.app body.solo .pv{margin-bottom:20px}
 </style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
   <button class="logob" id="acct" type="button" aria-label="YouTube account"><svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
@@ -1166,7 +1169,7 @@ function renderPv() {
   // Looked up once the box is still for a moment: typing a link by hand doesn't look up every half of it.
   clearTimeout(lookT);
   if (links.some(function (l) { return !facts[l]; })) lookT = setTimeout(function () { linksIn($('links').value).forEach(look); }, 400);
-  links.slice(0, 6).forEach(function (link, i) {
+  links.forEach(function (link, i) {
     var f = facts[link] || { looking: true }, o = plan(link), r = pvRows[link];
     seen[link] = 1;
     if (!r) {
@@ -1191,7 +1194,8 @@ function renderPv() {
     r.durT = o.kind !== 'list' && f.duration ? clockOf(f.duration) : '';
     var di = r.pic.querySelector('i');
     if (r.durT && r.pic.querySelector('img')) { if (!di) r.pic.append(di = el('i')); setText(di, r.durT); } else if (di) di.remove();
-    r.ch.innerHTML = f.channel && o.kind !== 'list' ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.3-3.5 4.3-5 8-5s6.7 1.5 8 5"/></svg>' : '';
+    // The channel's name alone: a grey person in front of it read as a missing picture (the owner).
+    r.ch.innerHTML = '';
     if (f.channel && o.kind !== 'list') r.ch.append(el('span', '', f.channel));
     r.ch.hidden = !r.ch.firstChild;
     setText(r.t, o.kind === 'list' ? (f.listTitle || link) : (f.title || link.replace(/^https?:\/\/(www\.)?/, '')));
@@ -1229,12 +1233,17 @@ function renderPv() {
     r.c.style.minHeight = !r.c.firstChild && !r.c.hidden ? '28px' : '';
   });
   Object.keys(pvRows).forEach(function (l) { if (!seen[l]) { pvRows[l].el.remove(); delete pvRows[l]; } });
-  var more = $('pvMore') || el('div', 'pvf pvmore');
-  more.id = 'pvMore';
-  more.textContent = links.length > 6 ? tr('and ' + (links.length - 6) + ' more', 'и ещё ' + (links.length - 6)) : '';
-  if (links.length > 6) box.append(more); else more.remove();
   box.hidden = !links.length;
+  capPv();
   $('empty').hidden = !!links.length || !document.body.classList.contains('solo');
+}
+// Three previews in sight at most and the top of the fourth, so it's plain there are more: the
+// rest scroll inside the box (the owner: ten links made the window as tall as the screen, and
+// "and 4 more" hid them). Every link gets its preview, scrolled to.
+function capPv() {
+  var box = $('pv'), it = box.querySelectorAll('.pvi');
+  var cap = it.length > 3 && !box.hidden ? Math.ceil(it[2].offsetTop + it[2].offsetHeight - it[0].offsetTop + 30) + 'px' : '';
+  if (box.style.maxHeight !== cap) { box.style.maxHeight = cap; fitLater(); }
 }
 // The drop-downs follow the links: a fragment is for one video; the qualities are the ones
 // that video has (the rest hidden).
