@@ -155,7 +155,7 @@ async function paste(pg, text) {
     // Pixel by pixel, in the browser (no image library needed); a diff image for each that differs.
     const cmp = await (await browser.newContext()).newPage();
     let differ = 0;
-    for (const f of fs.readdirSync(before).filter(f => f.endsWith('.png'))) {
+    for (const f of fs.readdirSync(before).filter(f => f.endsWith('.png') && !f.endsWith('.diff.png'))) {
       const a = path.join(before, f), b = path.join(dir, f);
       if (!fs.existsSync(b)) { console.log(`MISSING ${f}`); differ++; continue; }
       if (fs.readFileSync(a).equals(fs.readFileSync(b))) continue;

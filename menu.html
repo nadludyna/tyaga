@@ -8,10 +8,10 @@
    menu, in the same look as the main window: on top what's going on (the download now, how
    far, how many are left), then the actions with the same coloured icons as in the window.
    The window is transparent; the card is the menu. */
-:root{color-scheme:dark;--card:#1a1a1c;--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--hover:rgba(255,255,255,.07);--acc:#ff6b2c;--err:#ff6b6b;--ok:#51cf66;--folder:#f0b44c;--info:#79b0ff}
+:root{color-scheme:dark;--card:#1a1a1c;--fg:#eee;--dim:#8a8a8a;--line:rgba(255,255,255,.08);--hover:rgba(255,255,255,.07);--acc:#ff6b2c;--err:#ff6b6b;--folder:#f0b44c;--info:#79b0ff}
 /* The theme the main window's button picked (data-theme), else Windows' own. */
-:root[data-theme=light]{color-scheme:light;--card:#fff;--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--hover:rgba(0,0,0,.05);--acc:#e8590c;--err:#c92a2a;--ok:#2b8a3e;--folder:#c48412;--info:#2f6fd1}
-@media (prefers-color-scheme:light){:root:not([data-theme=dark]){color-scheme:light;--card:#fff;--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--hover:rgba(0,0,0,.05);--acc:#e8590c;--err:#c92a2a;--ok:#2b8a3e;--folder:#c48412;--info:#2f6fd1}}
+:root[data-theme=light]{color-scheme:light;--card:#fff;--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--hover:rgba(0,0,0,.05);--acc:#e8590c;--err:#c92a2a;--folder:#c48412;--info:#2f6fd1}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]){color-scheme:light;--card:#fff;--fg:#1b1b1b;--dim:#6f6f6f;--line:rgba(0,0,0,.09);--hover:rgba(0,0,0,.05);--acc:#e8590c;--err:#c92a2a;--folder:#c48412;--info:#2f6fd1}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;height:100%;background:transparent;overflow:hidden;-webkit-user-select:none;user-select:none;cursor:default}
@@ -34,13 +34,12 @@ body{font:13px/1.3 Onest,system-ui,sans-serif;color:var(--fg);padding:8px;displa
 button{position:relative;z-index:1;display:flex;align-items:center;gap:10px;width:100%;height:30px;padding:0 9px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;font-weight:500;text-align:left;cursor:default;transition:background .12s ease,color .12s ease,transform .1s ease}
 button:hover,button:focus-visible{background:var(--hover);outline:none}
 button:active{transform:scale(.98)}
-button svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-button>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* The words sit in the middle by the letters themselves, like in the main window. */
-button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em} /* room for the tails of у, р, g where a label is cut with "…" */
+button svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:filter .12s ease}
+/* The words sit in the middle by the letters themselves, like in the main window; room for the
+   tails of у, р, g where a label is cut with "…". */
+button>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
 /* Each action its own colour, the same as in the main window: it says at a glance which is which
    (the owner: one quiet colour made them harder to tell apart, and duller). */
-button svg{transition:filter .12s ease}
 #open svg{color:var(--acc)}#folder svg{color:var(--folder)}#pick svg{color:var(--info)}.quit svg{color:var(--dim)}
 button:hover svg,button:focus-visible svg{filter:brightness(1.15)}
 .sep{height:1px;background:var(--line);margin:3px 6px}
@@ -66,7 +65,7 @@ html.off .menu{opacity:0;animation:none;transition:opacity .08s ease}
   <div class="items">
     <div class="now" id="now"><span id="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 7.5 6.8 12l-4.3 4.5z" fill="currentColor"/><ellipse cx="13.6" cy="12" rx="8.4" ry="7" fill="currentColor"/><path d="M11.4 9v6l4.8-3z" fill="var(--card)"/><circle cx="18.4" cy="9.8" r="1" fill="var(--card)"/></svg></span><div class="nt"><b id="nt">&nbsp;</b><span id="ns">&nbsp;</span></div><div class="bar"><i id="nb"></i></div></div>
     <button id="open"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg><span data-t="Open ТЯГА">Open ТЯГА</span></button>
-    <button id="folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="folderT">Open the downloads folder</span></button>
+    <button id="folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open the downloads folder">Open the downloads folder</span></button>
     <button id="pick"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change the folder…">Change the folder…</span></button>
     <div class="sep"></div>
     <button id="quit" class="quit"><svg viewBox="0 0 24 24"><path d="M12 3v8M7 6a8 8 0 1 0 10 0"/></svg><span data-t="Quit ТЯГА">Quit ТЯГА</span></button>
@@ -80,7 +79,7 @@ html.off .menu{opacity:0;animation:none;transition:opacity .08s ease}
 var TOKEN = new URLSearchParams(location.search).get('t'), busy = false;
 function $(id) { return document.getElementById(id); }
 // The language the main window's button picked (tyaga-lang), else Windows' own.
-var RU = { 'Open ТЯГА': 'Открыть ТЯГУ', 'Change the folder…': 'Сменить папку…',
+var RU = { 'Open the downloads folder': 'Открыть папку загрузок', 'Open ТЯГА': 'Открыть ТЯГУ', 'Change the folder…': 'Сменить папку…',
   'Quit ТЯГА': 'Выйти из ТЯГИ', 'Something is still downloading.': 'Ещё что-то качается.',
   'Quit anyway? Unfinished downloads stay in the list for next time.': 'Всё равно выйти? Недокачанное останется в списке до следующего раза.',
   'Keep going': 'Пусть качает', 'Quit': 'Выйти' }, ru = false;
@@ -91,7 +90,7 @@ function langNow() {
 }
 function tray(text) {
   return fetch('/api/tray', { method: 'POST', headers: { 'x-token': TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ text: text }) })
-    .then(function (r) { return r.json(); });
+    .then(function (r) { return r.json(); }, function () { return {}; });
 }
 // What's going on now: the download, how far it is, how many are left after it.
 function showNow(s) {
@@ -106,8 +105,6 @@ function showNow(s) {
     : s.std ? (ru ? 'Папки: Музыка и Видео' : 'Folders: Music and Videos')
     : (s.folder ? (ru ? 'Папка: ' + s.folder : 'Folder: ' + s.folder) : '');
   $('nb').style.width = busy ? p + '%' : '0';
-  // (the folder's name is in the line above: here it made the label too long for the menu)
-  $('folderT').textContent = ru ? 'Открыть папку загрузок' : 'Open the downloads folder';
   $('pick').hidden = s.canPick === false;
 }
 // Every time the menu shows: what's going on now, and the plain menu (not the question).
