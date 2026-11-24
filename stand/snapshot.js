@@ -58,8 +58,17 @@ async function page(browser, look, jobs) {
   await sleep(1500);
   return { ctx, pg, errs, setJobs: j => { current = j; } };
 }
+// Settled: no blinking caret, every picture loaded, nothing mid-animation.
+async function still(pg) {
+  await pg.evaluate(() => { if (!document.getElementById('snapstill')) { const st = document.createElement('style'); st.id = 'snapstill'; st.textContent = '*{caret-color:transparent!important}'; document.head.append(st); } });
+  await pg.waitForFunction(() => [...document.images].every(i => i.complete), null, { timeout: 5000 }).catch(() => {});
+  await sleep(250);
+  await pg.evaluate(() => document.getAnimations().forEach(a => { try { if (a.effect && a.effect.getTiming().iterations !== Infinity) a.finish(); } catch (e) {} }));
+  await sleep(150);
+}
 async function shot(pg, name) {
   await sleep(700); // a state poll and its pictures
+  await still(pg);
   await pg.evaluate(() => document.getAnimations().forEach(a => { try { if (a.effect && a.effect.getTiming().iterations !== Infinity) a.finish(); } catch (e) {} }));
   await sleep(150);
   const h = await pg.evaluate(() => { const cs = [...document.querySelectorAll('main > .card')].filter(c => !c.hidden && c.offsetHeight); const flys = [...document.querySelectorAll('.fly:not([hidden])')]; return Math.ceil(Math.max(...cs.map(c => c.getBoundingClientRect().bottom), ...flys.map(f => f.getBoundingClientRect().bottom)) + 16); });
@@ -119,7 +128,7 @@ async function paste(pg, text) {
         const e = await s.pg.$(sel);
         if (!e || !(await e.isVisible())) { console.log(`(no ${n} to hover: ${sel})`); continue; }
         const b = await e.boundingBox();
-        await s.pg.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await sleep(350);
+        await s.pg.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await sleep(500); await still(s.pg);
         await s.pg.screenshot({ path: path.join(dir, `${tag}-h-${n}.png`), clip: { x: Math.max(0, b.x - 5), y: Math.max(0, b.y - 5), width: Math.min(b.width + 10, look.w - Math.max(0, b.x - 5)), height: b.height + 10 } });
         await s.pg.mouse.move(1, 1); await sleep(200);
       }

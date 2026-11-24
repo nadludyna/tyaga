@@ -21,8 +21,7 @@ body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.
 /* An app, not a document: Ctrl+A or a stray click doesn't paint the buttons and labels blue.
    What's worth copying stays selectable: the links box, download titles, errors and the log. */
 body{-webkit-user-select:none;user-select:none}
-textarea,.name,.sub,.log{-webkit-user-select:text;user-select:text}
-
+textarea,.name,.sub{-webkit-user-select:text;user-select:text}
 /* Background: a faint glow at the top (the browser page; ТЯГА's window has it in its first card). */
 .bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 80% 50% at 50% -10%,var(--glow),transparent 70%)}
 /* A download finished: the fish jumps on the hook. */
@@ -34,7 +33,6 @@ body.caught .logo .catch{animation:jump .9s cubic-bezier(.3,1.5,.5,1)}
 .job.just{isolation:isolate}
 .job.just::before{content:"";position:absolute;inset:1px -7px;z-index:-1;border-radius:10px;pointer-events:none;background:color-mix(in srgb,var(--ok) 13%,transparent);box-shadow:inset 0 0 16px color-mix(in srgb,var(--ok) 22%,transparent);animation:glow 1.7s ease both}
 @keyframes glow{0%{opacity:0}15%{opacity:1}45%{opacity:1}100%{opacity:0}}
-
 main{max-width:760px;margin:0 auto;padding:56px 18px 40px}
 header{display:flex;align-items:center;gap:16px;margin:0 0 26px;animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .logo{width:58px;height:58px;flex:none;border-radius:15px;box-shadow:0 10px 30px -8px var(--glow),0 0 0 1px var(--line);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
@@ -47,22 +45,16 @@ h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;
 /* The name with its version above it and the motto beside it. */
 .title{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0}
 .title small{font-size:11px;line-height:1.1;color:var(--dim);letter-spacing:.02em;font-variant-numeric:tabular-nums}
-.brand{display:flex;align-items:baseline;gap:14px;min-width:0}
 .motto{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--tonal);white-space:nowrap;min-width:0;overflow:hidden}
-.motto>span{overflow:hidden;text-overflow:ellipsis}
 /* The motto hangs on a little fishing line: a wave that ends in a hook (it bobs when the logo
    or the motto is under the mouse; still otherwise). */
-.motto svg{width:30px;height:13px;flex:none;fill:none;stroke:var(--acc);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
-.motto .mh{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
-header:has(.logob:hover,.motto:hover) .motto .mh{transform:translateY(2px)}
-
 .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 50px -30px rgba(0,0,0,.6);animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .card+.card{margin-top:16px}
-main>.card:nth-of-type(2){animation-delay:.08s}main>.card:nth-of-type(3){animation-delay:.16s}
+main>.card:nth-of-type(2){animation-delay:.08s}
+main>.card:nth-of-type(3){animation-delay:.16s}
 @keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 .note{border-color:var(--acc);font-size:14px;white-space:pre-line}
 .note.err{border-color:var(--err);color:var(--err)}
-
 textarea{width:100%;min-height:90px;resize:vertical;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;outline:none;transition:border-color .1s,box-shadow .1s,background .1s}
 body.drop textarea{border-color:var(--acc);border-style:dashed;box-shadow:0 0 0 4px var(--glow)}
 textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--glow);background:transparent}
@@ -82,32 +74,20 @@ label:hover{color:var(--fg)}
 .opts{display:grid;grid-template-columns:1fr 2fr;gap:8px}
 .opts .seg{display:flex}
 .opts .seg button{flex:1;padding-left:6px;padding-right:6px}
-.chips{display:flex;gap:8px}
-.chips>.chip{flex:1 1 0}
 /* "Whole playlist" is there only for a link to a video inside a playlist: it opens out of
    nothing at the left and the others make room (and close up again when it goes). */
-.chips>.chip{transition:flex-grow .3s cubic-bezier(.2,.8,.2,1),padding .3s cubic-bezier(.2,.8,.2,1),margin .3s cubic-bezier(.2,.8,.2,1),border-width .3s,opacity .2s ease,border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
-.chips>.chip.away{flex-grow:0;padding-left:0;padding-right:0;border-width:0;margin-right:-8px;opacity:0;pointer-events:none}
-.chips.calm>.chip{transition:none}
-@media (max-width:560px){.opts{grid-template-columns:1fr}.chips{display:grid;grid-auto-flow:row;grid-template-columns:1fr 1fr}.foot .btn.clear{margin-left:0}}
+@media (max-width:560px){.opts{grid-template-columns:1fr}}
 @media (max-width:430px){.motto{display:none}}
 .chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 28px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .08s ease,background .08s ease,color .08s ease,transform .06s ease}
 .chip:hover{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.1)}
 /* Filter chips like Material 3: no checkbox square, a check mark when on. Its place is always
    kept (and balanced on the right), so the words never move when it's ticked. */
 .chip{position:relative}
-.chip input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
 .chip::before{content:"";position:absolute;left:9px;top:50%;margin-top:-9px;width:18px;height:18px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.4);transition:opacity .08s ease,transform .1s cubic-bezier(.2,.8,.2,1)}
-.chip:has(input:checked)::before{opacity:1;transform:none}
-.chip:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:2px}
 .chip:active{transform:scale(.97)}
-.chip:has(input:checked){border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
-.chip:has(input:disabled){opacity:.38;cursor:default;border-color:var(--line);background:transparent;color:var(--dim)}
-.cutrow:has(.times[hidden]){display:none}
-.cutrow{justify-content:center}
 .input{display:flex;gap:12px;align-items:stretch}
 .input textarea{flex:1}
-@media (max-width:560px){.input{flex-direction:column}.input .go{flex-direction:row;padding:12px}.chips>.chip.away{display:none}}
+@media (max-width:560px){.input{flex-direction:column}.input .go{flex-direction:row;padding:12px}}
 /* Every button answers the same calm way: a little lighter under the mouse, a little smaller
    while pressed. No jumps, no flashes. */
 .go{flex:none;min-width:132px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:filter .08s ease,transform .06s ease}
@@ -116,26 +96,15 @@ label:hover{color:var(--fg)}
 .go .goi{width:24px;height:24px;flex:none;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
 .go .goi .ga{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
 .go:hover .goi .ga{transform:translateY(2.5px)}
-.go b{position:absolute;top:8px;right:8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;display:grid;place-items:center;background:#1a0c04;color:var(--acc2);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;animation:pop2 .3s cubic-bezier(.3,1.6,.5,1) both}
 @keyframes pop2{from{transform:scale(.3);opacity:0}}
 .go:active{transform:scale(.97);filter:brightness(.95)}
 .msg{color:var(--err);margin-top:8px;font-size:14px}
 .msg:empty{margin:0}
 /* A short note about what a click just did, with a way back (Undo), like Material 3's
    snackbar: under the options, fades in, goes away by itself. */
-.notice{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13.5px;color:var(--dim);animation:fadein .2s ease both;transition:opacity .2s ease}
-.notice.out{opacity:0}
 /* It comes and goes as one: it fades and its place opens or folds with it, so what's under it
    glides instead of jumping (the owner: Clear finished's note vanished, then the list jumped up). */
-.notice{transition:opacity .2s ease,height .3s cubic-bezier(.2,.8,.2,1),margin-top .3s cubic-bezier(.2,.8,.2,1),padding-bottom .3s cubic-bezier(.2,.8,.2,1)}
-.notice.out{margin-top:0;padding-bottom:0}
-.notice span{flex:1;min-width:0}
-.notice .btn{height:28px;padding:0 12px;font-variant-numeric:tabular-nums}
-.notice{position:relative;padding-bottom:8px;box-sizing:border-box} /* its height, set while it opens or folds, includes this padding */
-.ntime{position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--line);overflow:hidden}
-.ntime::after{content:"";position:absolute;inset:0;border-radius:2px;background:var(--acc);opacity:.7;transform-origin:left;animation:drain 8s linear forwards}
-@keyframes drain{to{transform:scaleX(0)}}
-
+/* its height, set while it opens or folds, includes this padding */
 /* One download = one compact row, the way mature downloaders do it (Seal, 4K Video
    Downloader): the picture, then two lines. The title with its state on the right; under it
    what it is, or while it downloads the bar and the numbers. Its buttons sit at the right of
@@ -143,11 +112,13 @@ label:hover{color:var(--fg)}
 .job{display:flex;flex-wrap:wrap;column-gap:12px;row-gap:0;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);border-radius:10px}
 .job:last-child{border-bottom:0}
 .job.grow{overflow:hidden;transition:height .32s cubic-bezier(.2,.8,.2,1),padding .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
-.job .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1} /* over the fishing line's canvas: a jumping fish goes behind the picture, not over it */
+.job .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1}
+/* over the fishing line's canvas: a jumping fish goes behind the picture, not over it */
 /* The picture: the cover that's really in the finished file; before that an icon of what it is
    (no video thumbnail: it's not what ends up in the file). Always the same square, so the
    text never moves; what's in it cross-fades. */
-.side{flex:none;position:relative;z-index:1;width:104px;height:58.5px} /* 16:9; bigger so what downloads is seen (the owner, build 29: it was 72) */
+.side{flex:none;position:relative;z-index:1;width:104px;height:58.5px}
+/* 16:9; bigger so what downloads is seen (the owner, build 29: it was 72) */
 @media (max-width:560px){.side{width:88px;height:49.5px}}
 .side>*{position:absolute;inset:0;width:100%;height:100%;transition:opacity .25s ease}
 .side>.gone{opacity:0!important}
@@ -167,7 +138,11 @@ label:hover{color:var(--fg)}
 .name.link{color:var(--dim)}
 .st{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dim);white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums}
 .st svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.st.running{color:var(--acc)}.st.waiting{color:var(--dim)}.st.done{color:var(--ok)}.st.error{color:var(--err)}.st.cancelled,.st.queued{color:var(--dim)}
+.st.running{color:var(--acc)}
+.st.waiting{color:var(--dim)}
+.st.done{color:var(--ok)}
+.st.error{color:var(--err)}
+.st.cancelled,.st.queued{color:var(--dim)}
 .st.pop{animation:pop .35s ease}
 @keyframes pop{0%{opacity:0}100%{opacity:1}}
 /* Small icon buttons in a row: cancel, copy the file. */
@@ -176,13 +151,14 @@ label:hover{color:var(--fg)}
 .ibtn:hover{background:color-mix(in srgb,var(--fg) 11%,transparent);color:var(--fg)}
 .ibtn:active{transform:scale(.92);background:color-mix(in srgb,var(--fg) 17%,transparent)}
 .ibtn.x:hover{color:var(--err);background:color-mix(in srgb,var(--err) 12%,transparent)}
-.ibtn.acc{color:var(--tonal)}.ibtn.acc:hover{color:var(--tonal);background:color-mix(in srgb,var(--acc) 16%,transparent)} /* Retry: the way out of a failure */
+.ibtn.acc{color:var(--tonal)}
+.ibtn.acc:hover{color:var(--tonal);background:color-mix(in srgb,var(--acc) 16%,transparent)}
+/* Retry: the way out of a failure */
 .ibtn.x{overflow:hidden;transition:width .25s cubic-bezier(.2,.8,.2,1),margin .25s cubic-bezier(.2,.8,.2,1),opacity .15s ease,background .15s,color .15s}
 .ibtn.x.off{width:0;margin:-2px 0 -2px -10px;opacity:0;pointer-events:none}
 .ibtn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .line2{display:flex;align-items:center;gap:8px 10px;min-height:28px;flex-wrap:wrap}
 .kind{flex:1;min-width:0;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kind.err{color:var(--err)}
 /* While it downloads: what's happening ("3 MB of 5 MB · 1.2 MB/s · 0:02 left") and, on the
    right, how far it is all together; the fishing line full width under the row. */
 .nums{flex:1;min-width:0;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
@@ -208,21 +184,16 @@ label:hover{color:var(--fg)}
 .acts .ibtn{margin:0}
 .sub{font-size:12px;color:var(--dim);word-break:break-word}
 .sub.err{color:var(--err)}
-.foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 /* Buttons: soft pills with an icon; the accent one is for the thing you most likely want. */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 13px 0 11px;border:1px solid var(--line2);border-radius:8px;background:color-mix(in srgb,var(--fg) 4%,transparent);color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .08s ease,background .08s ease,color .08s ease,transform .06s ease}
 .btn svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 /* Icons with a meaning get a quiet colour of it: folders, copying; clearing turns red on hover. */
-#open svg{color:var(--folder)}#pick svg{color:var(--info)}.btn.copyall svg{color:var(--ok)}
-.foot .btn.clear{margin-left:auto}
-.btn.clear svg{color:var(--dim)}.btn.clear:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}.btn.clear:hover svg{color:var(--err)}
+#open svg{color:var(--folder)}
+#pick svg{color:var(--info)}
 .btn:hover{border-color:rgba(127,127,127,.4);background:rgba(127,127,127,.14)}
 .btn:active{transform:scale(.97)}
 .btn.acc{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 45%,transparent);background:color-mix(in srgb,var(--acc) 12%,transparent)}
 .btn.acc:hover{background:color-mix(in srgb,var(--acc) 22%,transparent);border-color:var(--acc)}
-.btn.ghost{color:var(--dim)}
-.btn.ghost:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}
-
 .empty{color:var(--dim);text-align:center;padding:26px 0 18px}
 .empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35}
 .times{color:var(--dim);display:inline-flex;gap:6px;align-items:center;animation:rise .3s both}
@@ -236,11 +207,13 @@ label:hover{color:var(--fg)}
 #tip{position:fixed;left:0;top:0;z-index:60;max-width:280px;padding:7px 10px;border-radius:8px;background:#2b2b2e;color:#f1f1f1;box-shadow:0 8px 24px -8px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);font:12.5px/1.45 Onest,system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .08s ease,transform .08s cubic-bezier(.2,.8,.2,1);will-change:transform,opacity}
 #tip.on{opacity:1}
 :root[data-theme=light] #tip{background:#2f2f33}
-.seg{overflow:visible}.seg button:first-child{border-radius:7px 0 0 7px}.seg button:last-child{border-radius:0 7px 7px 0}
-
+.seg{overflow:visible}
+.seg button:first-child{border-radius:7px 0 0 7px}
+.seg button:last-child{border-radius:0 7px 7px 0}
 /* Signing in to YouTube (ТЯГА's own window on Windows): one button on the right of the header.
    It keeps one width whatever it says, so nothing next to it moves. */
-header{position:relative;z-index:5} /* above the options row: the folder menu hangs over it */
+header{position:relative;z-index:5}
+/* above the options row: the folder menu hangs over it */
 /* The YouTube account lives in the logo: a little badge in its corner says whether ТЯГА
    downloads as you (green tick), isn't signed in (grey person), is waiting for the sign-in
    window (orange, breathing) or asks "sign out?" (red cross); the hint says it in words. */
@@ -256,7 +229,6 @@ header{position:relative;z-index:5} /* above the options row: the folder menu ha
 .logob.wait .badge{background:var(--acc);color:#1a0c04;animation:breathe2 1.6s ease-in-out infinite}
 .logob:hover .badge{transform:scale(1.12)}
 @keyframes breathe2{0%,100%{opacity:.8}50%{opacity:.3}}
-
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 /* In ТЯГА's own window (Windows) the window is the cards themselves: no frame, no background,
    the desktop shows around them. The logo and the window buttons sit in the first card; its top
@@ -275,7 +247,8 @@ html.app .card{flex:none;app-region:no-drag;-webkit-app-region:no-drag;--wails-d
    a hairline between them; the outer corners stay round. With no list, the first card is whole. */
 html.app .card+.card{margin-top:0}
 html.app .card.form{transition:border-radius .2s ease}
-html.app .card.form:has(+#jobsCard:not([hidden])){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent;clip-path:inset(-40px -40px 0 -40px)} /* its shadow would fall on the list */
+html.app .card.form:has(+#jobsCard:not([hidden])){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent;clip-path:inset(-40px -40px 0 -40px)}
+/* its shadow would fall on the list */
 html.app #jobsCard{border-top-left-radius:0;border-top-right-radius:0}
 html.app .card.form{background:radial-gradient(ellipse 70% 90% at 12% -30%,var(--glow),transparent 65%),var(--card)}
 html.app header{margin:-4px -6px 16px 0;animation:none;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
@@ -295,10 +268,8 @@ html.app .wbtns{display:flex;gap:2px;margin-left:auto;align-self:flex-start}
 .tbtn.moon .body{transform:scale(1.35)}
 .tbtn.moon .bite{transform:translate(-5px,5px)}
 .tbtn.moon .rays{transform:rotate(-90deg) scale(.4);opacity:0}
-html.app .tbtn+.wbtns{margin-left:6px}
 /* Language and theme sit next to the window buttons, a hairline and a gap away from them:
    close enough to belong to the window's corner, far enough not to hit "close" by mistake. */
-html.app .wbtns::before{content:"";width:1px;height:16px;margin:7px 6px 0 0;background:var(--line2)}
 /* Switching the theme: the new one spreads in a circle from the button (the View Transitions
    API: one snapshot, then the graphics card animates it). */
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
@@ -318,7 +289,8 @@ html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column
 html.app #jobsCard:not(.folded){min-height:180px}
 html.app #jobsCard:not(.folded) #list{flex-grow:1}
 html.app #jobsCard>*{position:relative;z-index:1}
-html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding:0 7px 30px;margin-left:-7px;margin-right:-17px} /* room for the water under the last row (44 px tall: build 47), and for a row's glow, both sides */
+html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding:0 7px 30px;margin-left:-7px;margin-right:-17px}
+/* room for the water under the last row (44 px tall: build 47), and for a row's glow, both sides */
 html.app .bg{display:none}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
@@ -326,14 +298,12 @@ html.app .bg{display:none}
 /* The list header is a plain line: what is going on. Folding is the arrow on the right (the line
    itself used to fold the list too, and lit up under the mouse like a button). */
 html.app .lhead{display:flex;align-items:center;gap:10px;width:100%;flex:none;margin:0;padding:2px 0;color:var(--dim);font-size:13.5px;text-align:left;user-select:none;-webkit-user-select:none}
-
 .lhead #lsum{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.lhead .bad{color:var(--err)}.lhead .good{color:var(--ok)}
-.lhead svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
-html.app #jobsCard.folded .lhead svg{transform:rotate(180deg)}
+.lhead .bad{color:var(--err)}
+.lhead .good{color:var(--ok)}
 html.app #jobsCard.folded{flex:none}
-html.app #jobsCard #list,html.app #jobsCard .foot{transition:opacity .2s}
-html.app #jobsCard.folded #list,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+html.app #jobsCard #list{transition:opacity .2s}
+html.app #jobsCard.folded #list{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
 html.app #jobsCard.anim{transition:height .25s cubic-bezier(.2,.8,.2,1)}
 /* Comes in: the card itself is solid at once (a see-through card showed the desktop through the
    window for a moment: "the bottom vanishes and comes back"); only what's in it fades in. */
@@ -344,12 +314,10 @@ html.app #jobsCard.leave{height:0!important;padding-top:0;padding-bottom:0;margi
 /* A row that leaves the list (Clear finished) folds up and fades, the rows below slide up. */
 .job.bye{overflow:hidden;opacity:0;transition:height .26s cubic-bezier(.4,0,.2,1),padding .26s cubic-bezier(.4,0,.2,1),margin .26s cubic-bezier(.4,0,.2,1),opacity .18s ease;height:0!important;padding-top:0!important;padding-bottom:0!important;margin-top:0!important;margin-bottom:0!important;border-width:0!important}
 html.app #list{margin-top:10px}
-html.app .fadeout{opacity:0!important;transition:opacity .14s ease}
-html.app #list.fadein{animation:fadein .22s ease both}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
 /* Things that appear because a switch changed (a chip, the format buttons, the Play button,
    a row's buttons or message) fade in instead of popping up. */
-.chips .chip,.opts .seg,.acts .btn,.acts .ibtn,.job .body>.sub,.msg:not(:empty){animation:fadein .2s ease backwards}
+.opts .seg,.acts .btn,.acts .ibtn,.job .body>.sub,.msg:not(:empty){animation:fadein .2s ease backwards}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
 html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
@@ -362,7 +330,6 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 .seg button.on:hover{background:color-mix(in srgb,var(--acc) 30%,transparent)}
 .chip:hover{border-color:color-mix(in srgb,var(--fg) 30%,transparent);background:color-mix(in srgb,var(--fg) 9%,transparent);color:var(--fg)}
 .chip:active{background:color-mix(in srgb,var(--fg) 15%,transparent)}
-.chip:has(input:checked):hover{border-color:transparent;background:color-mix(in srgb,var(--acc) 28%,transparent)}
 .btn:hover{border-color:color-mix(in srgb,var(--fg) 32%,transparent);background:color-mix(in srgb,var(--fg) 11%,transparent)}
 .btn:active{background:color-mix(in srgb,var(--fg) 17%,transparent)}
 .go:hover{filter:brightness(1.1);box-shadow:0 10px 28px -6px var(--glow)}
@@ -371,9 +338,7 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 .tbtn:active,.wbtns button:active{background:color-mix(in srgb,var(--fg) 19%,transparent)}
 .wbtns button.x:hover{background:#c42b1c;color:#fff}
 .wbtns button.x:active{background:#a32317}
-
-
-.seg button:focus-visible,.btn:focus-visible,.go:focus-visible,.tbtn:focus-visible,.wbtns button:focus-visible,.lhead:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.seg button:focus-visible,.btn:focus-visible,.go:focus-visible,.tbtn:focus-visible,.wbtns button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .seg button:focus-visible{outline-offset:-2px}
 .rip{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;background:currentColor;opacity:.22;transform:scale(0);animation:rip .55s cubic-bezier(.2,.8,.2,1) forwards}
 .go .rip{background:#fff;opacity:.45}
@@ -385,11 +350,6 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 .opts .seg{display:inline-flex}
 .opts .seg button{flex:none;padding:0 16px}
 .opts .sp{flex:1}
-.btn.ghost{border-color:transparent;background:transparent;color:var(--dim)}
-.btn.ghost:hover{border-color:transparent;background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}
-.btn.ghost.on{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--tonal)}
-.btn.sm{height:28px;padding:0 10px 0 8px;font-size:12.5px;gap:6px}
-.btn.sm svg{width:15px;height:15px}
 .destw{position:relative;min-width:0}
 .dest{max-width:240px}
 .dest #destT{min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -401,7 +361,8 @@ html.app .menu{background:var(--card)}
 .menu button{display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;text-align:left;cursor:pointer;white-space:nowrap}
 .menu button:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
 .menu svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-#open svg{color:var(--folder)}#pick svg{color:var(--info)}
+#open svg{color:var(--folder)}
+#pick svg{color:var(--info)}
 /* A line per link: picture, title, what's in it, its switches. */
 .pv{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .pvi{display:flex;gap:12px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:10px;animation:fadein .2s ease both}
@@ -418,34 +379,13 @@ html.app .pv{overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable
 .pvc .chip::before{left:8px}
 .chip.on{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 .chip.on::before{opacity:1;transform:none}
-.pvc .chip:not(.on)::before,.morebox .chip:not(:has(input:checked))::before{opacity:.75;transform:none;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.pvc .chip:not(.on)::before{opacity:.75;transform:none;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E")}
 .chip.on:hover{border-color:transparent;background:color-mix(in srgb,var(--acc) 28%,transparent)}
 .pvseg button{height:28px;padding:0 12px;font-size:12.5px}
 /* More: the rest, for all the links. */
-.morew{position:relative}
 /* An open More hangs out of the first card: the card must not clip it (it clips its shadow off the list). */
-
-.morew{display:flex;align-items:center;gap:8px;min-width:0}
-.morebox{display:flex;align-items:center;gap:8px;animation:morein .2s cubic-bezier(.2,.8,.2,1) both}
-@keyframes morein{from{opacity:0;transform:translateX(-8px)}}
-.morebox>.mrow{display:contents}
 /* While More is open the folder steps aside (it's back when More closes): the row stays one row. */
-.opts:has(.morebox:not([hidden])) .destw{display:none}
-.morew:has(.morebox:not([hidden])) #moreB>span{display:none}
-.morew:has(.morebox:not([hidden])) #moreB{padding:0 9px}
-.morebox .chip{flex:none;padding:0 11px 0 29px}
-.morebox .chip::before{left:9px}
-.morebox .seg button{padding:0 10px}
-.morew,.morebox{gap:6px}
-.mrow{margin-top:0;gap:8px}
-.mrow .chip{flex:none}
-.cutrow{justify-content:flex-start;margin-top:10px}
 /* The times hang under the Fragment chip (placeTimes() lines them up), an arrow pointing at it. */
-.cutrow .times{position:relative;padding:7px 10px;border:1px solid var(--line2);border-radius:10px;background:var(--card);animation:timesin .18s cubic-bezier(.2,.8,.2,1) both}
-.cutrow .times::before{content:"";position:absolute;top:-6px;left:var(--caret,24px);width:10px;height:10px;margin-left:-5px;background:var(--card);border-left:1px solid var(--line2);border-top:1px solid var(--line2);transform:rotate(45deg)}
-.cutrow .times.free::before{display:none}
-@keyframes timesin{from{opacity:0;transform:translateY(-4px)}}
-.morebox .mrow{flex-wrap:wrap}
 /* The list's header: what's going on, the actions for the whole list, the fold arrow. */
 .lbar{display:flex;align-items:center;gap:4px;justify-content:flex-end;margin:0 0 4px}
 html.app .lbar{margin:-4px 0 0}
@@ -455,25 +395,20 @@ html.app .lchev{flex:none;display:grid;place-items:center;width:30px;height:28px
 html.app .lchev:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}
 .lchev svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
 html.app #jobsCard.folded .lchev svg{transform:rotate(180deg)}
-.lbar .btn.clear svg{color:var(--dim)}
-.lbar .btn:not([hidden]){animation:fadein .2s ease}
-.lbar .btn.clear:hover{color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
-.lbar .btn.clear:hover svg{color:var(--err)}
 /* A row: the state is the start of its second line ("Done · Pilotredsky · Audio · M4A"). */
 .line2>.st{flex:none;margin-right:-4px}
 .line2>.st~:is(.kind,.nums):not(:empty)::before{content:"·";margin-right:6px;color:var(--dim)}
-.line2>.st~.kind.err:not(:empty)::before{color:var(--dim)}
 /* Labels sit in the middle of their buttons by the letters themselves, not by the font's
    line box: Onest's box is much taller above the letters than below (13 : 4), so its middle
    was 1.2 px above the icons' middle (1–2 screen pixels at 125 %). */
 button.chip{font-family:inherit}
-.seg button,.notice .btn{text-box:trim-both cap alphabetic}
+.seg button{text-box:trim-both cap alphabetic}
 .btn>span:not(.tw),.btn .tw>span,.chip>span,.go>span,.menu button>span,.tbtn.lang>span,.st,.lhead #lsum{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
 /* (the same room above and below the letters: where a long label is cut with "…", the tails
    of у, р, g stay whole; the middle stays where it was) */
 /* Narrow: More and the list's actions keep only their icons (the hint still says the word),
    so the folder stays on its row and the list's summary isn't cut. */
-@media (max-width:560px){.opts:has(.morebox:not([hidden])){flex-wrap:wrap}.morew{display:contents}.morebox{flex-basis:100%;flex-wrap:wrap}.opts{flex-wrap:nowrap}#moreB>span,.lbar .btn>span{display:none}#moreB,.lbar .btn{padding:0 8px}.destw{flex:0 1 auto}.dest{max-width:100%}.pvp{width:72px;height:40.5px}}
+@media (max-width:560px){.opts{flex-wrap:nowrap}.destw{flex:0 1 auto}.dest{max-width:100%}.pvp{width:72px;height:40.5px}}
 /* ——— The approved layout (22.11) ——— */
 /* The name: solid, the motto small above it; the version is in the logo's hint. */
 html.app header .title{gap:2px}
@@ -491,11 +426,9 @@ h1,html.app header h1{font-size:24px;line-height:1;letter-spacing:.08em;font-wei
 .tbtn.lang{display:grid;place-items:center;margin-left:0}
 .tbtn.lang svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 html.app .hpair+.wbtns{margin-left:10px}
-html.app .wbtns::before{display:none} /* no divider (the owner): a wider gap keeps the two groups apart */
+/* no divider (the owner): a wider gap keeps the two groups apart */
 /* Switching the language: the window cross-fades to the new words (like the theme's circle). */
-html.vt-lang::view-transition-old(root){animation:vtout .08s ease-in both}
-html.vt-lang::view-transition-new(root){animation:fadein .12s ease-out .07s both} /* after the old words are gone: never both at once */
-@keyframes vtout{to{opacity:0}}
+/* after the old words are gone: never both at once */
 #tip{white-space:pre-line}
 /* The links box grows with the links (up to a few lines, then scrolls); Download keeps its size. */
 .input{align-items:flex-start}
@@ -543,7 +476,8 @@ html.app .fly{background:var(--card)}
 @keyframes flyup{from{opacity:0;transform:translateY(4px)}}
 /* A drop-down hanging over the list: the clip opens just where it is (clipFor). */
 .card.form>.opts{position:relative;z-index:3}
-.card.form>.opts{z-index:4} /* its drop-downs hang over the bottom row */
+.card.form>.opts{z-index:4}
+/* its drop-downs hang over the bottom row */
 .qgrid{display:grid;grid-template-columns:repeat(3,76px);gap:4px}
 .qgrid button,.flist button,.menu button{border:0;border-radius:6px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;cursor:pointer;font-variant-numeric:tabular-nums;transition:background .12s ease}
 .qgrid button{height:32px;display:flex;align-items:center;justify-content:center}
@@ -555,7 +489,7 @@ html.app .fly{background:var(--card)}
 .qgrid button:disabled{color:var(--dim);opacity:.45;cursor:default;background:transparent}
 .flist{display:flex;flex-direction:column;gap:2px;width:max-content;max-width:300px}
 .flist button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:8px 10px;text-align:left}
-.flist small,.frow small{font-size:12px;color:var(--dim);font-weight:400}
+.flist small{font-size:12px;color:var(--dim);font-weight:400}
 .flist button.on small{color:inherit;opacity:.8}
 .fh{font-size:12px;color:var(--dim);padding:4px 6px 8px}
 /* Inside the flyout nothing moves on its own: it comes in as one piece, like the other menus
@@ -566,17 +500,8 @@ html.app .fly{background:var(--card)}
 .fly .times input::-webkit-inner-spin-button,.fly .times input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .fly .times i{font-style:normal;margin:0 6px}
 .fly .times b{font-weight:400;margin:0}
-.ffoot{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:8px;padding:8px 6px 2px;border-top:1px solid var(--line);font-size:12px;color:var(--dim);white-space:nowrap}
 .lnk{border:0;background:none;padding:0;color:var(--tonal);font:inherit;font-weight:600;cursor:pointer;text-box:trim-both cap alphabetic}
 .lnk:hover{text-decoration:underline}
-.frow{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;cursor:pointer;width:max-content;max-width:300px;color:var(--fg)}
-.frow:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}
-.frow b{display:block;font-weight:500;margin-bottom:3px}
-.frow input{position:absolute;opacity:0;pointer-events:none}
-.frow .box{flex:none;width:18px;height:18px;margin-top:1px;border-radius:5px;border:1.5px solid var(--line2);display:grid;place-items:center;transition:background .08s,border-color .08s}
-.frow input:checked+.box{background:var(--acc);border-color:var(--acc)}
-.frow input:checked+.box::after{content:"";width:10px;height:6px;border-left:2px solid #1a0c04;border-bottom:2px solid #1a0c04;transform:translateY(-1px) rotate(-45deg)}
-.frow input:focus-visible+.box{outline:2px solid var(--acc);outline-offset:2px}
 .menu{position:absolute;top:calc(100% + 8px);bottom:auto;right:0;left:auto;min-width:180px}
 .menu.up{top:auto;bottom:calc(100% + 8px)}
 /* Under the options: the empty state or the links' preview. While the list is empty it's never
@@ -601,7 +526,8 @@ body.solo .area{min-height:184px;display:flex;flex-direction:column;justify-cont
 html.app .card.form{background:var(--card)}
 .card.form>*{position:relative;z-index:1}
 .card.form>header{z-index:6}
-.card.form>.opts{z-index:7}  /* its drop-downs hang over what is under it, and over the header when they open upwards (a folded list) */
+.card.form>.opts{z-index:7}
+/* its drop-downs hang over what is under it, and over the header when they open upwards (a folded list) */
 html.app body.solo .card.form::after,html.app #jobsCard::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;pointer-events:none;z-index:0;border-radius:0 0 15px 15px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='24'%3E%3Cpath d='M0 12c20-8 40-8 60 0s40 8 60 0 30-6 40-3' fill='none' stroke='%23ff6b2c' stroke-opacity='.14' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 0 100%/160px 24px,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='30'%3E%3Cpath d='M0 15c27-10 55-10 82 0s55 10 82 0 40-7 56-4' fill='none' stroke='%23ff6b2c' stroke-opacity='.10' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 40px calc(100% - 16px)/220px 30px}
 html.app #jobsCard.folded::after{display:none}
 /* ТЯГА's window (650): the short quality word, no arrow on the folder. */
@@ -609,7 +535,6 @@ html.app #jobsCard.folded::after{display:none}
 @media (max-width:560px){.flist{max-width:210px}/* the format list wraps its hints instead of sticking out of the window (found by CI's layout check, Russian) */.acts .btn>.tw{display:none}.acts .btn{width:28px;padding:0;justify-content:center}/* a narrow window: Show file is its icon (holding both languages' words, it pushed the row's buttons onto a second line) */.dd .chev{display:none}.dd{padding:0 10px}.dd.plain{padding:0 6px}.opts{gap:6px}.opts .seg button>span{display:none}.dd.plain>span{display:none}.input{flex-direction:row}.go{min-width:0;padding:0 16px}.go>span{display:none}.pvp{width:96px;height:54px}}
 /* ——— Build 07 notes (22.11) ——— */
 /* Quality and format share one slot of one width: switching video/audio moves nothing. */
-
 /* Fragment is the scissors alone (the owner: the word says nothing the icon doesn't); one width
    on or off, the picked part is in its hint. */
 #cutB>span,#qualB>span,#fmtB>span,#destT{display:none}
@@ -625,7 +550,8 @@ html.app #jobsCard.folded::after{display:none}
 .opts .ddw.destw{flex:0 1 auto;min-width:0}
 .opts #dest{max-width:180px}
 #destT{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#destMenu{top:calc(100% + 8px);bottom:auto;left:0;right:auto} /* from the button's left edge, like the other drop-downs (the owner) */
+#destMenu{top:calc(100% + 8px);bottom:auto;left:0;right:auto}
+/* from the button's left edge, like the other drop-downs (the owner) */
 #destMenu.up{top:auto;bottom:calc(100% + 8px)}
 #destMenu.end{left:auto;right:0}
 /* Room above the name (the owner: it was pressed against the top); the window buttons stay in the corner. */
@@ -643,7 +569,8 @@ html.app header .logo,html.app header .title{margin-top:8px}
 .opts .seg button{height:100%}
 .opts>*:not(.sp){flex-shrink:0}
 .opts .ddw.destw{flex:none;margin-left:auto}
-.opts>.sp{display:none} /* an empty item takes a gap of its own: 16 px before the folder instead of 8 */
+.opts>.sp{display:none}
+/* an empty item takes a gap of its own: 16 px before the folder instead of 8 */
 /* The empty list: the hook hangs on a line from the top edge, a little higher than the middle,
    its caption at an even step under it (the owner: it hung by itself). */
 .area:has(>#empty:not([hidden])){justify-content:flex-start}
@@ -689,7 +616,8 @@ html.app[data-theme=light] .card.form::before,html.app[data-theme=light] body.so
 .tw>.ghost{visibility:hidden}
 /* The fragment: one line, "from [0:00] to [3:20]", under the word Fragment; Reset is a quiet link
    next to it, there only once a part is set. */
-#cutFly{width:auto;min-width:0} /* as small as its one row of times (the owner, build 23: it was 296×170 for two numbers) */
+#cutFly{width:auto;min-width:0}
+/* as small as its one row of times (the owner, build 23: it was 296×170 for two numbers) */
 #cutFly .fh{display:flex;align-items:center;justify-content:space-between;gap:16px;box-sizing:border-box;height:28px;white-space:nowrap;font-size:13px;color:var(--fg);padding:2px 6px 6px}
 #cutFly .fh>span{text-box:trim-both cap alphabetic}
 #cutFly .lnk{font-size:12.5px}
@@ -724,7 +652,8 @@ html.app .card.form::before{content:"";position:absolute;top:22px;left:var(--sky
 /* Even steps: links box, options, line, folder and Download, the card's edge: 14 px each. */
 html.app .card.form .opts{margin-top:14px}
 html.app .card.form:has(+#jobsCard:not([hidden])){padding-bottom:14px}
-.opts .seg button.on{font-weight:500} /* bold made the picked word wider: the row moved by a pixel on every switch */
+.opts .seg button.on{font-weight:500}
+/* bold made the picked word wider: the row moved by a pixel on every switch */
 #editW{flex:none}
 .dd.icon[aria-pressed=true]{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 #dest>svg:first-child{color:var(--folder)}
@@ -756,16 +685,6 @@ html.app .lchev{position:relative;left:11px}
 html.app body.solo .pv{margin-bottom:30px}
 /* The snackbar (Material 3): over the window's bottom edge, the inverse of the window's colours,
    taking no room. */
-html.app .notice{position:fixed;left:50%;bottom:14px;z-index:60;transform:translateX(-50%);width:max-content;max-width:calc(100% - 40px);margin:0;padding:6px 6px 6px 12px;height:auto;min-height:44px;box-sizing:border-box;border-radius:12px;gap:10px;font-size:13px;line-height:1.35;color:var(--fg);background:color-mix(in srgb,var(--fg) 7%,var(--card));border:1px solid color-mix(in srgb,var(--fg) 13%,transparent);box-shadow:0 12px 32px -6px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.25);animation:snackin .2s cubic-bezier(.2,.8,.2,1) both;transition:opacity .18s ease,transform .18s ease}
-html.app .notice.out{opacity:0;transform:translate(-50%,6px)}
-html.app .notice span{flex:none}
-html.app .notice .ntime{display:none}
-html.app .notice .ni{flex:none;display:grid;place-items:center;width:20px;height:20px;color:var(--dim)}
-html.app .notice .ni svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-html.app .notice .ni.folder{color:var(--folder)}
-html.app .notice .btn{flex:none;height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--acc);font-weight:600}
-html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transparent)}
-@keyframes snackin{from{opacity:0;transform:translate(-50%,8px)}}
 /* The list's header: its summary, then its actions as icons (Copy all files, Clear finished)
    like the rows' own, and the fold arrow. (Two buttons with words left the summary "7 d…", and
    the words, sized for Russian, stood apart from their icons in English: the owner.) */
