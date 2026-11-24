@@ -367,7 +367,7 @@ func chooseFolder() string {
 	mu.Lock()
 	outDir = dir
 	mu.Unlock()
-	saveSettings(settings{Out: dir})
+	changeSettings(func(s *settings) { s.Out = dir })
 	logf("Downloads now go to %s", dir)
 	return folderName(dir)
 }

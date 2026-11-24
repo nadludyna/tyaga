@@ -141,9 +141,15 @@ func runWindow(token string) bool {
 			win.SetBounds(b)
 		}
 	}
-	// × (or Alt+F4) hides the window to the tray, and says so: downloads go on there.
+	// × (or Alt+F4) hides the window to the tray, and says so the first time only: downloads go
+	// on there. Every time was annoying (the owner).
 	toTray := func() {
 		win.Hide()
+		told := false
+		changeSettings(func(s *settings) { told, s.TrayTold = s.TrayTold, true })
+		if told {
+			return
+		}
 		trayBalloon("ТЯГА is in the tray", "Downloads go on. Click the icon to open ТЯГА; Quit is in its menu.")
 	}
 	windowControl = func(action string, n int) {

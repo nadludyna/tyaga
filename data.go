@@ -10,10 +10,11 @@ package main
 //	login\            ТЯГА's own sign-in window, only for Chrome/Edge users (Windows)
 //	tyaga.log         what happened in the last run, for when something goes wrong
 //	youtube-signin.txt  which browser the YouTube sign-in is read from
-//	settings.json     what was picked on the page and has to outlive the window: the
-//	                  downloads folder (the switches live in the window's own storage)
+//	settings.json     what has to outlive the window: the downloads folder picked on the
+//	                  page (the switches live in the window's own storage), and that the
+//	                  "ТЯГА is in the tray" notice was shown (once is enough: every time annoys)
 //
-// Downloads go to Downloads\YouTube unless another folder was picked. Only when the program's folder can't be
+// Downloads go to Downloads\ТЯГА unless another folder was picked. Only when the program's folder can't be
 // written to (Program Files) is the data kept in the user's own app data folder instead.
 
 import (
@@ -23,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 func makeDataDir() string {
@@ -81,7 +83,20 @@ func folderID() string {
 
 // settings are kept in tyaga-data/settings.json.
 type settings struct {
-	Out string `json:"out,omitempty"` // the downloads folder, if one was picked
+	Out      string `json:"out,omitempty"`      // the downloads folder, if one was picked
+	TrayTold bool   `json:"trayTold,omitempty"` // the "ТЯГА is in the tray" notice was shown once
+}
+
+var settingsMu sync.Mutex
+
+// changeSettings reads settings.json, changes it and writes it back, so one setting saved
+// doesn't wipe the others.
+func changeSettings(f func(*settings)) {
+	settingsMu.Lock()
+	defer settingsMu.Unlock()
+	s := loadSettings()
+	f(&s)
+	saveSettings(s)
 }
 
 func settingsFile() string { return filepath.Join(dataDir, "settings.json") }
