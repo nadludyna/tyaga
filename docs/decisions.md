@@ -103,3 +103,51 @@ Updated at the end of every work session.
   exe's path; forcing it means the registry, which ТЯГА doesn't touch (portable).
 - **Pin on top is "always on top", not "survives Win+D".** Show desktop hides every window,
   pinned ones too, as in Windows itself; keeping one over it needs hacks.
+
+## 2026-11-24: the list used the way people use it, and toward a release
+
+- **Scenarios, not only looks**: `stand/scenarios.js` pastes a chat message, the same video
+  three ways, ten links, cancels, fails, clears while downloading, and records the fishing line
+  frame by frame; CI runs it. Every bug below was found by it or by measuring, not by eye.
+- **The list is in the order added**, done on top, then what's downloading, then what waits,
+  and the list scrolls to the running one. Newest-first put a long queue upside down, with the
+  download it was on out of sight.
+- **Links without `https://` are found**, a trailing comma is dropped, and the same video
+  however written (youtu.be, watch?v=, shorts, music.) is one link; one already waiting or
+  downloading isn't added again ("Already in the list").
+- **What was unfinished when ТЯГА closed comes back** (`tyaga-data\queue.json`), stopped, and
+  Retry resumes it; finished rows don't come back (the list starts clean). A cancel by hand
+  removes its half-done files; Quit keeps them, to resume.
+- **A preview fills in as fast as each part can be had**: the picture from the video id at once,
+  the title from YouTube's oEmbed in ~0.25 s, the rest from yt-dlp, at most four at a time.
+  yt-dlp took 5–10 s per link, 2.5 just to start.
+- **ТЯГА keeps the unpacked yt-dlp** (`yt-dlp_win.zip`) in `tyaga-data\bin\yt-dlp`, even when
+  another yt-dlp is installed: 0.8 s to start instead of 2–2.5 (the one-file exe unpacks itself
+  every run). Updated by the release's checksum list (0.17 s, was `-U`, 2–3 s).
+- **Downloads go to Windows' Music and Videos** (as Windows names them), a picked folder still
+  wins; "Music and Videos" in the folder menu goes back. Was `Downloads\ТЯГА\Аудио|Видео`.
+- **The fishing line**: when 100 % comes in one step the fish swims the rest of the way (up to
+  1.3 s, eased), not a stiff spring that crossed the line in 0.4 s; converting is the fish
+  being drawn in, a tug now and then, not somersaults (it read as a spinner); done, the line
+  fades as the fish swims off and the lane folds right after. Its place stays under the row,
+  full width: under the text only left a hole under the picture, in the second line there's
+  no room for the numbers and the leaps.
+- **Clear finished speaks inside the window**: in the list's header in place of its summary, or
+  under the hook when the list is gone, with a tonal Undo. Rejected after trying: the line in
+  the card with "Undo · 7" counting down (the window grew and shrank around it), a snackbar at
+  the bottom (light: it glared; dark: still looked stuck on).
+- **Row and list actions are 32 px framed icon buttons** side by side. Stacked was considered:
+  two of them are taller than the row's picture. Words in those buttons left a hole in English
+  (sized for Russian) and cut the list's summary.
+- **English by default**, Russian from the globe button. The links box says any paste works.
+- **The water** is taller and clearer: three waves, the fish under the surface, two clumps of
+  reeds, the float with its antenna, a stronger orange in the light theme; the same in the
+  tray menu. The tray menu keeps a colour per action (the owner: colours tell them apart).
+- **Portable for real**: yt-dlp's cache (`--cache-dir`) and Deno's (`DENO_DIR`) are in
+  `tyaga-data\cache`, not the user's profile; no AppData fallback either: a folder ТЯГА can't
+  write to is said at start.
+- **Security**: a double-click opens only sound and video (yt-dlp takes plain links to any
+  file: a downloaded .exe would have run); options from the page and `queue.json` keep to known
+  values; the page shows titles and errors as text only (checked).
+- **Lighter on slow PCs**: several new rows grow in one layout, and folded lines aren't drawn
+  every frame: the worst frame 83 → 24 ms, and half the frame time with the CPU 6× slower.
