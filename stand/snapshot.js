@@ -27,7 +27,6 @@ const JOBS = [
   job({ id: 7, url: 'https://youtu.be/fffffffffff', status: 'cancelled', stopped: true, title: 'Not finished song', progress: 0 }),
 ];
 const PLAYLIST = job({ id: 8, url: 'https://www.youtube.com/playlist?list=PLsnap', list: true, status: 'running', title: '[2/3] Digital Love', channel: 'Daft Punk', progress: 50, pos: 2, of: 3, speed: '2.0 MB/s', size: '3 MB of 6 MB', eta: '0:02', log: ['Downloading the sound'] });
-const WAITING = job({ id: 9, url: 'https://youtu.be/ggggggggggg', status: 'running', title: 'Waiting song', progress: 0, wait: 5, log: [] });
 
 const facts = (id, o) => Object.assign({ kind: 'video', id, title: 'A video called ' + id, channel: 'Some Channel', duration: 245, thumb: '', chapters: 0, parts: [], music: false, heights: [1080, 720, 480, 360], listTitle: '', listCount: 0, ads: 0, adsSec: 0, offtopic: 0 }, o);
 const FACTS = {
@@ -97,8 +96,8 @@ async function paste(pg, text) {
     // 2. The list in every kind of row; a playlist and YouTube's pause; folded; the Clear note.
     s = await page(browser, look, JOBS);
     await shot(s.pg, `${tag}-08-list`);
-    s.setJobs([PLAYLIST, WAITING, JOBS[0]]); await sleep(900);
-    await shot(s.pg, `${tag}-09-playlist-waiting`);
+    s.setJobs([PLAYLIST, JOBS[0]]); await sleep(900); // (YouTube's pause counts down in seconds: not still enough for a pixel compare)
+    await shot(s.pg, `${tag}-09-playlist`);
     s.setJobs([JOBS[0], JOBS[1], JOBS[2]]); await sleep(900);
     await s.pg.evaluate(() => notice(LANG === 'ru' ? 'Убрано из списка: 3. Файлы на месте.' : 'Cleared 3 downloads from the list. The files stay.', function () {}, 'clear', true));
     await shot(s.pg, `${tag}-10-note-header`);
@@ -109,6 +108,23 @@ async function paste(pg, text) {
     await s.pg.evaluate(() => notice(LANG === 'ru' ? 'Убрано из списка: 3. Файлы на месте.' : 'Cleared 3 downloads from the list. The files stay.', function () {}, 'clear', false));
     await shot(s.pg, `${tag}-12-note-empty`);
     errors += s.errs.length; s.errs.forEach(e => console.log('PAGE ERROR', tag, e)); await s.ctx.close();
+    // 2b. Under the mouse: every kind of button, hovered (the styles' :hover rules), in the wide look.
+    if (look.w === 653) {
+      s = await page(browser, look, JOBS);
+      await paste(s.pg, 'https://youtu.be/vvvvvvvvvvv');
+      const HOVER = [['seg', '#mode [data-v="video"]'], ['dd', '#fmtB'], ['go', '#go'], ['theme', '#theme'], ['lang', '#lang'], ['pin', '#pin'],
+        ['close', '#wClose'], ['min', '#wMin'], ['logo', '#acct'], ['chev', '#lchev'], ['copyall', '#copyall'], ['clear', '#clear'],
+        ['show', '.job.done .acts .ibtn'], ['retry', '.job.error .acts .ibtn'], ['cancel', '.job.running .x'], ['chip', '.pv .chip'], ['dest', '#dest']];
+      for (const [n, sel] of HOVER) {
+        const e = await s.pg.$(sel);
+        if (!e || !(await e.isVisible())) { console.log(`(no ${n} to hover: ${sel})`); continue; }
+        const b = await e.boundingBox();
+        await s.pg.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await sleep(350);
+        await s.pg.screenshot({ path: path.join(dir, `${tag}-h-${n}.png`), clip: { x: Math.max(0, b.x - 5), y: Math.max(0, b.y - 5), width: Math.min(b.width + 10, look.w - Math.max(0, b.x - 5)), height: b.height + 10 } });
+        await s.pg.mouse.move(1, 1); await sleep(200);
+      }
+      errors += s.errs.length; s.errs.forEach(e => console.log('PAGE ERROR', tag, e)); await s.ctx.close();
+    }
     // 3. The tray menu: quiet and busy.
     if (look.w === 653) {
       const ctx = await browser.newContext({ viewport: { width: 264, height: 246 }, colorScheme: look.theme, reducedMotion: 'reduce' });
