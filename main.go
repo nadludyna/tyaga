@@ -68,7 +68,7 @@ var (
 	outDir      string // the downloads folder picked (or -out); see dirFor
 	outPicked   bool   // a folder was picked (or -out given): else Windows' Music and Videos
 	lastAudio   = true // what was downloaded last (the tray's "open the folder"), and in which language
-	lastLang    = "ru"
+	lastLang    = "en"
 )
 
 func main() {

@@ -318,7 +318,7 @@ html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column
 html.app #jobsCard:not(.folded){min-height:180px}
 html.app #jobsCard:not(.folded) #list{flex-grow:1}
 html.app #jobsCard>*{position:relative;z-index:1}
-html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding:0 7px 20px;margin-left:-7px;margin-right:-17px} /* room for a row's glow, both sides */
+html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding:0 7px 30px;margin-left:-7px;margin-right:-17px} /* room for the water under the last row (44 px tall: build 47), and for a row's glow, both sides */
 html.app .bg{display:none}
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
@@ -736,11 +736,13 @@ html.app .card.form:has(+#jobsCard:not([hidden])){padding-bottom:14px}
 html.lang-swap :is([data-t],#goT,#qualT,#fmtT,#cutT,#dest>span,#lsum,.kind,.nums,.st,.pvf,.pvch span,.ovr){animation:langin .18s cubic-bezier(.2,.8,.2,1) both}
 @keyframes langin{from{opacity:0;transform:translateY(5px)}}
 /* The empty window (no downloads yet): the same water as under the list, at the first card's bottom. */
-html.app body.solo .card.form::after{height:34px;bottom:4px;border-radius:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='30' viewBox='0 0 34 30'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='.29' stroke-width='1.6'%3E%3Cpath d='M8 27V15M16 27V10M24 27V17'/%3E%3Crect x='13' y='1' width='6' height='12' rx='3' fill='%23ff6b2c' fill-opacity='.22'/%3E%3C/g%3E%3Cpath d='M16 27c-5-4-9-6-13-6' stroke-opacity='.2' stroke-width='1.3'/%3E%3C/g%3E%3C/svg%3E") left 22px bottom 0/34px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='.32' stroke-width='1.5'%3E%3Cpath d='M8 15a7 7 0 0 0 14 0z'/%3E%3Cpath d='M8 15a7 7 0 0 1 14 0' fill='%23ff6b2c' fill-opacity='.45'/%3E%3Cpath d='M1 23c6 3 22 3 28 0' stroke-opacity='.22'/%3E%3C/g%3E%3C/svg%3E") right 26px bottom 0/30px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='30' viewBox='0 0 200 30'%3E%3Cg fill='%23ff6b2c' fill-opacity='.16'%3E%3Cpath d='M16 22c6-6 16-6 22 0-6 6-16 6-22 0zm-8-5 8 5-8 5z'/%3E%3Cpath d='M150 25c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z'/%3E%3C/g%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='.22' stroke-width='1.2'%3E%3Ccircle cx='50' cy='13' r='2.2'/%3E%3Ccircle cx='57' cy='8' r='1.5'/%3E%3Ccircle cx='178' cy='17' r='1.8'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/200px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='30' viewBox='0 0 132 30'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='.18'/%3E%3Cpath d='M-33 25c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='.11'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 30px repeat-x;-webkit-mask:linear-gradient(90deg,transparent 4px,#000 26px,#000 calc(100% - 26px),transparent calc(100% - 4px));mask:linear-gradient(90deg,transparent 4px,#000 26px,#000 calc(100% - 26px),transparent calc(100% - 4px))}
+html.app #jobsCard::after,html.app body.solo .card.form::after{height:44px;bottom:3px;border-radius:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.42' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23ff6b2c' fill-opacity='0.32'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23ff6b2c' fill-opacity='0.32'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.28' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 18px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.50'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23ff6b2c' fill-opacity='0.70' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.45'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23ff6b2c' fill-opacity='0.60' stroke-opacity='0.45'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.25'/%3E%3C/g%3E%3C/svg%3E") right 22px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23ff6b2c'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.26'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.22'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.16'/%3E%3C/g%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.30' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/220px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.30'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.17'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.09'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x;-webkit-mask:linear-gradient(90deg,transparent 4px,#000 28px,#000 calc(100% - 28px),transparent calc(100% - 4px));mask:linear-gradient(90deg,transparent 4px,#000 28px,#000 calc(100% - 28px),transparent calc(100% - 4px))}
+html.app[data-theme=light] #jobsCard::after,html.app[data-theme=light] body.solo .card.form::after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.57' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.38' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 18px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.68'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23d9480f' fill-opacity='0.94' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.61'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23d9480f' fill-opacity='0.81' stroke-opacity='0.61'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.34'/%3E%3C/g%3E%3C/svg%3E") right 22px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23d9480f'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.35'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.30'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.22'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.41' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/220px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.41'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.23'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x}
+@media (prefers-color-scheme:light){html.app:not([data-theme=dark]) #jobsCard::after,html.app:not([data-theme=dark]) body.solo .card.form::after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.57' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.38' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 18px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.68'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23d9480f' fill-opacity='0.94' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.61'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23d9480f' fill-opacity='0.81' stroke-opacity='0.61'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.34'/%3E%3C/g%3E%3C/svg%3E") right 22px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23d9480f'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.35'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.30'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.22'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.41' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/220px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.41'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.23'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x}}
 /* Under the downloads, the water: waves that fade out at both ends, the reeds at the left and the
    float at the right clear of the round corners, two fish in the middle; nothing touches the card's
    edge (the owner: the old one, wider than the card, was cut off at both corners). */
-html.app #jobsCard::after{height:34px;bottom:4px;border-radius:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='30' viewBox='0 0 34 30'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='.29' stroke-width='1.6'%3E%3Cpath d='M8 27V15M16 27V10M24 27V17'/%3E%3Crect x='13' y='1' width='6' height='12' rx='3' fill='%23ff6b2c' fill-opacity='.22'/%3E%3C/g%3E%3Cpath d='M16 27c-5-4-9-6-13-6' stroke-opacity='.2' stroke-width='1.3'/%3E%3C/g%3E%3C/svg%3E") left 22px bottom 0/34px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='.32' stroke-width='1.5'%3E%3Cpath d='M8 15a7 7 0 0 0 14 0z'/%3E%3Cpath d='M8 15a7 7 0 0 1 14 0' fill='%23ff6b2c' fill-opacity='.45'/%3E%3Cpath d='M1 23c6 3 22 3 28 0' stroke-opacity='.22'/%3E%3C/g%3E%3C/svg%3E") right 26px bottom 0/30px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='30' viewBox='0 0 200 30'%3E%3Cg fill='%23ff6b2c' fill-opacity='.16'%3E%3Cpath d='M16 22c6-6 16-6 22 0-6 6-16 6-22 0zm-8-5 8 5-8 5z'/%3E%3Cpath d='M150 25c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z'/%3E%3C/g%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='.22' stroke-width='1.2'%3E%3Ccircle cx='50' cy='13' r='2.2'/%3E%3Ccircle cx='57' cy='8' r='1.5'/%3E%3Ccircle cx='178' cy='17' r='1.8'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/200px 30px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='30' viewBox='0 0 132 30'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='.18'/%3E%3Cpath d='M-33 25c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='.11'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 30px repeat-x;-webkit-mask:linear-gradient(90deg,transparent 4px,#000 26px,#000 calc(100% - 26px),transparent calc(100% - 4px));mask:linear-gradient(90deg,transparent 4px,#000 26px,#000 calc(100% - 26px),transparent calc(100% - 4px))}
+/* (one rule for both waters: under the list and in the empty window; see the one above) */
 /* The right edge: the row's icons (cancel, its actions) and the list's fold arrow end where the
    Download button and the percent end, by the icon itself (each sits 9–11 px inside its round
    hover, which made the column look ragged: the owner). Shifted, not resized: nothing else moves. */
@@ -751,7 +753,7 @@ html.app .lchev{position:relative;left:11px}
 .ibtn.fold:hover{color:var(--folder)}
 /* The previews end above the water at the first card's bottom (the fourth one peeking out of the
    scrolling box ran into the waves). */
-html.app body.solo .pv{margin-bottom:20px}
+html.app body.solo .pv{margin-bottom:30px}
 /* The snackbar (Material 3): over the window's bottom edge, the inverse of the window's colours,
    taking no room. */
 html.app .notice{position:fixed;left:50%;bottom:14px;z-index:60;transform:translateX(-50%);width:max-content;max-width:calc(100% - 40px);margin:0;padding:6px 6px 6px 12px;height:auto;min-height:44px;box-sizing:border-box;border-radius:12px;gap:10px;font-size:13px;line-height:1.35;color:var(--fg);background:color-mix(in srgb,var(--fg) 7%,var(--card));border:1px solid color-mix(in srgb,var(--fg) 13%,transparent);box-shadow:0 12px 32px -6px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.25);animation:snackin .2s cubic-bezier(.2,.8,.2,1) both;transition:opacity .18s ease,transform .18s ease}
@@ -771,6 +773,38 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
 .lbar .hb svg{width:16px;height:16px}
 .lbar .hb:hover{color:var(--fg);background:color-mix(in srgb,var(--fg) 8%,transparent)}
 .lbar #clear:hover{color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
+/* The actions of a row (Show file, Copy file; Retry, Copy error) and of the list (Copy all files,
+   Clear finished): 32 px buttons with a frame, like the row of options above, so they read as
+   buttons and are easy to hit (the owner: 28 px bare icons were too small). Their frame stands on
+   the Download button's edge. */
+.job .acts{left:0;gap:6px}
+.job .acts .ibtn,.lbar .hb{width:32px;height:32px;margin:-2px 0;border:1px solid var(--line2);border-radius:8px}
+.job .acts .ibtn svg,.lbar .hb svg{width:16px;height:16px}
+.lbar .hb{left:0}
+.lbar #lchev{margin-left:-4px}
+.job .acts .ibtn:hover,.lbar .hb:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);border-color:color-mix(in srgb,var(--fg) 22%,transparent)}
+.lbar #clear:hover{border-color:color-mix(in srgb,var(--err) 45%,transparent)}
+/* The short message inside the window (inlineNote): in the list's header in place of its
+   summary, or in the empty state in place of its words; the window's own colours, Undo as a
+   tonal button (like a picked switch). */
+.noting>#lsum,.hook0.noting>span{display:none}
+.inote{display:flex;align-items:center;gap:8px;min-width:0;color:var(--fg);font-size:13.5px;animation:fadein .18s ease both;transition:opacity .18s ease}
+.lhead .inote{flex:1}
+.hook0 .inote{margin-top:14px}
+.inote.out{opacity:0}
+.inote .ni{flex:none;display:grid;place-items:center;width:18px;height:18px;color:var(--dim)}
+.inote .ni.folder{color:var(--folder)}
+.inote .ni svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transform:none}
+.inote .nt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inote .nb{flex:none;height:28px;padding:0 12px;border:0;border-radius:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent);transition:background .08s}
+.inote .nb:hover{background:color-mix(in srgb,var(--acc) 22%,transparent)}
+/* The logo and the sign-in badge on it are one thing (the YouTube account): they tilt and press
+   together, not each on its own (the owner). */
+.logob{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.logob:hover{transform:rotate(-6deg) scale(1.06)}
+.logob:active{transform:scale(.94);transition-duration:.1s}
+.logo:hover,.logob:active .logo{transform:none}
+.logob.can:hover .badge{transform:none}
 </style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
 <header>
   <button class="logob" id="acct" type="button" aria-label="YouTube account"><svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
@@ -798,7 +832,7 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
 
 <div class="card form">
   <div class="input">
-    <textarea id="links" rows="2" data-ph="Paste links freely, each will go on a new line"></textarea>
+    <textarea id="links" rows="2" data-ph="Paste links any way you like: several at once, untidy, mixed with text. ТЯГА finds them and puts each on its own line."></textarea>
   </div>
   <div class="row opts">
     <div class="seg" id="mode"><button data-v="video"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="m10 9.5 4.5 2.5-4.5 2.5z"/></svg><span data-t="Video">Video</span></button><button data-v="audio" class="on"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span data-t="Audio">Audio</span></button></div>
@@ -842,7 +876,7 @@ var TOKEN = new URLSearchParams(location.search).get('t');
 // language picked.
 var LANG = (function () {
   try { var l = localStorage.getItem('tyaga-lang'); if (l === 'en' || l === 'ru') return l; } catch (e) {}
-  return /^(ru|uk|be)\b/i.test(navigator.language || '') ? 'ru' : 'en';
+  return 'en'; // English until Russian is picked with the globe button (the owner: English by default)
 })();
 var RU = {
   'Reel it in.': 'Подсекай.', 'Download': 'Скачать', 'Audio': 'Аудио', 'Video': 'Видео', 'Best': 'Лучшее',
@@ -903,7 +937,7 @@ var RU = {
   "Not signed in to YouTube. Some videos need it, and sometimes YouTube asks to prove you're not a bot. Click to sign in": 'Вход в YouTube не выполнен. Некоторым видео он нужен, а иногда YouTube просит доказать, что ты не бот. Нажми, чтобы войти',
   'Done ✓': 'Готово ✓',
   "Nothing on the hook yet. Cast a link above.": "На крючке пусто. Закинь ссылку сверху.",
-  "Paste links freely, each will go on a new line": "Вставляй ссылки как угодно, каждая встанет на новую строку",
+  "Paste links any way you like: several at once, untidy, mixed with text. ТЯГА finds them and puts each on its own line.": "Вставляй ссылки как угодно: пачкой, с мусором, вперемешку с текстом. ТЯГА сама их найдёт и разложит по строкам.",
   "Video quality": "Качество видео",
   "Best quality": "Лучшее качество",
   "Audio format": "Формат звука",
@@ -1761,12 +1795,14 @@ $('pick').onclick = function () {
 };
 // Clear finished takes the rows off at once, and says so with an Undo for a few seconds.
 $('clear').onclick = function () {
+  // Will the list still be there after? (only if something is still downloading or waiting)
+  var stays = (state.jobs || []).some(function (j) { return j.status === 'running' || j.status === 'queued'; });
   api('/api/clear', {}).then(function (r) {
     refresh();
     if (r && r.n) notice(LANG === 'ru' ? 'Убрано из списка: ' + r.n + '. Файлы на месте.'
       : 'Cleared ' + r.n + (r.n === 1 ? ' download' : ' downloads') + ' from the list. The files stay.', function () {
       api('/api/unclear', {}).then(refresh);
-    }, 'clear');
+    }, 'clear', stays);
   });
 };
 // Every finished file onto the clipboard at once (Ctrl+V in a chat attaches them all).
@@ -1779,13 +1815,15 @@ $('copyall').onclick = function () {
     setTimeout(function () { b.innerHTML = ICON.copy; b.dataset.tip = 'Copy all files'; }, 1800);
   });
 };
-// A short message (Clear finished, a new downloads folder): in ТЯГА's window a snackbar over
-// the bottom edge (see .notice), with "Undo" when there's a way back, for a few seconds. It
-// takes no room: nothing moves when it comes or goes. (It used to open a line in the card under
-// the options, with "Undo · 7" counting down and a line draining under it: the window grew and
-// shrank around it, and it hung there 8 s. The owner: it looked bad.)
+// A short message (Clear finished, a new downloads folder), with "Undo" when there's a way
+// back, for a few seconds, said where it belongs in ТЯГА's window, in its own colours: the list's
+// header line, in place of its summary; with no list (it was all cleared), the empty state, in
+// place of "Nothing on the hook yet". It takes no room of its own: nothing moves. (Before: a line
+// opening in the card with "Undo · 7" counting down; then a snackbar stuck to the window's
+// bottom. The owner: neither looked like part of ТЯГА.) A browser tab keeps the snackbar.
 var noticeTimer = 0, NOTICE_MS = 6000;
-function notice(text, undo, icon) {
+function notice(text, undo, icon, listStays) {
+  if (APP) return inlineNote(text, undo, icon, listStays);
   var n = $('notice');
   clearTimeout(noticeTimer);
   if (APP && n.parentNode !== document.body) document.body.append(n); // over everything, not inside a card
@@ -1801,7 +1839,35 @@ function notice(text, undo, icon) {
   n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; // a new one comes in again
   noticeTimer = setTimeout(hideNotice, NOTICE_MS);
 }
-function hideNotice() {
+// The note itself: where (the list's header, or the empty state), the words and the Undo.
+var noteAt = null;
+function inlineNote(text, undo, icon, listStays) {
+  hideNotice(true);
+  var list = listStays === undefined ? !$('jobsCard').hidden && !fold.gone : listStays;
+  var host = list ? $('lhead') : $('empty');
+  var n = el('div', 'inote');
+  var ic = el('i', 'ni' + (icon ? ' ' + icon : ''));
+  ic.innerHTML = icon === 'folder' ? ICON.folder : '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>';
+  n.append(ic, el('span', 'nt', text));
+  if (undo) {
+    var b = el('button', 'nb', T('Undo'));
+    b.type = 'button';
+    b.onclick = function (e) { e.stopPropagation(); hideNotice(); undo(); };
+    n.append(b);
+  }
+  host.classList.add('noting');
+  host.append(n);
+  noteAt = { host: host, el: n };
+  noticeTimer = setTimeout(hideNotice, NOTICE_MS);
+}
+function hideNotice(now) {
+  if (noteAt) {
+    var a = noteAt; noteAt = null;
+    clearTimeout(noticeTimer);
+    a.el.classList.add('out');
+    setTimeout(function () { a.el.remove(); if (!noteAt || noteAt.host !== a.host) a.host.classList.remove('noting'); }, now === true ? 0 : 180);
+    if (now === true) { a.el.remove(); a.host.classList.remove('noting'); }
+  }
   var n = $('notice');
   clearTimeout(noticeTimer);
   if (n.hidden) return;
@@ -2030,7 +2096,7 @@ function updateRow(r, j) {
     // Its last moment plays out, then the lane folds: done, the fish swims off (0.6 s) while the line
     // fades, and the lane folds as it goes, no empty band left behind (it hung on 1.7 s, a straight orange bar under a finished
     // row while the next one ran: the owner); failed or cancelled, RIP or the snapped line is seen.
-    t.until = now + (j.status === 'done' ? 600 : 1800);
+    t.until = now + (j.status === 'done' ? 700 : 1800);
   }
   // (the fish may keep it open longer while it swims the last stretch: look again then)
   if (t.until > now) { clearTimeout(r.untilT); r.untilT = setTimeout(function () { if (r.j) updateRow(r, r.j); }, t.until - now + 30); }
@@ -2289,7 +2355,7 @@ function render() {
     updateRow(r, j);
     if (list.children[i] !== r.row) list.insertBefore(r.row, list.children[i] || null);
   });
-  if (booted) fresh.forEach(grow);
+  if (booted) growAll(fresh);
   if (run && run.id !== inView.id && rows[run.id]) { inView.id = run.id; keepInView(rows[run.id].row, fresh.length > 0); }
   Object.keys(rows).forEach(function (id) {
     if (!alive[id]) { bye(rows[id].row); delete rows[id]; }
@@ -2378,6 +2444,24 @@ function bye(row) {
 // A new row opens up from nothing; the rows below glide down with it.
 var booted = false;
 function still() { return matchMedia('(prefers-reduced-motion: reduce)').matches; }
+// Several rows at once (ten links pasted): every height is read first, then every row starts
+// from nothing, one layout for all of them. One grow() after another laid the page out once per
+// row: 270 ms with the CPU 6× slower (the stand measured it).
+function growAll(list) {
+  if (still() || !list.length) return;
+  var hs = list.map(function (row) { return row.offsetHeight; });
+  list.forEach(function (row, i) {
+    if (!hs[i]) return;
+    row.style.height = '0px'; row.style.paddingTop = row.style.paddingBottom = '0px'; row.style.opacity = '0';
+  });
+  void document.body.offsetHeight;
+  list.forEach(function (row, i) {
+    if (!hs[i]) return;
+    row.classList.add('grow');
+    row.style.height = hs[i] + 'px'; row.style.paddingTop = row.style.paddingBottom = row.style.opacity = '';
+  });
+  setTimeout(function () { list.forEach(function (row) { row.classList.remove('grow'); row.style.height = ''; }); fitLater(); }, 340);
+}
 function grow(row) {
   var h = row.offsetHeight;
   if (still() || !h) return;
@@ -2681,7 +2765,7 @@ var waveTarget = {}, waveState = {};
     if (finishing && st.shown < 99.3 && !still) {
       mode = 'move';
       // The lane stays open until it's there and the catch has played (it folded with the fish short of the end).
-      if (t.status === 'done') t.until = Math.max(t.until || 0, now + 600);
+      if (t.status === 'done') t.until = Math.max(t.until || 0, now + 700);
     }
     if (mode !== st.mode) {
       var over = /^(done|err|cancel)$/.test(mode);
@@ -2913,7 +2997,9 @@ var waveTarget = {}, waveState = {};
     var dt = Math.min(.5, (now - last) / 1000), moving = false;
     last = now;
     document.querySelectorAll('canvas.wave').forEach(function (cv) {
-      if (cv.clientWidth && draw(cv, now, dt)) moving = true;
+      // A folded line (a finished, waiting or failed row) isn't drawn: nothing of it shows, and
+      // drawing every row's canvas every frame cost the most while downloading.
+      if (cv.clientWidth && cv.clientHeight && draw(cv, now, dt)) moving = true;
     });
     // Nothing moves any more, or the window is hidden: sleep (render() wakes it).
     if (moving && !state.hidden) raf = requestAnimationFrame(frame);
