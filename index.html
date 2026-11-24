@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" class="app"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ТЯГА</title>
 <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"%3E %3Crect width="256" height="256" rx="58" fill="%23161616"/%3E %3Cpath d="M176 0 V22" stroke="%238a96a3" stroke-width="6"/%3E %3Ccircle cx="176" cy="36" r="12" fill="none" stroke="%23fff" stroke-width="9"/%3E %3Cpath d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="%23fff" stroke-width="18"/%3E %3Cpath d="M85 42 L96 10 L107 42 Z" fill="%23fff"/%3E %3Cpath d="M103 36 L119 54" stroke="%23fff" stroke-width="9.9" stroke-linecap="round"/%3E %3Cg fill="%23161616" stroke="%23161616" stroke-width="12" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cg fill="%23ff6b2c" stroke="%23ff6b2c" stroke-width="2" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cpath d="M83.143 108.208 L83.143 139.792 L111.76599999999999 124 Z" fill="%23fff" stroke="%23fff" stroke-width="5.922" stroke-linejoin="round"/%3E %3Ccircle cx="131.32" cy="109.9" r="6" fill="%23161616"/%3E %3C/svg%3E'>
 <style>
@@ -806,6 +806,10 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
 .logo:hover,.logob:active .logo{transform:none}
 .logob.can:hover .badge{transform:none}
 </style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
+
+<div class="card note" id="setup" hidden></div>
+
+<div class="card form">
 <header>
   <button class="logob" id="acct" type="button" aria-label="YouTube account"><svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
     <rect width="256" height="256" rx="58" fill="#161616"/>
@@ -827,10 +831,6 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
   <div class="hpair"><button class="tbtn pin" id="pin" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pinb" d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></svg></button><button class="tbtn lang" id="lang" aria-label="Language"></button><button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button></div>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Close to tray" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
 </header>
-
-<div class="card note" id="setup" hidden></div>
-
-<div class="card form">
   <div class="input">
     <textarea id="links" rows="2" data-ph="Paste links any way you like: several at once, untidy, mixed with text. ТЯГА finds them and puts each on its own line."></textarea>
   </div>
@@ -852,14 +852,13 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
     <div class="gow"><button class="go" id="go"><svg class="goi" viewBox="0 0 24 24" aria-hidden="true"><g class="ga"><path d="M12 3.5v11.5"/><path d="M7 10l5 5 5-5"/></g><path d="M5 20h14"/></svg><span id="goT">Download</span></button><b class="gon" id="goN" hidden></b></div>
   </div>
   <div class="msg" id="msg"></div>
-  <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB"><span id="noticeBT">Undo</span></button><i class="ntime" id="ntime" hidden></i></div>
-  <div class="area" id="area">
+    <div class="area" id="area">
     <div class="hook0" id="empty" hidden><i class="hline" aria-hidden="true"></i><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg><span data-t="Nothing on the hook yet. Cast a link above.">Nothing on the hook yet. Cast a link above.</span></div>
     <div class="pv" id="pv" hidden></div>
   </div>
 </div>
 
-<div class="card" id="jobsCard" hidden>
+<div class="card folded" id="jobsCard" hidden>
   <div class="lbar" id="lbar"><div class="lhead" id="lhead"><span id="lsum"></span></div>
     <button class="ibtn hb" id="copyall" hidden data-tip="Copy all files" aria-label="Copy all files"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
     <button class="ibtn hb" id="clear" data-tip="Clear finished. Files stay on disk" aria-label="Clear finished"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg></button>
@@ -1020,18 +1019,11 @@ function applyLang() {
 // The theme: Windows' own until the theme button picks one; that choice is remembered (the
 // tray menu reads it too).
 try { var t0 = localStorage.getItem('tyaga-theme'); if (t0 === 'light' || t0 === 'dark') document.documentElement.dataset.theme = t0; } catch (e) {}
-// In ТЯГА's own window (see html.app in the styles): the logo goes into the first card,
-// the falling notes into the list card, and the window buttons work.
-if (new URLSearchParams(location.search).get('w')) {
-  document.documentElement.classList.add('app');
-  var form = document.querySelector('.card.form');
-  form.insertBefore(document.querySelector('header'), form.firstChild);
-  var jobsCard = document.getElementById('jobsCard');
-  jobsCard.classList.add('folded'); // until the list is known: no flash of a big empty card
-  ['Min', 'Close'].forEach(function (b) {
-    document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
-  });
-}
+// The page is always ТЯГА's own window (a plain browser tab is no longer a mode of its own):
+// its buttons minimise and close it.
+['Min', 'Close'].forEach(function (b) {
+  document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
+});
 var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'failed', cancelled: 'cancelled' };
 var state = {}, OFFLINE = 'ТЯГА is not responding. Start the program again.';
 
@@ -1613,7 +1605,7 @@ function add() {
     if (!r.error) { // a fragment is a one-off: the next link is whole again
       // The first download: the preview stays until the list takes its place (setGone), in the
       // same frame, so the window never shows an empty bottom in between.
-      if (APP && fold.gone) { handOver = clearForm; setTimeout(function () { if (handOver === clearForm) { handOver = null; clearForm(); } }, 3000); }
+      if (fold.gone) { handOver = clearForm; setTimeout(function () { if (handOver === clearForm) { handOver = null; clearForm(); } }, 3000); }
       else clearForm();
     }
     refresh();
@@ -1694,20 +1686,18 @@ $('lang').onclick = function () {
   clearTimeout(window.langT); window.langT = setTimeout(function () { root.classList.remove('lang-swap'); }, 250);
 };
 // The pin: ТЯГА's window stays over all the others (remembered; ТЯГА's window only).
-var INAPP = document.documentElement.classList.contains('app'); // (APP itself is set further down)
 function setPin(on) {
   $('pin').classList.toggle('on', on);
   $('pin').setAttribute('aria-pressed', on);
   $('pin').dataset.tip = on ? 'Unpin' : 'Pin on top';
-  if (INAPP) api('/api/window', { text: 'top', n: on ? 1 : 0 }).catch(function () {});
+  api('/api/window', { text: 'top', n: on ? 1 : 0 }).catch(function () {});
 }
-$('pin').hidden = !INAPP;
 $('pin').onclick = function () {
   var on = !$('pin').classList.contains('on');
   try { localStorage.setItem('tyaga-top', on ? '1' : ''); } catch (e) {}
   setPin(on);
 };
-(function () { var on = false; try { on = localStorage.getItem('tyaga-top') === '1'; } catch (e) {} if (on || !INAPP) setPin(on); else $('pin').dataset.tip = 'Pin on top'; })();
+(function () { var on = false; try { on = localStorage.getItem('tyaga-top') === '1'; } catch (e) {} if (on) setPin(on); else $('pin').dataset.tip = 'Pin on top'; })();
 // The fish is cast as soon as a link goes in (add() checks it's not empty).
 
 // Ctrl+A anywhere outside a text field selects the links, not the whole page.
@@ -1820,25 +1810,9 @@ $('copyall').onclick = function () {
 // header line, in place of its summary; with no list (it was all cleared), the empty state, in
 // place of "Nothing on the hook yet". It takes no room of its own: nothing moves. (Before: a line
 // opening in the card with "Undo · 7" counting down; then a snackbar stuck to the window's
-// bottom. The owner: neither looked like part of ТЯГА.) A browser tab keeps the snackbar.
+// bottom. The owner: neither looked like part of ТЯГА.)
 var noticeTimer = 0, NOTICE_MS = 6000;
-function notice(text, undo, icon, listStays) {
-  if (APP) return inlineNote(text, undo, icon, listStays);
-  var n = $('notice');
-  clearTimeout(noticeTimer);
-  if (APP && n.parentNode !== document.body) document.body.append(n); // over everything, not inside a card
-  var ni = n.querySelector('.ni') || n.insertBefore(el('i', 'ni'), n.firstChild);
-  ni.className = 'ni ' + (icon || ''); ni.innerHTML = icon === 'folder' ? ICON.folder : '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>';
-  ni.hidden = !icon;
-  $('noticeT').textContent = text;
-  $('noticeB').hidden = !undo;
-  setText($('noticeBT'), T('Undo'));
-  $('ntime').hidden = true;
-  $('noticeB').onclick = function () { hideNotice(); if (undo) undo(); };
-  n.hidden = false; n.classList.remove('out');
-  n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; // a new one comes in again
-  noticeTimer = setTimeout(hideNotice, NOTICE_MS);
-}
+function notice(text, undo, icon, listStays) { inlineNote(text, undo, icon, listStays); }
 // The note itself: where (the list's header, or the empty state), the words and the Undo.
 var noteAt = null;
 function inlineNote(text, undo, icon, listStays) {
@@ -1868,12 +1842,6 @@ function hideNotice(now) {
     setTimeout(function () { a.el.remove(); if (!noteAt || noteAt.host !== a.host) a.host.classList.remove('noting'); }, now === true ? 0 : 180);
     if (now === true) { a.el.remove(); a.host.classList.remove('noting'); }
   }
-  var n = $('notice');
-  clearTimeout(noticeTimer);
-  if (n.hidden) return;
-  if (still()) { n.hidden = true; return; }
-  n.classList.add('out');
-  noticeTimer = setTimeout(function () { n.hidden = true; n.classList.remove('out'); }, 200);
 }
 
 // Closing or reloading the page: tell TYAGA. If no page comes back, it finishes
@@ -1999,7 +1967,7 @@ function makeRow(j) {
     if (!j || j.status !== 'done' || !j.files.length || e.target.closest('button')) return;
     api('/api/play', { id: j.id, n: j.files.length - 1 });
   });
-  if (APP && rowWatch) rowWatch.observe(r.row);
+  if (rowWatch) rowWatch.observe(r.row);
   return r;
 }
 
@@ -2321,26 +2289,12 @@ function render() {
   document.title = run ? Math.floor(run.progress) + '% · ТЯГА' : 'ТЯГА';
   ping(jobs);
 
-  if (!jobs.length && APP) { // the list card folds away (setGone); its rows fold up meanwhile
+  if (!jobs.length) { // the list card folds away (setGone); its rows fold up meanwhile
     Object.keys(rows).forEach(function (id) { bye(rows[id].row); });
     rows = {};
     syncFold(jobs);
     return;
   }
-  if (!jobs.length) {
-    if (!list.querySelector('.empty')) {
-      list.innerHTML = '';
-      rows = {};
-      var empty = el('div', 'empty');
-      empty.innerHTML = '<svg viewBox="0 0 256 256"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="18"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg>';
-      var et = el('span', null, T('Nothing on the hook yet. Paste a link above.')); et.dataset.t = 'Nothing on the hook yet. Paste a link above.';
-      empty.append(et);
-      list.append(empty);
-    }
-    return;
-  }
-  var e = list.querySelector('.empty');
-  if (e) e.remove();
 
   // Every download has its own row that stays on the page and is only updated, so nothing
   // blinks or starts its animation over. A part is rebuilt only when it really changes.
@@ -2362,7 +2316,7 @@ function render() {
   });
   // The window is fitted after the rows are in, so it grows once, straight to the height it
   // needs (fitting it first made it too short and then grow again frame by frame).
-  if (APP) { syncFold(jobs); fitLater(); }
+  syncFold(jobs); fitLater();
   booted = true;
 
   // Just finished: the row glows green for a moment and the fish on the hook jumps.
@@ -2403,7 +2357,7 @@ function keepInView(row, wait) {
 // to start the drag itself. (With ten links pasted, WebView2 stopped telling Windows where the
 // title bar is: the window couldn't be moved, buttons and scrolling still worked. The owner.)
 document.addEventListener('mousedown', function (e) {
-  if (!APP || e.button !== 0 || e.detail > 1) return;
+  if (e.button !== 0 || e.detail > 1) return;
   var t = e.target;
   var bare = t === document.body || t === document.documentElement || t.tagName === 'MAIN' || t.closest('header');
   if (!bare || t.closest('button,a,input,textarea,select,[contenteditable],.logob,.hpair,.wbtns,[role="button"]')) return;
@@ -2411,10 +2365,9 @@ document.addEventListener('mousedown', function (e) {
 });
 
 // The list card's fold (ТЯГА's window only, see .lhead in the styles).
-var APP = document.documentElement.classList.contains('app');
 var fold = { on: false, gone: false, count: -1 };
 function foldSummary(jobs) {
-  if (!jobs.length) return APP ? $('lsum').innerHTML : T('Nothing on the hook yet'); // app: the card is leaving, keep its line
+  if (!jobs.length) return $('lsum').innerHTML; // the card is leaving: keep its line
   var n = { running: 0, queued: 0, done: 0, error: 0, stopped: 0 }, run = null;
   jobs.forEach(function (j) { if (j.stopped) n.stopped++; else if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
   var parts = [];
@@ -2435,7 +2388,7 @@ function foldSummary(jobs) {
 // ).
 // A row leaves: it folds up and fades, then it's gone. With "reduce motion": at once.
 function bye(row) {
-  if (!APP || matchMedia('(prefers-reduced-motion: reduce)').matches || !row.offsetHeight) return row.remove();
+  if (still() || !row.offsetHeight) return row.remove();
   row.style.height = row.offsetHeight + 'px';
   void row.offsetHeight;
   row.classList.add('bye');
@@ -2564,14 +2517,13 @@ var readyH = 0, comeAt = 0;
 // first card (the owner couldn't click YouTube there). The window grows when the list comes.
 function readyWindow() {
   return;
-  if (!APP || !fold.gone) return;
+  if (!fold.gone) return;
   var want = $('links').value.trim() ? openHeight() + ROW_GUESS : 0;
   if (want === readyH) return;
   readyH = want;
   windowFit();
 }
 function windowFit() {
-  if (!APP) return;
   if ($('jobsCard').classList.contains('leave')) return; // folding away: the window follows at the end
   var n;
   if (fold.gone || fold.on) {
@@ -2633,11 +2585,9 @@ function setFold(on, animate) {
     });
   }
 }
-if (APP) {
-  $('lchev').onclick = function () { setFold(!fold.on, true); };
-  // The first card can grow (fragment times, an error): the folded window follows it.
-  if (window.ResizeObserver) new ResizeObserver(fitLater).observe(document.querySelector('.card.form'));
-}
+$('lchev').onclick = function () { setFold(!fold.on, true); };
+// The first card can grow (fragment times, an error): the folded window follows it.
+if (window.ResizeObserver) new ResizeObserver(fitLater).observe(document.querySelector('.card.form'));
 
 function refresh() {
   return api('/api/state')
