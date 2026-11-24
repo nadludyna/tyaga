@@ -197,7 +197,9 @@ label:hover{color:var(--fg)}
    the canvas with the folding edge showed half a fish and a stub of line: the owner); opening,
    the place opens first, then the picture fades in. */
 .wave{transition:opacity .16s ease .12s}
-.lane.shut .wave{opacity:0;transition:opacity .12s ease}
+/* Folded away, the line also takes no room: its 46 px canvas hanging out of a 0 px lane made
+   the list scroll by a few pixels with nothing to scroll to (a scrollbar under one row). */
+.lane.shut .wave{opacity:0;height:0;transition:opacity .12s ease,height 0s .45s}
 .lane.shut{transition:height .32s cubic-bezier(.2,.8,.2,1) .1s}
 .wave{position:absolute;left:0;top:6px;width:100%;height:46px;display:block;pointer-events:none}
 .acts{flex:none;display:flex;gap:6px;margin-left:auto}
@@ -825,7 +827,7 @@ var RU = {
   'Sign in': 'Войти', 'Retry': 'Повторить', 'Copy error': 'Копировать ошибку', 'Copied': 'Скопировано',
   "Couldn't copy": 'Не вышло', 'Show file': 'Показать файл',
   'Queued': 'В очереди', 'Downloading': 'Скачивается', 'Waiting': 'Ждём', 'Getting ready': 'Готовимся',
-  'Finishing': 'Завершаем', 'Done': 'Готово', 'Already there': 'Уже есть', 'Failed': 'Ошибка',
+  'Finishing': 'Завершаем', 'Done': 'Готово', 'Already there': 'Уже есть', 'Failed': 'Ошибка', 'Already in the list': 'Уже в списке', 'Not finished': 'Не докачано',
   'Cancelled': 'Отменено', 'Waiting for setup': 'Ждём установки', 'Cancel': 'Отменить',
   'Getting ready…': 'Готовимся…', 'Finishing up': 'Завершаем…', 'Starting…': 'Начинаем…',
   'track': 'трек', 'video': 'видео', 'of': 'из', 'one file': 'одним файлом',
@@ -840,7 +842,7 @@ var RU = {
   'YouTube asks you to sign in: sign in, then Retry.': 'YouTube просит войти: войди и нажми «Повторить».',
   'YouTube asks you to sign in: put a fresh youtube-cookies.txt next to ТЯГА.': 'YouTube просит войти: положи свежий youtube-cookies.txt рядом с ТЯГОЙ.',
   'YouTube is limiting requests: try again later.': 'YouTube ограничивает запросы: попробуй позже.',
-  'YouTube refused (403): Retry usually helps.': 'YouTube отказал (403): обычно помогает «Повторить».',
+  'YouTube refused (403): Retry usually helps.': 'YouTube отказал (403): нажми «Повторить».',
   'ТЯГА is not responding. Start the program again.': 'ТЯГА не отвечает. Запусти программу заново.',
   'Nothing on the hook yet. Paste a link above.': 'На крючке пока пусто. Вставь ссылку сверху.',
   'Nothing on the hook yet': 'На крючке пока пусто', 'Add at least one link.': 'Добавь хотя бы одну ссылку.',
@@ -1495,13 +1497,26 @@ function options(link) {
 function add() {
   var links = linksIn($('links').value);
   if (!links.length) { // not a link: the server says what's wrong with it
-    if ($('links').value.trim()) api('/api/add', { text: $('links').value.trim() }).then(function (r) { $('msg').textContent = T(r.error) || ''; });
+    if ($('links').value.trim()) api('/api/add', { text: $('links').value.trim() }).then(function (r) { addMsg(T(r.error) || ''); });
     return;
   }
+  // A link that's already waiting or downloading (in the same mode) isn't added twice: said
+  // instead. Downloaded before is fine: maybe in another format (and "Already there" says so).
+  var on = {}, dup = [];
+  (state.jobs || []).forEach(function (j) { if (j.status === 'queued' || j.status === 'running') on[linkKey(j.url, j.list) + '|' + j.mode] = j; });
+  links = links.filter(function (l) {
+    var k = linkKey(l, plan(l).whole) + '|' + mode();
+    if (on[k]) { if (on[k] !== true) dup.push(on[k]); return false; }
+    on[k] = true;
+    return true;
+  });
+  var dupText = !dup.length ? '' : dup.length > 1 ? T('Already in the list') + ': ' + dup.length
+    : T('Already in the list') + ': ' + ((dup[0].title || knownTitle(dup[0].url) || '').replace(/^\[\d+\/\d+\] /, '') || dup[0].url.replace(/^https?:\/\/(www\.)?/, ''));
+  if (!links.length) { clearForm(); addMsg(dupText); return; }
   var go = Promise.resolve({});
   links.forEach(function (l) { go = go.then(function (r) { return r.error ? r : api('/api/add', options(l)); }); });
   go.then(function (r) {
-    $('msg').textContent = T(r.error) || '';
+    addMsg(T(r.error) || dupText);
     if (!r.error) { // a fragment is a one-off: the next link is whole again
       // The first download: the preview stays until the list takes its place (setGone), in the
       // same frame, so the window never shows an empty bottom in between.
@@ -1511,6 +1526,15 @@ function add() {
     refresh();
   }, function () { $('msg').textContent = T(OFFLINE); });
 }
+// What Download said (not a link, already in the list) is about the links that were in the
+// box: it goes as soon as the box changes, so it never stays saying something no longer true.
+var addSaid = false;
+function addMsg(text) {
+  if (!text && !addSaid) return;
+  $('msg').textContent = text;
+  addSaid = !!text;
+}
+$('links').addEventListener('input', function () { addMsg(''); });
 
 function clearForm() {
   $('links').value = '';
@@ -1629,10 +1653,24 @@ function cleanLink(u) {
     return x.toString().replace(/\?$/, '');
   } catch (e) { return u; }
 }
-function linksIn(text) { return (text.match(/https?:\/\/[^\s<>"']+/g) || []).map(cleanLink); }
+// Links in any text: with https:// or without it (youtube.com/…, youtu.be/…, as people write
+// them in chats), without the comma or full stop after them.
+function linksIn(text) {
+  return (text.match(/(?:https?:\/\/|(?<![\w.\/-])(?=(?:www\.|m\.|music\.)?(?:youtube\.com|youtu\.be)\/))[^\s<>"'«»]+/gi) || []).map(function (l) {
+    l = l.replace(/[.,;:!?)\]]+$/, '');
+    return cleanLink(/^https?:\/\//i.test(l) ? l : 'https://' + l);
+  });
+}
+// The same video (or playlist) however its link is written: youtu.be/…, watch?v=…, shorts/…,
+// music.…, with or without extra bits. whole: a video inside a playlist taken as the playlist.
+function linkKey(l, whole) {
+  var v = /(?:[?&]v=|youtu\.be\/|shorts\/)([\w-]{11})/.exec(l), list = /[?&]list=([\w-]+)/.exec(l);
+  return whole && list ? 'l:' + list[1] : v ? 'v:' + v[1] : list ? 'l:' + list[1] : l;
+}
 function putLinks(add) {
-  var box = $('links'), have = linksIn(box.value);
-  var all = have.concat(add.filter(function (l, i) { return have.indexOf(l) < 0 && add.indexOf(l) === i; }));
+  var box = $('links'), have = linksIn(box.value), keys = have.map(function (l) { return linkKey(l); });
+  var all = have.concat(add.filter(function (l) { var k = linkKey(l); if (keys.indexOf(k) >= 0) return false; keys.push(k); return true; }));
+  addMsg('');
   box.value = all.join('\n') + '\n';
   box.focus();
   box.selectionStart = box.selectionEnd = box.value.length;
@@ -1871,8 +1909,8 @@ function updateRow(r, j) {
   // While it downloads: the preview of the video it's on (a playlist: of the track it's on), so
   // each row shows what's coming; the real cover replaces it when the file is done.
   var side = j.status === 'done' && j.cover ? 'cover' + j.cover
-    : j.status === 'running' && j.thumb ? 'thumb' + j.thumb
-    : j.status === 'done' || j.status === 'running' ? (j.mode === 'audio' ? 'audio' : 'video') : j.status;
+    : (j.status === 'running' || j.status === 'queued' || j.stopped) && j.thumb ? 'thumb' + j.thumb
+    : j.status === 'done' || j.status === 'running' || j.stopped ? (j.mode === 'audio' ? 'audio' : 'video') : j.status;
   if (r.side !== side) {
     r.side = side;
     var pic, old = r.img;
@@ -1906,10 +1944,10 @@ function updateRow(r, j) {
   // The state on the right of the title: an icon and a word, in one style for all of them.
   var key = running ? (waiting ? 'Waiting' : conv ? 'Finishing' : ind ? 'Getting ready' : 'Downloading')
     : j.status === 'done' ? (j.already ? 'Already there' : 'Done')
-    : j.status === 'error' ? 'Failed' : j.status === 'cancelled' ? 'Cancelled'
+    : j.status === 'error' ? 'Failed' : j.stopped ? 'Not finished' : j.status === 'cancelled' ? 'Cancelled'
     : verb === 'waiting for setup' ? 'Waiting for setup' : 'Queued';
   var icon = { Waiting: 'sWaiting', Finishing: 'sFinishing', 'Getting ready': 'sDownloading', Downloading: 'sDownloading',
-    'Already there': 'sDone', Done: 'sDone', Failed: 'sFailed', Cancelled: 'sCancelled' }[key] || 'sQueued';
+    'Already there': 'sDone', Done: 'sDone', Failed: 'sFailed', Cancelled: 'sCancelled', 'Not finished': 'sWaiting' }[key] || 'sQueued';
   var st = j.status + (waiting ? ' waiting' : '');
   if (r.st0 !== st + key) {
     r.row.className = 'job ' + j.status + (r.row.classList.contains('grow') ? ' grow' : '') + (r.row.classList.contains('lining') ? ' lining' : '');
@@ -1961,18 +1999,17 @@ function updateRow(r, j) {
   var list = j.of > 1 && j.pos;
   r.kind.hidden = running;
   r.nums.hidden = r.ovr.hidden = !running;
-  var bad = j.status === 'error' && j.error;
-  setText(r.kind, bad ? T(j.error) : kindText(j));
-  r.kind.classList.toggle('err', !!bad);
-  if (bad) r.kind.dataset.tip = j.error; else delete r.kind.dataset.tip;
+  // A failure: what went wrong goes on a line of its own under it, whole (cut off at the end of
+  // the second line it lost the part that says what to do).
+  setText(r.kind, kindText(j));
   setText(r.nums, running ? numsText(j) : '');
   setText(r.ovr, !running || ind || (waiting && j.progress <= 0) ? ''
     : (list ? itemWord(j) + ' ' + j.pos + ' ' + T('of') + ' ' + j.of + ' · ' : '') + Math.floor(j.progress) + '%');
 
   // A note: videos of a playlist that were skipped, a Mix that was cut short.
-  var msg = j.status === 'done' ? j.error : j.status === 'error' ? '' : j.note;
+  var msg = j.status === 'done' || j.status === 'error' ? j.error : j.note;
   setText(r.msg, T(msg) || '');
-  r.msg.className = 'sub';
+  r.msg.className = 'sub' + (j.status === 'error' ? ' err' : '');
   r.msg.hidden = !msg;
 
   // Buttons, at the right of the second line: rebuilt only when the state changes.
@@ -2175,7 +2212,10 @@ function render() {
   // Every download has its own row that stays on the page and is only updated, so nothing
   // blinks or starts its animation over. A part is rebuilt only when it really changes.
   var alive = {}, fresh = [];
-  jobs.slice().reverse().forEach(function (j, i) { // newest first
+  // In the order they were added, like a queue: done on top, then what's downloading, then
+  // what waits. (Newest first put a long queue upside down and the download it was on out of
+  // sight at the bottom.) keepInView follows the download that's running.
+  jobs.forEach(function (j, i) {
     alive[j.id] = true;
     var r = rows[j.id];
     if (!r) { r = rows[j.id] = makeRow(j); fresh.push(r.row); }
@@ -2183,6 +2223,7 @@ function render() {
     if (list.children[i] !== r.row) list.insertBefore(r.row, list.children[i] || null);
   });
   if (booted) fresh.forEach(grow);
+  if (run && run.id !== inView.id && rows[run.id]) { inView.id = run.id; keepInView(rows[run.id].row, fresh.length > 0); }
   Object.keys(rows).forEach(function (id) {
     if (!alive[id]) { bye(rows[id].row); delete rows[id]; }
   });
@@ -2204,13 +2245,33 @@ function render() {
   });
 }
 
+// When the next download starts and its row is out of sight in a long list, the list scrolls
+// to it, gently, unless the list was just scrolled by hand (then it stays where it was put).
+var inView = { id: 0, user: 0 };
+['wheel', 'touchmove', 'keydown'].forEach(function (e) { $('list').addEventListener(e, function () { inView.user = Date.now(); }, { passive: true }); });
+function keepInView(row, wait) {
+  // Looked at once the row is in, and again once its fishing line has opened under it (the
+  // list can't scroll to a bottom that isn't there yet).
+  var d = wait ? 380 : 120;
+  setTimeout(pass, d); setTimeout(pass, d + 420);
+  function pass() {
+    var l = $('list');
+    if (!row.isConnected || Date.now() - inView.user < 4000 || l.scrollHeight <= l.clientHeight + 1) return;
+    // Its bottom as it will be: the fishing line opening under it adds its 46 px.
+    var lane = row.querySelector('.lane'), grow = lane ? Math.max(0, 46 - lane.offsetHeight) : 0;
+    var top = row.getBoundingClientRect().top - l.getBoundingClientRect().top + l.scrollTop, bot = top + row.offsetHeight + grow;
+    var to = top < l.scrollTop ? top - 4 : bot > l.scrollTop + l.clientHeight ? bot - l.clientHeight + 8 : null;
+    if (to !== null) l.scrollTo({ top: to, behavior: still() ? 'auto' : 'smooth' });
+  }
+}
+
 // The list card's fold (ТЯГА's window only, see .lhead in the styles).
 var APP = document.documentElement.classList.contains('app');
 var fold = { on: false, gone: false, count: -1 };
 function foldSummary(jobs) {
   if (!jobs.length) return APP ? $('lsum').innerHTML : T('Nothing on the hook yet'); // app: the card is leaving, keep its line
-  var n = { running: 0, queued: 0, done: 0, error: 0 }, run = null;
-  jobs.forEach(function (j) { if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
+  var n = { running: 0, queued: 0, done: 0, error: 0, stopped: 0 }, run = null;
+  jobs.forEach(function (j) { if (j.stopped) n.stopped++; else if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
   var parts = [];
   var ru = LANG === 'ru';
   if (run) parts.push(statusText(run) === 'waiting' ? (ru ? 'Ждём YouTube' : 'Waiting for YouTube')
@@ -2218,6 +2279,7 @@ function foldSummary(jobs) {
     : run.progress >= 100 ? T('Finishing')
     : T('Downloading') + ' ' + Math.floor(run.progress) + '%');
   if (n.queued) parts.push(ru ? 'в очереди: ' + n.queued : n.queued + ' queued');
+  if (n.stopped) parts.push(ru ? 'не докачано: ' + n.stopped : n.stopped + ' not finished');
   if (n.done) parts.push(ru ? 'готово: ' + n.done : n.done + ' done');
   var html = parts.map(function (t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }).join(' · ');
   if (n.error) html += (html ? ' · ' : '') + '<span class="bad">' + (ru ? 'с ошибкой: ' + n.error : n.error + ' failed') + '</span>';

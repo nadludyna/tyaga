@@ -66,7 +66,7 @@ html.off .menu{opacity:0;animation:none;transition:opacity .08s ease}
     <button id="quit" class="quit"><svg viewBox="0 0 24 24"><path d="M12 3v8M7 6a8 8 0 1 0 10 0"/></svg><span data-t="Quit ТЯГА">Quit ТЯГА</span></button>
   </div>
   <div class="ask">
-    <p><b data-t="Something is still downloading.">Something is still downloading.</b><span data-t="Quit anyway? Unfinished files resume when you download them again.">Quit anyway? Unfinished files resume when you download them again.</span></p>
+    <p><b data-t="Something is still downloading.">Something is still downloading.</b><span data-t="Quit anyway? Unfinished downloads stay in the list for next time.">Quit anyway? Unfinished downloads stay in the list for next time.</span></p>
     <div class="row"><button id="keep"><span data-t="Keep going">Keep going</span></button><button id="quit2" class="quit"><span data-t="Quit">Quit</span></button></div>
   </div>
 </div>
@@ -76,7 +76,7 @@ function $(id) { return document.getElementById(id); }
 // The language the main window's button picked (tyaga-lang), else Windows' own.
 var RU = { 'Open ТЯГА': 'Открыть ТЯГУ', 'Change the folder…': 'Сменить папку…',
   'Quit ТЯГА': 'Выйти из ТЯГИ', 'Something is still downloading.': 'Ещё что-то качается.',
-  'Quit anyway? Unfinished files resume when you download them again.': 'Всё равно выйти? Недокачанное докачается, когда скачаешь снова.',
+  'Quit anyway? Unfinished downloads stay in the list for next time.': 'Всё равно выйти? Недокачанное останется в списке до следующего раза.',
   'Keep going': 'Пусть качает', 'Quit': 'Выйти' }, ru = false;
 function langNow() {
   var l = null; try { l = localStorage.getItem('tyaga-lang'); } catch (e) {}

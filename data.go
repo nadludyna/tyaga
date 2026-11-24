@@ -10,6 +10,8 @@ package main
 //	login\            ТЯГА's own sign-in window, only for Chrome/Edge users (Windows)
 //	tyaga.log         what happened in the last run, for when something goes wrong
 //	youtube-signin.txt  which browser the YouTube sign-in is read from
+//	queue.json        what was still downloading or waiting when ТЯГА closed: it's back in
+//	                  the list next time, to resume (queue.go); gone once nothing is left
 //	settings.json     what has to outlive the window: the downloads folder picked on the
 //	                  page (the switches live in the window's own storage), and that the
 //	                  "ТЯГА is in the tray" notice was shown (once is enough: every time annoys)

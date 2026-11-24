@@ -13,7 +13,7 @@ if '-U' in a or '--version' in a:
     print('Latest version: 2026.11.10 from yt-dlp/yt-dlp\nyt-dlp is up to date (2026.11.10 from yt-dlp/yt-dlp)'); sys.exit(0)
 out = a[a.index('-P') + 1] if '-P' in a else '.'
 def vid_of(link): return (link.split('v=')[-1].split('&')[0] if 'v=' in link else link.split('?')[0].rstrip('/').split('/')[-1])[:11]
-def own(link): return 'Song ' + vid_of(link)[-2:] if 'NEW' in link else None
+def own(link): return 'Song ' + vid_of(link).split('NEW', 1)[1] if 'NEW' in vid_of(link) else None
 # -J: what the link is, no download (inspect.go). Words in the link pick what it is like:
 # CHAP an album with 10 chapters (Music), SPON a video with ads (SponsorBlock, see inspect.go),
 # HD720 only up to 720p, FAIL fails; a playlist link (list=) gives 3 entries with --flat-playlist.
@@ -99,6 +99,8 @@ for i, (artist, title, vid) in enumerate(items, 1):
             say('[hlsnative] Downloading m3u8 manifest')
             say(f'[hlsnative] Total fragments: {frags}')
         say(f'[download] Destination: {base}.{ext}')
+        part = f'{base}.{ext}.part'  # like yt-dlp: the file grows as .part, renamed once whole
+        open(part, 'wb').close()
         done, v = 0, 3e6
         while done < total:
             r = random.random()
@@ -112,6 +114,7 @@ for i, (artist, title, vid) in enumerate(items, 1):
             else:
                 say(f'PROG|{int(done)}|{total}|NA|{v}|{eta}|NA|NA')
             time.sleep(0.5 if r >= 0.06 else 1.5)
+        os.remove(part)
         say(f'[download] 100% of {total/1e6:.2f}MiB in 00:00:0{random.randint(2,9)} at {v/1e6:.2f}MiB/s')
     final = f'{base}.{fmt if audio else "mp4"}'
     if audio:

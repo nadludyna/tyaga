@@ -293,6 +293,8 @@ func runWindow(token string) bool {
 	tray.OnRightClick(showMenu)
 
 	go showProgress(win, tray)
+	loadQueue()
+	go keepQueue()
 	go setupTools()
 	if err := app.Run(); err != nil {
 		fail("Could not open the window: " + err.Error())

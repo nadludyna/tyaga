@@ -135,6 +135,8 @@ func quitWhenAbandoned() {
 // quit stops the download (the unfinished file stays and resumes next time) and exits.
 func quit() {
 	mu.Lock()
+	quitting = true
+	left := unfinished() // written down before it's stopped: it comes back next time (queue.go)
 	for _, j := range jobs {
 		if j.Status == "queued" || j.Status == "running" {
 			j.Status = "cancelled"
@@ -144,6 +146,8 @@ func quit() {
 		killTree(running)
 	}
 	mu.Unlock()
+	last := ""
+	writeQueue(left, &last)
 	os.Remove(instanceFile())
 	if logFile != nil {
 		logFile.Close()

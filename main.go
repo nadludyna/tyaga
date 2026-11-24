@@ -125,6 +125,8 @@ func main() {
 	logf("If the browser didn't open: %s", address)
 	logf("To quit: just close the page.")
 
+	loadQueue()
+	go keepQueue()
 	go setupTools()
 	if !*noBrowser {
 		openURL(address)

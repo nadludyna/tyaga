@@ -48,6 +48,14 @@
     if (typeof window.placeSky !== 'function' || typeof window.optLabels !== 'function') bad.push('the page script did not load (a syntax error?)');
     // Measure things where they end up, not halfway through their appearing (a badge pops in from 30 %).
     document.getAnimations().forEach(function (x) { try { if (x.effect && x.effect.getTiming().iterations !== Infinity) x.finish(); } catch (e) {} });
+    // 0b. The list scrolls only when its rows don't fit: something invisible hanging out of a
+    // row (a folded fishing line's canvas) gave one row a scrollbar (the owner, by eye).
+    var lst = document.getElementById('list');
+    if (lst && seen(lst) && lst.scrollHeight > lst.clientHeight + 1) {
+      var last = lst.lastElementChild, need = 0;
+      if (last) need = last.getBoundingClientRect().bottom - lst.getBoundingClientRect().top + lst.scrollTop + parseFloat(getComputedStyle(lst).paddingBottom);
+      if (need <= lst.clientHeight + 1) bad.push('the list scrolls with nothing to scroll to (' + (lst.scrollHeight - lst.clientHeight) + ' px)');
+    }
     // 1. Labels in the middle.
     document.querySelectorAll('button,.chip,.seg button').forEach(function (b) {
       if (!seen(b)) return;
