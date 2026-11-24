@@ -4,7 +4,9 @@ package main
 // Copy the program somewhere and it starts clean; delete the folder and nothing of ТЯГА is
 // left on the computer. What's in it, and why:
 //
-//	bin\              yt-dlp, ffmpeg and Deno, downloaded once (only if they aren't installed)
+//	bin\              ffmpeg and Deno, downloaded once (only if they aren't installed);
+//	bin\yt-dlp\       yt-dlp unpacked (it starts faster than the one-file one), kept up to
+//	                  date at each start (ytdlp_unpacked.go)
 //	webview\          the window's browser data: the switches you picked (Windows; WebView2
 //	                  can't run without such a folder; its caches are deleted at every start)
 //	login\            ТЯГА's own sign-in window, only for Chrome/Edge users (Windows)
