@@ -119,6 +119,42 @@ const S = {
     expect(r.length === 1 && /running/.test(r[0].cls), 'the running download stays');
     await pg.$$eval('.job .x:not(.off)', xs => xs.forEach(x => x.click()));
   },
+  // The fishing line, frame by frame: a short clip (100 % comes in one step), a normal song and
+  // a playlist. It never goes back (but for a new track's cast), never lurches (a step that
+  // changes by more than a few px from one frame to the next), and the lane folds only once the
+  // fish has got to the end and swum off.
+  line: async () => {
+    await pg.evaluate(() => {
+      window.__line = {};
+      (function tick() {
+        document.querySelectorAll('.job').forEach(row => {
+          const st = waveState[row.dataset.id], t = waveTarget[row.dataset.id], lane = row.querySelector('.lane'), cv = row.querySelector('canvas.wave');
+          if (!st || !t || !lane) return;
+          (window.__line[row.dataset.id] = window.__line[row.dataset.id] || []).push({ s: st.shown, pos: t.pos || 0, c: !!st.catchAt, status: t.status, shut: lane.classList.contains('shut'), gone: !!st.gone, w: cv ? cv.clientWidth : 0 });
+        });
+        requestAnimationFrame(tick);
+      })();
+    });
+    await paste([L('l1', 'TINY'), L('l2'), 'https://www.youtube.com/playlist?list=PL' + R + 'line'].join('\n'), 3500);
+    await go(); await idle(200000); await sleep(1500);
+    const lines = await pg.evaluate(() => window.__line);
+    for (const [id, fr] of Object.entries(lines)) {
+      let back = 0, lurch = 0, worst = 0;
+      for (let i = 2; i < fr.length; i++) {
+        const a = fr[i - 2], b = fr[i - 1], c = fr[i];
+        if (c.pos !== b.pos || b.c || c.c || c.status !== b.status) continue;
+        if (c.s < b.s - 0.05) back++;
+        if (b.pos !== a.pos || a.c || b.status !== a.status) continue;
+        const d1 = (b.s - a.s) * c.w / 100, d2 = (c.s - b.s) * c.w / 100;
+        if (Math.abs(d2 - d1) > 6) { lurch++; worst = Math.max(worst, Math.abs(d2 - d1)); }
+      }
+      const fold = fr.findIndex((f, i) => i > 0 && f.shut && !fr[i - 1].shut);
+      const before = fold > 0 ? fr[fold - 1] : null;
+      expect(!back, `row ${id}: the line never goes back (${back})`);
+      expect(lurch <= 2, `row ${id}: no lurches (${lurch}, worst ${worst.toFixed(1)} px a frame)`);
+      if (before && before.status === 'done') expect(before.s >= 99.5 && before.gone, `row ${id}: folds once the fish got to the end and swam off (${before.s.toFixed(1)} %, gone ${before.gone})`);
+    }
+  },
 };
 
 (async () => {

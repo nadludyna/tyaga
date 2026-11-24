@@ -2647,6 +2647,9 @@ var waveTarget = {}, waveState = {};
     var mode = t.status === 'done' ? 'done' : t.status === 'error' ? 'err' : t.status === 'cancelled' ? 'cancel'
       : t.wait ? 'wait' : t.conv ? 'conv' : t.ind ? 'start' : 'move';
     if (t.p !== st.lastP) { st.lastP = t.p; st.lastPAt = now; }
+    // A new state (it waited in the queue, it started): "nothing came for a while" counts from now,
+    // or a row that waited long in the queue started with the "?" up (one frame, the stand saw it).
+    if (t.status !== st.stat) { st.stat = t.status; st.lastPAt = now; }
     if (mode === 'move' && now - st.lastPAt > 10000) mode = 'stall';
     // 100 % came in a step: it swims the rest of the way first, then the somersaults or the catch.
     var finishing = mode === 'done' || (mode === 'conv' && t.p >= 99);
@@ -2687,11 +2690,25 @@ var waveTarget = {}, waveState = {};
     if (catchK >= 0) target = st.shown; // mid-catch: it stays where it got to
     else if (t.p < st.shown - 5 && mode !== 'done' && !t.list) { st.shown = t.p; st.vel = 0; }
     if (still) st.shown = t.list && st.catchAt ? st.shown : target;
-    else for (var left = dt; left > 1e-4; left -= 1 / 60) {
-      var d = Math.min(1 / 60, left), sp = finishing ? [60, 2 * Math.sqrt(60)] : spring(target - st.shown); // the last stretch: briskly to the very end
+    else if (finishing && catchK < 0) {
+      // 100 % came in a step (a short clip goes 0 → 100 at once): the rest of the way is swum, not
+      // sprung. A stiff spring crossed the whole line in 0.4 s, 60–90 px a frame (the stand saw
+      // it). Now up to 1.3 s (less when little is left), picking up the speed it already had
+      // and slowing into the end: no lurch where it starts, none where it stops.
+      if (st.finAt == null) {
+        st.finAt = now; st.finFrom = st.shown; st.finDur = 400 + 900 * (100 - st.shown) / 100;
+        st.finV = Math.max(0, Math.min(2.5, st.vel * st.finDur / 1000 / Math.max(1, 100 - st.shown))); // its speed, as a share of the rest per the whole swim
+      }
+      var fk = Math.min(1, (now - st.finAt) / st.finDur), fh = st.finV * (fk * fk * fk - 2 * fk * fk + fk) + (3 * fk * fk - 2 * fk * fk * fk);
+      var was = st.shown;
+      st.shown = Math.max(st.shown, Math.min(100, st.finFrom + (100 - st.finFrom) * fh));
+      st.vel = dt > 0 ? (st.shown - was) / dt : 0;
+    } else for (var left = dt; left > 1e-4; left -= 1 / 60) {
+      var d = Math.min(1 / 60, left), sp = spring(target - st.shown);
       st.vel += (sp[0] * (target - st.shown) - sp[1] * st.vel) * d;
       st.shown = Math.max(st.shown, Math.min(100, st.shown + st.vel * d)); // never back
     }
+    if (!finishing) st.finAt = null;
 
     var dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
