@@ -436,7 +436,7 @@ func explain(line string) string {
 	case goneRe.MatchString(line):
 		return "Removed or not available."
 	case sponsorRe.MatchString(line):
-		return "SponsorBlock didn't answer: untick \"no sponsors\"."
+		return "SponsorBlock didn't answer: turn cutting the ads off, then Retry."
 	case signInRe.MatchString(line):
 		if canLogin {
 			return "YouTube asks you to sign in: sign in, then Retry."
@@ -678,7 +678,7 @@ func onLine(j *Job, line string) {
 	}
 }
 
-// logSize: how many recent lines the page shows under the progress wave.
+// logSize: how many recent steps a download keeps (the page shows the last one).
 const logSize = 4
 
 // pathRe finds a full path in a log line (Windows or Unix, quoted or not) and keeps just the file name.

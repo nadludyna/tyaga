@@ -94,9 +94,7 @@ func main() {
 	// A folder picked on the page (settings.json) counts, unless -out was given (the stand).
 	outGiven := false
 	flag.Visit(func(f *flag.Flag) { outGiven = outGiven || f.Name == "out" })
-	// The old default (Downloads\YouTube) remembered as if picked counts as not picked: it moves
-	// to the new one. What's in the old folder stays there.
-	if s := loadSettings(); !outGiven && s.Out != "" && filepath.IsAbs(s.Out) && !strings.EqualFold(filepath.Clean(s.Out), filepath.Join(home, "Downloads", "YouTube")) {
+	if s := loadSettings(); !outGiven && s.Out != "" && filepath.IsAbs(s.Out) {
 		outDir, outPicked = s.Out, true
 	}
 	outPicked = outPicked || outGiven
@@ -128,7 +126,7 @@ func main() {
 
 	os.WriteFile(instanceFile(), []byte(address), 0o600)
 
-	logf("TYAGA %s is running. Files are saved to %s", version, outDir)
+	logf("ТЯГА %s is running. Files go to %s", version, filesGoTo())
 	logf("If the browser didn't open: %s", address)
 	logf("To quit: just close the page.")
 
@@ -274,8 +272,7 @@ func handler(token string) http.Handler {
 				return
 			}
 			for _, l := range links {
-				u, err := url.Parse(l)
-				if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+				if !isWebLink(l) {
 					writeJSON(w, map[string]string{"error": "This doesn't look like a link: " + l})
 					return
 				}
@@ -287,11 +284,12 @@ func handler(token string) http.Handler {
 			}
 			addJobs(links, o)
 		case "/api/inspect": // what a link is, before it's downloaded (inspect.go)
-			u, err := url.Parse(strings.TrimSpace(body.Text))
-			if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+			link := strings.TrimSpace(body.Text)
+			if !isWebLink(link) {
 				writeJSON(w, Facts{Error: "not a link"})
 				return
 			}
+			u, _ := url.Parse(link)
 			writeJSON(w, inspect(u.String()))
 			return
 		case "/api/peek": // a link's title and channel in a moment, before the full look (inspect.go)
@@ -360,6 +358,22 @@ func handler(token string) http.Handler {
 		}
 		writeJSON(w, map[string]bool{"ok": true})
 	})
+}
+
+// isWebLink: an http or https address with a host, the only kind of link ТЯГА takes.
+func isWebLink(s string) bool {
+	u, err := url.Parse(s)
+	return err == nil && (u.Scheme == "http" || u.Scheme == "https") && u.Host != ""
+}
+
+// filesGoTo says where downloads go, for the log.
+func filesGoTo() string {
+	mu.Lock()
+	defer mu.Unlock()
+	if outPicked {
+		return outDir
+	}
+	return dirFor(true, "en") + " (audio), " + dirFor(false, "en") + " (video)"
 }
 
 // cleanOptions keeps only the values ТЯГА knows: what comes from the page (or from queue.json)

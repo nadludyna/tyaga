@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" class="app"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ТЯГА</title>
 <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"%3E %3Crect width="256" height="256" rx="58" fill="%23161616"/%3E %3Cpath d="M176 0 V22" stroke="%238a96a3" stroke-width="6"/%3E %3Ccircle cx="176" cy="36" r="12" fill="none" stroke="%23fff" stroke-width="9"/%3E %3Cpath d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="%23fff" stroke-width="18"/%3E %3Cpath d="M85 42 L96 10 L107 42 Z" fill="%23fff"/%3E %3Cpath d="M103 36 L119 54" stroke="%23fff" stroke-width="9.9" stroke-linecap="round"/%3E %3Cg fill="%23161616" stroke="%23161616" stroke-width="12" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cg fill="%23ff6b2c" stroke="%23ff6b2c" stroke-width="2" stroke-linejoin="round"%3E %3Cellipse cx="100" cy="124" rx="54" ry="47"/%3E %3Cpath d="M60 124 L24 86.4 Q33.9 124 24 161.6 Z"/%3E %3C/g%3E %3Cpath d="M83.143 108.208 L83.143 139.792 L111.76599999999999 124 Z" fill="%23fff" stroke="%23fff" stroke-width="5.922" stroke-linejoin="round"/%3E %3Ccircle cx="131.32" cy="109.9" r="6" fill="%23161616"/%3E %3C/svg%3E'>
 <style>
@@ -17,14 +17,10 @@
 [hidden]{display:none!important}
 /* The scrollbar's place is kept even without one, so the page doesn't shift sideways when the list gets long. */
 html{min-height:100%;scrollbar-gutter:stable}
-body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.45 Onest,system-ui,sans-serif;overflow-x:hidden}
 /* An app, not a document: Ctrl+A or a stray click doesn't paint the buttons and labels blue.
    What's worth copying stays selectable: the links box, download titles, errors and the log. */
-body{-webkit-user-select:none;user-select:none}
-textarea,.name,.sub,.log{-webkit-user-select:text;user-select:text}
-
-/* Background: a faint glow at the top (the browser page; ТЯГА's window has it in its first card). */
-.bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 80% 50% at 50% -10%,var(--glow),transparent 70%)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.45 Onest,system-ui,sans-serif;overflow-x:hidden;-webkit-user-select:none;user-select:none}
+textarea,.name,.sub{-webkit-user-select:text;user-select:text}
 /* A download finished: the fish jumps on the hook. */
 body.caught .logo .catch{animation:jump .9s cubic-bezier(.3,1.5,.5,1)}
 @keyframes jump{0%{transform:none}35%{transform:translateY(-18px) rotate(-10deg)}70%{transform:translateY(3px) rotate(4deg)}100%{transform:none}}
@@ -34,7 +30,6 @@ body.caught .logo .catch{animation:jump .9s cubic-bezier(.3,1.5,.5,1)}
 .job.just{isolation:isolate}
 .job.just::before{content:"";position:absolute;inset:1px -7px;z-index:-1;border-radius:10px;pointer-events:none;background:color-mix(in srgb,var(--ok) 13%,transparent);box-shadow:inset 0 0 16px color-mix(in srgb,var(--ok) 22%,transparent);animation:glow 1.7s ease both}
 @keyframes glow{0%{opacity:0}15%{opacity:1}45%{opacity:1}100%{opacity:0}}
-
 main{max-width:760px;margin:0 auto;padding:56px 18px 40px}
 header{display:flex;align-items:center;gap:16px;margin:0 0 26px;animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .logo{width:58px;height:58px;flex:none;border-radius:15px;box-shadow:0 10px 30px -8px var(--glow),0 0 0 1px var(--line);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
@@ -47,95 +42,46 @@ h1{font-size:24px;letter-spacing:.42em;margin:0;font-weight:800;line-height:1.1;
 /* The name with its version above it and the motto beside it. */
 .title{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0}
 .title small{font-size:11px;line-height:1.1;color:var(--dim);letter-spacing:.02em;font-variant-numeric:tabular-nums}
-.brand{display:flex;align-items:baseline;gap:14px;min-width:0}
 .motto{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--tonal);white-space:nowrap;min-width:0;overflow:hidden}
-.motto>span{overflow:hidden;text-overflow:ellipsis}
-/* The motto hangs on a little fishing line: a wave that ends in a hook (it bobs when the logo
-   or the motto is under the mouse; still otherwise). */
-.motto svg{width:30px;height:13px;flex:none;fill:none;stroke:var(--acc);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
-.motto .mh{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
-header:has(.logob:hover,.motto:hover) .motto .mh{transform:translateY(2px)}
-
 .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 50px -30px rgba(0,0,0,.6);animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
 .card+.card{margin-top:16px}
-main>.card:nth-of-type(2){animation-delay:.08s}main>.card:nth-of-type(3){animation-delay:.16s}
+main>.card:nth-of-type(2){animation-delay:.08s}
+main>.card:nth-of-type(3){animation-delay:.16s}
 @keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 .note{border-color:var(--acc);font-size:14px;white-space:pre-line}
 .note.err{border-color:var(--err);color:var(--err)}
-
-textarea{width:100%;min-height:90px;resize:vertical;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;outline:none;transition:border-color .1s,box-shadow .1s,background .1s}
+textarea{width:100%;background:rgba(127,127,127,.06);color:inherit;border:1px solid var(--line);border-radius:10px;font:inherit;outline:none;transition:border-color .1s,box-shadow .1s,background .1s}
 body.drop textarea{border-color:var(--acc);border-style:dashed;box-shadow:0 0 0 4px var(--glow)}
 textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--glow);background:transparent}
 .row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:14px}
-.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;background:transparent}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;background:transparent}
 .seg button{border:0;background:transparent;color:inherit;height:32px;padding:0 12px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:500;transition:background .08s ease,color .08s ease,transform .06s ease}
-.seg button:hover:not(.on){background:rgba(127,127,127,.12)}
 .seg button:active{transform:scale(.97)}
 /* Selected: a tonal orange (Material 3's secondary container), so only Download is solid orange. */
 .seg button.on{background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal);font-weight:600}
 label{color:var(--dim);cursor:pointer;user-select:none;transition:color .1s}
 label:hover{color:var(--fg)}
-/* Options: switches on one line (pushed to both edges), checkboxes as chips that fill the width. */
-/* Both switches stretch to fill the line, every button the same width (grow = number of buttons). */
-/* Fixed columns, so nothing moves when a switch flips: Video/Audio always takes a third,
-   the switch next to it (4 qualities or 2 formats) two thirds; the checkboxes, equal columns. */
-.opts{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.opts{grid-template-columns:1fr 2fr}
 .opts .seg{display:flex}
-.opts .seg button{flex:1;padding-left:6px;padding-right:6px}
-.chips{display:flex;gap:8px}
-.chips>.chip{flex:1 1 0}
-/* "Whole playlist" is there only for a link to a video inside a playlist: it opens out of
-   nothing at the left and the others make room (and close up again when it goes). */
-.chips>.chip{transition:flex-grow .3s cubic-bezier(.2,.8,.2,1),padding .3s cubic-bezier(.2,.8,.2,1),margin .3s cubic-bezier(.2,.8,.2,1),border-width .3s,opacity .2s ease,border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
-.chips>.chip.away{flex-grow:0;padding-left:0;padding-right:0;border-width:0;margin-right:-8px;opacity:0;pointer-events:none}
-.chips.calm>.chip{transition:none}
-@media (max-width:560px){.opts{grid-template-columns:1fr}.chips{display:grid;grid-auto-flow:row;grid-template-columns:1fr 1fr}.foot .btn.clear{margin-left:0}}
+@media (max-width:560px){.opts{grid-template-columns:1fr}}
 @media (max-width:430px){.motto{display:none}}
-.chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 28px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--fg);font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .08s ease,background .08s ease,color .08s ease,transform .06s ease}
-.chip:hover{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.1)}
-/* Filter chips like Material 3: no checkbox square, a check mark when on. Its place is always
-   kept (and balanced on the right), so the words never move when it's ticked. */
-.chip{position:relative}
-.chip input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.chip{background:transparent}
+.chip{min-width:0;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 28px;border:1px solid var(--line2);border-radius:8px;color:var(--fg);font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:border-color .08s ease,background .08s ease,color .08s ease,transform .06s ease;position:relative}
 .chip::before{content:"";position:absolute;left:9px;top:50%;margin-top:-9px;width:18px;height:18px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.4);transition:opacity .08s ease,transform .1s cubic-bezier(.2,.8,.2,1)}
-.chip:has(input:checked)::before{opacity:1;transform:none}
-.chip:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:2px}
 .chip:active{transform:scale(.97)}
-.chip:has(input:checked){border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
-.chip:has(input:disabled){opacity:.38;cursor:default;border-color:var(--line);background:transparent;color:var(--dim)}
-.cutrow:has(.times[hidden]){display:none}
-.cutrow{justify-content:center}
-.input{display:flex;gap:12px;align-items:stretch}
+.input{display:flex;gap:12px}
 .input textarea{flex:1}
-@media (max-width:560px){.input{flex-direction:column}.input .go{flex-direction:row;padding:12px}.chips>.chip.away{display:none}}
+@media (max-width:560px){.input{flex-direction:column}.input .go{flex-direction:row;padding:12px}}
 /* Every button answers the same calm way: a little lighter under the mouse, a little smaller
    while pressed. No jumps, no flashes. */
-.go{flex:none;min-width:132px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 8px 22px -8px var(--glow);transition:filter .08s ease,transform .06s ease}
-.go:hover{filter:brightness(1.08)}
-.go{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:15.5px;box-shadow:0 8px 22px -8px var(--glow),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.08)}
-.go .goi{width:24px;height:24px;flex:none;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.go{flex:none;min-width:132px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a0c04;border:0;border-radius:10px;padding:9px 26px;font:inherit;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:filter .08s ease,transform .06s ease;display:flex;align-items:center;justify-content:center;font-size:15.5px;box-shadow:0 8px 22px -8px var(--glow),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.08)}
+.go .goi{flex:none;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
 .go .goi .ga{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
 .go:hover .goi .ga{transform:translateY(2.5px)}
-.go b{position:absolute;top:8px;right:8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;display:grid;place-items:center;background:#1a0c04;color:var(--acc2);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;animation:pop2 .3s cubic-bezier(.3,1.6,.5,1) both}
 @keyframes pop2{from{transform:scale(.3);opacity:0}}
-.go:active{transform:scale(.97);filter:brightness(.95)}
 .msg{color:var(--err);margin-top:8px;font-size:14px}
 .msg:empty{margin:0}
-/* A short note about what a click just did, with a way back (Undo), like Material 3's
-   snackbar: under the options, fades in, goes away by itself. */
-.notice{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13.5px;color:var(--dim);animation:fadein .2s ease both;transition:opacity .2s ease}
-.notice.out{opacity:0}
-/* It comes and goes as one: it fades and its place opens or folds with it, so what's under it
-   glides instead of jumping (the owner: Clear finished's note vanished, then the list jumped up). */
-.notice{transition:opacity .2s ease,height .3s cubic-bezier(.2,.8,.2,1),margin-top .3s cubic-bezier(.2,.8,.2,1),padding-bottom .3s cubic-bezier(.2,.8,.2,1)}
-.notice.out{margin-top:0;padding-bottom:0}
-.notice span{flex:1;min-width:0}
-.notice .btn{height:28px;padding:0 12px;font-variant-numeric:tabular-nums}
-.notice{position:relative;padding-bottom:8px;box-sizing:border-box} /* its height, set while it opens or folds, includes this padding */
-.ntime{position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--line);overflow:hidden}
-.ntime::after{content:"";position:absolute;inset:0;border-radius:2px;background:var(--acc);opacity:.7;transform-origin:left;animation:drain 8s linear forwards}
-@keyframes drain{to{transform:scaleX(0)}}
-
+/* its height, set while it opens or folds, includes this padding */
 /* One download = one compact row, the way mature downloaders do it (Seal, 4K Video
    Downloader): the picture, then two lines. The title with its state on the right; under it
    what it is, or while it downloads the bar and the numbers. Its buttons sit at the right of
@@ -143,14 +89,15 @@ label:hover{color:var(--fg)}
 .job{display:flex;flex-wrap:wrap;column-gap:12px;row-gap:0;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);border-radius:10px}
 .job:last-child{border-bottom:0}
 .job.grow{overflow:hidden;transition:height .32s cubic-bezier(.2,.8,.2,1),padding .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
-.job .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1} /* over the fishing line's canvas: a jumping fish goes behind the picture, not over it */
+.job .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1}
+/* over the fishing line's canvas: a jumping fish goes behind the picture, not over it */
 /* The picture: the cover that's really in the finished file; before that an icon of what it is
    (no video thumbnail: it's not what ends up in the file). Always the same square, so the
    text never moves; what's in it cross-fades. */
-.side{flex:none;position:relative;z-index:1;width:104px;height:58.5px} /* 16:9; bigger so what downloads is seen (the owner, build 29: it was 72) */
+.side{flex:none;position:relative;z-index:1;width:104px;height:58.5px}
+/* 16:9; bigger so what downloads is seen (the owner, build 29: it was 72) */
 @media (max-width:560px){.side{width:88px;height:49.5px}}
 .side>*{position:absolute;inset:0;width:100%;height:100%;transition:opacity .25s ease}
-.side>.gone{opacity:0!important}
 /* A cover: 16:9 as it is; a square album cover in the middle, over a blurred copy of itself
    (no black bars). */
 .cover{border-radius:8px;overflow:hidden;background:var(--line);box-shadow:0 0 0 1px var(--line);opacity:0;transform:scale(.94);transition:opacity .35s,transform .35s cubic-bezier(.3,1.5,.5,1)}
@@ -167,7 +114,11 @@ label:hover{color:var(--fg)}
 .name.link{color:var(--dim)}
 .st{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dim);white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums}
 .st svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.st.running{color:var(--acc)}.st.waiting{color:var(--dim)}.st.done{color:var(--ok)}.st.error{color:var(--err)}.st.cancelled,.st.queued{color:var(--dim)}
+.st.running{color:var(--acc)}
+.st.waiting{color:var(--dim)}
+.st.done{color:var(--ok)}
+.st.error{color:var(--err)}
+.st.cancelled,.st.queued{color:var(--dim)}
 .st.pop{animation:pop .35s ease}
 @keyframes pop{0%{opacity:0}100%{opacity:1}}
 /* Small icon buttons in a row: cancel, copy the file. */
@@ -176,13 +127,14 @@ label:hover{color:var(--fg)}
 .ibtn:hover{background:color-mix(in srgb,var(--fg) 11%,transparent);color:var(--fg)}
 .ibtn:active{transform:scale(.92);background:color-mix(in srgb,var(--fg) 17%,transparent)}
 .ibtn.x:hover{color:var(--err);background:color-mix(in srgb,var(--err) 12%,transparent)}
-.ibtn.acc{color:var(--tonal)}.ibtn.acc:hover{color:var(--tonal);background:color-mix(in srgb,var(--acc) 16%,transparent)} /* Retry: the way out of a failure */
+.ibtn.acc{color:var(--tonal)}
+.ibtn.acc:hover{color:var(--tonal);background:color-mix(in srgb,var(--acc) 16%,transparent)}
+/* Retry: the way out of a failure */
 .ibtn.x{overflow:hidden;transition:width .25s cubic-bezier(.2,.8,.2,1),margin .25s cubic-bezier(.2,.8,.2,1),opacity .15s ease,background .15s,color .15s}
 .ibtn.x.off{width:0;margin:-2px 0 -2px -10px;opacity:0;pointer-events:none}
 .ibtn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .line2{display:flex;align-items:center;gap:8px 10px;min-height:28px;flex-wrap:wrap}
 .kind{flex:1;min-width:0;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kind.err{color:var(--err)}
 /* While it downloads: what's happening ("3 MB of 5 MB · 1.2 MB/s · 0:02 left") and, on the
    right, how far it is all together; the fishing line full width under the row. */
 .nums{flex:1;min-width:0;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
@@ -208,23 +160,13 @@ label:hover{color:var(--fg)}
 .acts .ibtn{margin:0}
 .sub{font-size:12px;color:var(--dim);word-break:break-word}
 .sub.err{color:var(--err)}
-.foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 /* Buttons: soft pills with an icon; the accent one is for the thing you most likely want. */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 13px 0 11px;border:1px solid var(--line2);border-radius:8px;background:color-mix(in srgb,var(--fg) 4%,transparent);color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .08s ease,background .08s ease,color .08s ease,transform .06s ease}
 .btn svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 /* Icons with a meaning get a quiet colour of it: folders, copying; clearing turns red on hover. */
-#open svg{color:var(--folder)}#pick svg{color:var(--info)}.btn.copyall svg{color:var(--ok)}
-.foot .btn.clear{margin-left:auto}
-.btn.clear svg{color:var(--dim)}.btn.clear:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}.btn.clear:hover svg{color:var(--err)}
-.btn:hover{border-color:rgba(127,127,127,.4);background:rgba(127,127,127,.14)}
 .btn:active{transform:scale(.97)}
 .btn.acc{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 45%,transparent);background:color-mix(in srgb,var(--acc) 12%,transparent)}
 .btn.acc:hover{background:color-mix(in srgb,var(--acc) 22%,transparent);border-color:var(--acc)}
-.btn.ghost{color:var(--dim)}
-.btn.ghost:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent);background:color-mix(in srgb,var(--err) 10%,transparent)}
-
-.empty{color:var(--dim);text-align:center;padding:26px 0 18px}
-.empty svg{display:block;margin:0 auto 10px;width:44px;height:44px;opacity:.35}
 .times{color:var(--dim);display:inline-flex;gap:6px;align-items:center;animation:rise .3s both}
 .times input{width:58px;background:rgba(127,127,127,.06);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 4px 5px 8px;font:inherit;font-variant-numeric:tabular-nums;outline:none;transition:border-color .1s,box-shadow .1s}
 .times input:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--glow)}
@@ -233,14 +175,16 @@ label:hover{color:var(--fg)}
 /* Hints, only where the label doesn't say it all (the page turns title="" into data-tip): one
    bubble for the whole page (#tip), placed by the script below or above the thing so it always
    fits in the window, a solid plate like Material 3's plain tooltip. */
-#tip{position:fixed;left:0;top:0;z-index:60;max-width:280px;padding:7px 10px;border-radius:8px;background:#2b2b2e;color:#f1f1f1;box-shadow:0 8px 24px -8px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);font:12.5px/1.45 Onest,system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .08s ease,transform .08s cubic-bezier(.2,.8,.2,1);will-change:transform,opacity}
+#tip{position:fixed;left:0;top:0;z-index:60;max-width:280px;padding:7px 10px;border-radius:8px;background:#2b2b2e;color:#f1f1f1;box-shadow:0 8px 24px -8px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);font:12.5px/1.45 Onest,system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .08s ease,transform .08s cubic-bezier(.2,.8,.2,1)}
 #tip.on{opacity:1}
 :root[data-theme=light] #tip{background:#2f2f33}
-.seg{overflow:visible}.seg button:first-child{border-radius:7px 0 0 7px}.seg button:last-child{border-radius:0 7px 7px 0}
-
+.seg{overflow:visible}
+.seg button:first-child{border-radius:7px 0 0 7px}
+.seg button:last-child{border-radius:0 7px 7px 0}
 /* Signing in to YouTube (ТЯГА's own window on Windows): one button on the right of the header.
    It keeps one width whatever it says, so nothing next to it moves. */
-header{position:relative;z-index:5} /* above the options row: the folder menu hangs over it */
+header{position:relative;z-index:5}
+/* above the options row: the folder menu hangs over it */
 /* The YouTube account lives in the logo: a little badge in its corner says whether ТЯГА
    downloads as you (green tick), isn't signed in (grey person), is waiting for the sign-in
    window (orange, breathing) or asks "sign out?" (red cross); the hint says it in words. */
@@ -254,51 +198,41 @@ header{position:relative;z-index:5} /* above the options row: the folder menu ha
 .logob.in .badge{background:var(--ok);color:#0d2a12}
 .logob.arm .badge{background:var(--err);color:#fff}
 .logob.wait .badge{background:var(--acc);color:#1a0c04;animation:breathe2 1.6s ease-in-out infinite}
-.logob:hover .badge{transform:scale(1.12)}
 @keyframes breathe2{0%,100%{opacity:.8}50%{opacity:.3}}
-
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-/* In ТЯГА's own window (Windows) the window is the cards themselves: no frame, no background,
-   the desktop shows around them. The logo and the window buttons sit in the first card; its top
-   row and the gaps between the cards drag the window (Windows' own dragging: double-click,
-   snapping). The window has a fixed size: the download list scrolls inside its card, nothing
-   grows. The falling notes live in the list card, the glow in the first one. */
+/* ТЯГА's window is the cards themselves: no frame, no background, the desktop shows around
+   them. The logo and the window buttons sit in the first card; its top row and the gaps between
+   the cards drag the window (Windows' own dragging: double-click, snapping). */
 .wbtns{display:none}
 html.app,html.app body{background:transparent}
-html.app{--card:#fff}
-html.app[data-theme=dark]{--card:#1a1a1c}
-@media (prefers-color-scheme:dark){html.app:not([data-theme=light]){--card:#1a1a1c}}
+html.app{--card:#fff;--menu:#fff}
+html.app[data-theme=dark]{--card:#1a1a1c;--menu:#242427}
+@media (prefers-color-scheme:dark){html.app:not([data-theme=light]){--card:#1a1a1c;--menu:#242427}}
 html.app body{position:fixed;inset:0;min-height:0;overflow:hidden;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
 html.app main{max-width:none;height:100%;margin:0;padding:12px 14px 16px;display:flex;flex-direction:column}
 html.app .card{flex:none;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;box-shadow:0 6px 18px -8px rgba(0,0,0,.55)}
 /* One window, not two cards floating side by side: the list card hangs on under the first one,
    a hairline between them; the outer corners stay round. With no list, the first card is whole. */
 html.app .card+.card{margin-top:0}
+html.app .card.form:has(+#jobsCard:not([hidden])){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent}
+/* its shadow would fall on the list */
 html.app .card.form{transition:border-radius .2s ease}
-html.app .card.form:has(+#jobsCard:not([hidden])){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent;clip-path:inset(-40px -40px 0 -40px)} /* its shadow would fall on the list */
-html.app #jobsCard{border-top-left-radius:0;border-top-right-radius:0}
-html.app .card.form{background:radial-gradient(ellipse 70% 90% at 12% -30%,var(--glow),transparent 65%),var(--card)}
 html.app header{margin:-4px -6px 16px 0;animation:none;app-region:drag;-webkit-app-region:drag;--wails-draggable:drag}
 html.app header .logo{width:46px;height:46px;border-radius:12px;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
 html.app header h1{font-size:22px}
 html.app .wbtns{display:flex;gap:2px;margin-left:auto;align-self:flex-start}
 /* The theme button: a sun that turns into a moon (its bite slides in, the rays draw in). */
 .tbtn{flex:none;align-self:flex-start;margin-left:6px;font:inherit;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:pointer;transition:background .08s,color .08s,transform .06s;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
-.tbtn.lang{margin-left:auto}
 .tbtn:hover{background:var(--line);color:var(--fg)}
 .tbtn:active{transform:scale(.92)}
 .tbtn svg{width:18px;height:18px;overflow:visible}
-.tbtn.lang{font-size:12px;font-weight:700;letter-spacing:.04em}
+.tbtn.lang{margin-left:auto;font-size:12px;font-weight:700;letter-spacing:.04em}
 .tbtn .body{fill:currentColor;transform-origin:12px 12px;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
 .tbtn .bite{transition:transform .5s cubic-bezier(.4,0,.2,1)}
 .tbtn .rays{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;transform-origin:12px 12px;transition:transform .5s cubic-bezier(.3,1.4,.5,1),opacity .3s}
 .tbtn.moon .body{transform:scale(1.35)}
 .tbtn.moon .bite{transform:translate(-5px,5px)}
 .tbtn.moon .rays{transform:rotate(-90deg) scale(.4);opacity:0}
-html.app .tbtn+.wbtns{margin-left:6px}
-/* Language and theme sit next to the window buttons, a hairline and a gap away from them:
-   close enough to belong to the window's corner, far enough not to hit "close" by mistake. */
-html.app .wbtns::before{content:"";width:1px;height:16px;margin:7px 6px 0 0;background:var(--line2)}
 /* Switching the theme: the new one spreads in a circle from the button (the View Transitions
    API: one snapshot, then the graphics card animates it). */
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
@@ -306,50 +240,38 @@ html.app .wbtns::before{content:"";width:1px;height:16px;margin:7px 6px 0 0;back
 @keyframes themein{from{clip-path:circle(0 at var(--tx,90%) var(--ty,40px))}to{clip-path:circle(var(--tr,150%) at var(--tx,90%) var(--ty,40px))}}
 .wbtns button{app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag;width:34px;height:30px;border:0;border-radius:8px;padding:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:default;transition:background .08s,color .08s}
 .wbtns button:hover{background:var(--line);color:var(--fg)}
-.wbtns button.x:hover{background:#c42b1c;color:#fff}
 .wbtns svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3}
-html.app #jobsCard{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+html.app #jobsCard{border-top-left-radius:0;border-top-right-radius:0;flex:0 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 /* Room under the last row for the water lines at the card's bottom: they lie under the rows, not
    behind their text and progress line (the owner). On the list, not the card: folded stays as it is. */
-/* (the room itself is in the padding of the #list rule below: a padding-bottom here was overwritten by its "padding" and never applied: the line lay on the water) */
 /* The open list is never lower than the empty window: the tallest drop-down (the fragment) fits
    under the options row with one download in the list too, the same as with none (build 16).
    The list stretches, so the water stays at the bottom. */
 html.app #jobsCard:not(.folded){min-height:180px}
 html.app #jobsCard:not(.folded) #list{flex-grow:1}
 html.app #jobsCard>*{position:relative;z-index:1}
-html.app #list{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding:0 7px 30px;margin-left:-7px;margin-right:-17px} /* room for the water under the last row (44 px tall: build 47), and for a row's glow, both sides */
-html.app .bg{display:none}
+html.app #list{flex:0 1 auto;padding:0 7px 30px}
+/* room for the water under the last row (44 px tall: build 47), and for a row's glow, both sides */
 /* The list card folds to one line (what's going on + an arrow), and the window shrinks with it.
    It folds when the list is empty and unfolds when a link goes in; the arrow does it by hand. */
 .lhead{display:none}
 /* The list header is a plain line: what is going on. Folding is the arrow on the right (the line
    itself used to fold the list too, and lit up under the mouse like a button). */
-html.app .lhead{display:flex;align-items:center;gap:10px;width:100%;flex:none;margin:0;padding:2px 0;color:var(--dim);font-size:13.5px;text-align:left;user-select:none;-webkit-user-select:none}
-
+html.app .lhead{display:flex;align-items:center;gap:10px;margin:0;padding:2px 0;color:var(--dim);font-size:13.5px;text-align:left}
 .lhead #lsum{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.lhead .bad{color:var(--err)}.lhead .good{color:var(--ok)}
-.lhead svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
-html.app #jobsCard.folded .lhead svg{transform:rotate(180deg)}
+.lhead .bad{color:var(--err)}
 html.app #jobsCard.folded{flex:none}
-html.app #jobsCard #list,html.app #jobsCard .foot{transition:opacity .2s}
-html.app #jobsCard.folded #list,html.app #jobsCard.folded .foot{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+html.app #jobsCard #list{transition:opacity .2s}
+html.app #jobsCard.folded #list{opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
 html.app #jobsCard.anim{transition:height .25s cubic-bezier(.2,.8,.2,1)}
-/* Comes in: the card itself is solid at once (a see-through card showed the desktop through the
-   window for a moment: "the bottom vanishes and comes back"); only what's in it fades in. */
 html.app #jobsCard.come{animation:none}
 html.app #jobsCard.come>*{animation:fadein .3s ease both}
-/* Going away: the card folds up to nothing and fades (the window follows once it's gone). */
-html.app #jobsCard.leave{height:0!important;padding-top:0;padding-bottom:0;margin-top:0!important;border-color:transparent;opacity:0;transition:height .36s cubic-bezier(.4,0,.2,1),padding .36s cubic-bezier(.4,0,.2,1),margin .36s cubic-bezier(.4,0,.2,1),opacity .3s ease,border-color .36s}
 /* A row that leaves the list (Clear finished) folds up and fades, the rows below slide up. */
 .job.bye{overflow:hidden;opacity:0;transition:height .26s cubic-bezier(.4,0,.2,1),padding .26s cubic-bezier(.4,0,.2,1),margin .26s cubic-bezier(.4,0,.2,1),opacity .18s ease;height:0!important;padding-top:0!important;padding-bottom:0!important;margin-top:0!important;margin-bottom:0!important;border-width:0!important}
-html.app #list{margin-top:10px}
-html.app .fadeout{opacity:0!important;transition:opacity .14s ease}
-html.app #list.fadein{animation:fadein .22s ease both}
+html.app #list{min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;margin-left:-7px;margin-right:-17px;margin-top:10px}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
-/* Things that appear because a switch changed (a chip, the format buttons, the Play button,
-   a row's buttons or message) fade in instead of popping up. */
-.chips .chip,.opts .seg,.acts .btn,.acts .ibtn,.job .body>.sub,.msg:not(:empty){animation:fadein .2s ease backwards}
+/* Things that appear because a switch changed (a chip, a row's buttons or message) fade in instead of popping up. */
+.opts .seg,.acts .btn,.acts .ibtn,.job .body>.sub,.msg:not(:empty){animation:fadein .2s ease backwards}
 html.app ::-webkit-scrollbar{width:10px}
 html.app ::-webkit-scrollbar-thumb{background:var(--line);border:3px solid transparent;border-radius:6px;background-clip:padding-box}
 html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
@@ -362,7 +284,6 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 .seg button.on:hover{background:color-mix(in srgb,var(--acc) 30%,transparent)}
 .chip:hover{border-color:color-mix(in srgb,var(--fg) 30%,transparent);background:color-mix(in srgb,var(--fg) 9%,transparent);color:var(--fg)}
 .chip:active{background:color-mix(in srgb,var(--fg) 15%,transparent)}
-.chip:has(input:checked):hover{border-color:transparent;background:color-mix(in srgb,var(--acc) 28%,transparent)}
 .btn:hover{border-color:color-mix(in srgb,var(--fg) 32%,transparent);background:color-mix(in srgb,var(--fg) 11%,transparent)}
 .btn:active{background:color-mix(in srgb,var(--fg) 17%,transparent)}
 .go:hover{filter:brightness(1.1);box-shadow:0 10px 28px -6px var(--glow)}
@@ -371,115 +292,65 @@ html.app ::-webkit-scrollbar-thumb:hover{background-color:var(--dim)}
 .tbtn:active,.wbtns button:active{background:color-mix(in srgb,var(--fg) 19%,transparent)}
 .wbtns button.x:hover{background:#c42b1c;color:#fff}
 .wbtns button.x:active{background:#a32317}
-
-
-.seg button:focus-visible,.btn:focus-visible,.go:focus-visible,.tbtn:focus-visible,.wbtns button:focus-visible,.lhead:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.seg button:focus-visible,.btn:focus-visible,.go:focus-visible,.tbtn:focus-visible,.wbtns button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .seg button:focus-visible{outline-offset:-2px}
 .rip{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;background:currentColor;opacity:.22;transform:scale(0);animation:rip .55s cubic-bezier(.2,.8,.2,1) forwards}
 .go .rip{background:#fff;opacity:.45}
 @keyframes rip{to{transform:scale(1);opacity:0}}
-/* ——— The layout after "what is this link" (see renderPv): ———
-   Row 1: the links box and Download. Row 2: audio or video, More, and where the files go.
-   Then a line for every link with only its own switches. More folds the rest away. */
 .opts{display:flex;align-items:center;gap:8px}
-.opts .seg{display:inline-flex}
-.opts .seg button{flex:none;padding:0 16px}
-.opts .sp{flex:1}
-.btn.ghost{border-color:transparent;background:transparent;color:var(--dim)}
-.btn.ghost:hover{border-color:transparent;background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}
-.btn.ghost.on{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--tonal)}
-.btn.sm{height:28px;padding:0 10px 0 8px;font-size:12.5px;gap:6px}
-.btn.sm svg{width:15px;height:15px}
+.opts .seg button{padding-left:6px;padding-right:6px;flex:none}
 .destw{position:relative;min-width:0}
-.dest{max-width:240px}
-.dest #destT{min-width:0;overflow:hidden;text-overflow:ellipsis}
-.dest svg:first-child{color:var(--folder)}
-.dest .chev{width:14px;height:14px;margin-left:-2px}
-/* The folder menu opens upwards: under the first card the window may end right away. */
-.menu{position:absolute;right:0;bottom:calc(100% + 6px);z-index:30;min-width:230px;padding:5px;border-radius:10px;background:var(--card);border:1px solid var(--line2);box-shadow:0 14px 34px -12px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:2px;animation:fadein .15s ease}
-html.app .menu{background:var(--card)}
+/* The folder's menu: under its button, against the right edge. */
+.menu{z-index:30;padding:5px;border-radius:10px;background:var(--card);border:1px solid var(--line2);box-shadow:0 14px 34px -12px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:2px;animation:fadein .15s ease}
 .menu button{display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;text-align:left;cursor:pointer;white-space:nowrap}
 .menu button:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
 .menu svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-#open svg{color:var(--folder)}#pick svg{color:var(--info)}
+#open svg{color:var(--folder)}
+#pick svg{color:var(--info)}
 /* A line per link: picture, title, what's in it, its switches. */
-.pv{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.pvi{display:flex;gap:12px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:10px;animation:fadein .2s ease both}
-.pvp{flex:none;width:96px;height:54px;border-radius:7px;overflow:hidden;background:var(--line);display:grid;place-items:center;color:var(--dim)}
+.pv{display:flex;flex-direction:column;margin-top:12px}
+.pvi{display:flex;gap:12px;animation:fadein .2s ease both}
+.pvp{flex:none;overflow:hidden;background:var(--line);display:grid;place-items:center;color:var(--dim)}
 .pvp img{width:100%;height:100%;object-fit:cover;display:block;animation:fadein .25s ease}
 .pvp svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.pvb{flex:1;min-width:0;padding-top:2px}
-.pvt{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pvb{flex:1;min-width:0}
+.pvt{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
 .pvf{font-size:12.5px;color:var(--dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .pvi.looking .pvf{animation:breathe2 1.6s ease-in-out infinite}
 html.app .pv{overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;margin-right:-17px;padding-right:7px}
-.pvc{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pvc{display:flex;flex-wrap:wrap;gap:6px}
 .pvc .chip{flex:none;height:28px;padding:0 12px 0 30px;font-size:12.5px}
 .pvc .chip::before{left:8px}
 .chip.on{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 .chip.on::before{opacity:1;transform:none}
-.pvc .chip:not(.on)::before,.morebox .chip:not(:has(input:checked))::before{opacity:.75;transform:none;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E")}
+.pvc .chip:not(.on)::before{opacity:.75;transform:none;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6.5v11M6.5 12h11' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E")}
 .chip.on:hover{border-color:transparent;background:color-mix(in srgb,var(--acc) 28%,transparent)}
 .pvseg button{height:28px;padding:0 12px;font-size:12.5px}
-/* More: the rest, for all the links. */
-.morew{position:relative}
-/* An open More hangs out of the first card: the card must not clip it (it clips its shadow off the list). */
-
-.morew{display:flex;align-items:center;gap:8px;min-width:0}
-.morebox{display:flex;align-items:center;gap:8px;animation:morein .2s cubic-bezier(.2,.8,.2,1) both}
-@keyframes morein{from{opacity:0;transform:translateX(-8px)}}
-.morebox>.mrow{display:contents}
-/* While More is open the folder steps aside (it's back when More closes): the row stays one row. */
-.opts:has(.morebox:not([hidden])) .destw{display:none}
-.morew:has(.morebox:not([hidden])) #moreB>span{display:none}
-.morew:has(.morebox:not([hidden])) #moreB{padding:0 9px}
-.morebox .chip{flex:none;padding:0 11px 0 29px}
-.morebox .chip::before{left:9px}
-.morebox .seg button{padding:0 10px}
-.morew,.morebox{gap:6px}
-.mrow{margin-top:0;gap:8px}
-.mrow .chip{flex:none}
-.cutrow{justify-content:flex-start;margin-top:10px}
-/* The times hang under the Fragment chip (placeTimes() lines them up), an arrow pointing at it. */
-.cutrow .times{position:relative;padding:7px 10px;border:1px solid var(--line2);border-radius:10px;background:var(--card);animation:timesin .18s cubic-bezier(.2,.8,.2,1) both}
-.cutrow .times::before{content:"";position:absolute;top:-6px;left:var(--caret,24px);width:10px;height:10px;margin-left:-5px;background:var(--card);border-left:1px solid var(--line2);border-top:1px solid var(--line2);transform:rotate(45deg)}
-.cutrow .times.free::before{display:none}
-@keyframes timesin{from{opacity:0;transform:translateY(-4px)}}
-.morebox .mrow{flex-wrap:wrap}
 /* The list's header: what's going on, the actions for the whole list, the fold arrow. */
 .lbar{display:flex;align-items:center;gap:4px;justify-content:flex-end;margin:0 0 4px}
 html.app .lbar{margin:-4px 0 0}
-html.app .lhead{flex:1;width:auto;min-width:0}
+html.app .lhead{user-select:none;-webkit-user-select:none;flex:1;width:auto;min-width:0}
 .lchev{display:none}
 html.app .lchev{flex:none;display:grid;place-items:center;width:30px;height:28px;border:0;border-radius:8px;background:transparent;color:var(--dim);cursor:pointer}
 html.app .lchev:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}
 .lchev svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .25s}
 html.app #jobsCard.folded .lchev svg{transform:rotate(180deg)}
-.lbar .btn.clear svg{color:var(--dim)}
-.lbar .btn:not([hidden]){animation:fadein .2s ease}
-.lbar .btn.clear:hover{color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
-.lbar .btn.clear:hover svg{color:var(--err)}
 /* A row: the state is the start of its second line ("Done · Pilotredsky · Audio · M4A"). */
 .line2>.st{flex:none;margin-right:-4px}
 .line2>.st~:is(.kind,.nums):not(:empty)::before{content:"·";margin-right:6px;color:var(--dim)}
-.line2>.st~.kind.err:not(:empty)::before{color:var(--dim)}
 /* Labels sit in the middle of their buttons by the letters themselves, not by the font's
    line box: Onest's box is much taller above the letters than below (13 : 4), so its middle
    was 1.2 px above the icons' middle (1–2 screen pixels at 125 %). */
 button.chip{font-family:inherit}
-.seg button,.notice .btn{text-box:trim-both cap alphabetic}
+.seg button{text-box:trim-both cap alphabetic}
 .btn>span:not(.tw),.btn .tw>span,.chip>span,.go>span,.menu button>span,.tbtn.lang>span,.st,.lhead #lsum{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
 /* (the same room above and below the letters: where a long label is cut with "…", the tails
    of у, р, g stay whole; the middle stays where it was) */
-/* Narrow: More and the list's actions keep only their icons (the hint still says the word),
-   so the folder stays on its row and the list's summary isn't cut. */
-@media (max-width:560px){.opts:has(.morebox:not([hidden])){flex-wrap:wrap}.morew{display:contents}.morebox{flex-basis:100%;flex-wrap:wrap}.opts{flex-wrap:nowrap}#moreB>span,.lbar .btn>span{display:none}#moreB,.lbar .btn{padding:0 8px}.destw{flex:0 1 auto}.dest{max-width:100%}.pvp{width:72px;height:40.5px}}
-/* ——— The approved layout (22.11) ——— */
+@media (max-width:560px){.opts{flex-wrap:nowrap}.destw{flex:0 1 auto}.pvp{width:72px;height:40.5px}}
 /* The name: solid, the motto small above it; the version is in the logo's hint. */
 html.app header .title{gap:2px}
 .title .motto{font-size:11.5px;line-height:1;font-weight:500;letter-spacing:.02em;color:var(--dim);text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
 h1,html.app header h1{font-size:24px;line-height:1;letter-spacing:.08em;font-weight:800}
-/* Language and theme: one pair, like minimise + close, pressed against the divider. */
 /* Pin, language and theme: plain icons side by side (no frame, the owner), like the window buttons. */
 .hpair{margin-left:auto;align-self:flex-start;display:flex;gap:2px;app-region:no-drag;-webkit-app-region:no-drag;--wails-draggable:no-drag}
 .hpair .tbtn{margin:0;width:34px;height:30px;padding:0;align-self:auto}
@@ -491,12 +362,9 @@ h1,html.app header h1{font-size:24px;line-height:1;letter-spacing:.08em;font-wei
 .tbtn.lang{display:grid;place-items:center;margin-left:0}
 .tbtn.lang svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 html.app .hpair+.wbtns{margin-left:10px}
-html.app .wbtns::before{display:none} /* no divider (the owner): a wider gap keeps the two groups apart */
-/* Switching the language: the window cross-fades to the new words (like the theme's circle). */
-html.vt-lang::view-transition-old(root){animation:vtout .08s ease-in both}
-html.vt-lang::view-transition-new(root){animation:fadein .12s ease-out .07s both} /* after the old words are gone: never both at once */
-@keyframes vtout{to{opacity:0}}
-#tip{white-space:pre-line}
+/* no divider (the owner): a wider gap keeps the two groups apart */
+/* after the old words are gone: never both at once */
+#tip{will-change:transform,opacity;white-space:pre-line}
 /* The links box grows with the links (up to a few lines, then scrolls); Download keeps its size. */
 .input{align-items:flex-start}
 textarea{resize:none;min-height:68px;height:68px;max-height:150px;padding:10px 12px;line-height:1.5;overflow-y:auto}
@@ -511,7 +379,7 @@ textarea{resize:none;min-height:68px;height:68px;max-height:150px;padding:10px 1
 .row.opts{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;margin-top:12px}
 .opts .seg{flex:none;display:flex}
 .opts .seg button{display:flex;align-items:center;gap:6px;padding:0 10px;height:32px}
-.opts .seg button svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.opts .seg button svg{flex:none;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
 .opts .seg button>span{text-box:trim-both cap alphabetic;padding-block:.3em;margin-block:-.3em}
 .ddw{position:relative;flex:none;display:flex}
 .ddw.destw{flex:0 1 auto;min-width:0}
@@ -529,21 +397,16 @@ textarea{resize:none;min-height:68px;height:68px;max-height:150px;padding:10px 1
 .dd.on .chev{color:inherit}
 .dd.icon{width:32px;padding:0;justify-content:center}
 .dd.icon svg{width:16px;height:16px}
-.dd.plain{border-color:transparent;color:var(--dim);padding:0 8px;max-width:100%}
-.dd.plain>svg:first-child{color:var(--folder)}
-.dd.plain>span{color:var(--fg)}
-.dd.plain:hover{border-color:transparent}
 /* Flyouts: under their button (or above it when there's no room below), over what's there;
    the window never changes for them. */
 .fly{position:absolute;left:0;top:calc(100% + 8px);z-index:40;min-width:100%;padding:6px;border-radius:10px;background:var(--card);border:1px solid var(--line2);box-shadow:0 16px 36px -12px rgba(0,0,0,.55);animation:flyin .16s cubic-bezier(.2,.8,.2,1) both}
-html.app .fly{background:var(--card)}
 .fly.up{top:auto;bottom:calc(100% + 8px);animation-name:flyup}
 .fly.end{left:auto;right:0}
 @keyframes flyin{from{opacity:0;transform:translateY(-4px)}}
 @keyframes flyup{from{opacity:0;transform:translateY(4px)}}
 /* A drop-down hanging over the list: the clip opens just where it is (clipFor). */
 .card.form>.opts{position:relative;z-index:3}
-.card.form>.opts{z-index:4} /* its drop-downs hang over the bottom row */
+/* its drop-downs hang over the bottom row */
 .qgrid{display:grid;grid-template-columns:repeat(3,76px);gap:4px}
 .qgrid button,.flist button,.menu button{border:0;border-radius:6px;background:transparent;color:var(--fg);font:inherit;font-size:13.5px;font-weight:500;cursor:pointer;font-variant-numeric:tabular-nums;transition:background .12s ease}
 .qgrid button{height:32px;display:flex;align-items:center;justify-content:center}
@@ -555,43 +418,33 @@ html.app .fly{background:var(--card)}
 .qgrid button:disabled{color:var(--dim);opacity:.45;cursor:default;background:transparent}
 .flist{display:flex;flex-direction:column;gap:2px;width:max-content;max-width:300px}
 .flist button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:8px 10px;text-align:left}
-.flist small,.frow small{font-size:12px;color:var(--dim);font-weight:400}
+.flist small{font-size:12px;color:var(--dim);font-weight:400}
 .flist button.on small{color:inherit;opacity:.8}
-.fh{font-size:12px;color:var(--dim);padding:4px 6px 8px}
+.fh{font-size:12px;color:var(--dim)}
 /* Inside the flyout nothing moves on its own: it comes in as one piece, like the other menus
    (the old fields rose by themselves and the focused field's ring faded in). */
 .fly .times{display:flex;align-items:center;gap:4px;padding:0 6px;color:var(--dim);animation:none}
-.fly .times input{transition:none}
-.fly .times input{width:52px;height:32px;padding:0 6px;text-align:center;-moz-appearance:textfield;appearance:textfield}
+.fly .times input{transition:none;width:52px;height:32px;padding:0 6px;text-align:center;-moz-appearance:textfield;appearance:textfield}
 .fly .times input::-webkit-inner-spin-button,.fly .times input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .fly .times i{font-style:normal;margin:0 6px}
 .fly .times b{font-weight:400;margin:0}
-.ffoot{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:8px;padding:8px 6px 2px;border-top:1px solid var(--line);font-size:12px;color:var(--dim);white-space:nowrap}
 .lnk{border:0;background:none;padding:0;color:var(--tonal);font:inherit;font-weight:600;cursor:pointer;text-box:trim-both cap alphabetic}
 .lnk:hover{text-decoration:underline}
-.frow{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;cursor:pointer;width:max-content;max-width:300px;color:var(--fg)}
-.frow:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}
-.frow b{display:block;font-weight:500;margin-bottom:3px}
-.frow input{position:absolute;opacity:0;pointer-events:none}
-.frow .box{flex:none;width:18px;height:18px;margin-top:1px;border-radius:5px;border:1.5px solid var(--line2);display:grid;place-items:center;transition:background .08s,border-color .08s}
-.frow input:checked+.box{background:var(--acc);border-color:var(--acc)}
-.frow input:checked+.box::after{content:"";width:10px;height:6px;border-left:2px solid #1a0c04;border-bottom:2px solid #1a0c04;transform:translateY(-1px) rotate(-45deg)}
-.frow input:focus-visible+.box{outline:2px solid var(--acc);outline-offset:2px}
 .menu{position:absolute;top:calc(100% + 8px);bottom:auto;right:0;left:auto;min-width:180px}
 .menu.up{top:auto;bottom:calc(100% + 8px)}
 /* Under the options: the empty state or the links' preview. While the list is empty it's never
    shorter than the tallest flyout, so the window keeps one size from empty to a link pasted. */
 .area{margin:14px -18px -18px;padding:0 18px;border-top:1px solid var(--line);position:relative}
 .area:has(>#empty[hidden]):has(>#pv[hidden]){display:none}
-body.solo .area{min-height:184px;display:flex;flex-direction:column;justify-content:center}
-.hook0{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--dim);font-size:14px;animation:fadein .25s ease both}
+body.solo .area{display:flex;flex-direction:column;justify-content:center}
+.hook0{display:flex;flex-direction:column;align-items:center;color:var(--dim);font-size:14px;animation:fadein .25s ease both}
 .hook0 svg{width:40px;height:40px;color:color-mix(in srgb,var(--acc) 55%,var(--dim))}
 .pv{margin:0;gap:0;animation:fadein .2s ease both}
 .pvi{align-items:center;padding:14px 0;border:0;border-radius:0;border-bottom:1px solid var(--line)}
 .pvi:last-child{border-bottom:0}
 .pvp{width:128px;height:72px;border-radius:8px;position:relative}
 .pvp i{position:absolute;right:4px;bottom:4px;padding:1px 5px;border-radius:4px;background:rgba(0,0,0,.75);color:#fff;font-style:normal;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
-.pvb{padding:0;display:flex;flex-direction:column;gap:4px}
+.pvb{padding-top:2px;padding:0;display:flex;flex-direction:column;gap:4px}
 .pvt{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}
 .pvch{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pvch svg{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -601,15 +454,11 @@ body.solo .area{min-height:184px;display:flex;flex-direction:column;justify-cont
 html.app .card.form{background:var(--card)}
 .card.form>*{position:relative;z-index:1}
 .card.form>header{z-index:6}
-.card.form>.opts{z-index:7}  /* its drop-downs hang over what is under it, and over the header when they open upwards (a folded list) */
-html.app body.solo .card.form::after,html.app #jobsCard::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;pointer-events:none;z-index:0;border-radius:0 0 15px 15px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='24'%3E%3Cpath d='M0 12c20-8 40-8 60 0s40 8 60 0 30-6 40-3' fill='none' stroke='%23ff6b2c' stroke-opacity='.14' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 0 100%/160px 24px,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='30'%3E%3Cpath d='M0 15c27-10 55-10 82 0s55 10 82 0 40-7 56-4' fill='none' stroke='%23ff6b2c' stroke-opacity='.10' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x 40px calc(100% - 16px)/220px 30px}
+.card.form>.opts{z-index:7}
+/* its drop-downs hang over what is under it, and over the header when they open upwards (a folded list) */
+html.app body.solo .card.form::after,html.app #jobsCard::after{content:"";position:absolute;left:0;right:0;pointer-events:none;z-index:0}
 html.app #jobsCard.folded::after{display:none}
-/* ТЯГА's window (650): the short quality word, no arrow on the folder. */
-@media (max-width:700px){.dd.plain .chev{display:none}.dd.plain{padding:0 6px}}
-@media (max-width:560px){.flist{max-width:210px}/* the format list wraps its hints instead of sticking out of the window (found by CI's layout check, Russian) */.acts .btn>.tw{display:none}.acts .btn{width:28px;padding:0;justify-content:center}/* a narrow window: Show file is its icon (holding both languages' words, it pushed the row's buttons onto a second line) */.dd .chev{display:none}.dd{padding:0 10px}.dd.plain{padding:0 6px}.opts{gap:6px}.opts .seg button>span{display:none}.dd.plain>span{display:none}.input{flex-direction:row}.go{min-width:0;padding:0 16px}.go>span{display:none}.pvp{width:96px;height:54px}}
-/* ——— Build 07 notes (22.11) ——— */
-/* Quality and format share one slot of one width: switching video/audio moves nothing. */
-
+@media (max-width:560px){.flist{max-width:210px}/* the format list wraps its hints instead of sticking out of the window (found by CI's layout check, Russian) */.acts .btn>.tw{display:none}.acts .btn{width:28px;padding:0;justify-content:center}/* a narrow window: Show file is its icon (holding both languages' words, it pushed the row's buttons onto a second line) */.dd .chev{display:none}.dd{padding:0 10px}.opts{gap:6px}.opts .seg button>span{display:none}.input{flex-direction:row}.go{min-width:0;padding:0 16px}.go>span{display:none}.pvp{width:96px;height:54px}}
 /* Fragment is the scissors alone (the owner: the word says nothing the icon doesn't); one width
    on or off, the picked part is in its hint. */
 #cutB>span,#qualB>span,#fmtB>span,#destT{display:none}
@@ -618,15 +467,14 @@ html.app #jobsCard.folded::after{display:none}
    is a setting like the language or the theme: it sits in the header next to them, always in view. */
 .input{display:block}
 .opts .gow{flex:none}
-.opts .go{height:32px;min-width:0;padding:0 16px;font-size:14px;border-radius:8px}
-.opts .go .goi{width:17px;height:17px}
+.opts .go{height:32px;min-width:0}
 /* The folder: next to Download, where the files will go right before you send them there (the
    owner, build 14). A plain option button like the others; its menu opens down like theirs. */
-.opts .ddw.destw{flex:0 1 auto;min-width:0}
+.opts .ddw.destw{min-width:0}
 .opts #dest{max-width:180px}
 #destT{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#destMenu{top:calc(100% + 8px);bottom:auto;left:0;right:auto} /* from the button's left edge, like the other drop-downs (the owner) */
-#destMenu.up{top:auto;bottom:calc(100% + 8px)}
+#destMenu{bottom:auto;left:0;right:auto}
+/* from the button's left edge, like the other drop-downs (the owner) */
 #destMenu.end{left:auto;right:0}
 /* Room above the name (the owner: it was pressed against the top); the window buttons stay in the corner. */
 html.app header .logo,html.app header .title{margin-top:8px}
@@ -635,15 +483,14 @@ html.app header .logo,html.app header .title{margin-top:8px}
    Download and Скачать are not one length), and the icon buttons are all one size. */
 .opts .seg button{width:88px;justify-content:center}
 #qualB,#fmtB,#cutB,#dest,#editB{width:56px;padding:0;justify-content:center}
-.opts .go{width:136px;padding:0;justify-content:center}
+.opts .go{font-size:14px;border-radius:8px;width:136px;padding:0;justify-content:center}
 /* Every control in the row one form (the owner, build 19): 32 px tall, the icon ones 56 wide
    (the switch's frame made it 1.6 px taller; "for editing" was 32 wide). Nothing in the row
    shrinks: a window a little narrower squeezed the folder button. */
 .opts .seg{height:32px;box-sizing:border-box}
 .opts .seg button{height:100%}
-.opts>*:not(.sp){flex-shrink:0}
 .opts .ddw.destw{flex:none;margin-left:auto}
-.opts>.sp{display:none} /* an empty item takes a gap of its own: 16 px before the folder instead of 8 */
+/* an empty item takes a gap of its own: 16 px before the folder instead of 8 */
 /* The empty list: the hook hangs on a line from the top edge, a little higher than the middle,
    its caption at an even step under it (the owner: it hung by itself). */
 .area:has(>#empty:not([hidden])){justify-content:flex-start}
@@ -652,14 +499,11 @@ html.app header .logo,html.app header .title{margin-top:8px}
 .hook0>span{margin-top:14px}
 /* What's in the area (the preview, the hook) is centred over the part above the water at the
    bottom, not over the whole: the preview's lower edge sat on the waves. */
-body.solo .area{box-sizing:border-box;padding-bottom:30px}
+body.solo .area{min-height:184px;box-sizing:border-box;padding-bottom:30px}
 @media (max-width:560px){.opts .seg button{width:40px}#qualB,#fmtB,#cutB,#dest,#editB{width:40px}.opts .go{width:48px}}
 /* The logo and the name a little in from the edge (the owner). */
 html.app header{padding-left:6px}
 /* The drop-down's surface: a step lighter than the card in the dark theme, white in the light. */
-html.app{--menu:#fff}
-html.app[data-theme=dark]{--menu:#242427}
-@media (prefers-color-scheme:dark){html.app:not([data-theme=light]){--menu:#242427}}
 /* A drop-down grows out of its button (the owner, build 22: they floated 8 px under it and slid
    in; then an orange outline round it all was heavy): the open button takes the drop-down's
    surface and loses its bottom edge, the drop-down starts right under it, one shape with one thin
@@ -689,8 +533,9 @@ html.app[data-theme=light] .card.form::before,html.app[data-theme=light] body.so
 .tw>.ghost{visibility:hidden}
 /* The fragment: one line, "from [0:00] to [3:20]", under the word Fragment; Reset is a quiet link
    next to it, there only once a part is set. */
-#cutFly{width:auto;min-width:0} /* as small as its one row of times (the owner, build 23: it was 296×170 for two numbers) */
-#cutFly .fh{display:flex;align-items:center;justify-content:space-between;gap:16px;box-sizing:border-box;height:28px;white-space:nowrap;font-size:13px;color:var(--fg);padding:2px 6px 6px}
+#cutFly{width:auto;min-width:0}
+/* as small as its one row of times (the owner, build 23: it was 296×170 for two numbers) */
+#cutFly .fh{display:flex;align-items:center;font-size:13px;padding:2px 6px 6px}
 #cutFly .fh>span{text-box:trim-both cap alphabetic}
 #cutFly .lnk{font-size:12.5px}
 #cutFly .times{display:flex;align-items:center;gap:6px;padding:0 6px 4px}
@@ -699,7 +544,7 @@ html.app[data-theme=light] .card.form::before,html.app[data-theme=light] body.so
 #cutFly .times .tl~.tl{margin-left:6px}
 #cutFly:has(#cutChaps:not([hidden])),#cutFly:has(#cutTrim:not([hidden])){width:272px}
 /* The slider: a thin track, the kept part tonal, two round handles; what's picked in the header. */
-#cutFly .fh{gap:10px}
+#cutFly .fh{justify-content:space-between;box-sizing:border-box;height:28px;white-space:nowrap;color:var(--fg);gap:10px}
 .trv{margin-left:auto;font-size:12.5px;font-weight:500;color:var(--dim);font-variant-numeric:tabular-nums;text-box:trim-both cap alphabetic}
 .trv.on{color:var(--tonal)}
 .tr-h:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
@@ -723,8 +568,9 @@ html.app .card.form::before{content:"";position:absolute;top:22px;left:var(--sky
 .input #links{width:100%;display:block}
 /* Even steps: links box, options, line, folder and Download, the card's edge: 14 px each. */
 html.app .card.form .opts{margin-top:14px}
-html.app .card.form:has(+#jobsCard:not([hidden])){padding-bottom:14px}
-.opts .seg button.on{font-weight:500} /* bold made the picked word wider: the row moved by a pixel on every switch */
+html.app .card.form:has(+#jobsCard:not([hidden])){clip-path:inset(-40px -40px 0 -40px);padding-bottom:14px}
+.opts .seg button.on{font-weight:500}
+/* bold made the picked word wider: the row moved by a pixel on every switch */
 #editW{flex:none}
 .dd.icon[aria-pressed=true]{border-color:transparent;background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--tonal)}
 #dest>svg:first-child{color:var(--folder)}
@@ -736,9 +582,11 @@ html.app .card.form:has(+#jobsCard:not([hidden])){padding-bottom:14px}
 html.lang-swap :is([data-t],#goT,#qualT,#fmtT,#cutT,#dest>span,#lsum,.kind,.nums,.st,.pvf,.pvch span,.ovr){animation:langin .18s cubic-bezier(.2,.8,.2,1) both}
 @keyframes langin{from{opacity:0;transform:translateY(5px)}}
 /* The empty window (no downloads yet): the same water as under the list, at the first card's bottom. */
-html.app #jobsCard::after,html.app body.solo .card.form::after{height:44px;bottom:3px;border-radius:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.42' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23ff6b2c' fill-opacity='0.32'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23ff6b2c' fill-opacity='0.32'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.28' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 18px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.50'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23ff6b2c' fill-opacity='0.70' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.45'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23ff6b2c' fill-opacity='0.60' stroke-opacity='0.45'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.25'/%3E%3C/g%3E%3C/svg%3E") right 22px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23ff6b2c'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.26'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.22'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.16'/%3E%3C/g%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.30' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/220px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.30'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.17'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.09'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x;-webkit-mask:linear-gradient(90deg,transparent 4px,#000 28px,#000 calc(100% - 28px),transparent calc(100% - 4px));mask:linear-gradient(90deg,transparent 4px,#000 28px,#000 calc(100% - 28px),transparent calc(100% - 4px))}
-html.app[data-theme=light] #jobsCard::after,html.app[data-theme=light] body.solo .card.form::after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.57' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.38' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 18px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.68'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23d9480f' fill-opacity='0.94' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.61'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23d9480f' fill-opacity='0.81' stroke-opacity='0.61'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.34'/%3E%3C/g%3E%3C/svg%3E") right 22px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23d9480f'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.35'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.30'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.22'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.41' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/220px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.41'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.23'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x}
-@media (prefers-color-scheme:light){html.app:not([data-theme=dark]) #jobsCard::after,html.app:not([data-theme=dark]) body.solo .card.form::after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.57' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.38' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 18px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.68'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23d9480f' fill-opacity='0.94' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.61'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23d9480f' fill-opacity='0.81' stroke-opacity='0.61'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.34'/%3E%3C/g%3E%3C/svg%3E") right 22px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23d9480f'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.35'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.30'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.22'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.41' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/220px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.41'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.23'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x}}
+html.app #jobsCard::after,html.app body.solo .card.form::after{height:44px;bottom:3px;border-radius:0;background:var(--water);-webkit-mask:linear-gradient(90deg,transparent 4px,#000 28px,#000 calc(100% - 28px),transparent calc(100% - 4px));mask:linear-gradient(90deg,transparent 4px,#000 28px,#000 calc(100% - 28px),transparent calc(100% - 4px))}
+/* The water's pictures: written once each, the theme picks one (a darker orange on white). */
+html.app{--water:var(--water-dark);--water-dark:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.42' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23ff6b2c' fill-opacity='0.32'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23ff6b2c' fill-opacity='0.32'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.28' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 18px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.50'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23ff6b2c' fill-opacity='0.70' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.45'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23ff6b2c' fill-opacity='0.60' stroke-opacity='0.45'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.25'/%3E%3C/g%3E%3C/svg%3E") right 22px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23ff6b2c'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.26'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.22'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.16'/%3E%3C/g%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.30' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/220px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23ff6b2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.30'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.17'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.09'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x;--water-light:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='44' viewBox='0 0 54 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke-opacity='0.57' stroke-width='1.7'%3E%3Cpath d='M8 42V19M15 42V10M22 42V21M31 42V13M39 42V25'/%3E%3Crect x='12' y='1' width='6' height='12' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3Crect x='28' y='4' width='6' height='11' rx='3' fill='%23d9480f' fill-opacity='0.43'/%3E%3C/g%3E%3Cpath d='M15 42c-5-5-10-7-14-8M31 42c4-6 9-9 15-10' stroke-opacity='0.38' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") left 18px bottom 0/54px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='44' viewBox='0 0 34 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M17 9V2' stroke-opacity='0.68'/%3E%3Ccircle cx='17' cy='2' r='1.6' fill='%23d9480f' fill-opacity='0.94' stroke='none'/%3E%3Cpath d='M10 16a7 7 0 0 0 14 0z' stroke-opacity='0.61'/%3E%3Cpath d='M10 16a7 7 0 0 1 14 0z' fill='%23d9480f' fill-opacity='0.81' stroke-opacity='0.61'/%3E%3Cpath d='M3 24c6 3 22 3 28 0' stroke-opacity='0.34'/%3E%3C/g%3E%3C/svg%3E") right 22px bottom 0/34px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='44' viewBox='0 0 220 44'%3E%3Cg fill='%23d9480f'%3E%3Cpath d='M24 30c7-7 18-7 25 0-7 7-18 7-25 0zm-9-6 9 6-9 6z' fill-opacity='0.35'/%3E%3Cpath d='M160 35c5-5 13-5 18 0-5 5-13 5-18 0zm-7-4 7 4-7 4z' fill-opacity='0.30'/%3E%3Cpath d='M104 40c3-3 8-3 11 0-3 3-8 3-11 0zm-4-2.5 4 2.5-4 2.5z' fill-opacity='0.22'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.41' stroke-width='1.2'%3E%3Ccircle cx='55' cy='25' r='2'/%3E%3Ccircle cx='60' cy='21' r='1.5'/%3E%3Ccircle cx='63' cy='18' r='1'/%3E%3C/g%3E%3C/svg%3E") center bottom 0/220px 44px no-repeat,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='44' viewBox='0 0 132 44'%3E%3Cg fill='none' stroke='%23d9480f' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'%3E%3Cpath d='M0 16c22-8 44-8 66 0s44 8 66 0' stroke-opacity='0.41'/%3E%3Cpath d='M-33 27c22-6 44-6 66 0s44 6 66 0 44-6 66 0' stroke-opacity='0.23'/%3E%3Cpath d='M0 37c22-4 44-4 66 0s44 4 66 0' stroke-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E") left -20px bottom 0/132px 44px repeat-x}
+html.app[data-theme=light]{--water:var(--water-light)}
+@media (prefers-color-scheme:light){html.app:not([data-theme=dark]){--water:var(--water-light)}}
 /* Under the downloads, the water: waves that fade out at both ends, the reeds at the left and the
    float at the right clear of the round corners, two fish in the middle; nothing touches the card's
    edge (the owner: the old one, wider than the card, was cut off at both corners). */
@@ -747,32 +595,20 @@ html.app[data-theme=light] #jobsCard::after,html.app[data-theme=light] body.solo
    Download button and the percent end, by the icon itself (each sits 9–11 px inside its round
    hover, which made the column look ragged: the owner). Shifted, not resized: nothing else moves. */
 .job .top>.x{position:relative;left:6px}
-.job .acts{position:relative;left:9px}
+.job .acts{position:relative}
 html.app .lchev{position:relative;left:11px}
 .ibtn.fold{color:var(--folder)}
 .ibtn.fold:hover{color:var(--folder)}
 /* The previews end above the water at the first card's bottom (the fourth one peeking out of the
    scrolling box ran into the waves). */
 html.app body.solo .pv{margin-bottom:30px}
-/* The snackbar (Material 3): over the window's bottom edge, the inverse of the window's colours,
-   taking no room. */
-html.app .notice{position:fixed;left:50%;bottom:14px;z-index:60;transform:translateX(-50%);width:max-content;max-width:calc(100% - 40px);margin:0;padding:6px 6px 6px 12px;height:auto;min-height:44px;box-sizing:border-box;border-radius:12px;gap:10px;font-size:13px;line-height:1.35;color:var(--fg);background:color-mix(in srgb,var(--fg) 7%,var(--card));border:1px solid color-mix(in srgb,var(--fg) 13%,transparent);box-shadow:0 12px 32px -6px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.25);animation:snackin .2s cubic-bezier(.2,.8,.2,1) both;transition:opacity .18s ease,transform .18s ease}
-html.app .notice.out{opacity:0;transform:translate(-50%,6px)}
-html.app .notice span{flex:none}
-html.app .notice .ntime{display:none}
-html.app .notice .ni{flex:none;display:grid;place-items:center;width:20px;height:20px;color:var(--dim)}
-html.app .notice .ni svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-html.app .notice .ni.folder{color:var(--folder)}
-html.app .notice .btn{flex:none;height:32px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--acc);font-weight:600}
-html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transparent)}
-@keyframes snackin{from{opacity:0;transform:translate(-50%,8px)}}
 /* The list's header: its summary, then its actions as icons (Copy all files, Clear finished)
    like the rows' own, and the fold arrow. (Two buttons with words left the summary "7 d…", and
    the words, sized for Russian, stood apart from their icons in English: the owner.) */
-.lbar .hb{flex:none;width:30px;height:28px;margin:0;position:relative;left:11px}
+.lbar .hb{width:30px;height:28px;margin:0}
 .lbar .hb svg{width:16px;height:16px}
 .lbar .hb:hover{color:var(--fg);background:color-mix(in srgb,var(--fg) 8%,transparent)}
-.lbar #clear:hover{color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
+.lbar #clear:hover{background:color-mix(in srgb,var(--err) 10%,transparent)}
 /* The actions of a row (Show file, Copy file; Retry, Copy error) and of the list (Copy all files,
    Clear finished): 32 px buttons with a frame, like the row of options above, so they read as
    buttons and are easy to hit (the owner: 28 px bare icons were too small). Their frame stands on
@@ -780,10 +616,10 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
 .job .acts{left:0;gap:6px}
 .job .acts .ibtn,.lbar .hb{width:32px;height:32px;margin:-2px 0;border:1px solid var(--line2);border-radius:8px}
 .job .acts .ibtn svg,.lbar .hb svg{width:16px;height:16px}
-.lbar .hb{left:0}
+.lbar .hb{flex:none;position:relative;left:0}
 .lbar #lchev{margin-left:-4px}
 .job .acts .ibtn:hover,.lbar .hb:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);border-color:color-mix(in srgb,var(--fg) 22%,transparent)}
-.lbar #clear:hover{border-color:color-mix(in srgb,var(--err) 45%,transparent)}
+.lbar #clear:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 45%,transparent)}
 /* The short message inside the window (inlineNote): in the list's header in place of its
    summary, or in the empty state in place of its words; the window's own colours, Undo as a
    tonal button (like a picked switch). */
@@ -805,7 +641,13 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
 .logob:active{transform:scale(.94);transition-duration:.1s}
 .logo:hover,.logob:active .logo{transform:none}
 .logob.can:hover .badge{transform:none}
-</style></head><body><div class="bg"></div><div id="tip" role="tooltip"></div><main>
+.job .acts .ibtn.acc:hover{color:var(--tonal);background:color-mix(in srgb,var(--acc) 16%,transparent);border-color:color-mix(in srgb,var(--acc) 40%,transparent)}
+.chip:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+</style></head><body><div id="tip" role="tooltip"></div><main>
+
+<div class="card note" id="setup" hidden></div>
+
+<div class="card form">
 <header>
   <button class="logob" id="acct" type="button" aria-label="YouTube account"><svg class="logo" viewBox="0 0 256 256" aria-hidden="true">
     <rect width="256" height="256" rx="58" fill="#161616"/>
@@ -827,10 +669,6 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
   <div class="hpair"><button class="tbtn pin" id="pin" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pinb" d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></svg></button><button class="tbtn lang" id="lang" aria-label="Language"></button><button class="tbtn" id="theme" aria-label="Light or dark theme"><svg viewBox="0 0 24 24"><mask id="bite"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="bite" cx="21" cy="3" r="6" fill="#000"/></mask><circle class="body" cx="12" cy="12" r="5" mask="url(#bite)"/><g class="rays"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button></div>
   <div class="wbtns"><button id="wMin" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 14 14"><path d="M2 7h10"/></svg></button><button class="x" id="wClose" title="Close to tray" aria-label="Close"><svg viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>
 </header>
-
-<div class="card note" id="setup" hidden></div>
-
-<div class="card form">
   <div class="input">
     <textarea id="links" rows="2" data-ph="Paste links any way you like: several at once, untidy, mixed with text. ТЯГА finds them and puts each on its own line."></textarea>
   </div>
@@ -846,20 +684,19 @@ html.app .notice .btn:hover{background:color-mix(in srgb,var(--acc) 14%,transpar
         <div class="times" id="cutTimes"><span class="tl" data-t="from">from</span><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="cutFrom" placeholder="0:00" aria-label="from"><span class="tl" data-t="to">to</span><input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" id="cutTo" placeholder="–" aria-label="to"></div>
         <div class="chaps" id="cutChaps" hidden></div></div></div>
     <div class="ddw" id="editW"><button class="dd icon" id="editB" aria-pressed="false" title="For editing: H.264 + AAC, opens in any editor. Up to 1080p"><svg viewBox="0 0 24 24"><path d="M4 10.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path d="M4 10.5 3.4 7.6a1.2 1.2 0 0 1 .9-1.4l13.4-2.9a1.2 1.2 0 0 1 1.4.9l.6 2.9z"/><path d="m8.4 5.6 2.6 3.2M13.4 4.5 16 7.7"/></svg></button><input type="checkbox" id="edit" hidden></div>
-    <span class="sp"></span>
+    
     <div class="ddw destw"><button class="dd" id="dest" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="destT"></span><svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
         <div class="fly menu" id="destMenu" role="menu" hidden><button id="open" role="menuitem"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-t="Open">Open</span></button><button id="pick" role="menuitem" hidden><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/><path d="M3 7v10a2 2 0 0 0 2 2h6.5"/><path d="M14.5 17.5h7m-3-3 3 3-3 3"/></svg><span data-t="Change…">Change…</span></button><button id="std" role="menuitem" hidden><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"/></svg><span data-t="Music and Videos">Music and Videos</span></button></div></div>
     <div class="gow"><button class="go" id="go"><svg class="goi" viewBox="0 0 24 24" aria-hidden="true"><g class="ga"><path d="M12 3.5v11.5"/><path d="M7 10l5 5 5-5"/></g><path d="M5 20h14"/></svg><span id="goT">Download</span></button><b class="gon" id="goN" hidden></b></div>
   </div>
   <div class="msg" id="msg"></div>
-  <div class="notice" id="notice" hidden><span id="noticeT"></span><button class="btn acc" id="noticeB"><span id="noticeBT">Undo</span></button><i class="ntime" id="ntime" hidden></i></div>
-  <div class="area" id="area">
+    <div class="area" id="area">
     <div class="hook0" id="empty" hidden><i class="hline" aria-hidden="true"></i><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg><span data-t="Nothing on the hook yet. Cast a link above.">Nothing on the hook yet. Cast a link above.</span></div>
     <div class="pv" id="pv" hidden></div>
   </div>
 </div>
 
-<div class="card" id="jobsCard" hidden>
+<div class="card folded" id="jobsCard" hidden>
   <div class="lbar" id="lbar"><div class="lhead" id="lhead"><span id="lsum"></span></div>
     <button class="ibtn hb" id="copyall" hidden data-tip="Copy all files" aria-label="Copy all files"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
     <button class="ibtn hb" id="clear" data-tip="Clear finished. Files stay on disk" aria-label="Clear finished"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg></button>
@@ -880,22 +717,17 @@ var LANG = (function () {
 })();
 var RU = {
   'Reel it in.': 'Подсекай.', 'Download': 'Скачать', 'Audio': 'Аудио', 'Video': 'Видео', 'Best': 'Лучшее',
-  'whole playlist': 'весь плейлист', 'as one file': 'одним файлом', 'fragment': 'фрагмент', 'Fragment': 'Фрагмент', 'split by chapters': 'по главам',
-  'for editing': 'для монтажа', 'For editing': 'Для монтажа', 'no sponsors': 'без рекламы', 'from': 'с', 'to': 'до', 'end': 'конец',
-  'More': 'Ещё', 'More: format, quality, a fragment, for editing': 'Ещё: формат, качество, фрагмент, для монтажа', 'Downloads': 'Загрузки', 'Save downloads elsewhere…': 'Сохранять в другую папку…',
-  'A separate file for every chapter, in a folder of its own': 'Отдельный файл на каждую главу, в своей папке',
-  'Sponsor ads, self-promotion and "subscribe!" bits, as marked by SponsorBlock; for music also talking and intros': 'Реклама спонсоров, самореклама и «подпишись!» по разметке SponsorBlock; в музыке ещё разговоры и вступления',
-  'Open folder': 'Открыть папку', 'Change folder': 'Сменить папку', 'Clear finished': 'Убрать готовые',
-  'Copy all files': 'Копировать все', 'Undo': 'Вернуть', 'Language': 'Язык',
-  'Paste YouTube links: each one goes on its own line.\nEnter — download, Shift+Enter — new line.':
-    'Вставляй ссылки на YouTube: каждая встанет на свою строку.\nEnter — скачать, Shift+Enter — новая строка.',
-  'Sign in to YouTube': 'Войти в YouTube', 'Signing in…': 'Входим…', 'Sign out?': 'Выйти?', 'Signed in': 'Вход выполнен',
+  'whole playlist': 'весь плейлист', 'Fragment': 'Фрагмент',
+  'for editing': 'для монтажа', 'For editing': 'Для монтажа', 'from': 'с', 'to': 'до', 'end': 'конец',
+  'More': 'Ещё', 'Downloads': 'Загрузки',
+  'Clear finished': 'Убрать готовые',
+  'Undo': 'Вернуть', 'Language': 'Язык',
+  'Sign in to YouTube': 'Войти в YouTube', 'Sign out?': 'Выйти?',
   'Sign in': 'Войти', 'Retry': 'Повторить', 'Copy error': 'Копировать ошибку', 'Copied': 'Скопировано',
   "Couldn't copy": 'Не вышло', 'Show file': 'Показать файл',
   'Queued': 'В очереди', 'Downloading': 'Скачивается', 'Waiting': 'Ждём', 'Getting ready': 'Готовимся',
   'Finishing': 'Завершаем', 'Done': 'Готово', 'Already there': 'Уже есть', 'Failed': 'Ошибка', 'Already in the list': 'Уже в списке', 'Not finished': 'Не докачано',
   'Cancelled': 'Отменено', 'Waiting for setup': 'Ждём установки', 'Cancel': 'Отменить',
-  'Getting ready…': 'Готовимся…', 'Finishing up': 'Завершаем…', 'Starting…': 'Начинаем…',
   'track': 'трек', 'video': 'видео', 'of': 'из', 'one file': 'одним файлом',
   'Reading the video page': 'Читаю страницу видео', 'Asking YouTube for the formats': 'Спрашиваю у YouTube форматы',
   'Picked the best format': 'Выбран лучший формат', "Passing YouTube's check": 'Прохожу проверку YouTube',
@@ -904,37 +736,22 @@ var RU = {
   'Cutting out the sponsors': 'Вырезаю рекламу', 'Already in the folder': 'Уже в папке',
   'Found the album cover': 'Нашёл обложку альбома', 'Tagging the tracks': 'Подписываю треки', 'Gluing into one file': 'Склеиваю в один файл',
   'Private video.': 'Приватное видео.', 'Removed or not available.': 'Удалено или недоступно.',
-  'SponsorBlock didn\'t answer: untick "no sponsors".': 'SponsorBlock не ответил: сними «без рекламы».',
+  'SponsorBlock didn\'t answer: turn cutting the ads off, then Retry.': 'SponsorBlock не ответил: выключи вырезание рекламы и нажми «Повторить».',
+  'Signed in. Click to sign out': 'Вход выполнен. Нажми, чтобы выйти',
+  'ТЯГА is still getting ready. Sign in again once it\'s done.': 'ТЯГА ещё готовится. Войди снова, когда она будет готова.',
+  "Couldn't open the sign-in window.": 'Не удалось открыть окно входа.',
+  "Couldn't take the sign-in from that window. Try once more.": 'Не удалось взять вход из того окна. Попробуй ещё раз.',
+  'Not signed in: the window was closed before YouTube opened with your account.': 'Вход не выполнен: окно закрыли раньше, чем YouTube открылся с твоим аккаунтом.',
+  "Couldn't save the sign-in next to the program.": 'Не удалось сохранить вход рядом с программой.',
+  'The fragment times look wrong. Examples: 1:20, 0:45, 1:02:03; "to" after "from".': 'Время фрагмента не похоже на правду. Примеры: 1:20, 0:45, 1:02:03; «до» позже «с».',
   'YouTube asks you to sign in: sign in, then Retry.': 'YouTube просит войти: войди и нажми «Повторить».',
   'YouTube asks you to sign in: put a fresh youtube-cookies.txt next to ТЯГА.': 'YouTube просит войти: положи свежий youtube-cookies.txt рядом с ТЯГОЙ.',
   'YouTube is limiting requests: try again later.': 'YouTube ограничивает запросы: попробуй позже.',
   'YouTube refused (403): Retry usually helps.': 'YouTube отказал (403): нажми «Повторить».',
   'ТЯГА is not responding. Start the program again.': 'ТЯГА не отвечает. Запусти программу заново.',
-  'Nothing on the hook yet. Paste a link above.': 'На крючке пока пусто. Вставь ссылку сверху.',
   'Nothing on the hook yet': 'На крючке пока пусто', 'Add at least one link.': 'Добавь хотя бы одну ссылку.',
   'Light theme': 'Светлая тема', 'Dark theme': 'Тёмная тема', 'Minimize': 'Свернуть',
-  'Hide to the tray (downloads go on)': 'Спрятать в трей (загрузки продолжатся)',
-  'Show or hide the downloads': 'Показать или скрыть загрузки',
-  'Takes them off the list; the files stay': 'Убирает их из списка; файлы остаются',
-  'Every finished file onto the clipboard: Ctrl+V in a chat attaches them all': 'Все готовые файлы в буфер: Ctrl+V в чате прикрепит их все',
-  'Copied: paste it with Ctrl+V': 'Скопировано: вставь через Ctrl+V', "Couldn't copy the file": 'Не удалось скопировать файл',
-  'Shows it in its folder. Double-click the row to play it': 'Показывает его в папке. Двойной клик по строке — открыть',
-  'For a link to a video inside a playlist: download the whole playlist, not just this video': 'Для ссылки на видео внутри плейлиста: скачать весь плейлист, а не только это видео',
-  'The whole playlist as one long file, each video is a chapter': 'Весь плейлист одним длинным файлом, каждое видео — глава',
-  'An album uploaded as one long video with chapters → a folder with a separate track for every chapter': 'Альбом, залитый одним видео с главами → папка с отдельным треком на каждую главу',
-  'The original YouTube audio track, no re-encoding': 'Оригинальная дорожка YouTube, без перекодирования',
-  'Re-encoded at the highest quality, plays on anything': 'Перекодировано в лучшем качестве, играет где угодно',
-  "For video editing. YouTube usually gives VP9/AV1 video and Opus sound, which DaVinci Resolve and some editors can't open. This takes H.264 + AAC instead, which opens everywhere. Above 1080p YouTube often has no H.264, so it may come out in 1080p.":
-    'Для монтажа. YouTube обычно отдаёт VP9/AV1 и звук Opus, которые DaVinci Resolve и некоторые редакторы не открывают. Тут берётся H.264 + AAC, они открываются везде. Выше 1080p у YouTube часто нет H.264, поэтому может выйти 1080p.',
-  'Minutes and seconds. Arrows (or the mouse wheel) change the number, Shift — by 10. Seconds past 59 roll into minutes. Empty "to" — to the end.':
-    'Минуты и секунды. Стрелки (или колёсико) меняют число, с Shift — на 10. Секунды больше 59 переходят в минуты. Пустое «до» — до конца.',
-  'Some videos need a signed-in account, and sometimes YouTube asks to prove you\'re not a bot': 'Некоторые видео требуют входа, а иногда YouTube просит доказать, что ты не бот',
-  'Sign in to YouTube on the page that opened; ТЯГА notices by itself': 'Войди в YouTube на открывшейся странице; ТЯГА заметит сама',
-  'Checking that you are signed in to YouTube…': 'Проверяю, выполнен ли вход в YouTube…',
-  'Sign in to YouTube in the window that opened; it closes by itself': 'Войди в YouTube в открывшемся окне; оно закроется само',
-  'Click again: ТЯГА stops using your YouTube account (your browser stays signed in)': 'Нажми ещё раз: ТЯГА перестанет пользоваться твоим аккаунтом (в браузере ты останешься)',
-  'Signed in to YouTube: ТЯГА downloads as you. Click to sign out': 'Вход в YouTube выполнен: ТЯГА качает от твоего имени. Нажми, чтобы выйти',
-  "Not signed in to YouTube. Some videos need it, and sometimes YouTube asks to prove you're not a bot. Click to sign in": 'Вход в YouTube не выполнен. Некоторым видео он нужен, а иногда YouTube просит доказать, что ты не бот. Нажми, чтобы войти',
+  "Couldn't copy the file": 'Не удалось скопировать файл',
   'Done ✓': 'Готово ✓',
   "Nothing on the hook yet. Cast a link above.": "На крючке пусто. Закинь ссылку сверху.",
   "Paste links any way you like: several at once, untidy, mixed with text. ТЯГА finds them and puts each on its own line.": "Вставляй ссылки как угодно: пачкой, с мусором, вперемешку с текстом. ТЯГА сама их найдёт и разложит по строкам.",
@@ -948,11 +765,7 @@ var RU = {
   "A fragment is for one video at a time": "Фрагмент — только для одного видео",
   "Paste a link to a video first": "Сначала вставь ссылку на видео",
   "Only a part of it": "Скачать только кусок",
-  "Choose the start and end of the fragment:": "Выбери начало и конец фрагмента:",
-  "Empty “to”: to the end": "Пустое «до» — до конца",
   "Reset": "Сбросить",
-  "More options": "Ещё настройки",
-  "H.264 + AAC: opens in any editor. Up to 1080p": "H.264 + AAC: откроется в любом редакторе. До 1080p",
   "Open": "Открыть",
   "For editing: H.264 + AAC, opens in any editor. Up to 1080p": "Для монтажа: H.264 + AAC, откроется в любом редакторе. До 1080p",
   "For editing: only for video": "Для монтажа: только для видео",
@@ -967,9 +780,7 @@ var RU = {
   "Clear finished. Files stay on disk": "Убрать готовые. Файлы останутся",
   "Hide downloads list": "Скрыть список загрузок",
   "Show downloads list": "Показать список загрузок",
-  "Show in folder": "Показать в папке",
   "Copy file": "Копировать файл",
-  "Download the whole playlist": "Скачать весь плейлист",
   "Join into one file with chapters": "Склеить в один файл с главами",
   "Split into tracks by chapters": "Разрезать на треки по главам",
   "Cut ads marked by SponsorBlock": "Вырезать рекламу по разметке SponsorBlock",
@@ -982,17 +793,17 @@ var RU = {
 var RU_RE = [
   [/^Playlist: (.*)$/, 'Плейлист: $1'], [/^Converting to (\w+)$/, 'Конвертирую в $1'],
   [/^Waiting for YouTube · (\d+) s$/, 'YouTube просит подождать · $1 с'],
-  [/^Signed in · (.+)$/, 'Вход: $1'],
   [/^Signed in via (.+)\. Click to sign out$/, 'Вход через $1. Нажми, чтобы выйти'],
   [/^Downloads folder: (.+)$/, 'Папка загрузок: $1'],
-  [/^Checking that you are signed in to YouTube in (.+)…$/, 'Проверяю вход в YouTube в $1…'],
-  [/^Signed in to YouTube in (.+): ТЯГА downloads as you. Click to stop$/, 'Вход в YouTube выполнен в $1: ТЯГА качает от твоего имени. Нажми, чтобы перестать'],
-  [/^Downloads go to (.+)\. Pick another folder for the next ones$/, 'Файлы сохраняются в $1. Выбери другую папку для следующих'],
-  [/^Downloads go to (.+)$/, 'Файлы сохраняются в $1'],
   [/^Downloads now go to (.+)\.$/, 'Теперь файлы сохраняются в $1.'],
   [/^This doesn't look like a link: (.+)$/, 'Это не похоже на ссылку: $1'],
   [/^A YouTube Mix never ends, so only the first (\d+) videos\.$/, 'Микс YouTube бесконечный, поэтому только первые $1 видео.'],
-  [/^Downloading (yt-dlp|ffmpeg|Deno)(.*)$/, 'Скачиваю $1$2'],
+  [/^Downloading (yt-dlp|ffmpeg|[Dd]eno)(.*)$/, function (m, n, rest) { return 'Скачиваю ' + n + Tnums(rest); }], // "… 34% (12 of 40 MB)"
+  [/^Didn't see you sign in to YouTube in (.+)\. Sign in there, then click Sign in again\.$/, 'Не вижу входа в YouTube в $1. Войди там и нажми «Войти» ещё раз.'],
+  [/^Could not download (\S+)\. Check your internet and restart ТЯГА\. (.*)$/, function (m, a, b) { return 'Не удалось скачать ' + a + '. Проверь интернет и перезапусти ТЯГУ. ' + T(b); }],
+  [/^Download (\S+) manually and put it into the bin folder next to the program\.$/, 'Скачай $1 вручную и положи в папку bin рядом с программой.'],
+  [/^Put (\S+) into PATH\.$/, 'Добавь $1 в PATH.'],
+  [/^yt-dlp failed: (.*)$/, 'yt-dlp не справился: $1'],
   [/^(\S+) not found\. (.*)$/, function (m, a, b) { return a + ' не найден. ' + T(b); }],
   [/^(\d+) (?:track|video)s? (?:was|were) skipped\.\s*(.*)$/, function (m, n, rest) { return 'Пропущено: ' + n + '. ' + T(rest); }],
 ];
@@ -1013,25 +824,19 @@ function applyLang() {
   document.documentElement.lang = LANG;
   document.querySelectorAll('[data-t]').forEach(function (e) { e.textContent = T(e.dataset.t); });
   document.querySelectorAll('[data-ph]').forEach(function (e) { e.placeholder = T(e.dataset.ph); });
-  document.querySelectorAll('[data-t2]').forEach(function (e) { e.textContent = otherLang(e.dataset.t2); });
+  // labels for screen readers, in the page's language too (the English one kept to start from)
+  document.querySelectorAll('[aria-label]').forEach(function (e) { if (!e.dataset.al) e.dataset.al = e.getAttribute('aria-label'); e.setAttribute('aria-label', T(e.dataset.al)); });
   var b = document.getElementById('lang');
   if (b) { b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>'; b.dataset.tip = LANG === 'ru' ? 'Переключить на английский' : 'Switch to Russian'; }
 }
 // The theme: Windows' own until the theme button picks one; that choice is remembered (the
 // tray menu reads it too).
 try { var t0 = localStorage.getItem('tyaga-theme'); if (t0 === 'light' || t0 === 'dark') document.documentElement.dataset.theme = t0; } catch (e) {}
-// In ТЯГА's own window (see html.app in the styles): the logo goes into the first card,
-// the falling notes into the list card, and the window buttons work.
-if (new URLSearchParams(location.search).get('w')) {
-  document.documentElement.classList.add('app');
-  var form = document.querySelector('.card.form');
-  form.insertBefore(document.querySelector('header'), form.firstChild);
-  var jobsCard = document.getElementById('jobsCard');
-  jobsCard.classList.add('folded'); // until the list is known: no flash of a big empty card
-  ['Min', 'Close'].forEach(function (b) {
-    document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
-  });
-}
+// The page is always ТЯГА's own window (a plain browser tab is no longer a mode of its own):
+// its buttons minimise and close it.
+['Min', 'Close'].forEach(function (b) {
+  document.getElementById('w' + b).onclick = function () { api('/api/window', { text: b.toLowerCase() }); };
+});
 var LABEL = { queued: 'queued', running: 'downloading', done: 'done', error: 'failed', cancelled: 'cancelled' };
 var state = {}, OFFLINE = 'ТЯГА is not responding. Start the program again.';
 
@@ -1182,8 +987,7 @@ function isListLink(l) { return /youtube\.com\/(playlist\?|@|channel\/|c\/|user\
 var LOOKS = 4, looking = 0, toLook = [];
 function look(link) {
   if (facts[link]) return;
-  var v = /(?:[?&]v=|youtu\.be\/|shorts\/|live\/)([\w-]{11})/.exec(link);
-  facts[link] = { looking: true, id: v ? v[1] : '' };
+  facts[link] = { looking: true, id: ytIds(link).v };
   api('/api/peek', { text: link }).then(function (p) {
     var f = facts[link];
     if (!f || !f.looking || !p.title) return;
@@ -1197,7 +1001,8 @@ function nextLook() {
   while (looking < LOOKS && toLook.length) (function (link) {
     looking++;
     var done = function (f) { looking--; facts[link] = f; syncBoxes(); nextLook(); };
-    api('/api/inspect', { text: link }).then(function (f) { done(f.error ? { failed: true } : f); }, function () { done({ failed: true }); });
+    var failed = function () { var was = facts[link] || {}; done({ failed: true, id: was.id, title: was.title, channel: was.channel }); }; // what the preview had stays
+    api('/api/inspect', { text: link }).then(function (f) { if (f.error) failed(); else done(f); }, failed);
   })(toLook.shift());
 }
 function plan(link, m) {
@@ -1238,6 +1043,29 @@ function pvChip(on, text, tip, flip) {
   b.onclick = flip;
   return b;
 }
+var ICON = {
+  queued: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
+  // Failed: ТЯГА's fish, belly up, RIP (what the fishing line showed when it happened).
+  error: '<svg viewBox="0 0 24 24"><g transform="translate(12.5 14.5) scale(1 -1)"><ellipse rx="5.6" ry="4.8"/><path d="M-4.2 0L-8.2-4.1Q-7.2 0-8.2 4.1Z"/><circle cx="3.2" cy="-1.4" r=".6" fill="currentColor"/></g><text x="12" y="6.4" text-anchor="middle" font-size="5.2" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui,sans-serif">RIP</text></svg>',
+  cancelled: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
+  audio: '<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>',
+  video: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg>',
+  list: '<svg viewBox="0 0 24 24"><path d="M4 6h11M4 11h11M4 16h7"/><path d="M17 13.5v6l4.5-3z"/></svg>',
+  retry: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"/></svg>',
+  folder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+  cancel: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  copy: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+  user: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.3 3.9-5 7-5s5.8 1.7 7 5"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  // The states, all in one style: a circle with what it means inside.
+  sDone: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/></svg>',
+  sFailed: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/></svg>',
+  sQueued: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>',
+  sCancelled: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 15.5l7-7"/></svg>',
+  sDownloading: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v8M8.5 12.5l3.5 3.5 3.5-3.5"/></svg>',
+  sWaiting: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>',
+  sFinishing: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>',
+};
 function renderPv() {
   var links = linksIn($('links').value), box = $('pv'), seen = {};
   // Looked up once the box is still for a moment: typing a link by hand doesn't look up every half of it.
@@ -1613,7 +1441,7 @@ function add() {
     if (!r.error) { // a fragment is a one-off: the next link is whole again
       // The first download: the preview stays until the list takes its place (setGone), in the
       // same frame, so the window never shows an empty bottom in between.
-      if (APP && fold.gone) { handOver = clearForm; setTimeout(function () { if (handOver === clearForm) { handOver = null; clearForm(); } }, 3000); }
+      if (fold.gone) { handOver = clearForm; setTimeout(function () { if (handOver === clearForm) { handOver = null; clearForm(); } }, 3000); }
       else clearForm();
     }
     refresh();
@@ -1694,20 +1522,18 @@ $('lang').onclick = function () {
   clearTimeout(window.langT); window.langT = setTimeout(function () { root.classList.remove('lang-swap'); }, 250);
 };
 // The pin: ТЯГА's window stays over all the others (remembered; ТЯГА's window only).
-var INAPP = document.documentElement.classList.contains('app'); // (APP itself is set further down)
 function setPin(on) {
   $('pin').classList.toggle('on', on);
   $('pin').setAttribute('aria-pressed', on);
   $('pin').dataset.tip = on ? 'Unpin' : 'Pin on top';
-  if (INAPP) api('/api/window', { text: 'top', n: on ? 1 : 0 }).catch(function () {});
+  api('/api/window', { text: 'top', n: on ? 1 : 0 }).catch(function () {});
 }
-$('pin').hidden = !INAPP;
 $('pin').onclick = function () {
   var on = !$('pin').classList.contains('on');
   try { localStorage.setItem('tyaga-top', on ? '1' : ''); } catch (e) {}
   setPin(on);
 };
-(function () { var on = false; try { on = localStorage.getItem('tyaga-top') === '1'; } catch (e) {} if (on || !INAPP) setPin(on); else $('pin').dataset.tip = 'Pin on top'; })();
+(function () { var on = false; try { on = localStorage.getItem('tyaga-top') === '1'; } catch (e) {} if (on) setPin(on); else $('pin').dataset.tip = 'Pin on top'; })();
 // The fish is cast as soon as a link goes in (add() checks it's not empty).
 
 // Ctrl+A anywhere outside a text field selects the links, not the whole page.
@@ -1735,7 +1561,6 @@ addEventListener('drop', function (e) {
 if (window.chrome && window.chrome.webview) addEventListener('contextmenu', function (e) {
   if (!e.target.closest('textarea,input,.name,.sub,.log') && !String(getSelection())) e.preventDefault();
 });
-$('links').addEventListener('input', function () { readyWindow(); });
 
 // Links: pasting puts each one on its own line, cleaned of YouTube's share junk (?si=, &pp=…),
 // without repeats, and the caret waits on a fresh line for the next one. Download says how many.
@@ -1754,11 +1579,17 @@ function linksIn(text) {
     return cleanLink(/^https?:\/\//i.test(l) ? l : 'https://' + l);
   });
 }
+// A YouTube link's video id and playlist id, however it's written (watch?v=, youtu.be/, shorts/,
+// live/), or '' for each.
+function ytIds(l) {
+  var v = /(?:[?&]v=|youtu\.be\/|shorts\/|live\/)([\w-]{11})/.exec(l), list = /[?&]list=([\w-]+)/.exec(l);
+  return { v: v ? v[1] : '', list: list ? list[1] : '' };
+}
 // The same video (or playlist) however its link is written: youtu.be/…, watch?v=…, shorts/…,
 // music.…, with or without extra bits. whole: a video inside a playlist taken as the playlist.
 function linkKey(l, whole) {
-  var v = /(?:[?&]v=|youtu\.be\/|shorts\/)([\w-]{11})/.exec(l), list = /[?&]list=([\w-]+)/.exec(l);
-  return whole && list ? 'l:' + list[1] : v ? 'v:' + v[1] : list ? 'l:' + list[1] : l;
+  var id = ytIds(l);
+  return whole && id.list ? 'l:' + id.list : id.v ? 'v:' + id.v : id.list ? 'l:' + id.list : l;
 }
 function putLinks(add) {
   var box = $('links'), have = linksIn(box.value), keys = have.map(function (l) { return linkKey(l); });
@@ -1769,7 +1600,7 @@ function putLinks(add) {
   box.focus();
   box.selectionStart = box.selectionEnd = box.value.length;
   box.scrollTop = box.scrollHeight;
-  fitBox(); syncBoxes(); readyWindow(); countLinks();
+  fitBox(); syncBoxes(); countLinks();
 }
 function countLinks() {
   var n = linksIn($('links').value).length;
@@ -1805,14 +1636,16 @@ $('clear').onclick = function () {
     }, 'clear', stays);
   });
 };
+// A copy button says how it went on itself: a tick (or not) and its hint, then back as it was.
+function flashCopied(b, ok, okTip, failTip, idleTip) {
+  b.innerHTML = ok ? ICON.check : ICON.copy;
+  b.dataset.tip = ok ? okTip : failTip;
+  setTimeout(function () { b.innerHTML = ICON.copy; b.dataset.tip = idleTip; }, 1800);
+}
 // Every finished file onto the clipboard at once (Ctrl+V in a chat attaches them all).
 $('copyall').onclick = function () {
   api('/api/copyall', {}).then(function (x) {
-    // Said on the button itself, the way a row's copy button says it: a tick, and the hint.
-    var b = $('copyall');
-    b.innerHTML = x.ok ? ICON.check : ICON.copy;
-    b.dataset.tip = x.ok ? (LANG === 'ru' ? 'Скопировано: ' + x.n : 'Copied ' + x.n + ' files') : "Couldn't copy";
-    setTimeout(function () { b.innerHTML = ICON.copy; b.dataset.tip = 'Copy all files'; }, 1800);
+    flashCopied($('copyall'), x.ok, LANG === 'ru' ? 'Скопировано: ' + x.n : 'Copied ' + x.n + ' files', "Couldn't copy", 'Copy all files');
   });
 };
 // A short message (Clear finished, a new downloads folder), with "Undo" when there's a way
@@ -1820,25 +1653,9 @@ $('copyall').onclick = function () {
 // header line, in place of its summary; with no list (it was all cleared), the empty state, in
 // place of "Nothing on the hook yet". It takes no room of its own: nothing moves. (Before: a line
 // opening in the card with "Undo · 7" counting down; then a snackbar stuck to the window's
-// bottom. The owner: neither looked like part of ТЯГА.) A browser tab keeps the snackbar.
+// bottom. The owner: neither looked like part of ТЯГА.)
 var noticeTimer = 0, NOTICE_MS = 6000;
-function notice(text, undo, icon, listStays) {
-  if (APP) return inlineNote(text, undo, icon, listStays);
-  var n = $('notice');
-  clearTimeout(noticeTimer);
-  if (APP && n.parentNode !== document.body) document.body.append(n); // over everything, not inside a card
-  var ni = n.querySelector('.ni') || n.insertBefore(el('i', 'ni'), n.firstChild);
-  ni.className = 'ni ' + (icon || ''); ni.innerHTML = icon === 'folder' ? ICON.folder : '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 12h10l1-12"/></svg>';
-  ni.hidden = !icon;
-  $('noticeT').textContent = text;
-  $('noticeB').hidden = !undo;
-  setText($('noticeBT'), T('Undo'));
-  $('ntime').hidden = true;
-  $('noticeB').onclick = function () { hideNotice(); if (undo) undo(); };
-  n.hidden = false; n.classList.remove('out');
-  n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; // a new one comes in again
-  noticeTimer = setTimeout(hideNotice, NOTICE_MS);
-}
+function notice(text, undo, icon, listStays) { inlineNote(text, undo, icon, listStays); }
 // The note itself: where (the list's header, or the empty state), the words and the Undo.
 var noteAt = null;
 function inlineNote(text, undo, icon, listStays) {
@@ -1868,12 +1685,6 @@ function hideNotice(now) {
     setTimeout(function () { a.el.remove(); if (!noteAt || noteAt.host !== a.host) a.host.classList.remove('noting'); }, now === true ? 0 : 180);
     if (now === true) { a.el.remove(); a.host.classList.remove('noting'); }
   }
-  var n = $('notice');
-  clearTimeout(noticeTimer);
-  if (n.hidden) return;
-  if (still()) { n.hidden = true; return; }
-  n.classList.add('out');
-  noticeTimer = setTimeout(function () { n.hidden = true; n.classList.remove('out'); }, 200);
 }
 
 // Closing or reloading the page: tell TYAGA. If no page comes back, it finishes
@@ -1976,6 +1787,7 @@ function makeRow(j) {
   r.x = el('button', 'ibtn x');              // cancel, while queued or downloading
   r.x.innerHTML = ICON.cancel;
   r.x.dataset.tip = 'Cancel';
+  r.x.setAttribute('aria-label', T('Cancel'));
   r.x.onclick = function () { api('/api/cancel', { id: j.id }).then(refresh); };
   r.top.append(r.name, r.x);
   r.kind = el('div', 'kind');                // Pilotredsky · Audio · MP3, or what went wrong
@@ -1999,33 +1811,10 @@ function makeRow(j) {
     if (!j || j.status !== 'done' || !j.files.length || e.target.closest('button')) return;
     api('/api/play', { id: j.id, n: j.files.length - 1 });
   });
-  if (APP && rowWatch) rowWatch.observe(r.row);
+  if (rowWatch) rowWatch.observe(r.row);
   return r;
 }
 
-var ICON = {
-  queued: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
-  // Failed: ТЯГА's fish, belly up, RIP (what the fishing line showed when it happened).
-  error: '<svg viewBox="0 0 24 24"><g transform="translate(12.5 14.5) scale(1 -1)"><ellipse rx="5.6" ry="4.8"/><path d="M-4.2 0L-8.2-4.1Q-7.2 0-8.2 4.1Z"/><circle cx="3.2" cy="-1.4" r=".6" fill="currentColor"/></g><text x="12" y="6.4" text-anchor="middle" font-size="5.2" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui,sans-serif">RIP</text></svg>',
-  cancelled: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
-  audio: '<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>',
-  video: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg>',
-  list: '<svg viewBox="0 0 24 24"><path d="M4 6h11M4 11h11M4 16h7"/><path d="M17 13.5v6l4.5-3z"/></svg>',
-  retry: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"/></svg>',
-  folder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
-  cancel: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
-  copy: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
-  user: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.3 3.9-5 7-5s5.8 1.7 7 5"/></svg>',
-  check: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
-  // The states, all in one style: a circle with what it means inside.
-  sDone: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/></svg>',
-  sFailed: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/></svg>',
-  sQueued: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>',
-  sCancelled: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 15.5l7-7"/></svg>',
-  sDownloading: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v8M8.5 12.5l3.5 3.5 3.5-3.5"/></svg>',
-  sWaiting: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg>',
-  sFinishing: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>',
-};
 
 function updateRow(r, j) {
   // The picture: the cover that's really inside the finished file, else an icon of what it is
@@ -2156,11 +1945,7 @@ function updateRow(r, j) {
       if (j.status === 'error') {
         var copy = ibtn('', ICON.copy, 'Copy error', function () {
           var text = 'ТЯГА ' + (state.version || '') + '\nLink: ' + j.url + '\n' + (j.errorRaw || j.error || '');
-          var done = function (ok) {
-            copy.innerHTML = ok ? ICON.check : ICON.copy;
-            copy.dataset.tip = ok ? 'Copied' : "Couldn't copy";
-            setTimeout(function () { copy.innerHTML = ICON.copy; copy.dataset.tip = 'Copy error'; }, 1600);
-          };
+          var done = function (ok) { flashCopied(copy, ok, 'Copied', "Couldn't copy", 'Copy error'); };
           try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); }
           catch (e) { done(false); }
         });
@@ -2178,16 +1963,9 @@ function updateRow(r, j) {
       r.acts.append(ibtn('fold', ICON.folder, 'Show file',
         function () { api('/api/reveal', { id: j.id, n: j.files.length - 1 }); }));
       // The file itself onto the clipboard: Ctrl+V in a chat attaches it.
-      var cp = el('button', 'ibtn');
-      cp.innerHTML = ICON.copy;
-      cp.dataset.tip = 'Copy file';
-      cp.onclick = function () {
-        api('/api/copyfile', { id: j.id, n: j.files.length - 1 }).then(function (x) {
-          cp.innerHTML = x.ok ? ICON.check : ICON.copy;
-          cp.dataset.tip = x.ok ? 'Copied' : "Couldn't copy the file";
-          setTimeout(function () { cp.innerHTML = ICON.copy; cp.dataset.tip = 'Copy file'; }, 1800);
-        });
-      };
+      var cp = ibtn('', ICON.copy, 'Copy file', function () {
+        api('/api/copyfile', { id: j.id, n: j.files.length - 1 }).then(function (x) { flashCopied(cp, x.ok, 'Copied', "Couldn't copy the file", 'Copy file'); });
+      });
       r.acts.append(cp);
     }
   }
@@ -2200,11 +1978,11 @@ function updateRow(r, j) {
 // "3 MB of 5 MB · 1.2 MB/s · 0:02 left", "Waiting for YouTube · a 5 s pause", "Converting to MP3".
 // The title a link check (renderPv) found for this link, by its video or playlist id.
 function knownTitle(u) {
-  var v = /(?:[?&]v=|youtu\.be\/|shorts\/)([\w-]{11})/.exec(u), l = /[?&]list=([\w-]+)/.exec(u);
+  var id = ytIds(u);
   for (var k in facts) {
     var f = facts[k];
-    if (v && f.id === v[1] && f.title) return f.title;
-    if (!v && l && f.kind === 'list' && k.indexOf(l[1]) >= 0 && f.listTitle) return f.listTitle;
+    if (id.v && f.id === id.v && f.title) return f.title;
+    if (!id.v && id.list && f.kind === 'list' && k.indexOf(id.list) >= 0 && f.listTitle) return f.listTitle;
   }
   return '';
 }
@@ -2303,7 +2081,6 @@ function render() {
   // Not picked: Windows' Music (audio) or Videos (video), named for the mode it's in.
   var dn = state.picked && state.outName ? state.outName.split(' › ').pop() : T(mode() === 'audio' ? 'Music' : 'Videos');
   if ($('destT').dataset.n !== dn + LANG) { $('destT').dataset.n = dn + LANG; $('destT').innerHTML = ''; $('destT').append(dn); }
-  placeSky();
   $('dest').dataset.tip = state.picked ? (state.outName ? 'Downloads folder: ' + state.outName : '') : 'Audio goes to Music, video to Videos';
   $('std').hidden = !state.picked || !state.canPick;
 
@@ -2321,26 +2098,12 @@ function render() {
   document.title = run ? Math.floor(run.progress) + '% · ТЯГА' : 'ТЯГА';
   ping(jobs);
 
-  if (!jobs.length && APP) { // the list card folds away (setGone); its rows fold up meanwhile
+  if (!jobs.length) { // the list card folds away (setGone); its rows fold up meanwhile
     Object.keys(rows).forEach(function (id) { bye(rows[id].row); });
     rows = {};
     syncFold(jobs);
     return;
   }
-  if (!jobs.length) {
-    if (!list.querySelector('.empty')) {
-      list.innerHTML = '';
-      rows = {};
-      var empty = el('div', 'empty');
-      empty.innerHTML = '<svg viewBox="0 0 256 256"><path d="M176 48 V170 A40 40 0 0 1 96 170 V40" fill="none" stroke="currentColor" stroke-width="18"/><circle cx="176" cy="36" r="12" fill="none" stroke="currentColor" stroke-width="9"/><path d="M85 42 L96 10 L107 42 Z" fill="currentColor"/></svg>';
-      var et = el('span', null, T('Nothing on the hook yet. Paste a link above.')); et.dataset.t = 'Nothing on the hook yet. Paste a link above.';
-      empty.append(et);
-      list.append(empty);
-    }
-    return;
-  }
-  var e = list.querySelector('.empty');
-  if (e) e.remove();
 
   // Every download has its own row that stays on the page and is only updated, so nothing
   // blinks or starts its animation over. A part is rebuilt only when it really changes.
@@ -2362,7 +2125,7 @@ function render() {
   });
   // The window is fitted after the rows are in, so it grows once, straight to the height it
   // needs (fitting it first made it too short and then grow again frame by frame).
-  if (APP) { syncFold(jobs); fitLater(); }
+  syncFold(jobs); fitLater();
   booted = true;
 
   // Just finished: the row glows green for a moment and the fish on the hook jumps.
@@ -2403,7 +2166,7 @@ function keepInView(row, wait) {
 // to start the drag itself. (With ten links pasted, WebView2 stopped telling Windows where the
 // title bar is: the window couldn't be moved, buttons and scrolling still worked. The owner.)
 document.addEventListener('mousedown', function (e) {
-  if (!APP || e.button !== 0 || e.detail > 1) return;
+  if (e.button !== 0 || e.detail > 1) return;
   var t = e.target;
   var bare = t === document.body || t === document.documentElement || t.tagName === 'MAIN' || t.closest('header');
   if (!bare || t.closest('button,a,input,textarea,select,[contenteditable],.logob,.hpair,.wbtns,[role="button"]')) return;
@@ -2411,10 +2174,9 @@ document.addEventListener('mousedown', function (e) {
 });
 
 // The list card's fold (ТЯГА's window only, see .lhead in the styles).
-var APP = document.documentElement.classList.contains('app');
 var fold = { on: false, gone: false, count: -1 };
 function foldSummary(jobs) {
-  if (!jobs.length) return APP ? $('lsum').innerHTML : T('Nothing on the hook yet'); // app: the card is leaving, keep its line
+  if (!jobs.length) return $('lsum').innerHTML; // the card is leaving: keep its line
   var n = { running: 0, queued: 0, done: 0, error: 0, stopped: 0 }, run = null;
   jobs.forEach(function (j) { if (j.stopped) n.stopped++; else if (j.status in n) n[j.status]++; if (j.status === 'running') run = j; });
   var parts = [];
@@ -2435,7 +2197,7 @@ function foldSummary(jobs) {
 // ).
 // A row leaves: it folds up and fades, then it's gone. With "reduce motion": at once.
 function bye(row) {
-  if (!APP || matchMedia('(prefers-reduced-motion: reduce)').matches || !row.offsetHeight) return row.remove();
+  if (still() || !row.offsetHeight) return row.remove();
   row.style.height = row.offsetHeight + 'px';
   void row.offsetHeight;
   row.classList.add('bye');
@@ -2462,15 +2224,6 @@ function growAll(list) {
   });
   setTimeout(function () { list.forEach(function (row) { row.classList.remove('grow'); row.style.height = ''; }); fitLater(); }, 340);
 }
-function grow(row) {
-  var h = row.offsetHeight;
-  if (still() || !h) return;
-  row.style.height = '0px'; row.style.paddingTop = row.style.paddingBottom = '0px'; row.style.opacity = '0';
-  void row.offsetHeight;
-  row.classList.add('grow');
-  row.style.height = h + 'px'; row.style.paddingTop = row.style.paddingBottom = row.style.opacity = '';
-  setTimeout(function () { row.classList.remove('grow'); row.style.height = ''; fitLater(); }, 340);
-}
 function syncFold(jobs) {
   var html = foldSummary(jobs);
   if ($('lsum').innerHTML !== html) $('lsum').innerHTML = html;
@@ -2485,12 +2238,11 @@ function syncFold(jobs) {
 function setGone(on, animate) {
   var card = $('jobsCard');
   fold.gone = on;
-  animate = animate && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  animate = animate && !still();
   if (on) {
     var away = function () {
       if (!fold.gone) return;
       card.hidden = true;
-      card.classList.remove('leave');
       document.body.classList.add('solo'); // the area under the options comes back (empty state)
       renderPv();
       windowFit();
@@ -2500,9 +2252,8 @@ function setGone(on, animate) {
     return away();
   }
   fold.on = false;
-  readyH = 0;
   comeAt = Date.now();
-  card.classList.remove('folded', 'anim', 'leave');
+  card.classList.remove('folded', 'anim');
   card.style.height = '';
   var show = function () {
     if (fold.gone) return;
@@ -2519,7 +2270,7 @@ function setGone(on, animate) {
   $('empty').hidden = true;
   var need = openHeight();
   b.classList.toggle('solo', solo); $('pv').hidden = pvh; $('empty').hidden = emh;
-  // Grown already (a link was in the box, see readyWindow): the card comes in right away.
+  // The card comes in right away.
   if (innerHeight >= need - 2) { lastFit = need; return show(); }
   api('/api/window', { text: 'height', n: need }).catch(function () {}).then(function () {
     if (!animate) return show();
@@ -2540,7 +2291,7 @@ function mainPad() { return parseFloat(getComputedStyle(document.querySelector('
 function openHeight() { // the open list card's natural height, measured without painting
   var card = $('jobsCard'), list = $('list');
   var was = [card.hidden, card.className, card.style.height];
-  card.hidden = false; card.classList.remove('folded', 'leave', 'anim'); card.style.height = ''; // not 'come': taking it off and back restarts its fade (the card blinked on every update)
+  card.hidden = false; card.classList.remove('folded', 'anim'); card.style.height = ''; // not 'come': taking it off and back restarts its fade (the card blinked on every update)
   // Parts that are opening or folding right now count at the height they're going to.
   var moving = [];
   list.querySelectorAll('.job.grow').forEach(function (e) {
@@ -2558,28 +2309,14 @@ var lastFit = 0;
 // list will need (it's transparent below the cards, so nothing shows), so that Download
 // doesn't have to wait for Windows to resize the window: that wait, and the resizing during
 // the animation, was the stutter. An empty box gives the room back.
-var ROW_GUESS = 160; // the first row (74 px) and the list card around it (measured on the stand)
-var readyH = 0, comeAt = 0;
-// Not any more: the window grown ahead was see-through but still caught the clicks under the
-// first card (the owner couldn't click YouTube there). The window grows when the list comes.
-function readyWindow() {
-  return;
-  if (!APP || !fold.gone) return;
-  var want = $('links').value.trim() ? openHeight() + ROW_GUESS : 0;
-  if (want === readyH) return;
-  readyH = want;
-  windowFit();
-}
+var comeAt = 0;
 function windowFit() {
-  if (!APP) return;
-  if ($('jobsCard').classList.contains('leave')) return; // folding away: the window follows at the end
   var n;
   if (fold.gone || fold.on) {
     // From the layout, not getBoundingClientRect: at start the cards are still rising into place
     // (a 14 px slide), and measuring then made the window that much too tall.
     var card = fold.gone ? document.querySelector('.card.form') : $('jobsCard');
     n = Math.ceil(card.offsetTop + card.offsetHeight + mainPad());
-    if (fold.gone && readyH) n = Math.max(n, readyH);
   } else if ($('jobsCard').classList.contains('anim')) return; // sliding open: it fits at the end
   else n = openHeight();
   // While something in the list opens or folds, the window may grow at once (it's transparent
@@ -2601,8 +2338,9 @@ function fitLater() { if (!fitSoon) fitSoon = requestAnimationFrame(function () 
 function setFold(on, animate) {
   var card = $('jobsCard');
   fold.on = on;
+  $('lchev').setAttribute('aria-label', T(on ? 'Show downloads list' : 'Hide downloads list'));
   card.classList.remove('anim');
-  if (!animate || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (!animate || still()) {
     card.classList.toggle('folded', on);
     card.style.height = on ? foldedHeight() + 'px' : '';
     windowFit();
@@ -2633,12 +2371,11 @@ function setFold(on, animate) {
     });
   }
 }
-if (APP) {
-  $('lchev').onclick = function () { setFold(!fold.on, true); };
-  // The first card can grow (fragment times, an error): the folded window follows it.
-  if (window.ResizeObserver) new ResizeObserver(fitLater).observe(document.querySelector('.card.form'));
-}
+$('lchev').onclick = function () { setFold(!fold.on, true); };
+// The first card can grow (fragment times, an error): the folded window follows it.
+if (window.ResizeObserver) new ResizeObserver(fitLater).observe(document.querySelector('.card.form'));
 
+addEventListener('unhandledrejection', function (e) { e.preventDefault(); });
 function refresh() {
   return api('/api/state')
     .then(function (s) {
@@ -2738,7 +2475,6 @@ var waveTarget = {}, waveState = {};
     cx.restore();
   }
   // Where the fish is on the line at a given progress (the same sum as in draw).
-  function x0Of(cv, shown) { var w = cv.clientWidth, a = 2 + S * 1.5, b = w - S - 3; return a + Math.max(0, b - a) * shown / 100; }
   function splash(st, x, y, n, pw) {
     for (var i = 0; i < n; i++) st.parts.push({ k: 'd', x: x, y: y, vx: (Math.random() - .5) * pw * 1.6, vy: -pw * (.6 + Math.random() * .6), life: 0, max: .6, r: 1.1 });
   }
@@ -2749,7 +2485,7 @@ var waveTarget = {}, waveState = {};
     var st = waveState[id];
     if (!st) {
       st = waveState[id] = { shown: t.p || 0, vel: 0, phase: 0, amp: 1, parts: [], mode: '', at: now, born: now + 350, // the lane opens first (and the list card fades in): then the intro
-        lastP: t.p, lastPAt: now, pos: t.pos || 0, acc: 0, ev: {} };
+        lastP: t.p, lastPAt: now, ev: {} };
       if (t.status !== 'running') st.born = st.at = now - 1e5; // already over when the page saw it: its last look at once
     }
     var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2769,9 +2505,9 @@ var waveTarget = {}, waveState = {};
     }
     if (mode !== st.mode) {
       var over = /^(done|err|cancel)$/.test(mode);
-      if (mode === 'start' && /^(err|cancel)$/.test(st.mode)) { st.born = now + 350; st.dropped = 0; } // Retry: the lane opens again, it drops in again
+      if (mode === 'start' && /^(err|cancel)$/.test(st.mode)) { st.born = now + 350; } // Retry: the lane opens again, it drops in again
       st.from = st.mode && st.last ? st.last : null; // the look it had: the new one grows out of it
-      st.mode = mode; st.ev = {}; st.acc = 0;
+      st.mode = mode; st.ev = {};
       if (!over) st.gone = 0; // (Retry: the fish is back)
       st.at = over && st.born < now - 9e4 ? now - 1e5 : now; // over before the page saw it: its last look at once
     }
@@ -2789,7 +2525,7 @@ var waveTarget = {}, waveState = {};
       catchK = (now - st.catchAt) / 800;
       if (catchK >= 1 && mode === 'done') { st.catchAt = 0; catchK = -1; st.gone = 1; } // over: no new cast, the fish stays where it is
       else if (catchK >= 1) { // caught: a new cast
-        st.catchAt = 0; catchK = -1; st.shown = 0; st.vel = 0; st.born = now; st.dropped = 0; st.from = null;
+        st.catchAt = 0; catchK = -1; st.shown = 0; st.vel = 0; st.born = now; st.from = null;
       }
     }
 
@@ -2829,7 +2565,7 @@ var waveTarget = {}, waveState = {};
     // g: how grey the fish is, gl: how grey the line behind it (0 orange … 1 grey). level: the
     // fish lies flat (waiting, looking round) instead of following the slope of the wave.
     var ampK = 1, g = 0, gl = 0, F = 1.3, A = .18, fx = x, dy = 0, rot = null, dir = 1, op = 1, level = false;
-    var lineOp = 1, trackOp = 1, qm = 0, rip = 0, glint = -1, cut = null, hopRot = null, wiggle = false, moving = !still;
+    var lineOp = 1, trackOp = 1, qm = 0, rip = 0, glint = -1, cut = null, wiggle = false, moving = !still;
     function wy(xx) { return MID + Math.sin(xx / LEN * 2 * Math.PI) * AMP * ampK; }
     function slope(xx) { return Math.cos(xx / LEN * 2 * Math.PI) * AMP * ampK * 2 * Math.PI / LEN; }
     var born = (now - st.born) / 1000;
@@ -2884,7 +2620,7 @@ var waveTarget = {}, waveState = {};
     // A playlist, a track done: the fish swims on, faster and faster, the line filling behind it,
     // out over the right edge (the new cast brings it in from the left). Other lists (a channel
     // looked at whole) keep a dot where each video starts, up to 20.
-    var of = !t.list && t.of > 1 ? t.of : 0, hop = 0;
+    var of = !t.list && t.of > 1 ? t.of : 0;
     if (catchK >= 0) {
       var pOut = 100 * (w + 2 * S - x0) / Math.max(1, end - x0), pv = st.caughtAt + (pOut - st.caughtAt) * catchK * catchK;
       st.shown = Math.max(st.shown, Math.min(100, pv));
@@ -2894,7 +2630,7 @@ var waveTarget = {}, waveState = {};
       moving = true;
     }
 
-    if (rot === null) rot = hopRot !== null ? hopRot : level ? 0 : Math.atan(slope(fx)) * .6 * dir * Math.min(1, Math.abs(st.vel) / 2.5);
+    if (rot === null) rot = level ? 0 : Math.atan(slope(fx)) * .6 * dir * Math.min(1, Math.abs(st.vel) / 2.5);
     // A new state grows out of the last look over a third of a second: no colour, tilt or
     // wave height snaps from one to the other.
     if (st.from && tm < .35 && !still) {
@@ -2910,11 +2646,10 @@ var waveTarget = {}, waveState = {};
     var reveal = still ? 1 : ease(born / .5), swim = still ? 1 : ease(born / .6);
     if (swim < 1) fx = -2 * S + (fx + 2 * S) * swim;
     if (reveal < 1 || swim < 1) moving = true;
-    var fy = wy(fx) + dy - hop;
+    var fy = wy(fx) + dy;
     st.phase += F * 2 * Math.PI * dt;
     var tail = still ? 0 : Math.sin(st.phase) * A;
     if (wiggle && !still) rot -= tail * .25;
-    st.amp = ampK;
 
     // The line: grey ahead, orange (or grey, when it's over) behind; snapped when cancelled.
     var endDone = cut ? x - cut.back : x, done = [], ahead = [], xx;

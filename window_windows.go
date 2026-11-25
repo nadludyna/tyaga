@@ -81,7 +81,7 @@ func runWindow(token string) bool {
 	})
 	// Past this point this is the only ТЯГА from this folder: a second one has already exited above.
 	openLog()
-	logf("TYAGA %s is running. Files are saved to %s", version, outDir)
+	logf("ТЯГА %s is running. Files go to %s", version, filesGoTo())
 	exitApp = func() { app.Quit() }
 
 	win = app.Window.NewWithOptions(application.WebviewWindowOptions{
@@ -353,22 +353,6 @@ func hideDataDir(d string) {
 // webviewDataDir is where WebView2 keeps its cache and the page's remembered switches: in
 // tyaga-data (data.go), so every copy of ТЯГА has its own.
 func webviewDataDir() string { return filepath.Join(dataDir, "webview") }
-
-// moveOldWindowData: builds before tyaga-data kept the web view data in
-// %LOCALAPPDATA%\TYAGA\webview-<folder id> and login-<folder id>.
-func moveOldWindowData(d string) {
-	base := os.Getenv("LOCALAPPDATA")
-	if base == "" {
-		return
-	}
-	old := filepath.Join(base, "TYAGA")
-	if filepath.Dir(d) == old {
-		return // tyaga-data couldn't be made next to the program: it lives here now
-	}
-	moveIn(filepath.Join(old, "webview-"+folderID()), filepath.Join(d, "webview"))
-	moveIn(filepath.Join(old, "login-"+folderID()), filepath.Join(d, "login"))
-	os.Remove(old) // only goes if nothing else is in it
-}
 
 // ---------------------------------------------------------------------------
 //  The sign-in window (login.go)

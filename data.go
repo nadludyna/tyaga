@@ -43,7 +43,6 @@ func makeDataDir() string {
 		fail("ТЯГА can't write in its own folder:\n" + appDir + "\n\nMove tyaga.exe into a folder of your own (Desktop, Documents, a folder on another drive) and start it from there.")
 	}
 	hideDataDir(d)
-	moveOldData(d)
 	return d
 }
 
@@ -55,27 +54,6 @@ func writable(dir string) bool {
 	f.Close()
 	os.Remove(f.Name())
 	return true
-}
-
-// moveOldData: builds before tyaga-data kept these next to the program (and, on Windows, in
-// %LOCALAPPDATA%\TYAGA): move them in, so nothing is downloaded again and nothing stays behind.
-func moveOldData(d string) {
-	moveIn(filepath.Join(appDir, "bin"), filepath.Join(d, "bin"))
-	moveIn(filepath.Join(appDir, "youtube-signin.txt"), filepath.Join(d, "youtube-signin.txt"))
-	os.Remove(filepath.Join(appDir, "tyaga.log"))
-	os.Remove(filepath.Join(appDir, ".tyaga-running"))
-	moveOldWindowData(d)
-}
-
-// moveIn moves from to to, unless to is already there.
-func moveIn(from, to string) {
-	if _, err := os.Stat(to); err == nil {
-		return
-	}
-	if _, err := os.Stat(from); err != nil {
-		return
-	}
-	os.Rename(from, to)
 }
 
 // folderID tells copies of ТЯГА in different folders apart.

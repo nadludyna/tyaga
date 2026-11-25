@@ -170,12 +170,6 @@ func browserName(b string) string {
 	return b
 }
 
-func setLoginMsg(s string) {
-	login.Lock()
-	login.msg = s
-	login.Unlock()
-}
-
 // takeCookies turns the sign-in window's cookies into youtube-cookies.txt.
 // It returns what to tell the person, or "" when it worked.
 func takeCookies() string {

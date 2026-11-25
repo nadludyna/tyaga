@@ -18,5 +18,4 @@ func runLogin()              {}
 func defaultBrowser() string { return "" }
 func loginDir() string       { return "" }
 
-func moveOldWindowData(string) {}
-func hideDataDir(string)       {}
+func hideDataDir(string) {}
