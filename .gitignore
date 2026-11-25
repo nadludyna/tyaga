@@ -12,7 +12,3 @@ dist/
 
 # Everything TYAGA keeps next to itself (data.go)
 tyaga-data/
-
-# The notes for AI agents live only on the owner's computer, not in the repo
-# (.worktreeinclude copies them into Claude's worktrees)
-CLAUDE.md

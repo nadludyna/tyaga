@@ -99,6 +99,7 @@ Actions → **Release** → a version like `v2.1.0`. It builds `tyaga.exe` for W
 | `window_windows.go` | the window, the tray icon and its menu |
 | `index.html`, `menu.html` | the whole page; the tray menu |
 | `stand/` | the test stand |
+| `CLAUDE.md` | the rules and checks for anyone (or any AI agent) changing the code |
 | `docs/` | how the page should behave (`ui-principles.md`), and why things are the way they are (`decisions.md`) |
 
 ## The name
