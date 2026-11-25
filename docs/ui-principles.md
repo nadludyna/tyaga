@@ -2,8 +2,7 @@
 
 The basics every change to the page is checked against. They come from Jakob Nielsen's ten
 usability heuristics (1994), which most UI guidelines still build on, plus rules of our
-own. The visual rules (colours, motion, Material 3) are in the notes for AI agents (`CLAUDE.md`,
-kept on the owner's computer, not in the repo) under "Design rules";
+own. The visual rules (colours, motion, Material 3) are in `CLAUDE.md` under "Design rules";
 this file is about behaviour.
 
 ## How to check a change
@@ -66,9 +65,8 @@ the wrong font, a window that blinked. So these are measured, every time, before
    Retry; cancel; clear finished → Undo; sign in → sign out. At every step, the window's
    height must match rule 1b, and nothing may vanish that is still needed.
 
-Layout itself (grid, spacing, grouping, what goes in a flyout) follows the owner's `ui-layout`
-skill (kept with his Claude settings, for all his projects): mockup first, then build, then
-this check.
+Layout itself (grid, spacing, grouping, what goes in a flyout): a mockup first, then the build,
+then this check.
 
 The rules behind the check are in "Ours first" below; a new kind of mistake found by eye gets
 a new line in the check, so it's caught by itself next time.

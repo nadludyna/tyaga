@@ -91,9 +91,9 @@ label:hover{color:var(--fg)}
 .job.grow{overflow:hidden;transition:height .32s cubic-bezier(.2,.8,.2,1),padding .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
 .job .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1}
 /* over the fishing line's canvas: a jumping fish goes behind the picture, not over it */
-/* The picture: the cover that's really in the finished file; before that an icon of what it is
-   (no video thumbnail: it's not what ends up in the file). Always the same square, so the
-   text never moves; what's in it cross-fades. */
+/* The picture: while downloading, the video's preview; done, the cover that's really in the
+   file; else an icon of what it is. Always the same box, so the text never moves; what's in it
+   cross-fades. */
 .side{flex:none;position:relative;z-index:1;width:104px;height:58.5px}
 /* 16:9; bigger so what downloads is seen (the owner, build 29: it was 72) */
 @media (max-width:560px){.side{width:88px;height:49.5px}}
