@@ -1,0 +1,63 @@
+# The page, on the test stand: its script compiles, the layout checks in every state and the
+# scenarios. Runs for anything but the docs (a change to the Go side can break the page too:
+# the stand runs the real program). Docs alone (Markdown, docs/, the licence) run nothing.
+name: Page
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - 'fonts/OFL.txt'
+      - '.gitignore'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/release.yml'
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - 'fonts/OFL.txt'
+      - '.gitignore'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/release.yml'
+
+jobs:
+  page:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # One typo in the page's script and the page does nothing at all, while every Go test passes.
+      - name: Page script compiles
+        run: node stand/syntax.js
+
+      - name: Playwright
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+
+      # ТЯГА on the stand (a fake yt-dlp, no network) and the layout checks in every state:
+      # empty, a link pasted, downloads running, done and failed; dark and light, English and
+      # Russian, the real width and a narrow one.
+      # Then the scenarios (stand/scenarios.js): the page used the way people use it.
+      - name: Layout checks and scenarios on the stand
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          url=$(stand/run.sh)
+          echo "stand: $url"
+          if [ -z "$url" ]; then echo "::error title=Stand::the stand did not start: $(tail -c 1500 /tmp/tyaga-stand/app.log | tr -s '[:space:]' ' ')"; exit 1; fi
+          node stand/ci.js "$url"
+          node stand/scenarios.js "$url"
+
+      - name: The stand's log (when something failed)
+        if: failure()
+        run: cat /tmp/tyaga-stand/app.log || true

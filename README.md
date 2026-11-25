@@ -80,7 +80,7 @@ $env:CGO_ENABLED = "0"; go build -tags production -trimpath -ldflags "-s -w -H=w
   - `stand/check.js` measures the page in every state for anything misaligned, cut off, overlapping or moving;
   - `stand/scenarios.js` uses it the way people do (a chat message pasted, ten links, cancel, a failure, a playlist, the fishing line frame by frame) and checks what happens;
   - `stand/snapshot.js` takes every state as a picture and compares two runs pixel by pixel: for a change that must not change how anything looks.
-- **CI** runs all of it on every pull request: `gofmt`, `go vet`, the Go tests, a Windows build, the page's scripts, the layout checks in both themes, both languages, wide and narrow, and the scenarios.
+- **CI** runs what a pull request touches. **Go** (a change to the Go side): `gofmt`, `go vet`, the Go tests, a Windows build. **Page** (anything but the docs): the page's scripts, the layout checks in both themes, both languages, wide and narrow, and the scenarios. Docs alone run nothing.
 
 ### Releases
 

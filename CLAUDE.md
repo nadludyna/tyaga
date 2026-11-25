@@ -34,7 +34,9 @@ way they are, and what was tried and rejected. Read both before changing the pag
 1. **Start from what's there.** Read the code and the docs around the change. A feature that
    was tried and rejected is in `docs/decisions.md`: don't bring it back without a new reason.
 2. **Check your own work before showing it.** Nobody should have to point out a problem you
-   could have seen yourself. The checks are below; CI runs most of them on every PR.
+   could have seen yourself. The checks are below. CI runs what a PR touches: `Go` (`ci.yml`) for the Go side, `Page`
+   (`page.yml`, the stand) for anything but the docs; a PR of docs alone runs nothing. A new kind
+   of file the program or the stand uses must not fall under the docs filter in `page.yml`.
 3. **One PR per piece of work**, its description saying what changed, why, how it was checked
    and what wasn't. A decision that changes how ТЯГА behaves gets a couple of lines in
    `docs/decisions.md` (what was chosen, why, what was rejected); the README is updated when
